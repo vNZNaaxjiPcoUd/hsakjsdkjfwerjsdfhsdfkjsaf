@@ -1,6 +1,7 @@
 ---
-layout: iframe
-show: test
+layout: movie
+title: test
+song: SR0aN_neEu8
 ---
 <iframe width="30%" height="260" src="https://www.youtube.com/embed/SR0aN_neEu8" title="Song" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><iframe width="30%" height="260" src="https://www.youtube.com/embed/SR0aN_neEu8" title="Song" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe><iframe width="30%" height="260" src="https://www.youtube.com/embed/SR0aN_neEu8" title="Song" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 

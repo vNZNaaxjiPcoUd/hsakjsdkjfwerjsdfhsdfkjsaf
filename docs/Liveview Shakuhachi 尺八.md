@@ -1,6 +1,6 @@
 ---
-layout: youtube
-show: Shakuhachi 尺八
+layout: movie
+title: Shakuhachi 尺八
 song: miUKO5g0ONk
 ---
 

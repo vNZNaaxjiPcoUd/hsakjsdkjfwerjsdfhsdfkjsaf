@@ -1,5 +1,5 @@
 ---
-layout: youtube
-show: Oldies
+layout: movie
+title: Oldies
 song: 0beRSynjNY0
 ---
