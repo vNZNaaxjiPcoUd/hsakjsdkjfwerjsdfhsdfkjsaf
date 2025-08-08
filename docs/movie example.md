@@ -1,5 +1,5 @@
 ---
 layout: movie
-show: Movie example 
+title: Movie example 
 song: Q4dg19xeu8k
 ---
