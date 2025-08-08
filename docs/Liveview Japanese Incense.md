@@ -1,5 +1,5 @@
 ---
-layout: youtube
-show: Japanese Incense
+layout: movie
+title: Japanese Incense
 song: BU43ULq-DPU
 ---

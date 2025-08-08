@@ -1,5 +1,5 @@
 ---
-layout: youtube
-show: tmp
+layout: movie
+title: tmp
 song: CLNXiaY4uec
 ---

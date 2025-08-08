@@ -1,6 +1,6 @@
 ---
-layout: youtube
-show: 日本箏 料亭で流れてそうな曲
+layout: movie
+title: 日本箏 料亭で流れてそうな曲
 song: 4cONuCvYnFU
 ---
 
