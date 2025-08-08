@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<base target="_blank">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ "/assets/css/style.css?v=" | append: site.github.build_revision | relative_url }}">
+	<title>{{ page.show }}</title>
+<style>
+html,
+body {
+
+		color: rgb(120, 120, 120);
+		background-color: rgb(1, 1, 1);
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+pre,code {
+	color: inherit;
+	text-decoration: none;
+}
+
+table, tr, th ,td ,tr:nth-child(even),tr:nth-child(odd){
+	color: rgb(120, 120, 120);
+	background-color: rgb(1, 1, 1);
+	text-decoration: none;
+}
+	
+.mono { font-family: monospace, monospace, monospace; }
+</style>
+<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
+</head>
+<body  class="mono">
+	<iframe width="100%" height="1100" src="https://www.youtube.com/embed/{{ page.song }}" 
+	title="Song" frameborder="0" 
+	allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+	referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+	<div class="container-lg px-3 my-5 markdown-body">
+		{{ content }}
+	</div>
+</body>
+</html>
