@@ -1,5 +1,5 @@
 ---
 layout: movie
-show: Wabi Sabi 庭園20選
+title: Wabi Sabi 庭園20選
 song: KsLaLrnaXoE
 ---
