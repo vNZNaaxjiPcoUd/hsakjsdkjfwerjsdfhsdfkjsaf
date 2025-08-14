@@ -9,3 +9,4 @@ AJS
 - [Plex](https://plex.sistrunk.synology.me)
 - [Portainer](http://192.168.1.184:9000/#!/auth)
 - [DS918](http://192.168.1.184:5000/)
+- [DSCAM](https://192.168.1.184:5001)
