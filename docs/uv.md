@@ -16,8 +16,8 @@ uv tool install
 uv tool list
 ```
 
-sample code: https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbXZ2MHBQdUlQTU5PVEFnUDA2LW9qdDY2VVBUQXxBQ3Jtc0tucWpYLXB2bmZINVdvQktuaUo1SE1sTXB6ZHFmbFhIUG9KNXBtU2stdkxqaHhVb2pwTmFvNk1mZENCbmlzV3JyRDNDR1FQZmYyaGtabUY5ZVNPYmVmZlBHN3RFYjhFS3Q0bUVFX0ZlZDFGVXBUdk5yOA&q=https%3A%2F%2Fgist.github.com%2Fcradiator%2Fb486a3148be3ab63ae7d0c5376fcf783&v=aVXs8lb7i9U
+[sample code](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbXZ2MHBQdUlQTU5PVEFnUDA2LW9qdDY2VVBUQXxBQ3Jtc0tucWpYLXB2bmZINVdvQktuaUo1SE1sTXB6ZHFmbFhIUG9KNXBtU2stdkxqaHhVb2pwTmFvNk1mZENCbmlzV3JyRDNDR1FQZmYyaGtabUY5ZVNPYmVmZlBHN3RFYjhFS3Q0bUVFX0ZlZDFGVXBUdk5yOA&q=https%3A%2F%2Fgist.github.com%2Fcradiator%2Fb486a3148be3ab63ae7d0c5376fcf783&v=aVXs8lb7i9U)
 
-video: https://www.youtube.com/watch?v=aVXs8lb7i9U
+[video](https://www.youtube.com/watch?v=aVXs8lb7i9U)
 
 
