@@ -12,9 +12,9 @@
 <style>
 html,
 body {
-
 		color: rgb(180, 180, 180);
 		background-color: rgb(1, 1, 1);
+		font-family: monospace, monospace, monospace;
 		font-size: 18px;
 }
 
@@ -34,13 +34,12 @@ table, tr, th ,td ,tr:nth-child(even),tr:nth-child(odd){
 	background-color: rgb(1, 1, 1);
 	text-decoration: none;
 }
-	
-.mono { font-family: monospace, monospace, monospace; }
+
 </style>
 <title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
 </head>
 
-<body  class="mono">
+<body>
 
   <div class="container-lg px-3 my-5 markdown-body">
     {{ content }}
