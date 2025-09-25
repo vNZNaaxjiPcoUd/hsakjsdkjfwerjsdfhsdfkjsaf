@@ -5,10 +5,6 @@ https://github.com/jmaupetit/md2pdf
 
 Convert Markdown files to PDF with styles.
 
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jmaupetit/md2pdf/docker-image.yml?logo=docker&label=Docker%20build)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/jmaupetit/md2pdf/python-package.yml?logo=python&label=Python%20build)
-
-
 ## Installation
 
 The easiest way to go is to use pip:
