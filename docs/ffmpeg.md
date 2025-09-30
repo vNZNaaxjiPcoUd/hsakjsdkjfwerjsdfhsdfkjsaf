@@ -3,7 +3,7 @@ ffmpeg
 
 # Readme.md
 
-## backup in https://github.com/vNZNaaxjiPcoUd/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/ffmpeg.md
+## backup in https://vnzn.jwint.net/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/ffmpeg.md
 
 # 轉成mp3
 ffmpeg -i in.m4a -codec:a libmp3lame out.mp3
