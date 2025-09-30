@@ -61,7 +61,6 @@ ffmpeg -loop 1 -i myimage.png -i mysong.mp3 -c:v h264_videotoolbox -b:v 800k -g 
 
 
 https://youtu.be/ojhzJKhkuPE
-https://github.com/vNZNaaxjiPcoUd/Notes/blob/www/doc/ffmpeg.md
 https://share.jwint.net/doc/merge%20youtube%20v%20and%20a.html
 https://www.protectedtext.com/ffmpegprwp
 https://blog.miniasp.com/post/2022/10/08/Useful-tool-FFmpeg
