@@ -10,13 +10,14 @@ chmod a+rx yt-dlp
 ### list all
 yt-dlp -F url
 
-### save
-- audio only m4a
+
+### audio only m4a
     yt-dlp -f 140 url
-- mp4 video with audio
+### mp4 video with audio
     yt-dlp -f 18 url
 
-### 若是url有帶特別的字，那就加""
+### Note:
+- 若是url有帶特別的字，那就加""
 
 
 ------
