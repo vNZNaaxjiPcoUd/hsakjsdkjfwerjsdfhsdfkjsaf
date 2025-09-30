@@ -1,2 +1,2 @@
 # 咖啡種類
-![cofe type](./cofe%20type.jpg)
+![cofe type](https://share.jwint.net/doc/cofe%20type.jpg)
