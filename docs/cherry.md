@@ -1,6 +1,6 @@
 # 五種櫻桃品種圖解
 
-![cherry](./cherry_files/202311160734187081.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160734187081.webp)  
 ▲世界５大最主要的櫻桃品種外觀及甜度圖解（圖/）
 
 台灣一年中會有兩次吃**[進口櫻桃](/?key=%E6%AB%BB%E6%A1%83&type=0)**的機會。分別可以吃到來自「北半球」和「南半球」的櫻桃喔！
@@ -12,7 +12,7 @@
 
 布魯克斯櫻桃（Brooks）**
 
-![cherry](./cherry_files/202311160721293001.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160721293001.webp)  
 ▲布魯克斯櫻桃對於台灣人來說是最早報到的櫻桃！（ 圖/[無毒農](/Search?key=%E6%AB%BB%E6%A1%83&type=0)）  
 
 **布魯克斯櫻桃（Brooks）：**  
@@ -32,7 +32,7 @@
 
 賓櫻桃（Bing）**
 
-![cherry](./cherry_files/202311160723199601.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160723199601.webp)  
 ▲賓櫻桃是最常見的美洲櫻桃，也是最普遍受人喜愛的櫻桃！（ 圖/[無毒農](/Search?key=%E6%AB%BB%E6%A1%83&type=0)）  
 
 **賓櫻桃（Bing）：**  
@@ -50,7 +50,7 @@
 
 蘭伯特櫻桃（Lambert）**
 
-![cherry](./cherry_files/202311160723408439.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160723408439.webp)  
 ▲ 蘭伯特櫻桃有著完美的「愛心型」可以說是櫻桃送禮的首選（ 圖/）  
 
 **蘭伯特櫻桃(Lambert)：**  
@@ -68,7 +68,7 @@
 
 白櫻桃（Rainier）**
 
-![cherry](./cherry_files/202311160723582186.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160723582186.webp)  
 ▲白櫻桃是最嬌貴也是甜度最高的櫻桃（ 圖/）  
 
 **白櫻桃(Rainier)：**  
@@ -86,7 +86,7 @@
 
 黑櫻桃（Kordia）**
 
-![cherry](./cherry_files/202311160724176637.webp)  
+![cherry](https://share.jwint.net/doc/cherry_files/202311160724176637.webp)  
 ▲來自捷克的Kordia櫻桃是櫻桃圈內稀有又高貴的櫻桃代表！（ 圖/）  
 
 **黑櫻桃(Kordia)：**  
