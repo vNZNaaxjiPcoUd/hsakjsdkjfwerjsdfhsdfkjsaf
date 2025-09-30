@@ -5,10 +5,10 @@ ffmpeg
 
 ## backup in https://vnzn.jwint.net/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/ffmpeg.md
 
-# 轉成mp3
+### 轉成mp3
     ffmpeg -i in.m4a -codec:a libmp3lame out.mp3
 
-# mp3 轉成mp4 libx264
+### mp3 轉成mp4 libx264
     ffmpeg -loop 1 -i inpic.jpg -i audio.mp3 -c:v libx264 -c:a aac -shortest -vf "format=yuv420p" -threads 0 output.mp4
 
     ffmpeg -loop 1 -i inpic.jpg -i gu.m4a -c:v h264_videotoolbox -b:v 500k -g 600 -c:a aac -shortest -vf "format=yuv420p" out.mp4
@@ -41,8 +41,13 @@ ffmpeg
 - q:a > VBR rate, 1-9, 9 is high compress
 - ac > channel
 
+
 ----------------------
-# GPU use
+# Work space
+
+----------------------
+
+## GPU use
 ### 查看支援的GPU
     ffmpeg -encoders | grep videotoolbox
 
@@ -74,10 +79,6 @@ audio 140
     ffmpeg -i video.mp4 -i audio.m4a -c:v copy -c:a aac -map 0:v -map 1:a output.mp4
 
 
-
-----
-
-# Work space
 
 ----
 
