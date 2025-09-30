@@ -1,2 +1,2 @@
 # 校車停車規則
-![Stop Bus](./SchoolBusStopRule.png)
+![Stop Bus](https://share.jwint.net/doc/SchoolBusStopRule.png)
