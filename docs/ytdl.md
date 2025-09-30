@@ -4,11 +4,11 @@ yt-dlp
 # readme.md
 
 ### get
-wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
-chmod a+rx yt-dlp
+    wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
+    chmod a+rx yt-dlp
 
 ### list all
-yt-dlp -F url
+    yt-dlp -F url
 
 
 ### audio only m4a
