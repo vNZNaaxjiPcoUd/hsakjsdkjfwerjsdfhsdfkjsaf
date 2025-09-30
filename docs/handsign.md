@@ -1,2 +1,2 @@
 # 自行車手勢
-![sign hand](./handIndex.png)
+![sign hand](https://share.jwint.net/doc/handIndex.png)
