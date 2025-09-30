@@ -1,6 +1,63 @@
 yt-dlp
-======
+=======
 
+# readme.md
+
+### get
+wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
+chmod a+rx yt-dlp
+
+### list all
+yt-dlp -F url
+
+### save
+- audio only m4a
+    yt-dlp -f 140 url
+- mp4 video with audio
+    yt-dlp -f 18 url
+
+### 若是url有帶特別的字，那就加""
+
+
+------
+# work
+
+
+
+
+
+
+
+
+------
+
+# backup in 
+https://vnzn.jwint.net/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/ytdl.md
+
+p(youtubedl)
+
+# tool
+sudo wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
+sudo chmod a+rx yt-dlp
+
+wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
+chmod a+rx yt-dlp
+
+### arg
+-F 	列出所有可供下載的格式及格式程式碼
+-f [FORMAT] 	指定格式程式碼
+
+
+### my git
+https://github.com/JW1213812138/yt-dlp
+github account is github@jwint.net // npry
+
+### 限制檔案名長度
+./yt-dlp2 -f 140 --trim-filenames 8 https://youtu.be/m9lGiyEHFFo
+
+---------
+
+# Get tool
 
     sudo wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp
 
@@ -50,9 +107,6 @@ yt-dlp
 
 
 
-
-
-
 通常1080p以上品質的影片並不會自帶聲音
     所以要額外多加下載音訊檔案
     選定你想要的影片和音訊內容
@@ -85,7 +139,7 @@ yt-dlp
 --output 'X:\[PATH]' 	指定檔案輸出位置
 
 
-
+-------
 
     wget https://yt-dl.org/downloads/latest/youtube-dl
 
@@ -118,8 +172,7 @@ https://www.youtube.com/watch?v=nWb_X3ZJQjw&list=PLDgLLnSBXR_MdsJ_b_lXNKU9y8dTJZ
 https://www.youtube.com/watch?v=2nry60MCU8U&list=RD2nry60MCU8U
 
 
+# Ref
 p(youtubedl)
 
-
 https://github.com/yt-dlp/yt-dlp?tab=readme-ov-file#readme
-
