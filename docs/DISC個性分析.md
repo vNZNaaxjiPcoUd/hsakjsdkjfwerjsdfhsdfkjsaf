@@ -30,9 +30,9 @@ DISC 這四個單字普遍來說肯定不陌生，DISC理論是1920年由美國�
 - **動機：**回歸目的、高品質、精確性
 1. **變色龍???**
     
-    ![pic](./disc1.jpeg)
+    ![pic](https://share.jwint.net/doc/disc1.jpeg)
     
-    ![pic](./disc2.jpeg)
+    ![pic](https://share.jwint.net/doc/disc2.jpeg)
     
 
 ##**二、適應各類型教戰守則**
