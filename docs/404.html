@@ -1,3 +1,22 @@
-<!DOCTYPE html><html><head>
-<meta http-equiv="refresh" content="0; URL='https://vertymusic.jwint.net/slamdunk.mp3'" />
-</head><body></body></html>
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <title>Go</title>
+</head>
+<body>
+    <p id="message"></p>
+    <script>
+        function processAndRedirect() {
+            const baseUrl = "https://www.protectedtext.com/";
+
+            const url = window.location.href;
+            const lastPart = url.match(/[^/]+$/)[0];
+            
+            const newUrl = `${baseUrl}${lastPart}`;
+            window.location.href = newUrl;
+        }
+        processAndRedirect();
+    </script>
+</body>
+</html>    
