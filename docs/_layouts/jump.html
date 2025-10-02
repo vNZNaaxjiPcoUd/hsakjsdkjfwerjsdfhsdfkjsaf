@@ -1,6 +1,43 @@
 <!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="cache-control" content="no-cache" />
+    <title>Go</title>
+</head>
+<body>
+    <p id="message"></p>
+
+    <script>
+        function processAndRedirect() {
+            const baseUrl = "{{ page.go }}";
+            /*
+            const params = new URLSearchParams(window.location.search);
+            const customOutput = Array.from(params)
+            .map(([key, value]) => value ? `${key}=${value}` : key)
+            .join("&");
+            */
+
+            const enccustomOutput = window.location.search.slice(1);
+            
+            const newUrl = `${baseUrl}${enccustomOutput}`;
+            window.location.href = newUrl;
+        }
+
+        //window.onload = processAndRedirect;
+        processAndRedirect();
+    </script>
+</body>
+</html>    
+
+<!---
+
+
+
+<!DOCTYPE html>
 <html><head>
 <title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
 <meta http-equiv="cache-control" content="no-cache" />
 <meta http-equiv="refresh" content="0; URL='{{ page.go }}'" />
 </head><body></body></html>
+--->
+
