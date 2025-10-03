@@ -70,7 +70,7 @@ Espresso 細節
 4.法式濾壓壺的研磨程度，一般情況下屬於粗研磨，研磨大小大概是晶冰糖的狀態。
 
 由左而右：生豆，熟豆，粗，中，細
-![size](./cofesize.webp)
+![size](https://share.jwint.net/doc/cofesize.webp)
 
 ## 咖啡萃取時間：
 
@@ -80,7 +80,7 @@ Espresso 細節
 
 ## 花式咖啡種類
 
-![](./cofe%20type.jpg)
+![](https://share.jwint.net/doc/cofe%20type.jpg)
 
 ## **水溫**
 
