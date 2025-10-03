@@ -1,0 +1,207 @@
+/* 全局樣式 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Montserrat:wght@500;700&display=swap');
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; /* 基礎文字大小 */
+    line-height: 1.7; /* 行距 */
+    color: #f0f0f0; /* 淺灰文字，適應黑底 */
+    background-color: #000000; /* 純黑背景 */
+    width: 92%; /* 設置寬度為 92% */
+    max-width: 900px; /* 最大寬度限制 */
+    margin: 0 auto; /* 居中 */
+    padding: 40px 20px;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05); /* 淺色陰影 */
+}
+
+a, a.visited {
+	text-decoration: none;
+	color: inherit;
+}
+
+/* 標題樣式 */
+h1 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 2.5rem;
+    font-weight: 700; /* 粗體 */
+    color: #4a90e2; /* 淺藍 */
+    letter-spacing: 0.05em; /* 字母間距 */
+    margin: 1.8em 0 0.6em;
+    border-bottom: 1px solid #4a90e2; /* 淺藍底線 */
+    padding-bottom: 0.3em;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3); /* 深色陰影增強對比 */
+    transition: color 0.3s ease;
+}
+
+h1:hover {
+    color: #66aaff; /* 懸停時變亮 */
+}
+
+h2 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 500; /* 中等粗體 */
+    color: #d4a017; /* 金色 */
+    letter-spacing: 0.03em;
+    margin: 1.5em 0 0.5em;
+    transition: color 0.3s ease;
+}
+
+h2:hover {
+    color: #e6b800; /* 懸停時變亮金色 */
+}
+
+/* 粗體字 */
+b, strong {
+    font-weight: 700;
+    color: #4a90e2; /* 淺藍 */
+    transition: color 0.3s ease;
+}
+
+b:hover, strong:hover {
+    color: #66aaff; /* 懸停變亮 */
+}
+
+/* 斜體字 */
+i, em {
+    font-style: italic;
+    color: #cccccc; /* 淺灰 */
+}
+
+/* 粗體斜體字 */
+b i, strong em, i b, em strong {
+    font-style: italic;
+    font-weight: 700;
+    color: #ff6666; /* 淡紅 */
+    transition: transform 0.3s ease;
+}
+
+b i:hover, strong em:hover, i b:hover, em strong:hover {
+    transform: scale(1.05); /* 懸停輕微放大 */
+}
+
+/* 段落樣式 */
+p {
+    margin: 1.2em 0;
+}
+
+/* 表格樣式 */
+table {
+    width: 100%; /* 表格填滿父容器 */
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 1.8em 0;
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+th, td {
+    border: 1px solid #333333; /* 深灰邊框 */
+    padding: 14px;
+    text-align: left;
+    transition: background-color 0.3s ease;
+}
+
+th {
+    background-color: #4a90e2; /* 淺藍表頭 */
+    color: #ffffff;
+    font-weight: 500;
+}
+
+tr:nth-child(even) {
+    background-color: #1a1a1a; /* 略淺的黑色 */
+}
+
+tr:hover {
+    background-color: #2a2a2a; /* 懸停更亮 */
+}
+
+/* 列表樣式 */
+ul, ol {
+    margin: 1.2em 0;
+    padding-left: 2.5em;
+}
+
+ul li {
+    list-style-type: square; /* 方形項目符號 */
+    color: #cccccc; /* 淺灰 */
+}
+
+ol li {
+    list-style-type: decimal; /* 數字項目符號 */
+    color: #cccccc;
+}
+
+li {
+    margin-bottom: 0.6em;
+    transition: color 0.3s ease;
+}
+
+li:hover {
+    color: #d4a017; /* 懸停變金色 */
+}
+
+/* 代碼塊 */
+pre, code {
+    font-family: 'Courier New', monospace;
+    background-color: #1a1a1a; /* 深黑背景 */
+    color: #cccccc; /* 淺灰文字 */
+    padding: 12px;
+    border-radius: 4px;
+    border: 1px solid #333333;
+}
+
+/* 頁腳樣式 */
+footer {
+    margin-top: 3em;
+    padding-top: 1em;
+    border-top: 1px solid #333333; /* 深灰邊框 */
+    font-size: 0.9rem;
+    color: #cccccc; /* 淺灰 */
+    text-align: center;
+}
+
+/* 響應式設計 */
+@media (max-width: 768px) {
+    body {
+        font-size: 15px;
+        padding: 20px 10px;
+        width: 92%; /* 保持 92% 寬度 */
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    table {
+        font-size: 14px;
+    }
+}
+
+@media print {
+    body { 
+        background-color: #ffffff; /* 列印時白底 */
+        box-shadow: none; 
+        width: 100%; /* 全寬 */
+        color: #000000; /* 黑字 */
+    }
+    table { 
+        box-shadow: none; 
+    }
+    h1, h2, b, strong, i, em, b i, strong em { 
+        color: #000000 !important; /* 列印時統一黑字 */
+    }
+    th {
+        background-color: #ffffff; /* 表頭白底 */
+        color: #000000; /* 黑字 */
+        border: 1px solid #000000;
+    }
+    tr:nth-child(even) {
+        background-color: #ffffff; /* 無交替背景 */
+    }
+    tr:hover {
+        background-color: #ffffff; /* 無懸停效果 */
+    }
+}
