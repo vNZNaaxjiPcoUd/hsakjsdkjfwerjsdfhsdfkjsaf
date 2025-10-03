@@ -45,13 +45,47 @@ h2 {
     color: #d4a017; /* 金色 */
     letter-spacing: 0.03em;
     margin: 1.5em 0 0.5em;
-    transition: color 0.3s ease;
+    padding-bottom: 0.2em; /* 添加輕微底部間距，與h1一致 */
+    border-bottom: 1px solid rgba(212, 160, 23, 0.3); /* 淺金色底線，增加層次 */
+    transition: color 0.3s ease, transform 0.3s ease; /* 添加transform動畫 */
 }
 
 h2:hover {
     color: #e6b800; /* 懸停時變亮金色 */
+    transform: scale(1.02); /* 輕微放大，與其他元素懸停效果一致 */
 }
 
+h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.4rem; /* 比h2小，保持層次 */
+    font-weight: 500; /* 中等粗體，與h2一致 */
+    color: #cccccc; /* 淺灰，次於金色，降低視覺強度 */
+    letter-spacing: 0.02em;
+    margin: 1.2em 0 0.4em;
+    padding-bottom: 0.1em;
+    border-bottom: 1px solid rgba(204, 204, 204, 0.2); /* 淺灰底線，與主題協調 */
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+h3:hover {
+    color: #ffffff; /* 懸停時變純白，增強對比 */
+    transform: scale(1.02); /* 與h2一致的懸停效果 */
+}
+
+h4 {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 1.2rem; /* 比h3更小 */
+    font-weight: 400; /* 較輕的字重，區分層次 */
+    color: #999999; /* 更深的淺灰，進一步降低視覺強度 */
+    letter-spacing: 0.01em;
+    margin: 1em 0 0.3em;
+    transition: color 0.3s ease, transform 0.3s ease;
+}
+
+h4:hover {
+    color: #cccccc; /* 懸停時變亮淺灰 */
+    transform: scale(1.02); /* 一致的懸停效果 */
+}
 /* 粗體字 */
 b, strong {
     font-weight: 700;
@@ -185,7 +219,7 @@ footer {
 /* 響應式設計 */
 @media (max-width: 2000px) {
     body {
-        font-size: 15.5px; /* 略減小字體 */
+        font-size: 15.5px;
         padding: 35px 18px;
     }
     h1 {
@@ -194,8 +228,14 @@ footer {
     h2 {
         font-size: 1.7rem;
     }
+    h3 {
+        font-size: 1.3rem; /* 縮小h3 */
+    }
+    h4 {
+        font-size: 1.1rem; /* 縮小h4 */
+    }
     img {
-        width: 92%; /* 保持 92% 寬度 */
+        width: 92%;
     }
 }
 
@@ -211,12 +251,18 @@ footer {
     h2 {
         font-size: 1.5rem;
     }
+    h3 {
+        font-size: 1.2rem;
+    }
+    h4 {
+        font-size: 1rem;
+    }
     img {
-        width: 100%; /* 平板上全寬 */
+        width: 100%;
     }
     table {
         font-size: 14px;
-        overflow-x: auto; /* 表格可水平滾動 */
+        overflow-x: auto;
         display: block;
     }
 }
@@ -233,16 +279,22 @@ footer {
     h2 {
         font-size: 1.4rem;
     }
+    h3 {
+        font-size: 1.1rem;
+    }
+    h4 {
+        font-size: 0.9rem; /* 手機上更小 */
+    }
     img {
-        width: 100%; /* 手機上全寬 */
-        margin: 1.2em auto; /* 減小間距 */
-        box-shadow: none; /* 移除陰影以簡化 */
+        width: 100%;
+        margin: 1.2em auto;
+        box-shadow: none;
     }
     table {
         font-size: 13px;
     }
     ul, ol {
-        padding-left: 1.5em; /* 縮小縮進 */
+        padding-left: 1.5em;
     }
 }
 
@@ -258,16 +310,22 @@ footer {
     h2 {
         font-size: 1.3rem;
     }
+    h3 {
+        font-size: 1rem;
+    }
+    h4 {
+        font-size: 0.85rem; /* 超小螢幕更小 */
+    }
     img {
         width: 100%;
         margin: 1em auto;
-        border: none; /* 超小螢幕移除邊框 */
+        border: none;
     }
     table {
         font-size: 12px;
     }
     p {
-        margin: 0.8em 0; /* 縮小段落間距 */
+        margin: 0.8em 0;
     }
     footer {
         font-size: 0.8rem;
@@ -276,31 +334,34 @@ footer {
 
 @media print {
     body { 
-        background-color: #ffffff; /* 列印時白底 */
+        background-color: #ffffff;
         box-shadow: none; 
-        width: 100%; /* 全寬 */
-        color: #000000; /* 黑字 */
+        width: 100%;
+        color: #000000;
     }
     img {
-        box-shadow: none; /* 移除陰影 */
-        border: 1px solid #000000; /* 黑邊框 */
-        width: 100%; /* 列印時全寬 */
+        box-shadow: none;
+        border: 1px solid #000000;
+        width: 100%;
     }
     table { 
         box-shadow: none; 
     }
-    h1, h2, b, strong, i, em, b i, strong em { 
+    h1, h2, h3, h4, b, strong, i, em, b i, strong em { 
         color: #000000 !important; /* 列印時統一黑字 */
     }
+    h2, h3, h4 {
+        border-bottom: 1px solid #000000; /* 列印時黑底線 */
+    }
     th {
-        background-color: #ffffff; /* 表頭白底 */
-        color: #000000; /* 黑字 */
+        background-color: #ffffff;
+        color: #000000;
         border: 1px solid #000000;
     }
     tr:nth-child(even) {
-        background-color: #ffffff; /* 無交替背景 */
+        background-color: #ffffff;
     }
     tr:hover {
-        background-color: #ffffff; /* 無懸停效果 */
+        background-color: #ffffff;
     }
 }
