@@ -219,7 +219,7 @@ footer {
 /* 響應式設計 */
 @media (max-width: 2000px) {
     body {
-        font-size: 15.5px;
+        font-size: 16px;
         padding: 35px 18px;
     }
     h1 {
@@ -241,7 +241,7 @@ footer {
 
 @media (max-width: 1200px) {
     body {
-        font-size: 15px;
+        font-size: 16px;
         padding: 30px 15px;
         width: 92%;
     }
@@ -269,7 +269,7 @@ footer {
 
 @media (max-width: 768px) {
     body {
-        font-size: 14px;
+        font-size: 15px;
         padding: 20px 10px;
         width: 92%;
     }
@@ -300,7 +300,7 @@ footer {
 
 @media (max-width: 480px) {
     body {
-        font-size: 13px;
+        font-size: 14px;
         padding: 15px 8px;
         width: 92%;
     }
