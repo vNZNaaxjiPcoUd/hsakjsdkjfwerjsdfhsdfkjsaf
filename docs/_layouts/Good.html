@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
+
+<head>
+    <base target="_blank">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	
+<style>
+
+/* 全局樣式 */
+body {
+    font-family: 'Roboto', 'Open Sans', Arial, sans-serif;
+    font-size: 16px; /* 基礎文字大小 */
+    line-height: 1.6; /* 行距 */
+    color: #333333; /* 主要文字顏色 */
+    /* background-color: #f5f5f5; /* 淺灰背景 */
+    background-color: #ffffff; /* 淺灰背景 */
+    max-width: 800px; /* 限制內容寬度 */
+    margin: 0 auto; /* 居中 */
+    padding: 20px;
+}
+
+/* 標題樣式 */
+h1 {
+    font-size: 2.2rem;
+    font-weight: 700; /* 粗體 */
+    color: #1a3c6d; /* 深藍 */
+    margin: 1.5em 0 0.5em;
+    border-bottom: 2px solid #1a3c6d; /* 底線 */
+    padding-bottom: 0.2em;
+}
+
+h2 {
+    font-size: 1.8rem;
+    font-weight: 600; /* 稍輕的粗體 */
+    color: #444444; /* 深灰 */
+    margin: 1.2em 0 0.5em;
+}
+
+/* 粗體字 */
+b, strong {
+    font-weight: 700;
+    color: #005566; /* 深藍綠 */
+}
+
+/* 斜體字 */
+i, em {
+    font-style: italic;
+    color: #555555; /* 灰色 */
+}
+
+/* 粗體斜體字 */
+b i, strong em, i b, em strong {
+    font-style: italic;
+    font-weight: 700;
+    color: #b71c1c; /* 深紅 */
+}
+
+/* 段落樣式 */
+p {
+    margin: 1em 0;
+}
+
+/* 表格樣式 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5em 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+    border: 1px solid #dddddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background-color: #1a3c6d;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9; /* 交替行背景 */
+}
+
+/* 列表樣式 */
+ul, ol {
+    margin: 1em 0;
+    padding-left: 2em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+/* 代碼塊 */
+pre, code {
+    font-family: 'Courier New', monospace;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+/* 響應式設計 */
+@media (max-width: 600px) {
+    body {
+        font-size: 14px;
+        padding: 10px;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+}
+  
+</style>
+
+<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
+</head>
+
+<body>
+{{ content }}
+</body>
+
+</html>
