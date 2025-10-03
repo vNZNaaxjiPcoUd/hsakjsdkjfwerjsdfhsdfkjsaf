@@ -7,16 +7,17 @@ body {
     line-height: 1.7; /* 行距 */
     color: #f0f0f0; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
-    width: 90%; /* 設置寬度為 92% */
+    width: 92%; /* 設置寬度為 92% */
     max-width: 2000px; /* 最大寬度限制 */
     margin: 0 auto; /* 居中 */
     padding: 40px 20px;
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05); /* 淺色陰影 */
 }
 
-a, a.visited {
-	text-decoration: none;
+a,
+a.visited {
 	color: inherit;
+	text-decoration: none;
 }
 
 /* 標題樣式 */
@@ -83,6 +84,24 @@ b i:hover, strong em:hover, i b:hover, em strong:hover {
 /* 段落樣式 */
 p {
     margin: 1.2em 0;
+}
+
+/* 圖片樣式 */
+img {
+    max-width: 100%; /* 圖片不超過父容器 */
+    width: 92%; /* 圖片寬度與 body 一致（92%） */
+    height: auto; /* 保持比例 */
+    display: block; /* 確保居中 */
+    margin: 1.8em auto; /* 上下間距與居中 */
+    border: 1px solid #333333; /* 深灰邊框，適應黑底 */
+    border-radius: 4px; /* 圓角 */
+    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.1); /* 淺色陰影 */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+img:hover {
+    transform: scale(1.02); /* 懸停輕微放大 */
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); /* 增強陰影 */
 }
 
 /* 表格樣式 */
@@ -178,6 +197,9 @@ footer {
     table {
         font-size: 14px;
     }
+    img {
+        width: 100%; /* 小螢幕上圖片全寬 */
+    }
 }
 
 @media print {
@@ -186,6 +208,11 @@ footer {
         box-shadow: none; 
         width: 100%; /* 全寬 */
         color: #000000; /* 黑字 */
+    }
+    img {
+        box-shadow: none; /* 移除陰影 */
+        border: 1px solid #000000; /* 黑邊框 */
+        width: 100%; /* 列印時全寬 */
     }
     table { 
         box-shadow: none; 
