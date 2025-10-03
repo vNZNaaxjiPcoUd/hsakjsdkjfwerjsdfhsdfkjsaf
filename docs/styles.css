@@ -7,7 +7,7 @@ body {
     line-height: 1.7; /* 行距 */
     color: #f0f0f0; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
-    width: 100%; /* 設置寬度為 92% */
+    width: 90%; /* 設置寬度為 92% */
     max-width: 2000px; /* 最大寬度限制 */
     margin: 0 auto; /* 居中 */
     padding: 40px 20px;
