@@ -181,12 +181,29 @@ footer {
     text-align: center;
 }
 
+
 /* 響應式設計 */
-@media (max-width: 768px) {
+@media (max-width: 2000px) {
+    body {
+        font-size: 15.5px; /* 略減小字體 */
+        padding: 35px 18px;
+    }
+    h1 {
+        font-size: 2.3rem;
+    }
+    h2 {
+        font-size: 1.7rem;
+    }
+    img {
+        width: 92%; /* 保持 92% 寬度 */
+    }
+}
+
+@media (max-width: 1200px) {
     body {
         font-size: 15px;
-        padding: 20px 10px;
-        width: 92%; /* 保持 92% 寬度 */
+        padding: 30px 15px;
+        width: 92%;
     }
     h1 {
         font-size: 2rem;
@@ -194,11 +211,66 @@ footer {
     h2 {
         font-size: 1.5rem;
     }
+    img {
+        width: 100%; /* 平板上全寬 */
+    }
     table {
         font-size: 14px;
+        overflow-x: auto; /* 表格可水平滾動 */
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        padding: 20px 10px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.4rem;
     }
     img {
-        width: 100%; /* 小螢幕上圖片全寬 */
+        width: 100%; /* 手機上全寬 */
+        margin: 1.2em auto; /* 減小間距 */
+        box-shadow: none; /* 移除陰影以簡化 */
+    }
+    table {
+        font-size: 13px;
+    }
+    ul, ol {
+        padding-left: 1.5em; /* 縮小縮進 */
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 13px;
+        padding: 15px 8px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 1.6rem;
+    }
+    h2 {
+        font-size: 1.3rem;
+    }
+    img {
+        width: 100%;
+        margin: 1em auto;
+        border: none; /* 超小螢幕移除邊框 */
+    }
+    table {
+        font-size: 12px;
+    }
+    p {
+        margin: 0.8em 0; /* 縮小段落間距 */
+    }
+    footer {
+        font-size: 0.8rem;
     }
 }
 
