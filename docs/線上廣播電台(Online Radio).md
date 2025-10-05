@@ -80,7 +80,6 @@ body {
 ```
 
 ``` script.js
-// 手動定義播放清單（因為 GitHub Pages 無法動態掃描資料夾）
 const songs = [
   'audio/song1.mp3',
   'audio/song2.mp3',
@@ -101,14 +100,26 @@ songs.forEach(song => {
   playlist.appendChild(li);
 });
 
-// 自動播放下一首
+// 自動播放下一首並支援重複播放
 player.addEventListener('ended', () => {
   const currentSrc = player.src.split('/').pop();
   const currentIndex = songs.findIndex(song => song.split('/').pop() === currentSrc);
-  const nextIndex = (currentIndex + 1) % songs.length;
+  const nextIndex = (currentIndex + 1) % songs.length; // 使用模運算實現循環
   player.src = songs[nextIndex];
   player.play();
 });
+
+/* //隨機重複播放
+player.addEventListener('ended', () => {
+  const randomIndex = Math.floor(Math.random() * songs.length);
+  player.src = songs[randomIndex];
+  player.play();
+});
+*/
+
+// 初始播放第一首歌曲（可選）
+player.src = songs[0];
+player.play();
 ```
 #### 3. 部署到 GitHub Pages
 1. **創建 GitHub 儲存庫**：
