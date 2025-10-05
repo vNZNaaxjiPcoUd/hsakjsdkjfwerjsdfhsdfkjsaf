@@ -34,8 +34,7 @@ your-repo/
 
 #### 2. 前端程式碼
 以下是適用於 GitHub Pages 的純前端程式碼，無需後端伺服器。
-```
-<xaiArtifact artifact_id="8d3d3dec-eb1f-477f-8126-1034ec0e92a6" artifact_version_id="4bca4954-6022-4810-bd55-ee61e5f62cfc" title="index.html" contentType="text/html">
+``` index.html
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
@@ -56,9 +55,10 @@ your-repo/
   <script src="script.js"></script>
 </body>
 </html>
-</xaiArtifact>
 
-<xaiArtifact artifact_id="775729a8-bf46-491e-8a02-7f096434b5f1" artifact_version_id="2024f513-307e-4d8a-adce-a1a8ea705c6c" title="style.css" contentType="text/css">
+```
+
+``` style.css
 body {
   font-family: Arial, sans-serif;
   text-align: center;
@@ -77,9 +77,9 @@ body {
 #playlist li:hover {
   background: #ddd;
 }
-</xaiArtifact>
+```
 
-<xaiArtifact artifact_id="3d0ca3d6-8d54-4854-9d81-b8fc57b0d3b7" artifact_version_id="b62b7f41-73ee-4458-afa6-c3c1b4dbcd94" title="script.js" contentType="text/javascript">
+``` script.js
 // 手動定義播放清單（因為 GitHub Pages 無法動態掃描資料夾）
 const songs = [
   'audio/song1.mp3',
@@ -109,7 +109,6 @@ player.addEventListener('ended', () => {
   player.src = songs[nextIndex];
   player.play();
 });
-</xaiArtifact>
 ```
 #### 3. 部署到 GitHub Pages
 1. **創建 GitHub 儲存庫**：
