@@ -2,68 +2,26 @@ TECO fee structure
 =============
 
 
-### Daily Basic Service Charge
+| Daily Basic Service Charge | *31 days@ $0.43000* | $13.33 |
+| Energy Charge |
+| First 1,000 kWh | *1,000 kWh@ $0.08924/kWh* | $89.24 |
+| Above 1,000 kWh | *808 kWh@ $0.09924/kWh* | $80.19 |
+| Fuel Charge | 
+| First 1,000 kWh | *1,000 kWh@ $0.03044/kWh* | $30.44 |
+| Above 1,000 kWh | *808 kWh@ $0.04044/kWh* | $32.68 |
+| Storm Protection Charge | *1,808 kWh@ $0.00722/kWh* | $13.05
+| Clean Energy Transition Mechanism | *1,808 kWh@ $0.00406/kWh* | $7.34
+| Storm Surcharge | *1,808 kWh@ $0.01995/kWh* | $36.07
+| Florida Gross Receipt Tax | | $7.75 |
+| Total  Cost | | $310.09 |
 
-*31 days@ $0.43000*
 
-$13.33
 
-### Energy Charge
-
-First 1,000 kWh
-
-*1,000 kWh@ $0.08924/kWh*
-
-$89.24
-
-Above 1,000 kWh
-
-*808 kWh@ $0.09924/kWh*
-
-$80.19
-
-### Fuel Charge
-
-First 1,000 kWh
-
-*1,000 kWh@ $0.03044/kWh*
-
-$30.44
-
-Above 1,000 kWh
-
-*808 kWh@ $0.04044/kWh*
-
-$32.68
-
-### Storm Protection Charge
-
-*1,808 kWh@ $0.00722/kWh*
-
-$13.05
-
-### Clean Energy Transition Mechanism
-
-*1,808 kWh@ $0.00406/kWh*
-
-$7.34
-
-### Storm Surcharge
-
-*1,808 kWh@ $0.01995/kWh*
-
-$36.07
-
-### Florida Gross Receipt Tax
-
-$7.75
-
- 
-
-### Electric Service Cost
-
-$310.09
-
-###### Total Current Month's Charges
-
-###### $310.09
+| 台灣電價 | 用電度數區間    | 每度電價（元） | 1800 kwh |             |   |      | 1029kwh |             |     |
+| ---- | --------- | ------- | -------- | ----------- | - | ---- | ------- | ----------- | --- |
+|      | 1\~120度   | 2.1     | 120      | 252         |   | 2.1  | 120     | 252         |     |
+|      | 121\~330度 | 2.68    | 210      | 562.8       |   | 2.68 | 210     | 562.8       |     |
+|      | 331\~700度 | 4       | 370      | 1480        |   | 4    | 370     | 1480        |     |
+|      | 701度以上    | 6.41    | 1100     | 7051        |   | 6.41 | 329     | 2108.89     |     |
+|      |           |         |          | 9345.8      |   |      |         | 4403.69     | twd |
+|      |           |         |          | 311.5266667 |   |      |         | 146.7896667 | usd |
