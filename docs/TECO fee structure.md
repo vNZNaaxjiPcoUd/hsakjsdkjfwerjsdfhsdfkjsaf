@@ -1,7 +1,7 @@
 TECO fee structure
 =============
 
-| item | per | cost |
+| ITEM | per | Cost |
 | --- | --- | --- |
 | Daily Basic Service Charge | *31 days@ $0.43000* | $13.33 |
 | Energy Charge |
