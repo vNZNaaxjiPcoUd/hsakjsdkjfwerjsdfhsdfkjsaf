@@ -1,7 +1,8 @@
 TECO fee structure
 =============
 
-
+| item | per | cost |
+| --- | --- | --- |
 | Daily Basic Service Charge | *31 days@ $0.43000* | $13.33 |
 | Energy Charge |
 | First 1,000 kWh | *1,000 kWh@ $0.08924/kWh* | $89.24 |
