@@ -24,7 +24,7 @@ body {
   <p><a href="https://ipinfo.io/ip" target="_blank">ipinfo.io</a></p>
   <p><a href="https://dnschecker.org/port-scanner.php" target="_blank">Port scanner by dnschecker.org</a></p>
   <p><a href="https://browserleaks.com/ip" target="_blank">ip detail info by browserleaks.com</a></p>
-  <p><a href="http://ip-api.com/line/IPAA?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
+  <p><a href="http://ip-api.com/line/IPAA" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
 
 <script>
     const iurl = "https://api.ipify.org/";
@@ -83,6 +83,21 @@ body {
       return;
     }
 
+	function getIpJson(ip, callback) {
+		const script = document.createElement('script');
+		script.src = `http://ip-api.com/json/${ip}?callback=${callback}`;
+		document.head.appendChild(script);
+	}
+	function NewUpdateDetail(ip){
+		getIpJson( ip , function(data) {
+			document.getElementById('moreD').innerHTML = 
+				`<pre>${JSON.stringify(data, null, 2)}</pre>`;
+		});
+	}
+
+
+
+		
 	function forceHttpJump(e) {
 	    e.preventDefault();
 	    const url = "http://ip-api.com/line/" + nowIP + "?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query";
@@ -94,6 +109,7 @@ body {
         var ipNow = await Iip();
         //console.log(ipNow);
         //UpdateDetail(ipNow);
+		NewUpdateDetail(ipNow);
     }
 </script>
 </body>
