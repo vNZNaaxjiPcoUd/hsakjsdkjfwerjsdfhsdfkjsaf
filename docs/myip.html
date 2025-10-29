@@ -14,7 +14,7 @@ body {
 </head>
 <body onload="upPage0()">
   <h2><a href="https://api.ipify.org/" target="_blank"><label id="ipI">IP address</label></a></h2>
-  <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> : <label id="moreD">123</label></p>
+  <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
   <p><a href="https://myip.com.tw" target="_blank">myip TW</a></p>
   <p><a href="https://domains.google.com/checkip" target="_blank">ip from google</a></p>
   <p><a href="https://dns.google.com/" target="_blank">nslookup by google</a></p>
@@ -22,7 +22,6 @@ body {
   <p><a href="https://lookup.icann.org/en" target="_blank">ICANN lookup</a></p>
   <p><a href="https://ipinfo.io/ip" target="_blank">RAW IP from ipinfo</a></p>
 
-23
 <script>
     const iurl = "https://api.ipify.org/";
     const detailUrl = "http://ip-api.com/json/"
@@ -76,7 +75,7 @@ body {
     async function upPage0(){
         var ipNow = await Iip();
         //console.log(ipNow);
-        UpdateDetail(ipNow);
+        //UpdateDetail(ipNow);
     }
 </script>
 </body>
