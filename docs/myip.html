@@ -122,6 +122,7 @@ async function getIpJson(ip) {
 	pretty = JSON.stringify(data);
 	pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
 	pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
+	pretty = pretty.replace(/",/g, '",<br>');       // 結尾 }
 	pretty = pretty.replace(/:"/g, '": "');       // : 後加空格
 	  document.getElementById('moreD').innerHTML = pretty;
       return data;
