@@ -119,7 +119,11 @@ async function getIpJson(ip) {
       if (data.status === 'fail') {
         throw new Error(data.message || 'IP 查詢失敗');
       }
-	  document.getElementById('moreD').innerHTML = JSON.stringify(data, null, 2);
+	pretty = JSON.stringify(data);
+	pretty = pretty.replace(/{"/g, '\n{\n  "');     // 開頭 {
+	pretty = pretty.replace(/"}/g, '"\n}');       // 結尾 }
+	pretty = pretty.replace(/:"/g, '": "');       // : 後加空格
+	  document.getElementById('moreD').innerHTML = pretty;
       return data;
     }
 
