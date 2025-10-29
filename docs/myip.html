@@ -96,6 +96,33 @@ body {
 		});
 	}
 
+async function getIpJson(ip) {
+      if (!ip || !/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+        throw new Error('無效的 IP 地址');
+      }
+
+      // 目標 HTTP API
+      const targetUrl = `http://ip-api.com/json/${ip}`;
+      
+      // 使用免費 CORS 代理：https://api.allorigins.win
+      const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
+
+      const response = await fetch(proxyUrl);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+
+      // 檢查 API 是否回傳錯誤
+      if (data.status === 'fail') {
+        throw new Error(data.message || 'IP 查詢失敗');
+      }
+	  document.getElementById('moreD').innerHTML = data ;
+      return data;
+    }
+
 	function forceHttpJump(e) {
 	    e.preventDefault();
 	    const url = "http://ip-api.com/line/" + nowIP + "?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query";
