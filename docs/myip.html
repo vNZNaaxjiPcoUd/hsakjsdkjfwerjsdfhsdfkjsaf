@@ -14,7 +14,7 @@ body {
 </head>
 <body onload="upPage0()">
   <h2><a href="https://api.ipify.org/" target="_blank"><label id="ipI">IP address</label></a></h2>
-  <p><a href="http://ip-api.com/line/IPAA?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
+  <p></p><a href="#" onclick="forceHttpJump(event)">查詢 IP 更多資訊</a></p>
   <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> </p>	
   <p><a href="https://myip.com.tw" target="_blank">myip.tw</a></p>
   <p><a href="myip.com" target="_blank">myip.com</a></p>
@@ -24,7 +24,8 @@ body {
   <p><a href="https://ipinfo.io/ip" target="_blank">ipinfo.io</a></p>
   <p><a href="https://dnschecker.org/port-scanner.php" target="_blank">Port scanner by dnschecker.org</a></p>
   <p><a href="https://browserleaks.com/ip" target="_blank">ip detail info by browserleaks.com</a></p>
-  <p></p><a href="#" onclick="forceHttpJump(event)">查詢 IP（HTTP）</a></p>
+  <p><a href="http://ip-api.com/line/IPAA?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
+
 <script>
     const iurl = "https://api.ipify.org/";
     const detailUrl = "http://ip-api.com/json/"
