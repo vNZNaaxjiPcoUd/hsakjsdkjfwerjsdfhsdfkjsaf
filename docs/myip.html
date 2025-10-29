@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang=""en-US"">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+html,
+body {
+
+		color: rgb(120, 120, 120);
+		background-color: rgb(1, 1, 1);
+}
+</style>
+  <title>myip</title>
+</head>
+<body onload="upPage0()">
+  <h2><a href="https://api.ipify.org/" target="_blank"><label id="ipI">IP address</label></a></h2>
+  <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> : <label id="moreD">123</label></p>
+  <p><a href="https://myip.com.tw" target="_blank">myip TW</a></p>
+  <p><a href="https://domains.google.com/checkip" target="_blank">ip from google</a></p>
+  <p><a href="https://dns.google.com/" target="_blank">nslookup by google</a></p>
+  <p><a href="https://test-ipv6.com/" target="_blank">IPv6 check</a></p>
+  <p><a href="https://lookup.icann.org/en" target="_blank">ICANN lookup</a></p>
+  <p><a href="https://ipinfo.io/ip" target="_blank">RAW IP from ipinfo</a></p>
+
+23
+<script>
+    const iurl = "https://api.ipify.org/";
+    const detailUrl = "http://ip-api.com/json/"
+    var detailInfo ;  
+    
+    async function Iip() {     
+      let txtIP = "";
+      try {
+        const response = await fetch(iurl,{cache:"no-cache"});
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        txtIP = await response.text();
+        //console.log(txtIP);
+        let labelElement = document.getElementById("ipI");
+        labelElement.innerHTML = txtIP;
+      } catch (error) {
+        //console.log(error.message);
+      }
+      return txtIP ;
+    }   
+    
+    async function UpdateDetail(ip){
+      //var url=detailUrl.concat(ip);
+      var url = detailUrl.concat("?fields=status,message,continent,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query");
+      //console.log(url);
+      var detailInfo;
+      try {
+        const response = await fetch(url,{cache:"no-store"});
+        if (!response.ok) {
+          throw new Error(`Response status: ${response.status}`);
+        }
+        detailInfo = await response.json();
+      } catch (error) {
+        let labelElement = document.getElementById("moreD");
+        labelElement.innerHTML = "<- check your GeoIP";
+        detailInfo = error.message ;
+        return;
+      }
+      //console.log(detailInfo["lat"]);
+      let html = "";
+      for (const key in detailInfo){        
+          //console.log(`${key} : ${detailInfo[key]}`)
+          html = html + `${key} : ${detailInfo[key]}<br>`
+      }
+      let labelElement = document.getElementById("moreD");
+      labelElement.innerHTML = html;
+      return;
+    }
+
+    async function upPage0(){
+        var ipNow = await Iip();
+        //console.log(ipNow);
+        UpdateDetail(ipNow);
+    }
+</script>
+</body>
+</html>
