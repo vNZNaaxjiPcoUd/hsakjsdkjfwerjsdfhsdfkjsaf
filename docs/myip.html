@@ -83,17 +83,21 @@ body {
       return;
     }
 
+	/*
 	function getIpJson(ip, callback) {
 		const script = document.createElement('script');
 		script.src = `http://ip-api.com/json/${ip}?callback=${callback}`;
 		document.head.appendChild(script);
 	}
-
-	function NewUpdateDetail(ip){
+	*/
+async function NewUpdateDetail(ip){
+		/*
 		getIpJson( ip , function(data) {
 			document.getElementById('moreD').innerHTML = 
 				`<pre>${JSON.stringify(data, null, 2)}</pre>`;
 		});
+		*/
+		getIpJson(ip);
 	}
 
 async function getIpJson(ip) {
@@ -102,7 +106,7 @@ async function getIpJson(ip) {
       }
 
       // 目標 HTTP API
-      const targetUrl = `http://ip-api.com/json/${ip}`;
+      const targetUrl = `http://ip-api.com/json/${ip}?fields=66846719`;
       
       // 使用免費 CORS 代理：https://api.allorigins.win
       const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
@@ -122,7 +126,7 @@ async function getIpJson(ip) {
 	pretty = JSON.stringify(data);
 	pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
 	pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
-	pretty = pretty.replace(/",/g, '",<br>');       // 結尾 }
+	pretty = pretty.replace(/",/g, '",<br>');       // , }
 	pretty = pretty.replace(/:"/g, '": "');       // : 後加空格
 	  document.getElementById('moreD').innerHTML = pretty;
       return data;
