@@ -120,8 +120,8 @@ async function getIpJson(ip) {
         throw new Error(data.message || 'IP 查詢失敗');
       }
 	pretty = JSON.stringify(data);
-	pretty = pretty.replace(/{"/g, '\n{\n  "');     // 開頭 {
-	pretty = pretty.replace(/"}/g, '"\n}');       // 結尾 }
+	pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
+	pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
 	pretty = pretty.replace(/:"/g, '": "');       // : 後加空格
 	  document.getElementById('moreD').innerHTML = pretty;
       return data;
