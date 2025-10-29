@@ -24,12 +24,13 @@ body {
   <p><a href="https://ipinfo.io/ip" target="_blank">ipinfo.io</a></p>
   <p><a href="https://dnschecker.org/port-scanner.php" target="_blank">Port scanner by dnschecker.org</a></p>
   <p><a href="https://browserleaks.com/ip" target="_blank">ip detail info by browserleaks.com</a></p>
-
+  <p></p><a href="#" onclick="forceHttpJump(event)">查詢 IP（HTTP）</a></p>
 <script>
     const iurl = "https://api.ipify.org/";
     const detailUrl = "http://ip-api.com/json/"
     var detailInfo ;  
-    
+	var nowIP = "OK";
+	
     async function Iip() {     
       let txtIP = "";
       try {
@@ -45,12 +46,14 @@ body {
 		document.querySelectorAll('a[href*="IPA"]').forEach(a => {
         a.href = a.href.replace("IPAA", txtIP);
    			 });
+		nowIP = txtIP ;
       } catch (error) {
         //console.log(error.message);
       }
       return txtIP ;
     }   
-    
+
+	
     async function UpdateDetail(ip){
       //var url=detailUrl.concat(ip);
       var url = detailUrl.concat("?fields=status,message,continent,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query");
@@ -78,6 +81,13 @@ body {
       labelElement.innerHTML = html;
       return;
     }
+
+	function forceHttpJump(e) {
+	    e.preventDefault();
+	    const url = "http://ip-api.com/json/" + nowIP + "?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query";
+	    // 強制跳轉
+	    window.location.href = url;
+	}
 
     async function upPage0(){
         var ipNow = await Iip();
