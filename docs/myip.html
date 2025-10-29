@@ -14,9 +14,10 @@ body {
 </head>
 <body onload="upPage0()">
   <h2><a href="https://api.ipify.org/" target="_blank"><label id="ipI">IP address</label></a></h2>
-  <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
+  <p><a href="http://ip-api.com/json/IPAA?fields=status,message,continent,continentCode,country,countryCode,region,regionName,city,district,zip,lat,lon,timezone,offset,currency,isp,org,as,asname,reverse,mobile,proxy,hosting,query" target="_blank">GeoIP info</a> : <label id="moreD"><- get your Geo from ip</label></p>
+  <p><a href="https://ip-api.com/" target="_blank">GeoIP info</a> </p>	
   <p><a href="https://myip.com.tw" target="_blank">myip.tw</a></p>
-	<p><a href="myip.com" target="_blank">myip.com</a></p>
+  <p><a href="myip.com" target="_blank">myip.com</a></p>
   <p><a href="https://dns.google.com/" target="_blank">nslookup by google</a></p>
   <p><a href="https://test-ipv6.com/" target="_blank">IPv6 check</a></p>
   <p><a href="https://lookup.icann.org/en" target="_blank">ICANN lookup</a></p>
@@ -40,6 +41,10 @@ body {
         //console.log(txtIP);
         let labelElement = document.getElementById("ipI");
         labelElement.innerHTML = txtIP;
+		
+		document.querySelectorAll('a[href*="IPA"]').forEach(a => {
+        a.href = a.href.replace("IPAA", txtIP);
+   			 });
       } catch (error) {
         //console.log(error.message);
       }
