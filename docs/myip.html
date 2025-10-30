@@ -127,7 +127,8 @@ async function getIpJson(ip) {
 		pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
 		pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
 		pretty = pretty.replace(/,"/g, ',<br>"');      // , }
-		pretty = pretty.replace(/:"/g, ':  "');       // : 後加空格
+		pretty = pretty.replace(/:"/g, ':   "');       // : 後加空格
+		pretty = pretty.replace(/:-"/g, ':   -"');       // : 後加空格
 		pretty = pretty.replace(/"/g, '');       // 清除 "
 	  document.getElementById('moreD').innerHTML = pretty;
       return data;
