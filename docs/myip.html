@@ -123,11 +123,12 @@ async function getIpJson(ip) {
       if (data.status === 'fail') {
         throw new Error(data.message || 'IP 查詢失敗');
       }
-	pretty = JSON.stringify(data);
-	pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
-	pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
-	pretty = pretty.replace(/,"/g, ',<br>"');      // , }
-	pretty = pretty.replace(/:"/g, ': "');       // : 後加空格
+		pretty = JSON.stringify(data);
+		pretty = pretty.replace(/{"/g, '<br>{<br>  "');     // 開頭 {
+		pretty = pretty.replace(/"}/g, '"<br>}');       // 結尾 }
+		pretty = pretty.replace(/,"/g, ',<br>"');      // , }
+		pretty = pretty.replace(/:"/g, ': "');       // : 後加空格
+		pretty = pretty.replace(/"/g, '');       // 清除 "
 	  document.getElementById('moreD').innerHTML = pretty;
       return data;
     }
