@@ -10,7 +10,7 @@ ok
 [^1]: 這是腳註內容，會自動放到最後。
 ```
 
-去[後面](#ok)
+[頁內跳](#ok)
 
 ```
 [頁內跳](#ok)
@@ -37,7 +37,7 @@ We can | you | nono
 
 test here [^testhere], it is 
 
-[^testhere]: is the all data
+[^testhere]: is the all data, 註腳的名字一樣就行，會自動編號，註腳說名要獨立一行，即上下要空白，不可以和上一行在一起。
 
 we jump[^jump] to end.
 
