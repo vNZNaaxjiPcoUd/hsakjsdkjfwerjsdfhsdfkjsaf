@@ -5,7 +5,18 @@ ok
 
 這是內文[^1]，有腳註說明。
 
+```
+加腳註[^1]，有腳註說明。
+[^1]: 這是腳註內容，會自動放到最後。
+```
+
 去[後面](#ok)
+
+```
+[頁內跳](#ok)
+```
+
+
 
 [^1]: 這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長。
 [^2]: on this label by visiting the Federal Communications Commission's Consumer Resource 。
@@ -15,6 +26,12 @@ Learn more about the terms used on this label by visiting the Federal Communicat
 any special | I am
 
 We can | you | nono
+
+```
+自動列表
+
+We can | you | nono
+```
 
 這是內文[^2]，有腳註說明。
 －D => 細心 被動<=>果斷 主動 => 7<=>7
