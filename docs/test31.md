@@ -34,8 +34,8 @@ We can | you | nono
 
 ```
 
-test here [^test here], it is 
-[^test here]: is the all data
+test here [^testhere], it is 
+[^testhere]: is the all data
 
 we jump[^jump] to end.
 [^jump]: can show why we do.
