@@ -40,6 +40,9 @@ test here [^testhere], it is
 we jump[^jump] to end.
 [^jump]: can show why we do.
 
+we jump 4[^4] to end.
+[^4]: can show why we do.
+
 
 這是內文[^2]，有腳註說明。
 －D => 細心 被動<=>果斷 主動 => 7<=>7
