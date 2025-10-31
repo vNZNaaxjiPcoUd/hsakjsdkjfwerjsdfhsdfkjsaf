@@ -1,4 +1,4 @@
-# [7個步驟將 React 部署到 GitHub Pages](https://medium.com/@bun.coding/7%E5%80%8B%E6%AD%A5%E9%A9%9F%E5%B0%87-react-%E9%83%A8%E7%BD%B2%E5%88%B0-github-pages-2d7e0d203d50)
+# [將 React 部署到 GitHub Pages](https://medium.com/@bun.coding/7%E5%80%8B%E6%AD%A5%E9%A9%9F%E5%B0%87-react-%E9%83%A8%E7%BD%B2%E5%88%B0-github-pages-2d7e0d203d50)
 
 # Step1. 跑 npm run build
 
