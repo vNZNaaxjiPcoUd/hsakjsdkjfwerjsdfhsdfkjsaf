@@ -386,4 +386,5 @@ what?
 
 YEs! 
 
-[^3] [back](#Test31)
+[back](#Test31)[^3] 
+[^3]: yes go!
