@@ -5,6 +5,8 @@ ok
 
 這是內文[^1]，有腳註說明。
 
+去[後面](#ok)
+
 [^1]: 這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長這是腳註內容，可以很長。
 [^2]: on this label by visiting the Federal Communications Commission's Consumer Resource 。
 
@@ -18,6 +20,7 @@ We can | you | nono
 －D => 細心 被動<=>果斷 主動 => 7<=>7
 
 喜事，被動：貓頭鷹
+
 
 喜事，主動：老虎
 
@@ -49,6 +52,7 @@ We can | you | nono
 目標導向
 ```
 -----
+### ok
 
 ```
 希望得到完成任務的頭銜
