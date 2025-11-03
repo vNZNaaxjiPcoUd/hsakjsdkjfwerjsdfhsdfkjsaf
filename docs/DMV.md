@@ -9,7 +9,7 @@ https://county-taxes.net/dmv/hillsborough/hillsborough/vehicle-registration
 根據佛羅里達州法律（Florida law），搬家後 **30 天內** 必須更新駕照（Driver's License）上的地址，否則可能面臨罰款。Hillsborough County 的駕照服務由 Hillsborough County Tax Collector 負責，隸屬 Florida Department of Highway Safety and Motor Vehicles (FLHSMV)。你可以選擇線上或親自辦理。以下是詳細步驟：
 
 #### 1. **線上辦理（推薦，方便快捷）**
-   - 前往 **MyDMV Portal**（https://www.flhsmv.gov/mydmv/），使用你的 Florida 駕照或 ID 號碼登入。
+   - 前往 **MyDMV Portal** [WEB](https://www.flhsmv.gov/mydmv/) , 使用你的 Florida 駕照或 ID 號碼登入。
    - 選擇 "Change Address" 選項，輸入新地址並確認。
    - 更新後，你的駕照記錄會自動變更，但 **不會自動寄出新卡**。如果你想拿到印有新地址的實體駕照，需要額外申請替換（Replacement/Duplicate），費用約 $25（視情況而定）。
    - 注意：線上僅更新記錄，不適用於所有情況（如需 REAL ID 合規文件）。如果有未解決的罰單或暫停狀態，需先處理。
