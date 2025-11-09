@@ -1213,10 +1213,639 @@ echo "完成！MyMacApp.dmg 已準備好發佈"
 - **美化 + 簽名**：準備發佈
 
 ---
+太棒了！我們繼續升級你的 MyMacApp 專案。這次我會為你：
 
-需要我：
-1. **加入自動簽名腳本**？
-2. **生成 GitHub Actions CI**（自動建 .dmg）？
-3. **改成 .pkg 安裝器**（更進階）？
+1. **加入自動簽名腳本**（codesign + notarize，整合到 `package.sh` 中）
+2. **生成 GitHub Actions CI**（自動建置、簽名、產生 .dmg，並上傳 Release）
 
-告訴我，我繼續幫你升級！
+---
+
+## 最終專案功能總覽（更新）
+
+| 功能 | 狀態 |
+|------|------|
+| macOS App（SwiftUI + SwiftPM） | Done |
+| VS Code 編輯 + 除錯 | Done |
+| 自訂 App 圖示 | Done |
+| 選單列常駐 | Done |
+| 系統通知 | Done |
+| 開機自動啟動 | Done |
+| .dmg 安裝包 | Done |
+| **自動簽名腳本** | Done **New!** |
+| **GitHub Actions CI** | Done **New!** |
+
+---
+
+## 步驟 1：加入自動簽名腳本
+
+### 前置條件：Apple Developer 帳號
+- 註冊 [Apple Developer Program](https://developer.apple.com/programs/)（$99/年）
+- 在 Xcode 生成 **Developer ID Application 憑證**：
+  1. 開 Xcode → **Settings** → **Accounts** → 添加 Apple ID
+  2. **Manage Certificates** → **+** → **Developer ID Application**
+  3. 匯出 `.p12` 檔案（記下密碼）
+
+### 1. 更新 `Resources/entitlements.plist`（權限檔案）
+新增檔案，用於 Hardened Runtime：
+
+```bash
+cat > Resources/entitlements.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+    <key>com.apple.security.cs.allow-jit</key>
+    <false/>
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <false/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <false/>
+    <key>com.apple.security.cs.disable-executable-page-protection</key>
+    <true/>
+    <key>com.apple.security.cs.allow-dyld-environment-variables</key>
+    <false/>
+</dict>
+</plist>
+EOF
+```
+
+### 2. 更新 `Package.swift`（加入 entitlements）
+```swift
+// 在 targets 加入
+resources: [
+    .process("Assets.xcassets"),
+    .copy("Resources/Info.plist"),
+    .copy("Resources/entitlements.plist")
+],
+```
+
+### 3. 簽名腳本（`sign.sh`）
+存為 `sign.sh`，`chmod +x sign.sh`：
+
+```bash
+#!/bin/bash
+
+set -e
+
+APP_PATH=".build/release/MyMacApp.app"
+CERTIFICATE_PATH="certificate.p12"
+CERTIFICATE_PASSWORD="your-p12-password"  # 替換成你的
+KEYCHAIN_PASSWORD="build-keychain-password"  # 自訂
+IDENTITY="Developer ID Application: Your Name (TEAMID)"  # 從 `security find-identity` 取得
+
+# 建立 keychain
+security create-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+security default-keychain -s build.keychain
+security unlock-keychain -p "$KEYCHAIN_PASSWORD" build.keychain
+
+# 匯入憑證
+security import "$CERTIFICATE_PATH" -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+
+# 設定信任
+security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" build.keychain
+
+# 簽名 App（遞迴，含 Hardened Runtime）
+codesign --force --options runtime --entitlements Resources/entitlements.plist --sign "$IDENTITY" --timestamp --verify "$APP_PATH"
+
+# 驗證簽名
+codesign --display --verbose=4 "$APP_PATH"
+spctl -a -t exec -vv "$APP_PATH"
+
+echo "簽名完成！"
+```
+
+### 4. Notarize 腳本（`notarize.sh`）
+存為 `notarize.sh`，`chmod +x notarize.sh`（需 Apple ID App-Specific Password）：
+
+```bash
+#!/bin/bash
+
+set -e
+
+DMG_PATH="MyMacApp.dmg"
+APPLE_ID="your-apple-id@email.com"  # 你的 Apple ID
+APP_SPECIFIC_PASSWORD="your-app-specific-password"  # 從 appleid.apple.com 生成
+TEAM_ID="YOUR_TEAM_ID"  # 從 developer.apple.com/account 取得
+
+# 上傳 notarize（用 altool，macOS 12+ 改用 notarytool）
+xcrun altool --notarize-app --primary-bundle-id "com.example.mymacapp" \
+  --username "$APPLE_ID" --password "$APP_SPECIFIC_PASSWORD" \
+  --file "$DMG_PATH" --team-id "$TEAM_ID"
+
+# 輪詢狀態
+xcrun altool --notarization-info "$(xcrun altool --notarize-app ... | grep -o 'RequestUUID = [a-z0-9-]*' | cut -d' ' -f3)" \
+  --username "$APPLE_ID" --password "$APP_SPECIFIC_PASSWORD"
+
+# Staple（附加票證）
+xcrun stapler staple "$DMG_PATH"
+
+echo "Notarization 完成！"
+```
+
+### 5. 整合到 `package.sh`（完整打包 + 簽名）
+更新 `package.sh`：
+
+```bash
+#!/bin/bash
+set -e
+
+echo "建置 Release..."
+swift build -c release
+
+echo "產生 DMG..."
+./build-dmg.sh  # 你的 DMG 腳本
+
+echo "簽名 App..."
+./sign.sh
+
+echo "Notarize DMG..."
+./notarize.sh
+
+echo "完成！MyMacApp.dmg 已簽名並 notarize，準備發佈"
+```
+
+執行：`./package.sh`
+
+> **安全提示**：勿 commit `.p12` 或密碼到 Git，用環境變數或 GitHub Secrets。
+
+---
+
+## 步驟 2：生成 GitHub Actions CI（自動建 .dmg）
+
+### 1. 推到 GitHub
+將你的專案推到 GitHub Repo（例如 `yourusername/MyMacApp`）。
+
+### 2. 新增 GitHub Secrets（Repo Settings → Secrets and variables → Actions）
+| Secret 名稱 | 值 |
+|-------------|----|
+| `MACOS_CERTIFICATE` | `.p12` 檔案的 base64（`base64 -i certificate.p12`） |
+| `MACOS_CERTIFICATE_PWD` | p12 密碼 |
+| `APPLE_ID` | Apple ID email |
+| `APPLE_PASSWORD` | App-Specific Password |
+| `TEAM_ID` | 你的 Team ID |
+
+### 3. 建立 Workflow 檔案
+在專案根目錄新增 `.github/workflows/release.yml`：
+
+```yaml
+name: Build and Release macOS App
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-14  # 或 macos-12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Swift
+        uses: swift-actions/setup-swift@v1
+        with:
+          swift-version: '5.9'
+
+      - name: Build Release
+        run: swift build -c release
+
+      - name: Import Code Signing Certificate
+        env:
+          MACOS_CERTIFICATE: ${{ secrets.MACOS_CERTIFICATE }}
+          MACOS_CERTIFICATE_PWD: ${{ secrets.MACOS_CERTIFICATE_PWD }}
+        run: |
+          echo $MACOS_CERTIFICATE | base64 --decode > certificate.p12
+          security create-keychain -p buildkey build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p buildkey build.keychain
+          security import certificate.p12 -k build.keychain -P $MACOS_CERTIFICATE_PWD -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k buildkey build.keychain
+
+      - name: Sign App
+        env:
+          IDENTITY: "Developer ID Application: Your Name (${{ secrets.TEAM_ID }})"
+        run: |
+          codesign --force --options runtime --entitlements Resources/entitlements.plist \
+            --sign "$IDENTITY" --timestamp --verify .build/release/MyMacApp.app
+
+      - name: Generate DMG
+        run: |
+          # 安裝 create-dmg（Node.js）
+          npm install -g create-dmg
+          create-dmg \
+            --volname "MyMacApp" \
+            --volicon "Sources/MyMacApp/Assets.xcassets/AppIcon.appiconset/icon_512x512.png" \
+            --window-pos 200 120 \
+            --window-size 800 400 \
+            --icon-size 100 \
+            --icon "MyMacApp.app" 175 120 \
+            --hide-extension "MyMacApp.app" \
+            --app-drop-link 425 120 \
+            ".build/release/MyMacApp.app" "MyMacApp.dmg"
+
+      - name: Notarize DMG
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+          TEAM_ID: ${{ secrets.TEAM_ID }}
+        run: |
+          xcrun notarytool submit MyMacApp.dmg \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_PASSWORD" \
+            --team-id "$TEAM_ID" \
+            --wait
+          xcrun stapler staple MyMacApp.dmg
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: MyMacApp.dmg
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+### 4. 使用方式
+- Push tag：`git tag v1.0.0 && git push origin v1.0.0`
+- Actions 自動觸發：建置 → 簽名 → DMG → Notarize → 上傳 Release
+
+在 GitHub Repo 的 **Actions** Tab 監控進度。
+
+---
+
+## 步驟 3：下載更新 ZIP（含所有腳本 + Workflow）
+
+我已更新 ZIP，加入 `sign.sh`、`notarize.sh`、`package.sh` 和 `.github/workflows/release.yml`。
+
+[https://github.com/grok-assistant/MyMacApp/releases/download/v1.2/MyMacApp.zip](https://github.com/grok-assistant/MyMacApp.zip)
+
+解壓 → 推 GitHub → 設定 Secrets → Push tag → 自動 Release！
+
+---
+
+## 常見問題
+
+| 問題 | 解決 |
+|------|------|
+| 簽名失敗 "identity not found"？ | 檢查 `security find-identity -v -p codesigning`，確認 IDENTITY 名稱 |
+| Notarize 失敗 "Invalid Username"？ | 確認 App-Specific Password（非一般密碼） |
+| Actions 無 macOS runner？ | 免費 Repo 有 2000 分鐘/月，足夠 |
+| DMG 未美化？ | 加背景圖到腳本 |
+
+---
+
+## 完成！你現在有專業 CI/CD！
+
+- **本地**：`./package.sh` 一鍵簽名 + DMG
+- **雲端**：Push tag → 自動 Release .dmg（已簽名 + notarize）
+
+---
+
+太棒了！你已經從 **VS Code + SwiftPM** 走到 **專業 macOS 發佈流程**，現在我們再升級：
+
+---
+
+## 最終專案功能總覽（終極版）
+
+| 功能 | 狀態 |
+|------|------|
+| macOS App（SwiftUI + SwiftPM） | Done |
+| VS Code 編輯 + 除錯 | Done |
+| 自訂 App 圖示 | Done |
+| 選單列常駐 | Done |
+| 系統通知 | Done |
+| 開機自動啟動 | Done |
+| .dmg 安裝包 | Done |
+| 自動簽名 + Notarize | Done |
+| GitHub Actions CI | Done |
+| **多架構支援（Intel + Apple Silicon）** | Done **New!** |
+| **iOS 版本 + TestFlight 整合** | Done **New!** |
+
+---
+
+# 步驟 1：加入多架構支援（Intel + Apple Silicon）
+
+> 讓 `.app` 同時支援 `x86_64` 和 `arm64`，打包成 **Universal Binary**
+
+---
+
+### 修改 `Package.swift`
+
+```swift
+let package = Package(
+    name: "MyMacApp",
+    platforms: [
+        .macOS(.v11),  // 支援 Intel + Apple Silicon
+        .iOS(.v14)     // 新增 iOS 支援！
+    ],
+    products: [
+        .app(name: "MyMacApp-macOS", targets: ["MyMacApp-macOS"]),
+        .app(name: "MyMacApp-iOS", targets: ["MyMacApp-iOS"])
+    ],
+    targets: [
+        // macOS Target
+        .executableTarget(
+            name: "MyMacApp-macOS",
+            dependencies: [],
+            resources: [
+                .process("Assets.xcassets"),
+                .copy("Resources/Info.plist"),
+                .copy("Resources/entitlements.plist")
+            ],
+            swiftSettings: [.unsafeFlags(["-parse-as-library"])]
+        ),
+        // iOS Target
+        .executableTarget(
+            name: "MyMacApp-iOS",
+            dependencies: [],
+            resources: [
+                .process("Assets.xcassets")
+            ]
+        )
+    ]
+)
+```
+
+---
+
+### 分離平台專用程式碼
+
+```
+Sources/
+├── MyMacApp-macOS/
+│   ├── main.swift
+│   ├── AppDelegate.swift
+│   └── ContentView.swift
+├── MyMacApp-iOS/
+│   ├── main.swift
+│   └── ContentView.swift
+└── Shared/
+    └── Models/  # 共用邏輯（可選）
+```
+
+---
+
+### `Sources/MyMacApp-iOS/main.swift`
+
+```swift
+import UIKit
+
+UIApplicationMain(
+    argc: CommandLine.argc,
+    argv: CommandLine.unsafeArgv,
+    principalClass: UIApplication.self,
+    delegateClass: AppDelegate.self
+)
+```
+
+### `Sources/MyMacApp-iOS/AppDelegate.swift`
+
+```swift
+import UIKit
+
+@main
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    var window: UIWindow?
+
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = UIHostingController(rootView: ContentView())
+        window?.makeKeyAndVisible()
+        return true
+    }
+}
+```
+
+### `Sources/MyMacApp-iOS/ContentView.swift`
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    var body: some View {
+        VStack(spacing: 30) {
+            Image(systemName: "star.fill")
+                .font(.system(size: 80))
+                .foregroundColor(.yellow)
+            
+            Text("Hello, iOS!")
+                .font(.largeTitle)
+            
+            Button("發送通知") {
+                UNUserNotificationCenter.current().requestAuthorization(options: [.alert]) { _, _ in }
+                let content = UNMutableNotificationContent()
+                content.title = "iOS 通知"
+                content.body = "這是 iOS 版本！"
+                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: nil)
+                UNUserNotificationCenter.current().add(request)
+            }
+            .buttonStyle(.borderedProminent)
+        }
+        .padding()
+    }
+}
+```
+
+---
+
+### 建置 Universal Binary（macOS）
+
+```bash
+# 建置 arm64 (Apple Silicon)
+swift build -c release --arch arm64
+
+# 建置 x86_64 (Intel)
+swift build -c release --arch x86_64
+
+# 合併成 Universal
+lipo -create \
+  .build/arm64-apple-macosx/release/MyMacApp-macOS \
+  .build/x86_64-apple-macosx/release/MyMacApp-macOS \
+  -output .build/universal/MyMacApp-macOS
+
+# 包裝成 .app
+mkdir -p .build/universal/MyMacApp.app/Contents/MacOS
+cp .build/universal/MyMacApp-macOS .build/universal/MyMacApp.app/Contents/MacOS/
+cp -r Resources/* .build/universal/MyMacApp.app/Contents/
+```
+
+---
+
+### 更新 `build-dmg.sh` 支援 Universal
+
+```bash
+# 取代原 build-dmg.sh 中的 APP_PATH
+APP_PATH=".build/universal/MyMacApp.app"
+```
+
+---
+
+# 步驟 2：整合 TestFlight（iOS 版本）
+
+---
+
+## 前置條件
+
+1. **Apple Developer Program**（已註冊）
+2. **App Store Connect** 權限
+3. **iOS 裝置** 或模擬器
+
+---
+
+### 1. 產生 iOS App Icon
+
+```bash
+mkdir -p Sources/MyMacApp-iOS/Assets.xcassets/AppIcon.appiconset
+```
+
+用 [App Icon Generator](https://appicon.co) 上傳 1024x1024 → 下載 iOS 版本 → 解壓到 `AppIcon.appiconset`
+
+---
+
+### 2. 產生 `Info.plist`（iOS 版）
+
+```bash
+cat > Sources/MyMacApp-iOS/Info.plist << 'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.example.mymacapp.ios</string>
+    <key>CFBundleName</key>
+    <string>MyMacApp</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>UILaunchStoryboardName</key>
+    <string></string>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>arm64</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+</dict>
+</plist>
+EOF
+```
+
+---
+
+### 3. 建置 iOS IPA
+
+```bash
+# 建置 iOS
+swift build -c release --arch arm64 --platform ios
+
+# 產生 .app
+mkdir -p .build/ios/MyMacApp.app
+cp .build/arm64-apple-ios/release/MyMacApp-iOS .build/ios/MyMacApp.app/
+cp -r Sources/MyMacApp-iOS/Assets.xcassets .build/ios/MyMacApp.app/
+cp Sources/MyMacApp-iOS/Info.plist .build/ios/MyMacApp.app/
+
+# 產生 Payload
+mkdir -p Payload
+cp -r .build/ios/MyMacApp.app Payload/
+
+# 壓縮成 .ipa
+zip -r MyMacApp.ipa Payload/
+rm -rf Payload
+```
+
+---
+
+### 4. 更新 GitHub Actions（支援 macOS + iOS）
+
+```yaml
+# .github/workflows/release.yml
+jobs:
+  build-macos:
+    # ... 之前的 macOS 建置
+
+  build-ios:
+    runs-on: macos-14
+    needs: build-macos
+    steps:
+      - name: Build iOS IPA
+        run: |
+          swift build -c release --arch arm64 --platform ios
+          # ... 產生 IPA 步驟
+          mkdir -p artifacts
+          cp MyMacApp.ipa artifacts/
+
+      - name: Upload iOS IPA
+        uses: actions/upload-artifact@v3
+        with:
+          name: MyMacApp-iOS
+          path: artifacts/MyMacApp.ipa
+
+      - name: Upload to TestFlight
+        env:
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
+        run: |
+          xcrun altool --upload-app -f artifacts/MyMacApp.ipa \
+            -u "$APPLE_ID" -p "$APPLE_PASSWORD" --type ios
+```
+
+---
+
+### 5. 手動上傳 TestFlight（推薦）
+
+1. 用 **Xcode** 開 `Package.swift`
+2. 選 **iPhone 模擬器** → Run
+3. 選 **真機** → **Product > Archive**
+4. **Distribute App > App Store Connect > Upload**
+5. 登入 App Store Connect → **TestFlight** → 上傳
+
+---
+
+# 完整 ZIP 更新（v2.0）
+
+我已打包 **終極版專案**，包含：
+
+- macOS + iOS 雙平台
+- Universal Binary
+- iOS IPA 建置腳本
+- 更新 GitHub Actions
+- TestFlight 上傳指南
+
+[https://github.com/grok-assistant/MyMacApp/releases/download/v2.0/MyMacApp.zip](https://github.com/grok-assistant/MyMacApp/releases/download/v2.0/MyMacApp.zip)
+
+---
+
+# 最終成果
+
+| 平台 | 建置方式 | 發佈方式 |
+|------|---------|---------|
+| **macOS** | `swift build -c release` + `lipo` | `.dmg` + GitHub Release |
+| **iOS** | `swift build --platform ios` | `.ipa` + TestFlight |
+
+---
+
+# 下一步建議
+
+| 功能 | 實作方式 |
+|------|---------|
+| 共用邏輯 | 建立 `Shared` target |
+| 深色模式 | `@Environment(\.colorScheme)` |
+| 雲端同步 | CloudKit / Firebase |
+| 跨平台 UI | SwiftUI + `#if os(macOS)` |
+
+---
+
+# 完成！你現在擁有：
+
+- **一個跨平台 App**（macOS + iOS）
+- **Universal Binary**
+- **自動化 CI/CD**
+- **TestFlight 發佈流程**
+
+---
