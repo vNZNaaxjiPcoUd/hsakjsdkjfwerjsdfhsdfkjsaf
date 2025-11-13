@@ -200,10 +200,16 @@ pre, code {
     font-family: 'Courier New', monospace;
     background-color: #1a1a1a; /* 深黑背景 */
     color: #cccccc; /* 淺灰文字 */
+	white-space: pre;            /* 不換行，保留原始格式 */
+	overflow-x: auto;            /* 水平滾動 */
+	overflow-y: auto;
+	max-height: 300px;           /* 垂直也限制 */
+	display: block;
     /*padding: 12px;
     border-radius: 4px;
     border: 1px solid #333333;*/
 }
+
 
 /* 頁腳樣式 */
 footer {
