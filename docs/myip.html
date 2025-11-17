@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang=""en-US"">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+html,
+body {
+
+		color: rgb(120, 120, 120);
+		background-color: rgb(1, 1, 1);
+}
+</style>
+  <title>myip</title>
+</head>
+<body onload="upPage0()">
+  <h2><label id="ipI">IP address</label></h2>
+  <p><a href="https://h.jwint.net/myip2">detail</a></p>
+
+
+<script>
+    const iurl = "https://api.ipify.org/";
+
+    async function Iip() {     
+      let txtIP = "";
+      try {
+        const response = await fetch(iurl,{cache:"no-cache"});
+        if (!response.ok) {
+          let labelElement = document.getElementById("ipI");
+          labelElement.innerHTML = "0.0.0.0";
+          throw new Error(`Response status: ${response.status}`);
+        }
+        txtIP = await response.text();
+        let labelElement = document.getElementById("ipI");
+        labelElement.innerHTML = txtIP;
+
+      } catch (error) {
+        //console.log(error.message);
+      }
+      return txtIP ;
+    }   
+
+    async function upPage0(){
+        var ipNow = await Iip();
+    }
+</script>
+</body>
+</html>
