@@ -5,7 +5,6 @@
 <style>
 html,
 body {
-
 		color: rgb(120, 120, 120);
 		background-color: rgb(1, 1, 1);
 }
@@ -15,7 +14,6 @@ body {
 <body onload="upPage0()">
   <h2><label id="ipI">IP address</label></h2>
   <p><a href="https://h.jwint.net/myip2">detail</a></p>
-
 
 <script>
     const iurl = "https://api.ipify.org/";
@@ -34,13 +32,15 @@ body {
         labelElement.innerHTML = txtIP;
 
       } catch (error) {
-        //console.log(error.message);
+          let labelElement = document.getElementById("ipI");
+          labelElement.innerHTML = "9.9.9.9";
+		  return "9.9.9.9";
       }
       return txtIP ;
     }   
 
     async function upPage0(){
-        var ipNow = await Iip();
+        let ipNow = await Iip();
     }
 </script>
 </body>
