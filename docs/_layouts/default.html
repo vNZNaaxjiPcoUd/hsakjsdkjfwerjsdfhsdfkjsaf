@@ -24,6 +24,13 @@ body {
     margin: 0 auto; /* 居中 */
     padding: 40px 20px;
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05); /* 淺色陰影 */
+
+	/* 完整的文字換行設置 */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-all;        /* 在任意字符處斷開 */
+    hyphens: auto;               /* 自動斷字（需要支援） */
+    text-align: justify;         /* 可選：兩端對齊 */
 }
 
 a,
