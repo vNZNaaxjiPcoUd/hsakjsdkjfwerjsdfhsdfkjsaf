@@ -14,10 +14,10 @@ body {
 </style>
 </head>
 <body onload="upPage0()">
-Nows  :<label id="labelWithHTML">Initial Text</label><br>
-Start:<label id="startT">Initial Text</label><br>
-Site :<label id="siteTime">site time</label><br>
-Count:<label id="cnT">0</label><br>
+Nows : <label id="labelWithHTML">Initial Text</label><br>
+Start : <label id="startT">Initial Text</label><br>
+Site : <label id="siteTime">site time</label><br>
+Count :<label id="cnT">0</label><br>
 
 
 
@@ -39,7 +39,6 @@ Count:<label id="cnT">0</label><br>
     }
 	
     const dsurl = "/ds";
-    const dcurl = "/dc";
     async function getSiteTime() {
       try {
         const response = await fetch(dsurl,{cache:"no-cache"});
@@ -56,46 +55,18 @@ Count:<label id="cnT">0</label><br>
       }
     }
     
-    
-    async function getCodeTime() {     
-      try {
-        const response = await fetch(dcurl,{cache:"no-cache"});
-        if (!response.ok) {
-          throw new Error(`Response status: ${response.status}`);
-        }
-
-        const json = await response.json();
-        console.log(json);
-        let labelElement = document.getElementById("codeTime");
-        labelElement.innerHTML = json['data'];
-      } catch (error) {
-        console.error(error.message);
-      }
-    }
-    
     let cntt = 0;
     function updateCnt(){
       cntt = cntt + 1;
       let labelElement = document.getElementById("cnT");
-      //let T1 = new Date(cntt * 1000);
-      //labelElement.innerHTML = cntt.toString();
-      //const options = { timeZone: '+00:00', hour: '2-digit', minute: '2-digit', second: '2-digit'};
-      //labelElement.innerHTML = T1.toTimeString('en-US', options);
       const date = new Date(null);
-      date.setSeconds(cntt); // specify value for SECONDS here
+      date.setSeconds(cntt); 
       labelElement.innerHTML = result = date.toISOString().slice(11, 19);
     }
-    function refreshiFrame(){
-      document.getElementById('ifdc').contentWindow.location.reload();
-      document.getElementById('ifds').src = document.getElementById('ifds').src
-      console.log(document.getElementById('ifds').src);
-    }
-    
+   
     function upPage0(){
       startTime();
-      showTime();
-      getSiteTime();
-      //getCodeTime();
+      upPage();
     }
 
     function upPage(){
@@ -110,7 +81,7 @@ Count:<label id="cnT">0</label><br>
       updateCnt();
       //console.log("cntt");
     }
-
+	
     setInterval(upPage, 1000);
 </script>
 
