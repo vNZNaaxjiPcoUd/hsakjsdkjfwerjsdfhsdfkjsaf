@@ -50,6 +50,7 @@ Count :<label id="cnT">0</label><br>
         console.log(json);
         let labelElement = document.getElementById("siteTime");
         labelElement.innerHTML = json['data'];
+		  console.log(json['data']);
       } catch (error) {
         console.error(error.message);
       }
