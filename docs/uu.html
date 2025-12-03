@@ -42,10 +42,17 @@ Count :<label id="cnT">0</label><br>
     async function getSiteTime() {
       try {
         const response = await fetch(dsurl,{cache:"no-cache"});
+		  
+		  	console.log('response:', response);
+		  	const text = await response.clone().text();
+				console.log('Text 內容:', text);
+				const data = await response.clone().json();  // 用 clone() 避免 body 被消耗
+  			console.log('JSON 資料:', data);
+		  
         if (!response.ok) {
           throw new Error(`Response status: ${response.status}`);
         }
-
+		console.log(response);
         const json = await response.json();
         console.log(json);
         let labelElement = document.getElementById("siteTime");
