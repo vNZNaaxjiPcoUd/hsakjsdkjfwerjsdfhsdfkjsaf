@@ -24,7 +24,7 @@ Count :<label id="cnT">0</label><br>
 <script>
     function showTime() {
       const currentDate = new Date();
-      const options = { timeZone: '-04:00', hour: '2-digit', minute: '2-digit', second: '2-digit'};
+      const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit'};
       const timestamp = currentDate.toLocaleString('en-US', options);
       let labelElement = document.getElementById("labelWithHTML");
       labelElement.innerHTML = timestamp;
@@ -32,7 +32,7 @@ Count :<label id="cnT">0</label><br>
 
     function startTime() {
       const currentDate = new Date();
-      const options = { timeZone: '+00:00', hour: '2-digit', minute: '2-digit', second: '2-digit'};
+      const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit'};
       const timestamp = currentDate.toLocaleString('en-US', options);
       let labelElement = document.getElementById("startT");
       labelElement.innerHTML = timestamp;
@@ -41,7 +41,7 @@ Count :<label id="cnT">0</label><br>
     const dsurl = "/uuds";
     async function getSiteTime() {
       try {
-        const response = await fetch(dsurl,{cache:"no-cache"});
+        const response = await fetch(dsurl,{cache:"no-cache"}); // 因為 _config.yml 裡 加了 timezone: America/New_York ，所以時區對了。
 		  
 		  	console.log('response:', response);
 		  	const text = await response.clone().text();
