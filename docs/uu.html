@@ -22,9 +22,12 @@ Count :<label id="cnT">0</label><br>
 
 
 <script>
+
+	const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	
     function showTime() {
       const currentDate = new Date();
-      const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit'};
+      const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit'};
       const timestamp = currentDate.toLocaleString('en-US', options);
       let labelElement = document.getElementById("labelWithHTML");
       labelElement.innerHTML = timestamp;
@@ -32,7 +35,7 @@ Count :<label id="cnT">0</label><br>
 
     function startTime() {
       const currentDate = new Date();
-      const options = { timeZone: 'America/New_York', hour: '2-digit', minute: '2-digit', second: '2-digit'};
+      const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit'};
       const timestamp = currentDate.toLocaleString('en-US', options);
       let labelElement = document.getElementById("startT");
       labelElement.innerHTML = timestamp;
