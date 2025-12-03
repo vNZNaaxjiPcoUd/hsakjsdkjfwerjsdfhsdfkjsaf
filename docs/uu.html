@@ -53,7 +53,7 @@ Count :<label id="cnT">0</label><br>
           throw new Error(`Response status: ${response.status}`);
         }
 		console.log(response);
-        const json = await response.json();
+        const json = await response.clone().json();
         console.log(json);
         let labelElement = document.getElementById("siteTime");
         labelElement.innerHTML = json['data'];
