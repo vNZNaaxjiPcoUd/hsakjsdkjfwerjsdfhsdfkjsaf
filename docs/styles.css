@@ -234,13 +234,14 @@ footer {
 
 
 body {
-  font-size: 26px;
-  padding: 35px 2px;
-width: 90%;
-margin: 0 auto;  /* center */
+	font-size: 26px;
+	padding: 35px 2px;
+	width: 90%;
+	margin: 0 auto;  /* center */
 }
+
 .hugeS {
-	display: none;  /* 預設顯示，獨占空間 */
+	display: block;  /* 預設顯示，獨占空間 */
 }
 	
 .largeS {
@@ -276,6 +277,22 @@ margin: 0 auto;  /* center */
     img {
         width: 92%;
     }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+
 }
 @media (max-width: 3120px) {
     body {
@@ -297,6 +314,21 @@ margin: 0 auto;  /* center */
     img {
         width: 92%;
     }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
 }
 @media (max-width: 2200px) {
     body {
@@ -318,6 +350,21 @@ margin: 0 auto;  /* center */
     img {
         width: 92%;
     }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
 }
 	
 @media (max-width: 1920px) {
@@ -340,6 +387,21 @@ margin: 0 auto;  /* center */
     img {
         width: 92%;
     }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
 }
 
 @media (max-width: 1440px) {
@@ -368,6 +430,21 @@ margin: 0 auto;  /* center */
         overflow-x: auto;
         display: block;
     }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
 }
 	
 @media (max-width: 1024px) {
@@ -396,6 +473,21 @@ margin: 0 auto;  /* center */
         overflow-x: auto;
         display: block;
     }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: block;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
 }
 
 @media (max-width: 768px) {
@@ -427,16 +519,20 @@ margin: 0 auto;  /* center */
     ul, ol {
         padding-left: 1.5em;
     }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
 	.largeS {
-	    display: none; 
+		display: none;  /* 預設顯示，獨占空間 */
 	}
 	
 	.mediumS {
-	    display: block;  
+		display: none;  
 	}
 	
 	.smallS {
-	    display: none;  
+		display: block;  
 	}
 }
 
@@ -472,6 +568,10 @@ margin: 0 auto;  /* center */
     footer {
         font-size: 0.8rem;
     }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
 	.largeS {
 	    display: none; 
 	}
