@@ -2,6 +2,8 @@
 
 ## Kefir（克菲爾）是一種發酵乳飲品，類似優格（優酪乳）但更稀一點，可以直接喝，很受健康食品愛好者歡迎。
 
+[看看Amazon上有那些產品](https://www.amazon.com/s?k=organic+kefir+live+grains+milk&hvadid=678736293283&hvdev=c&hvexpln=0&hvlocphy=1013962&hvnetw=g&hvocijid=4426207815518133371--&hvqmt=b&hvrand=4426207815518133371&hvtargid=kwd-2233135651107&hydadcr=4877_13210655&mcid=b7f819848e42393cb364e87309eb7960&tag=googhydr-20&ref=pd_sl_1ec24zcfpd_b)
+
 **簡單來說，Kefir 是什麼？**
 
 * 原料：牛奶（或羊奶、椰奶、豆奶等植物奶）
