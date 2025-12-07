@@ -41,11 +41,12 @@ function unlock() {
             decrypted = true;
         } else {
             //throw new Error();
-			document.body.innerHTML = "<h1>Hello World!</h1>";
+			document.body.innerHTML = "<h2>Hello World!</h2>";
         }
     } catch (e) {
-        msg.textContent = "again！";
-        document.getElementById("password").value = "";
+        //msg.textContent = "again！";
+        //document.getElementById("password").value = "";
+		document.body.innerHTML = "<h2>Hello World!</h2>";
     }
 }
 
