@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Allo</title>
+<style>
+    body {
+        margin:0; height:100vh; background:#000; color:#fff;
+        font-family:Arial; display:flex; justify-content:center; align-items:center;
+        flex-direction:column;
+    }
+    #lockScreen {
+        text-align:center;
+    }
+    #lockScreen input {
+        padding:15px 20px; font-size:20px; width:300px; margin:20px;
+        border:none; border-bottom:3px solid #0f0; background:transparent;
+        color:white; text-align:center; outline:none;
+    }
+    #lockScreen button {
+        padding:12px 30px; font-size:18px; background:#0f0; color:black;
+        border:none; cursor:pointer; border-radius:6px;
+    }
+    #content { display:none; padding:40px; }
+</style>
+</head>
+<body>
+
+<div id="lockScreen">
+    <p>Allo</p>
+    <input type="password" id="password" placeholder="key" autocomplete="off">
+    <br>
+    <button onclick="unlock()">open</button>
+    <p id="msg" style="color:red; margin-top:15px;"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+<script>
+
+const ENCRYPTED_CONTENT = "{{ zip }}"; 
+
+let decrypted = false;
+
+function unlock() {
+    const input = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    if (!input) {
+        msg.textContent = "key";
+        return;
+    }
+
+    try {
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+	console.log(originalHTML);
+        if (originalHTML) {  
+            document.body.innerHTML = originalHTML;
+            decrypted = true;
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        msg.textContent = "again！";
+        document.getElementById("password").value = "";
+    }
+}
+
+document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") unlock();
+});
+</script>
+
+</body>
+</html>
