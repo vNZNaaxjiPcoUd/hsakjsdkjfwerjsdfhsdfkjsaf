@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Allo</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+
+<div id="lockScreen">
+    <p>Allo</p>
+    <input type="password" id="password" placeholder="key" autocomplete="off">
+    <br>
+    <button onclick="unlock()">open</button>
+    <p id="msg" style="color:red; margin-top:15px;"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+<script>
+
+const ENCRYPTED_CONTENT = "{{ page.zip }}"; 
+
+let decrypted = false;
+
+function unlock() {
+    const input = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    if (!input) {
+        msg.textContent = "key";
+        return;
+    }
+
+    try {
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+	console.log(originalHTML);
+        if (originalHTML) {  
+            document.body.innerHTML = originalHTML;
+            decrypted = true;
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        msg.textContent = "again！";
+        document.getElementById("password").value = "";
+    }
+}
+
+document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") unlock();
+});
+</script>
+
+</body>
+</html>
