@@ -35,12 +35,13 @@ function unlock() {
     try {
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
-	console.log(originalHTML);
+		console.log(originalHTML);
         if (originalHTML) {  
             document.body.innerHTML = originalHTML;
             decrypted = true;
         } else {
-            throw new Error();
+            //throw new Error();
+			document.body.innerHTML = "<h1>Hello World!</h1>";
         }
     } catch (e) {
         msg.textContent = "again！";
