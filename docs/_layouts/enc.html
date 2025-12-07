@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>密碼解鎖加密頁面</title>
+<style>
+    body {
+        margin:0; height:100vh; background:#000; color:#fff;
+        font-family:Arial; display:flex; justify-content:center; align-items:center;
+        flex-direction:column;
+    }
+    #lockScreen {
+        text-align:center;
+    }
+    #lockScreen input {
+        padding:15px 20px; font-size:20px; width:300px; margin:20px;
+        border:none; border-bottom:3px solid #0f0; background:transparent;
+        color:white; text-align:center; outline:none;
+    }
+    #lockScreen button {
+        padding:12px 30px; font-size:18px; background:#0f0; color:black;
+        border:none; cursor:pointer; border-radius:6px;
+    }
+    #content { display:none; padding:40px; }
+</style>
+</head>
+<body>
+
+<!-- 鎖定畫面 -->
+<div id="lockScreen">
+    <h1>HelloWorld</h1>
+    <p>輸入密碼以解鎖隱藏內容</p>
+    <input type="password" id="password" placeholder="請輸入密碼" autocomplete="off">
+    <br>
+    <button onclick="unlock()">解鎖</button>
+    <p id="msg" style="color:red; margin-top:15px;"></p>
+</div>
+
+<!-- 這裡是你要加密的真正內容（會被完全隱藏） -->
+<div id="content">
+    <h1>解鎖成功！歡迎管理員</h1>
+    <p>這段內容在原始碼裡是加密的，沒密碼完全看不懂！</p>
+    <hr>
+    <p>你可以放任何東西：</p>
+    <ul>
+        <li>後台管理面板</li>
+        <li>私人日記</li>
+        <li>隱藏連結</li>
+        <li>甚至整個管理系統</li>
+    </ul>
+    <button onclick="location.href='https://google.com'">範例：進入後台</button>
+</div>
+
+<!-- 引入 CryptoJS（AES 加密庫） -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+<script>
+// 設定你的密碼（請改成自己的！）
+const CORRECT_PASSWORD = "aaaa";   // 改成你想要的密碼
+
+// 這是你要隱藏的「真正內容」，已經被 AES 加密過
+// 你只需要產生一次，之後永遠用這串亂碼即可
+const ENCRYPTED_CONTENT = "U2FsdGVkX18BZFXBMWfln7sDIsWMhxORGejQBVovEY9xG/ww41VK8oz7zELiohHCUV7aY7Ghied24P96n6DYbbwz4EvY2/RpbdpP0zLnza1bHH82h2ZKHW/UphAYWYHpj9K1rUhBHPPjGB2UyV96r61Ch5VpoXjI93NXbP1HI4nHvJBCI8rU0yWQXjpCrA7Gwhc0K5MeaM8HuxE1nGGx/dbPG3dF4VIWMEFLj7/2s9+aWvywiyPszPl5RDeYv7Trpb6PfZ2ihJHGT2YO9NUynI9HXmObhE03czhLydfpFtGSD7gaETkb6yB2+tdfwgG+5eWoUv6mBbM4Pu3Jr/QRw44bzUXEsNJSXTMiboPBmvEsVy9vOAtNRjeAgbwFImRImwUeURSKtLCkLtEoan20A1oZqwmJb0wE317ujb/NXNo="; 
+// ↑ 這串是加密後的亂碼（下面教你怎麼產生）
+
+let decrypted = false;
+
+function unlock() {
+    const input = document.getElementById("password").value;
+    const msg = document.getElementById("msg");
+
+    if (!input) {
+        msg.textContent = "請輸入密碼";
+        return;
+    }
+
+    try {
+        // 嘗試用輸入的密碼解密
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+
+        if (originalHTML && originalHTML.includes("<")) {  // 簡單判斷是不是 HTML
+            // 解密成功 → 取代整個頁面內容
+            document.body.innerHTML = originalHTML;
+            decrypted = true;
+        } else {
+            throw new Error();
+        }
+    } catch (e) {
+        msg.textContent = "密碼錯誤！";
+        document.getElementById("password").value = "";
+    }
+}
+
+// 可選：按 Enter 也能解鎖
+document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") unlock();
+});
+</script>
+
+</body>
+</html>
