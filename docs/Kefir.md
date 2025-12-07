@@ -2,7 +2,6 @@
 
 ## Kefir（克菲爾）是一種發酵乳飲品，類似優格（優酪乳）但更稀一點，可以直接喝，很受健康食品愛好者歡迎。
 
-### [看看Amazon上有那些產品](https://www.amazon.com/s?k=organic+kefir+live+grains+milk&hvadid=678736293283&hvdev=c&hvexpln=0&hvlocphy=1013962&hvnetw=g&hvocijid=4426207815518133371--&hvqmt=b&hvrand=4426207815518133371&hvtargid=kwd-2233135651107&hydadcr=4877_13210655&mcid=b7f819848e42393cb364e87309eb7960&tag=googhydr-20&ref=pd_sl_1ec24zcfpd_b)
 
 **簡單來說，Kefir 是什麼？**
 
@@ -61,12 +60,7 @@
 所以如果你想同時做兩種，一定要分開養兩套菌粒，千萬不要混用或交叉污染（連容器、濾網都要分開洗最好）！
 
 
-
-
-
-
-
-是的！**Milk Kefir 菌粒** 和 **Water Kefir 菌粒** 在亞馬遜（Amazon）上絕對可以買到，而且選擇超多，大部分是新鮮活菌或脫水形式（脫水的好運輸，收到後泡水或奶復活即可）。價格通常在 10-20 美元左右，視量而定，還常有 Prime 免運費。
+### [看看Amazon上有那些產品](https://www.amazon.com/s?k=organic+kefir+live+grains+milk&hvadid=678736293283&hvdev=c&hvexpln=0&hvlocphy=1013962&hvnetw=g&hvocijid=4426207815518133371--&hvqmt=b&hvrand=4426207815518133371&hvtargid=kwd-2233135651107&hydadcr=4877_13210655&mcid=b7f819848e42393cb364e87309eb7960&tag=googhydr-20&ref=pd_sl_1ec24zcfpd_b) ， **Milk Kefir 菌粒** 和 **Water Kefir 菌粒** 在亞馬遜（Amazon）上絕對可以買到，而且選擇超多，大部分是新鮮活菌或脫水形式（脫水的好運輸，收到後泡水或奶復活即可）。價格通常在 10-20 美元左右，視量而定，還常有 Prime 免運費。
 
 **Milk Kefir 菌粒（奶克菲爾）**
 
@@ -84,17 +78,8 @@
   * **Florida Sun Kefir 1/4 Cup Live Grains**：活菌大份量，用有機糖養大，Reddit 用戶超推，說生長快、氣泡多。
 * **購買連結**：搜 “water kefir grains”，同樣超多選擇。 注意脫水款運輸更穩，但活菌要選快遞避免死掉。
 
-**小提醒**
 
-* **運到台灣/亞洲**：Amazon.com 支援國際運，但可能加關稅或運費高（約 20-50 USD）。建議用 Amazon 日本或全球賣家，或考慮本地如 PChome/Shopee（但菌種選擇少）。買前確認賣家運送政策。
-* **新手Tips**：選有「organic」和「live/active」的，收到後照說明復活（通常 24-48 小時）。很多人買一次用一輩子！
-* 如果你在台灣，運輸時間約 7-14 天，活菌款最好用 DHL 快遞。
-
-
-
-
-
-你在佛羅里達！那超級方便～在美國買 Milk Kefir 跟 Water Kefir 菌粒真的超容易，Amazon.com 當天或隔天就能送到你家（大部分都有 Prime 免運），而且美國賣家幾乎都是**新鮮活菌**，活性比國際運輸高很多。
+### 在美國買 Milk Kefir 跟 Water Kefir 菌粒真的超容易，Amazon.com 當天或隔天就能送到你家（大部分都有 Prime 免運），而且美國賣家幾乎都是**新鮮活菌**，活性比國際運輸高很多。
 
 以下是目前（2025 年 12 月）佛州人最常買、評價最高、真的會長大的幾款（我剛剛又確認了庫存跟最新評價）：
 
@@ -155,6 +140,3 @@
 
 * 活菌：99%的人第一批就成功，味道馬上到位
 * 乾菌：大概95%的人順利復活，但要耐心養3–5批才會跟活菌一樣強
-
-結論（給你在佛州的建議）： 第一次入坑 → 直接買 **Florida Sun Kefir 的 Live Grains**（活菌），你隔天收到就能喝，體驗最好。
-等你養到菌粒爆多之後，再買一包乾菌放著當備份或送人就完美了！
