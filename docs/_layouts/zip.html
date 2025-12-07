@@ -2,7 +2,7 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<title>Allo</title>
+<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
 <link rel="stylesheet" href="/styles_white.css">
 </head>
 <body>
