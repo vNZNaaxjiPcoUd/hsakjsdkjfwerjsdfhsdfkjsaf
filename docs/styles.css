@@ -435,11 +435,11 @@ body {
 	}
 	
 	.largeS {
-		display: block;  /* 預設顯示，獨占空間 */
+		display: none;  /* 預設顯示，獨占空間 */
 	}
 	
 	.mediumS {
-		display: none;  
+		display: block;  
 	}
 	
 	.smallS {
