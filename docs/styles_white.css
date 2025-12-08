@@ -162,13 +162,14 @@ footer {
 }
 
 @media (max-width: 4096px) { body { font-size: 29px; } }
-@media (max-width: 4096px) { body { font-size: 26px; } }
-@media (max-width: 4096px) { body { font-size: 23px; } }
-@media (max-width: 4096px) { body { font-size: 20px; } }
-@media (max-width: 4096px) { body { font-size: 17px; } }
-@media (max-width: 4096px) { body { font-size: 14px; } }
-@media (max-width: 4096px) { body { font-size: 11px; } }
-@media (max-width: 4096px) { body { font-size: 8px; } }
+@media (max-width: 3120px) { body { font-size: 26px; } }
+@media (max-width: 2200px) { body { font-size: 23px; } }
+@media (max-width: 1920px) { body { font-size: 20px; } }
+@media (max-width: 1440px) { body { font-size: 17px; } }
+@media (max-width: 1024px) { body { font-size: 14px; } }
+@media (max-width: 768px) { body { font-size: 11px; } }
+@media (max-width: 480px) { body { font-size: 8px; } }
+
 @media (max-width: 4096px) { .msg::before { content: "4096"; } }
 @media (max-width: 3120px) { .msg::before { content: "3120"; } }
 @media (max-width: 2200px) { .msg::before { content: "2200"; } }
