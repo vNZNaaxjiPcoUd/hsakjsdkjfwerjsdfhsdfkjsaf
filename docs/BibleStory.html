@@ -6,8 +6,8 @@ layout: empty
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>全螢幕圖片瀏覽器（手機完美填滿）</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<title>Bible Story</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
   body, html {
@@ -28,10 +28,10 @@ layout: empty
     /* 關鍵：讓圖片永遠填滿整個螢幕 */
     width: 100vw;
     height: 100vh;
-    object-fit: cover;     /* 填滿螢幕，會裁切邊緣 */
+    /* object-fit: cover;     /* 填滿螢幕，會裁切邊緣 */
     /* 如果你想要「完整顯示整張圖，不裁切」，改成 contain + 背景黑 */
-    /* object-fit: contain; */
-    /* background: #000; */
+    object-fit: contain; 
+    background: #000;
     transition: opacity 0.4s ease;
     user-select: none;
     -webkit-touch-callout: none;
