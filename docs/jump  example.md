@@ -1,5 +1,5 @@
 ---
-layout: jump
+layout: s
 go: https://shopify.github.io/liquid/tags/control-flow/
-title: Jump example
+title: 0 jump
 ---
