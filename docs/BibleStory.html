@@ -1,0 +1,147 @@
+---
+title: Bible Story
+layout: empty
+---
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>Bible Story</title>
+<style>
+  body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    color: #fff;
+    font-family: sans-serif;
+    overflow: hidden;
+    touch-action: pan-y; /* 讓水平滑動不會被瀏覽器攔截 */
+  }
+  #viewer {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+  }
+  #viewer img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    transition: opacity 0.3s;
+  }
+  .nav-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    width: 60px;
+    height: 100px;
+    font-size: 40px;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 10;
+  }
+  #viewer:hover .nav-btn { opacity: 0.7; }
+  .nav-btn:hover { opacity: 1 !important; }
+  #prev { left: 10px; }
+  #next { right: 10px; }
+  #counter {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.6);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<div id="viewer">
+  <button id="prev" class="nav-btn" aria-label="上一張">‹</button>
+  <img id="photo" src="" alt="圖片">
+  <button id="next" class="nav-btn" aria-label="下一張">›</button>
+  <div id="counter"></div>
+</div>
+
+<script>
+// ==== 請在這裡放入你的圖片網址（支援本地或遠端）====
+const images = [
+  "/pic/",
+];
+// =====================================================
+
+let currentIndex = 0;
+const img = document.getElementById('photo');
+const counter = document.getElementById('counter');
+
+function showImage(index) {
+  currentIndex = (index + images.length) % images.length; // 支援負數
+  img.style.opacity = 0;
+  img.src = images[currentIndex];
+  img.onload = () => {
+    img.style.opacity = 1;
+    counter.textContent = `${currentIndex + 1} / ${images.length}`;
+  };
+}
+
+function next() { showImage(currentIndex + 1); }
+function prev() { showImage(currentIndex - 1); }
+
+// 鍵盤
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+    e.preventDefault();
+    next();
+  } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    prev();
+  } else if (e.key === 'Escape' || e.key === 'Home') {
+    showImage(0);
+  }
+});
+
+// 滑鼠點擊圖片左右半邊
+img.addEventListener('click', e => {
+  const rect = img.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  if (x < rect.width / 2) prev();
+  else next();
+});
+
+// 按鈕
+document.getElementById('prev').addEventListener('click', prev);
+document.getElementById('next').addEventListener('click', next);
+
+// 手機觸控滑動
+let touchStartX = 0;
+viewer.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+}, {passive: true});
+
+viewer.addEventListener('touchend', e => {
+  if (!touchStartX) return;
+  const touchEndX = e.changedTouches[0].screenX;
+  const diff = touchStartX - touchEndX;
+  if (Math.abs(diff) > 50) { // 超過 50px 才算滑動
+    if (diff > 0) next();
+    else prev();
+  }
+  touchStartX = 0;
+}, {passive: true});
+
+// 啟動
+showImage(0);
+</script>
+</body>
+</html>
