@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>iPhone 垂直滾動圖片瀏覽器（滿版＋縮放＋換圖歸1×）</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body,html{height:100%;background:#000;overflow-x:hidden}
+  
+  /* 開始畫面 */
+  #welcome{
+    position:fixed;inset:0;background:#000;color:#fff;
+    font-size:22px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;z-index:9999;
+  }
+  #welcome button{
+    margin-top:30px;padding:18px 50px;font-size:24px;
+    background:#007AFF;color:white;border:none;border-radius:16px;
+  }
+
+  /* 滾動容器 */
+  #gallery{
+    display:none;
+    padding-top: env(safe-area-inset-top);     /* 避免劉海遮到 */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .item{
+    width:100vw;
+    position:relative;
+    flex-shrink:0;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+  }
+  .item img{
+    width:100vw;
+    height:100vh;
+    object-fit:contain;           /* 整張圖都看得到 */
+    /* object-fit:cover; */           /* 想要填滿就改這行 */
+    user-select:none;
+    touch-action:pinch-zoom pan-x pan-y;
+    background:#000;
+    transition:opacity .5s ease;
+  }
+  #counter{
+    position:fixed;bottom:40px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,0.6);color:#fff;padding:10px 26px;
+    border-radius:30px;font-size:18px;z-index:100;pointer-events:none;
+    opacity:1;transition:opacity .3s;
+  }
+</style>
+</head>
+<body>
+
+<div id="welcome">
+  <div>圖片瀏覽器</div>
+  <button id="enter">點我開始觀看</button>
+  <div style="margin-top:25px;font-size:16px;color:#aaa;line-height:1.6">
+    進入後：<br>
+    • 上下滾動換圖（像 Instagram）<br>
+    • 雙指縮放、拖曳<br>
+    • 點螢幕中間可隱藏計數器
+  </div>
+</div>
+
+<div id="gallery"></div>
+<div id="counter">1 / 6</div>
+
+<script>
+// 你的圖片清單
+const images = [
+ "/pic/np0p1.png",
+ "/pic/np0p2.gif",
+ "/pic/np1p0.jpg",
+ "/pic/np1p1.jpg",
+ "/pic/np1p1s1.png",
+ "/pic/np1p2.jpg",
+ "/pic/np1p3.jpg",
+ "/pic/np1p4.jpg",
+ "/pic/np1p5.jpg",
+ "/pic/np1p6.jpg",
+ "/pic/np1p7.jpg",
+ "/pic/np1p8.jpg",
+ "/pic/np1p9.jpg",
+ "/pic/np1p10.jpg",
+ "/pic/np1p11.jpg",
+ "/pic/np2p1.jpg",
+ "/pic/np2p2.jpg",
+ "/pic/np2p3.jpg",
+ "/pic/np2p4.jpg",
+ "/pic/np2p5.jpg",
+ "/pic/np2p6.jpg",
+ "/pic/np2p7.jpg",
+ "/pic/np2p8.jpg",
+];
+
+const gallery = document.getElementById('gallery');
+const counter = document.getElementById('counter');
+let currentIndex = 0;
+
+// 產生所有圖片項目
+images.forEach((src, i) => {
+  const div = document.createElement('div');
+  div.className = 'item';
+  div.id = 'item'+i;
+  const img = document.createElement('img');
+  img.src = src;
+  img.onload = () => img.style.opacity = 1;
+  div.appendChild(img);
+  gallery.appendChild(div);
+});
+
+// 開始按鈕
+document.getElementById('enter').onclick = () => {
+  document.getElementById('welcome').style.display = 'none';
+  gallery.style.display = 'block';
+  // 關鍵：讓 Safari 隱藏工具列
+  window.scrollTo(0,1);
+  setTimeout(() => window.scrollTo(0,0), 100);
+  updateCounter();
+};
+
+// 監聽滾動 → 更新計數器 + 換圖時重置縮放
+window.addEventListener('scroll', () => {
+const scrollY = window.scrollY + window.innerHeight * 0.5; // 螢幕中間位置
+  const items = document.querySelectorAll('.item');
+  let closestIndex = 0;
+  let minDistance = Infinity;
+
+  items.forEach((item, i) => {
+    const rect = item.getBoundingClientRect();
+    const distance = Math.abs(rect.top + rect.height/2 - window.innerHeight/2);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestIndex = i;
+    }
+  });
+
+  if (closestIndex !== currentIndex) {
+    currentIndex = closestIndex;
+    // 強制重置這張圖的縮放
+    const img = items[currentIndex].querySelector('img');
+    img.style.transform = 'translate(0,0) scale(1)';
+    counter.textContent = `${currentIndex + 1} / ${images.length}`;
+  }
+}, {passive:true});
+
+// 點螢幕中間顯示/隱藏計數器
+gallery.addEventListener('click', e => {
+  const cx = innerWidth/2, cy = innerHeight/2;
+  if (Math.abs(e.clientX - cx)<120 && Math.abs(e.clientY - cy)<120) {
+    counter.style.opacity = counter.style.opacity==='0' ? '1' : '0';
+    counter.style.opacity = '0';
+  }
+});
+
+// 鍵盤支援（電腦用）
+document.addEventListener('keydown', e=>{
+  if(['ArrowDown','ArrowRight',' '].includes(e.key)) {e.preventDefault(); window.scrollBy(0, window.innerHeight);}
+  if(['ArrowUp','ArrowLeft'].includes(e.key)) {e.preventDefault(); window.scrollBy(0, -window.innerHeight);}
+});
+
+function updateCounter() {
+  counter.textContent = `${currentIndex+1} / ${images.length}`;
+  counter.style.opacity = '0';
+}
+</script>
+</body>
+</html>
