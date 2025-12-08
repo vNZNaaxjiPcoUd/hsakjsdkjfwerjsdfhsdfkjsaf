@@ -6,100 +6,38 @@ layout: empty
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5">
-<title>Bible Story</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>雙擊全螢幕圖片瀏覽器</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body, html {
-    height: 100%;
-    background: #000;
-    overflow: hidden;
-    touch-action: manipulation; /* 讓水平滑動不被瀏覽器吃掉 */
+  *{margin:0;padding:0;box-sizing:border-box}
+  body,html{height:100%;background:#000;overflow:hidden}
+  #viewer{
+    width:100vw;height:100vh;position:relative;
+    touch-action:none; /* 讓所有觸控都給我們處理 */
   }
-  #viewer {
-    width: 100vw;
-    height: 100vh;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-   overflow: auto; /* 縮放後允許拖動 */
+  #photo{
+    width:100%;height:100%;
+    object-fit:contain;     /* 整張圖可見，支援縮放不裁切 */
+    user-select:none;
+    touch-action:pinch-zoom; /* 只允許雙指縮放 */
+    transition:opacity .4s;
   }
-  #photo {
-    /* 關鍵：讓圖片永遠填滿整個螢幕 */
-    width: 100vw;
-    height: 100vh;
-    /* object-fit: cover;     /* 填滿螢幕，會裁切邊緣 */
-    /* 如果你想要「完整顯示整張圖，不裁切」，改成 contain + 背景黑 */
-    object-fit: contain; 
-    background: #000;
-    transition: opacity 0.2s ease;
-    user-select: none;
-    -webkit-touch-callout: none;
-   touch-action: pinch-zoom; /* 允許雙指縮放 */
-  }
-  .nav-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background: rgba(0,0,0,0.4);
-    color: white;
-    border: none;
-    width: 70px;
-    height: 100px;
-    font-size: 50px;
-    cursor: pointer;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 10;
-    border-radius: 8px;
-   display: none;
-  }
-  #viewer:hover .nav-btn,
-  .nav-btn:active { opacity: 0.7; }
-  #prev { left: 10px; }
-  #next { right: 10px; }
-
-  #counter {
-    position: absolute;
-    bottom: 30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.6);
-    color: white;
-    padding: 8px 20px;
-    border-radius: 30px;
-    font-size: 16px;
-    z-index: 5;
-   pointer-events: none; /* 避免點擊干擾 */
-  }
-  #fullscreen-btn {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background: rgba(0,0,0,0.5);
-    color: white;
-    border: none;
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    font-size: 24px;
-    cursor: pointer;
-    z-index: 100;
+  #counter{
+    position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.6);color:#fff;padding:8px 20px;border-radius:30px;
+    font-size:16px;z-index:10;pointer-events:none;
   }
 </style>
 </head>
 <body>
 
-
- <div id="viewer">
-  <img id="photo" src="" alt="圖片">
+<div id="viewer">
+  <img id="photo" src="" alt="">
   <div id="counter"></div>
-  <button id="fullscreen-btn" aria-label="全螢幕">Full Screen</button>
 </div>
- 
+
 <script>
-// ==== 請在這裡放入你的圖片網址（支援本地或遠端）====
+// 你的圖片清單
 const images = [
  "/pic/np0p1.png",
  "/pic/np0p2.gif",
@@ -125,82 +63,60 @@ const images = [
  "/pic/np2p7.jpg",
  "/pic/np2p8.jpg",
 ];
-// =====================================================
-
-let index = 0;
+let idx = 0;
 const img = document.getElementById('photo');
 const counter = document.getElementById('counter');
 const viewer = document.getElementById('viewer');
-const fsBtn = document.getElementById('fullscreen-btn');
- 
-function load(n) {
-  index = (n + images.length) % images.length;
+
+// 載入圖片 + 換圖時重置縮放
+function load(n){
+  idx = (n + images.length) % images.length;
   img.style.opacity = 0;
-  // 換圖時強制重置縮放與位置
-  img.style.transform = 'translate(0,0) scale(1)';
-  img.src = images[index];
-  img.onload = () => img.style.opacity = 1;
-  counter.textContent = `${index + 1} / ${images.length}`;
-  updateFsIcon();
+  img.style.transform = 'translate(0,0) scale(1)'; // 重置位置與縮放
+  img.src = images[idx];
+  img.onload = ()=> img.style.opacity = 1;
+  counter.textContent = `${idx+1} / ${images.length}`;
 }
-function next() { load(index + 1); }
-function prev() { load(index - 1); }
+function next(){ load(idx+1); }
+function prev(){ load(idx-1); }
 
-// 全螢幕切換
-function toggleFullscreen() {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.() ||
-    document.documentElement.webkitRequestFullscreen?.();
+// ────── 雙擊 = 全螢幕（手機電腦都完美） ──────
+let lastTap = 0;
+viewer.addEventListener('click', e => {
+  const now = Date.now();
+  if (now - lastTap < 400) {               // 400ms 內點兩下 = 雙擊
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else {
+      viewer.requestFullscreen?.() || viewer.webkitRequestFullscreen?.();
+    }
   } else {
-    document.exitFullscreen?.() ||
-    document.webkitExitFullscreen?.();
+    // 單點：左右半邊換圖
+    const rect = img.getBoundingClientRect();
+    e.clientX - rect.left < rect.width/2 ? prev() : next();
   }
-}
-fsBtn.onclick = toggleFullscreen;
-
-// 按鈕圖示隨狀態變化
-function updateFsIcon() {
-  fsBtn.textContent = document.fullscreenElement ? 'Exit Full Screen' : 'Full Screen';
-}
-document.addEventListener('fullscreenchange', updateFsIcon);
-document.addEventListener('webkitfullscreenchange', updateFsIcon);
-
-// 鍵盤
-document.addEventListener('keydown', e => {
-  if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); next(); }
-  if (['ArrowLeft','ArrowUp'].includes(e.key)) { e.preventDefault(); prev(); }
-  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
+  lastTap = now;
 });
 
-// 點擊左右半邊
-img.onclick = e => {
-  const rect = img.getBoundingClientRect();
-  e.clientX - rect.left < rect.width/2 ? prev() : next();
-};
-
-// 手機滑動換圖（避免跟縮放衝突）
-let touchStartX = 0, touchStartY = 0;
-viewer.addEventListener('touchstart', e => {
-  touchStartX = e.touches[0].clientX;
-  touchStartY = e.touches[0].clientY;
+// ────── 手機左右滑動換圖（避免跟縮放衝突）──────
+let sx = 0;
+viewer.addEventListener('touchstart', e=> sx = e.touches[0].clientX, {passive:true});
+viewer.addEventListener('touchend', e=> {
+  if(!sx) return;
+  const ex = e.changedTouches[0].clientX;
+  const diff = sx - ex;
+  if(Math.abs(diff)>60){ diff>0 ? next() : prev(); }
+  sx = 0;
 }, {passive:true});
 
-viewer.addEventListener('touchend', e => {
-  if (!touchStartX) return;
-  const x = e.changedTouches[0].clientX;
-  const y = e.changedTouches[0].clientY;
-  const diffX = touchStartX - x;
-  const diffY = Math.abs(touchStartY - y);
-
-  if (Math.abs(diffX) > 60 && diffY < 80) {  // 水平滑動足夠大，垂直位移小
-    diffX > 0 ? next() : prev();
-  }
-  touchStartX = 0;
-}, {passive:true});
+// ────── 鍵盤 ──────
+document.addEventListener('keydown', e=>{
+  if(['ArrowRight','ArrowDown',' '].includes(e.key)) {e.preventDefault(); next();}
+  if(['ArrowLeft','ArrowUp'].includes(e.key)) {e.preventDefault(); prev();}
+});
 
 // 啟動
 load(0);
 </script>
 </body>
 </html>
-
