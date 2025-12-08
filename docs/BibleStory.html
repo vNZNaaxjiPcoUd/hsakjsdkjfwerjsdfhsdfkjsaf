@@ -6,7 +6,7 @@ layout: empty
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5">
 <title>Bible Story</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; }
@@ -14,7 +14,7 @@ layout: empty
     height: 100%;
     background: #000;
     overflow: hidden;
-    touch-action: pan-y; /* 讓水平滑動不被瀏覽器吃掉 */
+    touch-action: manipulation; /* 讓水平滑動不被瀏覽器吃掉 */
   }
   #viewer {
     width: 100vw;
@@ -23,6 +23,7 @@ layout: empty
     display: flex;
     align-items: center;
     justify-content: center;
+   overflow: auto; /* 縮放後允許拖動 */
   }
   #photo {
     /* 關鍵：讓圖片永遠填滿整個螢幕 */
@@ -32,9 +33,10 @@ layout: empty
     /* 如果你想要「完整顯示整張圖，不裁切」，改成 contain + 背景黑 */
     object-fit: contain; 
     background: #000;
-    transition: opacity 0.4s ease;
+    transition: opacity 0.2s ease;
     user-select: none;
     -webkit-touch-callout: none;
+   touch-action: pinch-zoom; /* 允許雙指縮放 */
   }
   .nav-btn {
     position: absolute;
@@ -51,6 +53,7 @@ layout: empty
     transition: opacity 0.3s;
     z-index: 10;
     border-radius: 8px;
+   display: none;
   }
   #viewer:hover .nav-btn,
   .nav-btn:active { opacity: 0.7; }
@@ -68,6 +71,7 @@ layout: empty
     border-radius: 30px;
     font-size: 16px;
     z-index: 5;
+   pointer-events: none; /* 避免點擊干擾 */
   }
 </style>
 </head>
@@ -116,7 +120,10 @@ function show(n) {
   current = (n + images.length) % images.length;
   img.style.opacity = 0;
   img.src = images[current];
-  img.onload = () => img.style.opacity = 1;
+  img.onload = () => {
+    img.style.opacity = 1;
+    img.style.transform = 'scale(1)'; // 重置縮放
+  };
   counter.textContent = `${current + 1} / ${images.length}`;
 }
 function next() { show(current + 1); }
