@@ -174,3 +174,401 @@ body { background-color: #ffffff; color: #222222; }  /* 確保覆蓋後面的重
     img, table { box-shadow: none; }
     a { color: #0000ee !important; }
 }
+
+
+/* 響應式設計 */
+@media (max-width: 4096px) { .msg::before { content: "4096"; } }
+@media (max-width: 3120px) { .msg::before { content: "3120"; } }
+@media (max-width: 2200px) { .msg::before { content: "2200"; } }
+@media (max-width: 1920px) { .msg::before { content: "1920"; } }
+@media (max-width: 1440px) { .msg::before { content: "1440"; } }
+@media (max-width: 1024px) { .msg::before { content: "1024"; } }
+@media (max-width: 768px)  { .msg::before { content: "768"; } }
+@media (max-width: 480px)  { .msg::before { content: "480"; } }
+
+
+body {
+	font-size: 26px;
+	padding: 35px 2px;
+	width: 90%;
+	margin: 0 auto;  /* center */
+}
+
+.hugeS {
+	display: block;  /* 預設顯示，獨占空間 */
+}
+	
+.largeS {
+	display: none;  /* 預設顯示，獨占空間 */
+}
+
+.mediumS {
+	display: none;  
+}
+
+.smallS {
+	display: none;  
+}
+		
+
+@media (max-width: 4096px) {
+    body {
+        font-size: 24px;
+        padding: 35px 18px;
+    }
+    h1 {
+        font-size: 2.3rem;
+    }
+    h2 {
+        font-size: 1.7rem;
+    }
+    h3 {
+        font-size: 1.3rem; /* 縮小h3 */
+    }
+    h4 {
+        font-size: 1.1rem; /* 縮小h4 */
+    }
+    img {
+        width: 92%;
+    }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+
+}
+@media (max-width: 3120px) {
+    body {
+        font-size: 22px;
+        padding: 35px 18px;
+    }
+    h1 {
+        font-size: 2.3rem;
+    }
+    h2 {
+        font-size: 1.7rem;
+    }
+    h3 {
+        font-size: 1.3rem; /* 縮小h3 */
+    }
+    h4 {
+        font-size: 1.1rem; /* 縮小h4 */
+    }
+    img {
+        width: 92%;
+    }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+}
+@media (max-width: 2200px) {
+    body {
+        font-size: 20px;
+        padding: 35px 18px;
+    }
+    h1 {
+        font-size: 2.3rem;
+    }
+    h2 {
+        font-size: 1.7rem;
+    }
+    h3 {
+        font-size: 1.3rem; /* 縮小h3 */
+    }
+    h4 {
+        font-size: 1.1rem; /* 縮小h4 */
+    }
+    img {
+        width: 92%;
+    }
+	.hugeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+}
+	
+@media (max-width: 1920px) {
+    body {
+        font-size: 18px;
+        padding: 35px 18px;
+    }
+    h1 {
+        font-size: 2.3rem;
+    }
+    h2 {
+        font-size: 1.7rem;
+    }
+    h3 {
+        font-size: 1.3rem; /* 縮小h3 */
+    }
+    h4 {
+        font-size: 1.1rem; /* 縮小h4 */
+    }
+    img {
+        width: 92%;
+    }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: block;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+}
+
+@media (max-width: 1440px) {
+    body {
+        font-size: 16px;
+        padding: 30px 15px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    h3 {
+        font-size: 1.2rem;
+    }
+    h4 {
+        font-size: 1rem;
+    }
+    img {
+        width: 98%;
+    }
+    table {
+        font-size: 15px;
+        overflow-x: auto;
+        display: block;
+    }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: block;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+}
+	
+@media (max-width: 1024px) {
+    body {
+        font-size: 14px;
+        padding: 30px 15px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    h3 {
+        font-size: 1.2rem;
+    }
+    h4 {
+        font-size: 1rem;
+    }
+    img {
+        width: 98%;
+    }
+    table {
+        font-size: 13px;
+        overflow-x: auto;
+        display: block;
+    }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: block;  
+	}
+	
+	.smallS {
+		display: none;  
+	}
+}
+
+@media (max-width: 768px) {
+    body {
+        font-size: 12px;
+        padding: 20px 10px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 1.8rem;
+    }
+    h2 {
+        font-size: 1.4rem;
+    }
+    h3 {
+        font-size: 1.1rem;
+    }
+    h4 {
+        font-size: 0.9rem; /* 手機上更小 */
+    }
+    img {
+        width: 98%;
+        margin: 1.2em auto;
+        box-shadow: none;
+    }
+    table {
+        font-size: 11px;
+    }
+    ul, ol {
+        padding-left: 1.5em;
+    }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.mediumS {
+		display: none;  
+	}
+	
+	.smallS {
+		display: block;  
+	}
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 10px;
+        padding: 15px 8px;
+        width: 92%;
+    }
+    h1 {
+        font-size: 1.6rem;
+    }
+    h2 {
+        font-size: 1.3rem;
+    }
+    h3 {
+        font-size: 1rem;
+    }
+    h4 {
+        font-size: 0.85rem; /* 超小螢幕更小 */
+    }
+    img {
+        width: 100%;
+        margin: 1em auto;
+        border: none;
+    }
+    table {
+        font-size: 9px;
+    }
+    p {
+        margin: 0.8em 0;
+    }
+    footer {
+        font-size: 0.8rem;
+    }
+	.hugeS {
+		display: none;  /* 預設顯示，獨占空間 */
+	}
+	
+	.largeS {
+	    display: none; 
+	}
+	
+	.mediumS {
+	    display: none;  
+	}
+	
+	.smallS {
+	    display: block;  
+	}
+}
+
+@media print {
+    body { 
+        background-color: #ffffff;
+        box-shadow: none; 
+        width: 100%;
+        color: #000000;
+    }
+    img {
+        box-shadow: none;
+        border: 1px solid #000000;
+        width: 100%;
+    }
+    table { 
+        box-shadow: none; 
+    }
+    h1, h2, h3, h4, b, strong, i, em, b i, strong em { 
+        color: #000000 !important; /* 列印時統一黑字 */
+    }
+    h2, h3, h4 {
+        border-bottom: 1px solid #000000; /* 列印時黑底線 */
+    }
+    th {
+        background-color: #ffffff;
+        color: #000000;
+        border: 1px solid #000000;
+    }
+    tr:nth-child(even) {
+        background-color: #ffffff;
+    }
+    tr:hover {
+        background-color: #ffffff;
+    }
+}
