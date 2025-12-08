@@ -1,8 +1,5 @@
-OWL
-====
-
-
-🍀 
+**OWL** 
+==========
 [AES](https://aes.jwint.net/)
 [Calculate](https://cal.jwint.net/)
 [Calendar](https://calendar.jwint.net/)
@@ -57,4 +54,3 @@ OWL
 [Windy](https://windy.jwint.net/)
 [WuBai](https://500.jwint.net/)
 [Youtube](https://youtube.jwint.net/)
- 🍀
