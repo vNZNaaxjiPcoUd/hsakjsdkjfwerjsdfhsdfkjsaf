@@ -7,7 +7,7 @@ layout: empty
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>iPhone 圖片瀏覽器（雙指縮放優化）</title>
+<title>Bible Story</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body,html{height:100%;background:#000;overflow:hidden}
@@ -17,11 +17,11 @@ layout: empty
   }
   #photo{
     width:100vw;height:100vh; /* 固定 vw/vh 避免 Safari 計算錯誤 */
-    object-fit:cover; /* 填滿螢幕，支援縮放 */
+    object-fit:contain; /* 填滿螢幕，支援縮放 */
     object-position:center;
     user-select:none;
     touch-action:pinch-zoom pan-x pan-y; /* 允許雙指縮放 + 拖曳 */
-    transition:opacity .4s;
+    transition:opacity .1s;
   }
   #counter{
     position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
@@ -33,7 +33,7 @@ layout: empty
 <body>
 
 <div id="viewer">
-  <img id="photo" width="1920" height="1080" src="" alt=""> <!-- 加固定尺寸讓 Safari 正常 -->
+  <img id="photo" src="" alt=""> <!-- 加固定尺寸讓 Safari 正常 -->
   <div id="counter"></div>
 </div>
 
