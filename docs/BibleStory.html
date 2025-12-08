@@ -20,7 +20,7 @@ layout: empty
     object-fit:contain;     /* 整張圖可見，支援縮放不裁切 */
     user-select:none;
     touch-action:pinch-zoom; /* 只允許雙指縮放 */
-    transition:opacity .4s;
+    transition:opacity .1s;
   }
   #counter{
     position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
@@ -84,7 +84,7 @@ function prev(){ load(idx-1); }
 let lastTap = 0;
 viewer.addEventListener('click', e => {
   const now = Date.now();
-  if (now - lastTap < 400) {               // 400ms 內點兩下 = 雙擊
+  if (now - lastTap < 600) {               // 400ms 內點兩下 = 雙擊
     if (document.fullscreenElement) {
       document.exitFullscreen();
     } else {
