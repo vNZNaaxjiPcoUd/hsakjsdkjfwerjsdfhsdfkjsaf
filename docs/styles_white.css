@@ -170,14 +170,14 @@ footer {
 @media (max-width: 768px) { body { font-size: 11px; } }
 @media (max-width: 480px) { body { font-size: 8px; } }
 
-@media (max-width: 4096px) { .msg::before { content: "4096"; } }
-@media (max-width: 3120px) { .msg::before { content: "3120"; } }
-@media (max-width: 2200px) { .msg::before { content: "2200"; } }
-@media (max-width: 1920px) { .msg::before { content: "1920"; } }
-@media (max-width: 1440px) { .msg::before { content: "1440"; } }
-@media (max-width: 1024px) { .msg::before { content: "1024"; } }
-@media (max-width: 768px)  { .msg::before { content: "768"; } }
-@media (max-width: 480px)  { .msg::before { content: "480"; } }
+@media (max-width: 4096px) { .msg::before { content: "h"; } }
+@media (max-width: 3120px) { .msg::before { content: "g"; } }
+@media (max-width: 2200px) { .msg::before { content: "f"; } }
+@media (max-width: 1920px) { .msg::before { content: "e"; } }
+@media (max-width: 1440px) { .msg::before { content: "d"; } }
+@media (max-width: 1024px) { .msg::before { content: "c"; } }
+@media (max-width: 768px)  { .msg::before { content: "b"; } }
+@media (max-width: 480px)  { .msg::before { content: "a"; } }
 
 /* 所有響應式 media query 中的 body 背景保持白色即可，文字顏色已在上方全局設定 */
 body { background-color: #ffffff; color: #222222; }  /* 確保覆蓋後面的重複宣告 */
