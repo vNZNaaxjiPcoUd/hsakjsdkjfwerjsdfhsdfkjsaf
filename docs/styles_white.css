@@ -161,20 +161,6 @@ footer {
     font-size: 0.9rem;
 }
 
-/* 所有響應式 media query 中的 body 背景保持白色即可，文字顏色已在上方全局設定 */
-body { background-color: #ffffff; color: #222222; }  /* 確保覆蓋後面的重複宣告 */
-
-/* 列印時保持白底黑字（你原本就寫得很好，稍微優化一下） */
-@media print {
-    body {
-        background: white;
-        color: black;
-        box-shadow: none;
-    }
-    img, table { box-shadow: none; }
-    a { color: #0000ee !important; }
-}
-
 
 /* 響應式設計 */
 @media (max-width: 4096px) { .msg::before { content: "4096"; } }
@@ -571,4 +557,19 @@ body {
     tr:hover {
         background-color: #ffffff;
     }
+}
+
+
+/* 所有響應式 media query 中的 body 背景保持白色即可，文字顏色已在上方全局設定 */
+body { background-color: #ffffff; color: #222222; }  /* 確保覆蓋後面的重複宣告 */
+
+/* 列印時保持白底黑字（你原本就寫得很好，稍微優化一下） */
+@media print {
+    body {
+        background: white;
+        color: black;
+        box-shadow: none;
+    }
+    img, table { box-shadow: none; }
+    a { color: #0000ee !important; }
 }
