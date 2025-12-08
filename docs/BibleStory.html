@@ -9,13 +9,13 @@ layout: empty
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
 <title>Bible Story</title>
 <style>
-  *{margin:0;padding:0;box-sizing:border-box}
+  *{margin:1px;padding:1px}
   body,html{background:#000;overflow:hidden}
   #viewer{
-    width:100vw;height:100vh;position:relative;
+    position:relative;
   }
   #photo{
-    width:100vw;height:100vh; /* 固定 vw/vh 避免 Safari 計算錯誤 */
+    width:99vw;
     object-fit:contain; /* 填滿螢幕，支援縮放 */
     object-position:center;
     user-select:none;
@@ -23,9 +23,9 @@ layout: empty
     transition:opacity .1s;
   }
   #counter{
-    position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
-    background:rgba(0,0,0,.6);color:#fff;padding:8px 20px;border-radius:30px;
-    font-size:16px;z-index:10;pointer-events:none;
+    position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+    background:rgba(0,0,0,.2);color:#fff;padding:2px 4px;border-radius:10px;
+    font-size:8px;z-index:10;pointer-events:none;
   }
 </style>
 </head>
