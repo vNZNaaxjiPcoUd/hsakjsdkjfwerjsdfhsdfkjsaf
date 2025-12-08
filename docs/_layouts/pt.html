@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+	<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
+	
+	<meta name="description" content="secure notepad. ">
+	<meta name="author" content="OWL>
+
+    <!-- No caching -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <!-- Mobile Specific Metas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="./static/skeleton.css">
+    <link rel="stylesheet" href="./static/base.css">
+    <link rel="stylesheet" href="./static/layout.css">
+    <link rel="stylesheet" href="./static/jquery-ui-1.10.3.custom.css">
+    <!-- Favicons -->
+    <link rel="shortcut icon" href="./static/favicon.ico">
+    <link rel="apple-touch-icon" href="./static/logo.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="./static/logo.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="./static/logo.png">
+    <!-- JS -->
+    <script type="text/javascript" src="./static/jquery-2.0.3.min.js"></script>
+    <script type="text/javascript" src="./static/jquery-ui-1.10.3.custom.min.js"></script> 
+    <script type="text/javascript" src="./static/sha512.js"></script>
+    <script type="text/javascript" src="./static/aes.js"></script>
+    <script type="text/javascript" src="./static/main.js"></script>
+    
+</head>
+<body style="overflow: hidden;">
+    <div class="" id="wholesite">
+        <div id="main-content-outter" style="overflow: hidden; height: 580px;">
+            <div class="container">
+                <div class="sixteen columns">
+                    <div id="tabs" class="ui-tabs ui-widget ui-widget-content ui-corner-all">
+                        <ul class="ui-tabs-nav ui-helper-reset ui-helper-clearfix ui-widget-header ui-corner-all ui-sortable" role="tablist">
+                            <button id="add_tab" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+                                <span class="ui-button-text">+</span>
+                            </button>
+                            <li class="ui-state-default ui-corner-top ui-tabs-active ui-state-active" role="tab" tabindex="0" aria-controls="tabs-1" aria-labelledby="ui-id-3" aria-selected="true">
+                                <a href="https://hello.com/tmp#tabs-1" class="ui-tabs-anchor" role="presentation" tabindex="-1" id="ui-id-3">hi</a> 
+                                <span class="ui-icon ui-icon-close" role="presentation" style="display: none;">Remove Tab</span>
+                            </li>
+                        </ul>                     
+                        <div id="tabs-1" aria-labelledby="ui-id-3" class="ui-tabs-panel ui-widget-content ui-corner-bottom" role="tabpanel" aria-expanded="true" aria-hidden="false" style="height: 544px;">
+                            <textarea rows="1" cols="1" class="textarea-contents" placeholder="your text goes here..."></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="outer-toast">
+        <div id="toast"></div>
+    </div>
+
+    <div id="loader" class="displaynone ui-widget-overlay">
+        <img src="./static/loader.gif" alt="loader-gif">
+    </div>
+
+    <div class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front no-close active-dialog ui-dialog-buttons ui-draggable" tabindex="-1" role="dialog" aria-describedby="dialog-password" style="height: auto; width: 300px; top: 137.5px; left: 447.5px; display: none;" aria-labelledby="ui-id-2">
+        <div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+            <span id="ui-id-2" class="ui-dialog-title">Password required</span>
+            <button class="ui-button ui-widget ui-state-default ui-corner-all ui-button-icon-only ui-dialog-titlebar-close" role="button" aria-disabled="false" title="close">
+                <span class="ui-button-icon-primary ui-icon ui-icon-closethick"></span>
+                <span class="ui-button-text">close</span>
+            </button>
+        </div>
+        <div id="dialog-password" class="displaynone ui-dialog-content ui-widget-content" style="display: block; width: auto; min-height: 21px; max-height: none; height: auto;">
+            <p class="comment">Hint </p>
+            <p class="additional-text remove-bottom">What ！</p>
+            <form onsubmit="return false">
+                <fieldset>
+                    <input type="password" name="enterpassword" id="enterpassword" value="" class="text ui-widget-content ui-corner-all">
+                </fieldset>
+            </form>
+        </div>
+        <div class="ui-dialog-buttonpane ui-widget-content ui-helper-clearfix">
+            <div class="ui-dialog-buttonset">
+                <button type="button" class="ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only" role="button" aria-disabled="false">
+                    <span class="ui-button-text">Open</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="text/javascript">
+        var state;
+        var createState = function() {
+            /* data from server is stored in 'state' object */
+            state = new ClientState(
+            "/{{ page.who }}",
+            "{{ page.say }}",
+            false,2,2);
+        }
+    </script>
+        
+</body>
+</html>
