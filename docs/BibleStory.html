@@ -7,20 +7,21 @@ layout: empty
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-<title>Bible Story</title>
+<title>iPhone 圖片瀏覽器（雙指縮放優化）</title>
 <style>
   *{margin:0;padding:0;box-sizing:border-box}
   body,html{height:100%;background:#000;overflow:hidden}
   #viewer{
     width:100vw;height:100vh;position:relative;
-    touch-action:none; /* 讓所有觸控都給我們處理 */
+    touch-action:none;
   }
   #photo{
-    width:100%;height:100%;
-    object-fit:contain;     /* 整張圖可見，支援縮放不裁切 */
+    width:100vw;height:100vh; /* 固定 vw/vh 避免 Safari 計算錯誤 */
+    object-fit:cover; /* 填滿螢幕，支援縮放 */
+    object-position:center;
     user-select:none;
-    touch-action:pinch-zoom; /* 只允許雙指縮放 */
-    transition:opacity .1s;
+    touch-action:pinch-zoom pan-x pan-y; /* 允許雙指縮放 + 拖曳 */
+    transition:opacity .4s;
   }
   #counter{
     position:absolute;bottom:30px;left:50%;transform:translateX(-50%);
@@ -32,7 +33,7 @@ layout: empty
 <body>
 
 <div id="viewer">
-  <img id="photo" src="" alt="">
+  <img id="photo" width="1920" height="1080" src="" alt=""> <!-- 加固定尺寸讓 Safari 正常 -->
   <div id="counter"></div>
 </div>
 
@@ -72,7 +73,7 @@ const viewer = document.getElementById('viewer');
 function load(n){
   idx = (n + images.length) % images.length;
   img.style.opacity = 0;
-  img.style.transform = 'translate(0,0) scale(1)'; // 重置位置與縮放
+  img.style.transform = 'translate(0,0) scale(1)'; // 重置
   img.src = images[idx];
   img.onload = ()=> img.style.opacity = 1;
   counter.textContent = `${idx+1} / ${images.length}`;
@@ -80,33 +81,40 @@ function load(n){
 function next(){ load(idx+1); }
 function prev(){ load(idx-1); }
 
-// ────── 雙擊 = 全螢幕（手機電腦都完美） ──────
-let lastTap = 0;
+// ────── 雙擊：快速左右換圖（iPhone 上無 Fullscreen，所以改成雙擊左右） ──────
+let lastTap = 0, tapX = 0;
 viewer.addEventListener('click', e => {
+  tapX = e.clientX || e.touches[0].clientX;
   const now = Date.now();
-  if (now - lastTap < 600) {               // 400ms 內點兩下 = 雙擊
-    if (document.fullscreenElement) {
-      document.exitFullscreen();
-    } else {
-      viewer.requestFullscreen?.() || viewer.webkitRequestFullscreen?.();
-    }
-  } else {
-    // 單點：左右半邊換圖
-    const rect = img.getBoundingClientRect();
-    e.clientX - rect.left < rect.width/2 ? prev() : next();
+  if (now - lastTap < 400) {  // 雙擊偵測
+    const rect = viewer.getBoundingClientRect();
+    (tapX - rect.left) < rect.width/2 ? prev() : next();
   }
   lastTap = now;
 });
 
-// ────── 手機左右滑動換圖（避免跟縮放衝突）──────
-let sx = 0;
-viewer.addEventListener('touchstart', e=> sx = e.touches[0].clientX, {passive:true});
+// ────── 單擊：左右半邊換圖 ──────
+img.addEventListener('click', e => {
+  const rect = img.getBoundingClientRect();
+  (e.clientX - rect.left) < rect.width/2 ? prev() : next();
+});
+
+// ────── 手機滑動換圖 ──────
+let sx = 0, sy = 0;
+viewer.addEventListener('touchstart', e=> {
+  sx = e.touches[0].clientX;
+  sy = e.touches[0].clientY;
+}, {passive:true});
 viewer.addEventListener('touchend', e=> {
   if(!sx) return;
   const ex = e.changedTouches[0].clientX;
-  const diff = sx - ex;
-  if(Math.abs(diff)>60){ diff>0 ? next() : prev(); }
-  sx = 0;
+  const ey = e.changedTouches[0].clientY;
+  const diffX = sx - ex;
+  const diffY = Math.abs(sy - ey);
+  if(Math.abs(diffX) > 50 && diffY < 100) {  // 水平滑動優先
+    diffX > 0 ? next() : prev();
+  }
+  sx = sy = 0;
 }, {passive:true});
 
 // ────── 鍵盤 ──────
