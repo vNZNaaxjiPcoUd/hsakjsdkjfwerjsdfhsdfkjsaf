@@ -73,17 +73,31 @@ layout: empty
     z-index: 5;
    pointer-events: none; /* 避免點擊干擾 */
   }
+  #fullscreen-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 100;
+  }
 </style>
 </head>
 <body>
 
-<div id="viewer">
-  <button id="prev" class="nav-btn" aria-label="上一張">‹</button>
- <img id="photo" src="" alt="圖片">
- <button id="next" class="nav-btn" aria-label="下一張">›</button>
- <div id="counter"></div>
-</div>
 
+ <div id="viewer">
+  <img id="photo" src="" alt="圖片">
+  <div id="counter"></div>
+  <button id="fullscreen-btn" aria-label="全螢幕">Full Screen</button>
+</div>
+ 
 <script>
 // ==== 請在這裡放入你的圖片網址（支援本地或遠端）====
 const images = [
@@ -112,58 +126,80 @@ const images = [
  "/pic/np2p8.jpg",
 ];
 // =====================================================
-let current = 0;
+
+let index = 0;
 const img = document.getElementById('photo');
 const counter = document.getElementById('counter');
-
-function show(n) {
-  current = (n + images.length) % images.length;
+const viewer = document.getElementById('viewer');
+const fsBtn = document.getElementById('fullscreen-btn');
+ 
+function load(n) {
+  index = (n + images.length) % images.length;
   img.style.opacity = 0;
-  img.src = images[current];
-  img.onload = () => {
-    img.style.opacity = 1;
-    img.style.transform = 'scale(1)'; // 重置縮放
-  };
-  counter.textContent = `${current + 1} / ${images.length}`;
+  // 換圖時強制重置縮放與位置
+  img.style.transform = 'translate(0,0) scale(1)';
+  img.src = images[index];
+  img.onload = () => img.style.opacity = 1;
+  counter.textContent = `${index + 1} / ${images.length}`;
+  updateFsIcon();
 }
-function next() { show(current + 1); }
-function prev() { show(current - 1); }
+function next() { load(index + 1); }
+function prev() { load(index - 1); }
 
-// 鍵盤（包含手機實體鍵盤）
+// 全螢幕切換
+function toggleFullscreen() {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.() ||
+    document.documentElement.webkitRequestFullscreen?.();
+  } else {
+    document.exitFullscreen?.() ||
+    document.webkitExitFullscreen?.();
+  }
+}
+fsBtn.onclick = toggleFullscreen;
+
+// 按鈕圖示隨狀態變化
+function updateFsIcon() {
+  fsBtn.textContent = document.fullscreenElement ? 'Exit Full Screen' : 'Full Screen';
+}
+document.addEventListener('fullscreenchange', updateFsIcon);
+document.addEventListener('webkitfullscreenchange', updateFsIcon);
+
+// 鍵盤
 document.addEventListener('keydown', e => {
   if (['ArrowRight','ArrowDown',' '].includes(e.key)) { e.preventDefault(); next(); }
   if (['ArrowLeft','ArrowUp'].includes(e.key)) { e.preventDefault(); prev(); }
+  if (e.key === 'f' || e.key === 'F') toggleFullscreen();
 });
 
-// 滑鼠點擊左右半邊（電腦＆手機點擊都支援）
-img.addEventListener('click', e => {
+// 點擊左右半邊
+img.onclick = e => {
   const rect = img.getBoundingClientRect();
-  const x = e.clientX - rect.left;
-  x < rect.width/2 ? prev() : next();
-});
+  e.clientX - rect.left < rect.width/2 ? prev() : next();
+};
 
-// 左右按鈕
-document.getElementById('prev').onclick = prev;
-document.getElementById('next').onclick = next;
-
-// 手機滑動（最重要）
-let startX = 0;
-document.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
+// 手機滑動換圖（避免跟縮放衝突）
+let touchStartX = 0, touchStartY = 0;
+viewer.addEventListener('touchstart', e => {
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
 }, {passive:true});
 
-document.addEventListener('touchend', e => {
-  if (!startX) return;
-  const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
-  if (Math.abs(diff) > 50) { // 滑動距離 > 50px 才觸發
-    diff > 0 ? next() : prev();
+viewer.addEventListener('touchend', e => {
+  if (!touchStartX) return;
+  const x = e.changedTouches[0].clientX;
+  const y = e.changedTouches[0].clientY;
+  const diffX = touchStartX - x;
+  const diffY = Math.abs(touchStartY - y);
+
+  if (Math.abs(diffX) > 60 && diffY < 80) {  // 水平滑動足夠大，垂直位移小
+    diffX > 0 ? next() : prev();
   }
-  startX = 0;
+  touchStartX = 0;
 }, {passive:true});
 
-// 啟動第一張
-show(0);
+// 啟動
+load(0);
 </script>
 </body>
 </html>
