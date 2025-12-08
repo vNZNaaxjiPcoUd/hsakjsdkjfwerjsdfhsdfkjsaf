@@ -36,8 +36,8 @@
     overflow:hidden;
   }
   .item img{
-    width:100vw;
-    height:100vh;
+    width:96vw;
+    //height:100vh;
     object-fit:contain;           /* 整張圖都看得到 */
     /* object-fit:cover; */           /* 想要填滿就改這行 */
     user-select:none;
@@ -113,6 +113,7 @@ images.forEach((src, i) => {
   gallery.appendChild(div);
 });
 
+/*
 // 開始按鈕
 document.getElementById('enter').onclick = () => {
   document.getElementById('welcome').style.display = 'none';
@@ -122,6 +123,7 @@ document.getElementById('enter').onclick = () => {
   setTimeout(() => window.scrollTo(0,0), 100);
   updateCounter();
 };
+*/
 
 // 監聽滾動 → 更新計數器 + 換圖時重置縮放
 window.addEventListener('scroll', () => {
@@ -167,6 +169,15 @@ function updateCounter() {
   counter.textContent = `${currentIndex+1} / ${images.length}`;
   counter.style.opacity = '0';
 }
+
+//直接開始
+document.getElementById('welcome').style.display = 'none';
+gallery.style.display = 'block';
+// 關鍵：讓 Safari 隱藏工具列
+window.scrollTo(0,1);
+setTimeout(() => window.scrollTo(0,0), 100);
+updateCounter();
+
 </script>
 </body>
 </html>
