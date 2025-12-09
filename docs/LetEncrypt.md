@@ -12,17 +12,24 @@ https://certbot.eff.org/
 https://certbot.eff.org/instructions?ws=nginx&os=osx
 
 0. Install Brew
+
    ```/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"```
-1. Install certbot
+2. Install certbot
+
    ```brew install certbot```
-2. Turn off nginx
+4. Turn off nginx
+
    ```brew services stop nginx```
-3. Open 80 port from world to pc
-4. Setup domainName to external IP
-5. Run certbot
+6. Open 80 port from world to pc
+7. Setup domainName to external IP
+8. Run certbot
+
    ```sudo certbot certonly --standalone```
-6. Run nginx
-   ```brew services start nginx```
-7. Check SSL connect.
+10. Run nginx
+
+    ```brew services start nginx```
+11. Opne port 443 from world to pc, can close port 80.
+12. Setup nginx to serve SSH with cert,key
+13. Check SSL connect.
    - ```https://externalIP/```
-   - Show nginx home page
+   - See nginx home page
