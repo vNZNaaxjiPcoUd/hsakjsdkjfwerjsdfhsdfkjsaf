@@ -131,5 +131,126 @@ sudo nginx -s reload           # 重新載入設定（不中斷服務）
 nginx -t                       # 檢查設定檔語法有沒有錯
 ```
 
-這樣就完成 macOS 上安裝 Nginx + 放網頁的最簡單流程了！  
-有需要再加 HTTPS (Let’s Encrypt)、PHP、反向代理等再跟我說～
+### nginx config example
+```
+
+#user  nobody;
+worker_processes  1;
+
+#error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+    #                  '$status $body_bytes_sent "$http_referer" '
+    #                  '"$http_user_agent" "$http_x_forwarded_for"';
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    #keepalive_timeout  0;
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    server {
+        listen       0.0.0.0:80;
+
+        #charset koi8-r;
+
+        #access_log  logs/host.access.log  main;
+
+        location / {
+            root   html;
+            index  index.html index.htm;
+        }
+
+        #error_page  404              /404.html;
+
+        # redirect server error pages to the static page /50x.html
+        #
+        error_page   500 502 503 504  /50x.html;
+        location = /50x.html {
+            root   html;
+        }
+
+        # proxy the PHP scripts to Apache listening on 127.0.0.1:80
+        #
+        #location ~ \.php$ {
+
+
+        # pass the PHP scripts to FastCGI server listening on 127.0.0.1:9000
+        #
+        #location ~ \.php$ {
+        #    root           html;
+        #    fastcgi_pass   127.0.0.1:9000;
+        #    fastcgi_index  index.php;
+        #    fastcgi_param  SCRIPT_FILENAME  /scripts$fastcgi_script_name;
+        #    include        fastcgi_params;
+        #}
+
+        # deny access to .htaccess files, if Apache's document root
+        # concurs with nginx's one
+        #
+        #location ~ /\.ht {
+        #    deny  all;
+        #}
+    }
+
+
+    # another virtual host using mix of IP-, name-, and port-based configuration
+    #
+    #server {
+    #    listen       8000;
+    #    listen       somename:8080;
+    #    server_name  somename  alias  another.alias;
+
+    #    location / {
+    #        root   html;
+    #        index  index.html index.htm;
+    #    }
+    #}
+
+
+    # HTTPS server
+    #
+    server {
+	listen       0.0.0.0:443 ssl;           # 正確，監聽所有介面的 443
+    	server_name  sm.jwint.net;              # 你的域名
+
+    
+    	ssl_certificate      /opt/homebrew/etc/nginx/sm.jwint.net/cert.pem;
+    	ssl_certificate_key  /opt/homebrew/etc/nginx/sm.jwint.net/privkey.pem;
+
+    	# 可選：更安全的 cipher（2025 年推薦）
+    	ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
+    	ssl_prefer_server_ciphers off;          # 現代瀏覽器建議關掉，改用協議協商
+    	ssl_session_cache    shared:SSL:10m;
+    	ssl_session_timeout  10m;
+
+    	# 網站根目錄（Homebrew 預設）
+    	root /opt/homebrew/var/www;             # 或者你想放的路徑，例如 ~/Sites/sm.jwint.net
+    	index index.html index.htm;
+
+    	location / {
+        	try_files $uri $uri/ =404;
+    	}
+    }
+    include servers/*;
+}
+```
+
