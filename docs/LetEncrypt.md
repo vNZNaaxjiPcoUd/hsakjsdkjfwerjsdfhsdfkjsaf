@@ -25,11 +25,11 @@ https://certbot.eff.org/instructions?ws=nginx&os=osx
 8. Run certbot
 
    ```sudo certbot certonly --standalone```
+11. Opne port 443 from world to pc, can close port 80.
+12. Setup nginx to serve SSH with cert,key
 10. Run nginx
 
     ```brew services start nginx```
-11. Opne port 443 from world to pc, can close port 80.
-12. Setup nginx to serve SSH with cert,key
 13. Check SSL connect.
       - ```https://externalIP/```
       - See nginx home page
