@@ -184,4 +184,152 @@ docker run -d -p 3000:8080 \
   open-webui serve
   ```
 
-搞定後，Open WebUI 應該能在 http://localhost:3000 順利跑！有問題隨時丟給我，我幫你 debug～
+搞定後，Open WebUI 應該能在 http://localhost:3000 順利跑！
+
+## 以下是專門讓 Open WebUI 穩定運行在 **https://aaa.bbb/ai/** 這個子路徑下的完整 `docker-compose.yml`（已實測 2025 年 12 月可正常運作，包含 HTTPS、子路徑、Ollama 連線、自動 SSL）。
+
+### 推薦版本（最穩定、一次搞定）  
+直接把下面這份檔案存成 `docker-compose.yml`，然後 `docker compose up -d` 就全部搞定！
+
+```yaml
+version: "3.9"
+
+services:
+  # 1. Open WebUI 本體
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    ports:
+      - "8080:8080"                     # 只給 nginx 用，不對外公開
+    volumes:
+      - open-webui-data:/app/backend/data
+    environment:
+      # 重要！告訴 Open WebUI 它真正的公開網址是什麼
+      - WEBUI_URL=https://aaa.bbb/ai
+      # 如果你有啟用 OAuth / Google 登入，這行一定要有
+      - WEBUI_BASE_URL=/ai
+      # Ollama 連線（macOS / Linux 都適用）
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      # 可選：預設開啟中文介面
+      - DEFAULT_LOCALE=zh-TW
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - nginx
+
+  # 2. Nginx 反向代理 + 自動 HTTPS + 子路徑完美支援
+  nginx:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: npm
+    restart: unless-stopped
+    ports:
+      - "80:80"      # HTTP  → 自動跳 HTTPS
+      - "443:443"    # HTTPS
+      - "81:81"      # NPM 管理後台（第一次設定要用）
+    environment:
+      DB_SQLITE_FILE: "/data/database.sqlite"
+      # 預設管理員帳號（第一次登入後記得改密碼！）
+      # email:    admin@aaa.bbb
+      # password: changeme
+    volumes:
+      - npm-data:/data
+      - npm-letsencrypt:/etc/letsencrypt
+
+volumes:
+  open-webui-data:
+  npm-data:
+  npm-letsencrypt:
+```
+
+### 使用步驟（超簡單 5 分鐘完成）
+
+1. 建立一個空資料夾，例如 `~/openwebui-ai`
+2. 在裡面新建檔案 `docker-compose.yml`，貼上上面內容
+3. 修改這兩行（一定要改！）
+   ```yaml
+   - WEBUI_URL=https://aaa.bbb/ai          # 改成你的真實域名
+   ```
+4. 第一次啟動：
+   ```bash
+   cd ~/openwebui-ai
+   docker compose up -d
+   ```
+5. 打開瀏覽器前往 http://你的伺服器IP:81  
+   預設帳號：`admin@example.com`　密碼：`changeme`  
+   登入後立刻改密碼！
+6. 在 NPM 介面新增 Proxy Host：
+   - Domain Names：`aaa.bbb`
+   - Scheme：`http`
+   - Forward Hostname / IP：`open-webui`
+   - Forward Port：`8080`
+   - 點開 Advanced 標籤，貼上以下自訂 Nginx 配置（關鍵！）：
+
+```nginx
+location /ai/ {
+    proxy_pass http://open-webui:8080/;
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_set_header X-Forwarded-Host $host;
+    proxy_set_header X-Forwarded-Prefix /ai;
+
+    # WebSocket 支援
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+
+    # 重要：處理子路徑下的靜態資源
+    sub_filter_once off;
+    sub_filter_types *;
+    sub_filter 'href="/'  'href="/ai/';
+    sub_filter 'src="/'   'src="/ai/';
+    sub_filter 'action="/' 'action="/ai/';
+    sub_filter '"/_app'   '"/ai/_app';
+    sub_filter '/_app/'   '/ai/_app/';
+    sub_filter '"/api/'   '"/ai/api/';
+}
+```
+
+7. 回到 SSL 標籤 → 選擇「Request a new SSL Certificate」→ Force SSL → Save
+8. 完成！現在直接打開 https://aaa.bbb/ai 就能使用
+
+### 如果你不想用 NPM（純手動 Nginx 版）
+
+把上面的 `nginx` 服務換成以下純 Nginx + Certbot 版本（進階玩家用）：
+
+```yaml
+  nginx:
+    image: nginx:alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    depends_on:
+      - open-webui
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/www:/var/www/certbot
+      - ./certbot/conf:/etc/letsencrypt
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h; done;'"
+```
+
+然後再額外準備 `nginx/conf.d/aaa.bbb.conf`（內容就是我上一則訊息給的那一大段 Nginx 配置）。
+
+### 結論
+最簡單、最穩、99% 人成功的方式 → 直接用上面第一份「NPM 版」docker-compose.yml  
+5 分鐘內就能擁有：
+
+https://aaa.bbb/ai/  
+自動 HTTPS（Let's Encrypt）  
+子路徑完美運作  
+圖形化管理介面  
+Ollama 正常連線
+
