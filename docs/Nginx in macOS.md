@@ -254,3 +254,96 @@ http {
 }
 ```
 
+
+
+
+## 讓 Nginx 同時滿足下面兩個需求：
+
+1. `https://a.b.c.d/`（所有路徑） → 反向代理到 `http://IPa:3343/`
+2. `https://e.f.g.h/`（所有路徑） → 反向代理到 `http://IPb:888/`
+
+而且這兩個都是 HTTPS 終止在 Nginx，後端都是 HTTP。
+
+最乾淨、最常用的做法就是寫兩個獨立的 `server {}` 區塊（根據不同的域名/IP 做分發）：
+
+```nginx
+# ================== 第一個站點：a.b.c.d ==================
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name a.b.c.d;       # 可以是域名或直接寫 IP
+
+    # SSL 證書（如果 a.b.c.d 和 e.f.g.h 用不同證書，就分開寫）
+    ssl_certificate     /path/to/a.b.c.d_fullchain.pem;
+    ssl_certificate_key /path/to/a.b.c.d_privkey.pem;
+
+    # SSL 安全設定（可共用）
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL:10m;
+
+    # 把全部請求轉到 IPa:3343
+    location / {
+        proxy_pass http://IPa:3343;           # 注意這裡不要加斜線！
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port  $server_port;
+    }
+}
+
+# ================== 第二個站點：e.f.g.h ==================
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    server_name e.f.g.h;       # 可以是域名或直接寫 IP
+
+    # SSL 證書（如果跟上面不同就寫不同的路徑）
+    ssl_certificate     /path/to/e.f.g.h_fullchain.pem;
+    ssl_certificate_key /path/to/e.f.g.h_privkey.pem;
+
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ssl_session_cache   shared:SSL:10m;
+
+    # 把全部請求轉到 IPb:888
+    location / {
+        proxy_pass http://IPb:888;            # 同樣不要加結尾斜線
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Port  $server_port;
+    }
+}
+
+# ================== 可選：把兩個站點的 80 端口都強制跳 HTTPS ==================
+server {
+    listen 80;
+    listen [::]:80;
+    server_name a.b.c.d e.f.g.h;
+    return 301 https://$host$request_uri;
+}
+```
+
+### 如果你懶得管兩份證書（兩個域名都用同一張萬用證書或同一張多域名證書）
+可以把證書路徑寫一樣，甚至合併成一個 server 塊用 `server_name a.b.c.d e.f.g.h;` 再用 `if` 或 `map` 判斷，但上面這種「兩個 server 塊」的方式最清楚、最不容易出錯，強烈建議這樣寫。
+
+### 最終步驟
+```bash
+# 把 IPa、IPb 和證書路徑改成你自己的
+sudo nginx -t                     # 檢查語法
+sudo systemctl reload nginx       # 重載設定
+```
+
+這樣就同時搞定：
+
+- https://a.b.c.d/anything  →  http://IPa:3343/anything
+- https://e.f.g.h/anything  →  http://IPb:888/anything
+
+完美！
