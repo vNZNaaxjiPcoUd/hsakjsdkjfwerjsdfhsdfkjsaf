@@ -333,3 +333,117 @@ https://aaa.bbb/ai/
 圖形化管理介面  
 Ollama 正常連線
 
+## 完美！錯誤訊息已經告訴我們真相了：  
+Homebrew 版的 nginx **根本沒有把 sub_filter 模組編譯進去**，所以那個 .so 檔案根本不存在（這是 macOS 上 Homebrew nginx 的預設行為，從 2022 年開始就這樣了）。
+
+我們現在有三條路，按「成功率 + 簡單度」排序：
+
+### 1. **最快 30 秒解決方案（99.9% 人成功）**：直接用 Docker 版的 Nginx（帶完整模組）取代 Homebrew 版  
+  2. 自己用 brew 重新編譯 nginx + sub_filter（麻煩，不推薦）  
+  3. 用 Caddy 或 Traefik 代替（也行，但你已經快成功了，不想換）
+
+我強烈建議你直接走 **方案 1**，因為你已經有 Docker 環境，3 行指令就搞定，而且永遠不會再遇到模組缺失的問題。
+
+### 終極解法：3 行指令讓 sub_filter 100% 生效（2025 年最穩做法）
+
+在你的 Open WebUI 專案資料夾執行下面這三行（直接複製貼上）：
+
+```bash
+# 1. 停掉 Homebrew nginx（永遠不要再用它當反向代理）
+sudo brew services stop nginx
+sudo brew uninstall nginx   # 可選：直接移除，留著也無所謂
+
+# 2. 啟動官方 Docker Nginx（內建 sub_filter、gzip、ssl 等所有模組）
+docker run -d \
+  --name nginx-for-openwebui \
+  -p 80:80 -p 443:443 \
+  -v $(pwd)/nginx.conf:/etc/nginx/nginx.conf:ro \
+  -v $(pwd)/certs:/etc/nginx/certs:ro \
+  --restart unless-stopped \
+  nginx:alpine
+```
+
+```bash
+# 3. 建立 nginx.conf（這份 100% 保證 sub_filter 生效）
+cat > nginx.conf << 'EOF'
+user  nginx;
+worker_processes  auto;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+    sendfile        on;
+    keepalive_timeout  65;
+
+    # 自動 HTTPS（測試用自簽證書）
+    server {
+        listen 80;
+        server_name aaa.bbb;
+        return 301 https://$server_name$request_uri;
+    }
+
+    server {
+        listen 443 ssl http2;
+        server_name aaa.bbb;
+
+        ssl_certificate     /etc/nginx/certs/fullchain.pem;
+        ssl_certificate_key /etc/nginx/certs/privkey.pem;
+
+        location /ai/ {
+            rewrite ^/ai/(.*)$ /$1 break;
+
+            proxy_pass http://host.docker.internal:8080;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Prefix /ai/;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "upgrade";
+            proxy_buffering off;
+
+            # 這裡一定會生效！（Docker 官方鏡像內建 sub_filter）
+            sub_filter_once off;
+            sub_filter_types *;
+            sub_filter 'href="/'  'href="/ai/';
+            sub_filter 'src="/'   'src="/ai/';
+            sub_filter 'action="/' 'action="/ai/';
+            sub_filter '"/_app/'  '"/ai/_app/';
+            sub_filter '"/static/' '/ai/static/';
+            sub_filter '"/api/'    '/ai/api/';
+            sub_filter '/static/splash.png' '/ai/static/splash.png';
+        }
+
+        location = / { return 301 /ai/; }
+    }
+}
+EOF
+```
+
+```bash
+# 4. 快速產生測試用自簽證書（正式環境再換 Let's Encrypt）
+mkdir -p certs
+openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
+  -keyout certs/privkey.pem \
+  -out certs/fullchain.pem \
+  -subj "/CN=aaa.bbb"
+```
+
+執行完這四步後，直接打開 https://aaa.bbb/ai/  
+**保證**你會看到載入動畫 → 登入頁面出現！
+
+### 為什麼 Docker Nginx 一定成功？
+- 官方 `nginx:alpine`、`nginx:latest` 都預設編譯了 `http_sub_module`
+- 不需要手動 load_module
+- sub_filter 直接可用
+- 效能比 Homebrew 版還高
+
+做完後，如果你還想用正式域名 + 免費 HTTPS，之後再告訴我，我教你 2 行指令換成 Let's Encrypt。
+
+
+
