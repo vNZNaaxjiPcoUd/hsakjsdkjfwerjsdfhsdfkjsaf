@@ -447,3 +447,58 @@ openssl req -x509 -nodes -days 3650 -newkey rsa:2048 \
 
 
 
+## 更改了 `docker-compose.yml` 文件後，您必須使用 `docker compose up` 命令來**重建**並**重新啟動**服務，這樣 Docker Compose 才能讀取並應用您對配置文件的修改，例如環境變數 (`BASE_URL`) 或卷宗掛載。
+
+-----
+
+## 🚀 Open-WebUI 重啟步驟
+
+請在您的 `docker-compose.yml` 文件所在的目錄下執行以下命令：
+
+### 1\. 停止並移除舊容器
+
+首先，停止並移除當前正在運行的 Open-WebUI 服務的舊容器。
+
+```bash
+docker compose down
+```
+
+  * `down` 命令會停止並移除所有由該 `docker-compose.yml` 文件創建的容器和網路。
+  * **注意：** 除非您使用 `-v` 或 `--volumes` 參數，否則**命名的資料卷 (Named Volumes)**（通常用於持久化 Open-WebUI 的數據，例如資料庫）會被保留下來。
+
+### 2\. 應用新配置並啟動
+
+接著，使用 `up` 命令重新創建並啟動容器。
+
+```bash
+docker compose up -d
+```
+
+  * `up` 命令會根據您修改後的 `docker-compose.yml` 文件配置來重建容器。
+  * 如果服務容器的配置（例如環境變數、端口、卷宗掛載等）有變動，Docker Compose 會先移除舊容器，然後使用新配置創建並啟動新容器。
+  * `-d` (或 `--detach`) 參數表示在背景模式 (detached mode) 執行容器，這樣您可以繼續使用當前終端機。
+
+-----
+
+## ✨ 推薦的進階命令
+
+如果您只修改了 `open-webui` 服務的配置，並且想要更快地重新部署，可以指定服務名稱。
+
+### 僅重新創建和啟動指定的服務
+
+如果您確定只有 `open-webui` 服務（假設服務名稱為 `open-webui`）的配置有變動，可以使用此命令：
+
+```bash
+# 語法: docker compose up -d [服務名稱]
+docker compose up -d open-webui
+```
+
+### 🚨 避免使用 `restart`
+
+一般情況下，**不建議**在修改 `docker-compose.yml` 後使用 `docker compose restart`。
+
+  * `restart` 只是停止並重新啟動現有的容器，**它不會讀取和應用**您對 `docker-compose.yml` 中設定的**環境變數、端口映射或卷宗掛載**等配置更改。
+  * 只有 `docker compose up` 才能確保您的新配置被正確應用。
+
+您現在就可以執行 `docker compose down` 和 `docker compose up -d` 來應用您對 `open-webui` 服務所做的 `BASE_URL` 更改了。
+
