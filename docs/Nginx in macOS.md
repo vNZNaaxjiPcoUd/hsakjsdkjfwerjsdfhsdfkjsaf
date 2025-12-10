@@ -346,4 +346,107 @@ sudo systemctl reload nginx       # 重載設定
 - https://a.b.c.d/anything  →  http://IPa:3343/anything
 - https://e.f.g.h/anything  →  http://IPb:888/anything
 
-完美！
+## 若 https://a.b/ 全轉到 http://ipa/, 除了 https://a.b/ai/ 要轉到 http://ipb/ 
+
+- https://a.b/               → 全部轉到 http://IPa/  
+- https://a.b/ai/            → 全部轉到 http://IPb/  
+- https://a.b/ai/anything    → 也要轉到 http://IPb/anything（路徑保持不變）
+
+這是最經典的「根路徑 + 一個子目錄例外轉不同後端」的場景。
+
+正確且最乾淨的寫法如下（重點是把 /ai/ 這個 location 寫在 / 前面，因為 Nginx 是「長匹配優先」）：
+
+```nginx
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name a.b;               # 或 a.b.c.d
+
+    # SSL 證書
+    ssl_certificate     /path/to/fullchain.pem;
+    ssl_certificate_key /path/to/privkey.pem;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # 1. 先處理例外：所有 /ai/ 開頭的請求 → 轉到 IPb
+    location /ai/ {
+        proxy_pass http://IPb/;                 # 這裡要加 / 才能吃掉 /ai 這段
+                                                # 所以客戶端 /ai/xxx → 後端 /xxx
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Port  443;
+    }
+
+    # 2. 其餘全部請求 → 轉到 IPa（整個站預設後端）
+    location / {
+        proxy_pass http://IPa;                  # 這裡千萬不要加 / ！！
+                                                # 這樣路徑才會完整保留
+
+        proxy_set_header Host              $host;
+        proxy_set_header X-Real-IP         $remote_addr;
+        proxy_set_header X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Port  443;
+    }
+}
+```
+
+### 為什麼要這樣寫？（對照表）
+
+| 客戶端請求                | 匹配到的 location | proxy_pass                 | 實際發到後端的 URL             | 正確？ |
+|---------------------------|-------------------|----------------------------|--------------------------------|--------|
+| https://a.b/              | location /        | http://IPa                 | http://IPa/                    | 正確   |
+| https://a.b/index.html    | location /        | http://IPa                 | http://IPa/index.html          | 正確   |
+| https://a.b/ai/           | location /ai/     | http://IPb/                | http://IPb/                    | 正確   |
+| https://a.b/ai/chat       | location /ai/     | http://IPb/                | http://IPb/chat                | 正確   |
+| https://a.b/ai/api/call   | location /ai/     | http://IPb/                | http://IPb/api/call            | 正確   |
+
+### 常見錯誤寫法（千萬不要這樣）
+
+```nginx
+location / {                     # 錯！如果這行寫在前面，/ai/ 永遠不會被匹配到
+    proxy_pass http://IPa;
+}
+location /ai/ {
+    proxy_pass http://IPb/;
+}
+```
+
+→ Nginx 是「最長字串優先」，但如果兩個 location 權重一樣，會用「檔案中先出現的那個」決定，所以例外一定要寫在前面！
+
+### 最終完整範例（直接複製貼上改 IP 即可）
+
+```nginx
+server {
+    listen 443 ssl http2;
+    server_name a.b;
+
+    ssl_certificate     /etc/letsencrypt/live/a.b/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/a.b/privkey.pem;
+
+    # 例外：所有 /ai/ 開頭的走 IPb
+    location /ai/ {
+        proxy_pass http://IPb/;     # 吃掉 /ai 這段
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # 預設：其他全部走 IPa
+    location / {
+        proxy_pass http://IPa;      # 完整保留路徑，結尾不加 /
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+}
+```
+
+存檔 → `nginx -t` → `systemctl reload nginx` 就大功告成！
+
+
