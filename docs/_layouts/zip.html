@@ -8,17 +8,13 @@
 <link rel="stylesheet" href="/styles_white.css">
 </head>
 <body>
-
-
 <div id="lockScreen">
 	<h2>
     <p>Allo</p>
     <input type="password" id="password" placeholder="here is" autocomplete="off">
     <br>
     <button onclick="unlock()">show</button>
-    <p id="msg" style="color:red; margin-top:15px;"></p>
 	</h2>
-	<div><div class="msg"></div></div>
 </div>
 
 <!--- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script> --->
@@ -27,31 +23,25 @@
 
 const ENCRYPTED_CONTENT = "{{ page.zip }}"; 
 
-let decrypted = false;
-
 function unlock() {
     const input = document.getElementById("password").value;
-    const msg = document.getElementById("msg");
 
     if (!input) {
-        //msg.textContent = "key";
         return;
     }
 
     try {
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
-		console.log(originalHTML);
+		//console.log(originalHTML);
         if (originalHTML) {  
             document.body.innerHTML = originalHTML;
-            decrypted = true;
         } else {
             //throw new Error();
 			document.getElementById("password").value = "";
 			document.body.innerHTML = "<h2>Hello World!</h2>";
         }
     } catch (e) {
-        //msg.textContent = "again！";
         document.getElementById("password").value = "";
 		document.body.innerHTML = "<h2>Hello!</h2>";
     }
