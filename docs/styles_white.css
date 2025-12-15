@@ -180,7 +180,7 @@ footer {
 @media (min-width: 4096px) {
     body {
         font-size: 24px;
-        max-width: 2400px; /* 超寬版面 */
+        max-width: 3800px; /* 超寬版面 */
         padding: 80px 60px;
     }
     h1 { font-size: 4.5rem; }
@@ -192,7 +192,7 @@ footer {
 @media (min-width: 3120px) and (max-width: 4095px) {
     body {
         font-size: 22px;
-        max-width: 2000px; /* 寬鬆版面 */
+        max-width: 2860px; /* 寬鬆版面 */
         padding: 70px 50px;
     }
     h1 { font-size: 4rem; }
@@ -204,7 +204,7 @@ footer {
 @media (min-width: 2200px) and (max-width: 3119px) {
     body {
         font-size: 20px;
-        max-width: 1800px; /* 增加寬度 */
+        max-width: 1920px; /* 增加寬度 */
         padding: 60px 40px;
     }
     h1 { font-size: 3.5rem; }
@@ -216,7 +216,7 @@ footer {
 @media (min-width: 1920px) and (max-width: 2199px) {
     body {
         font-size: 19px;
-        max-width: 1600px; /* 略微增加寬度 */
+        max-width: 1760px; /* 略微增加寬度 */
         padding: 50px 35px;
     }
     h1 { font-size: 3.2rem; }
