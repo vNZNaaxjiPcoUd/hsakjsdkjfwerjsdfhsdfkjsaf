@@ -174,20 +174,82 @@ footer {
     font-size: 0.9rem;
 }
 
-/* ====================== 響應式設計 ====================== */
+/* ====================== 響應式設計 (Media Queries) ====================== */
 
-/* 大螢幕（>1600px）略微加大字體 */
-@media (min-width: 1600px) {
+/* 4K/超寬螢幕 (≥4096px) */
+@media (min-width: 4096px) {
+    body {
+        font-size: 24px;
+        max-width: 2000px;
+        padding: 80px 60px;
+    }
+    h1 { font-size: 4.5rem; }
+    h2 { font-size: 3.2rem; }
+    h3 { font-size: 2.2rem; }
+}
+
+/* 4K/高解析度 (≥3120px) */
+@media (min-width: 3120px) and (max-width: 4095px) {
+    body {
+        font-size: 22px;
+        max-width: 1800px;
+        padding: 70px 50px;
+    }
+    h1 { font-size: 4rem; }
+    h2 { font-size: 3rem; }
+    h3 { font-size: 2rem; }
+}
+
+/* QHD/超大桌面 (≥2200px) */
+@media (min-width: 2200px) and (max-width: 3119px) {
+    body {
+        font-size: 20px;
+        max-width: 1600px;
+        padding: 60px 40px;
+    }
+    h1 { font-size: 3.5rem; }
+    h2 { font-size: 2.6rem; }
+    h3 { font-size: 1.8rem; }
+}
+
+/* FHD/桌面高解析度 (≥1920px) */
+@media (min-width: 1920px) and (max-width: 2199px) {
+    body {
+        font-size: 19px;
+        padding: 50px 35px;
+        max-width: 1500px;
+    }
+    h1 { font-size: 3.2rem; }
+    h2 { font-size: 2.4rem; }
+    h3 { font-size: 1.6rem; }
+}
+
+/* 較大桌面 (≥1440px) */
+@media (min-width: 1440px) and (max-width: 1919px) {
     body {
         font-size: 18px;
-        padding: 60px 40px;
+        padding: 45px 30px;
     }
     h1 { font-size: 3rem; }
     h2 { font-size: 2.2rem; }
+    h3 { font-size: 1.5rem; }
 }
 
-/* 平板到筆電（≤1200px） */
-@media (max-width: 1200px) {
+/* 標準桌面/大筆電 (≥1024px) */
+@media (min-width: 1024px) and (max-width: 1439px) {
+    body {
+        font-size: 16px;
+        width: 90%;
+        padding: 40px 20px;
+        max-width: 1200px;
+    }
+    h1 { font-size: 2.5rem; }
+    h2 { font-size: 1.8rem; }
+    h3 { font-size: 1.4rem; }
+}
+
+/* 平板到筆電 (≤1023px) - 涵蓋 901px 到 1023px */
+@media (max-width: 1023px) {
     body {
         width: 90%;
         padding: 30px 15px;
@@ -197,7 +259,7 @@ footer {
     h3 { font-size: 1.3rem; }
 }
 
-/* 平板直立與大手機（≤900px） */
+/* 平板直立與大手機 (≤900px) */
 @media (max-width: 900px) {
     body {
         font-size: 15px;
@@ -215,7 +277,7 @@ footer {
     }
 }
 
-/* 手機（≤600px） */
+/* 手機 (≤600px) */
 @media (max-width: 600px) {
     body {
         font-size: 14px;
@@ -234,6 +296,7 @@ footer {
     img {
         margin: 1.4em auto;
     }
+    /* 讓表格在小螢幕上可以水平滾動 */
     table {
         display: block;
         overflow-x: auto;
@@ -241,7 +304,7 @@ footer {
     }
 }
 
-/* 超小手機（≤480px） */
+/* 超小手機 (≤480px) */
 @media (max-width: 480px) {
     body {
         font-size: 13.5px;
