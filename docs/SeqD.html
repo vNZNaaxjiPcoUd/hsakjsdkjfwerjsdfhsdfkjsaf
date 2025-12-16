@@ -28,9 +28,24 @@ layout: empty
             <h3>Sequence Diagram</h3>
             <div class="editor-wrapper">
 <div class="editor">
-A->B:OK
-Note right of B: YES done.
-B->A:Check your bill.
+Title: Here is a title
+
+participant A
+participant B
+participant C
+Note right of A: By listing the participants\n you can change their order
+
+A->B: Normal line
+B-->C: Dashed line
+C->>D: Open arrow
+D-->>A: Dashed open arrow
+
+# Example of a comment.
+Note left of A: Note to the\n left of A
+Note right of A: Note to the\n right of A
+Note over A: Note over A
+Note over A,B: Note over both A and B
+
 </div>
             </div>
             Theme:
@@ -39,10 +54,12 @@ B->A:Check your bill.
               <option value="hand" >Hand drawn</option>
             </select>
               <br><a href="#" class="download">Download as SVG</a>
-              <a href="https://www.websequencediagrams.com/">, web sequence diagrams example</a>
+              <a href="https://www.websequencediagrams.com/">, web sequence diagrams</a>
               <a href="https://mermaid.live/">, mermaid live editor</a>
               <a href="https://sequencediagram.org/">, sequencediagram editor</a>
               <a href="https://bramp.github.io/js-sequence-diagrams/">, source in github</a>
+              <a href="https://bramp.github.io/js-sequence-diagrams/">, example</a>
+              <a href="https://github.com/bramp/js-sequence-diagrams/blob/master/src/grammar.jison">, gramma definition</a>
             </td>
             <td class="diagram" class="e_top">This should be a diagram! If you don't see it you need Javascript enabled</td>
           </tr>
