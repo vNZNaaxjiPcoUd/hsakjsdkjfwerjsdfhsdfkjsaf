@@ -6,6 +6,7 @@ layout: empty
 <html lang="en">
   <head>
     <meta charset='utf-8'>
+    <base target="_blank">
     <meta http-equiv="X-UA-Compatible" content="chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -13,7 +14,7 @@ layout: empty
     <link rel="stylesheet" type="text/css" href="./static/style.css" media="screen" />
     <link rel="stylesheet" type="text/css" href="./static/sequence-diagram-min.css" media="screen" />
 
-    <title>SeqD</title>
+    <title>Sequence Diagram</title>
  
   </head>
 
@@ -30,9 +31,10 @@ layout: empty
 <div class="editor">
 Title: Here is a title
 
-participant A
+participant Go as C
 participant B
-participant C
+participant A
+
 Note right of A: By listing the participants\n you can change their order
 
 A->B: Normal line
@@ -45,6 +47,7 @@ Note left of A: Note to the\n left of A
 Note right of A: Note to the\n right of A
 Note over A: Note over A
 Note over A,B: Note over both A and B
+
 
 </div>
             </div>
