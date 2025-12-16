@@ -403,7 +403,7 @@ table, tr, th ,td ,tr:nth-child(even),tr:nth-child(odd){
 <div id="secretArea">
 	<!--<div class="mono container-fluid px-3 my-5 markdown-body">-->
 	<div id="showworld">
-		<div id="allT"></div>
+		<div id="allT">{{ content }}</div>
 	</div>
 </div>
 
@@ -576,7 +576,7 @@ table, tr, th ,td ,tr:nth-child(even),tr:nth-child(odd){
 const PASSWORD = "d0a4b3d376be0af335a4d748e48327cbc6a4fd9e12dbfef2cea690cf2393319f65ff1deef529a0bf49826c408ba4c757788bcf4cf9ad7b7a85ea018a57540087";
 const SALT = "f862f1d08bf480f0a6c1f8db1914330976935c513eb154813220bad9fccad8a53f96d6ca0a12cead5d5fb2a65cbbd6e27d3b31d622f38c731e18de1d669df512d565ecea212aae"
 let buffer = [];        
-const allText = `{{ content }}`;
+const allText = ``;
 const MAX_BUFFER = 99;
 
 async function hashPassword(password, salt) {
@@ -609,7 +609,7 @@ document.addEventListener("keydown", async function(e) {
             buffer.shift();
         }
         if ( await checkPassword(buffer.join(""), SALT, PASSWORD) ) {
-          document.getElementById("allT").innerHTML = allText ;
+          //document.getElementById("allT").innerHTML = allText ;
           document.getElementsByClassName("msg")[0].style.display = "none";
           document.getElementById("secretArea").style.display = "block";
           document.getElementById("helloWorld").style.display = "none";
@@ -646,7 +646,7 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
         if (await checkPassword(this.value, SALT, PASSWORD)) {
             document.getElementById("passwordOverlay").style.display = "none";
-            document.getElementById("allT").innerHTML = allText ;
+            //document.getElementById("allT").innerHTML = allText ;
             document.getElementsByClassName("msg")[0].style.display = "none";
             document.getElementById("secretArea").style.display = "block";
             document.getElementById("helloWorld").style.display = "none";
