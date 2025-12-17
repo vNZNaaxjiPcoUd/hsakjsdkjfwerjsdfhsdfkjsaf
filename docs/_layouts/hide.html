@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="{{ page.lang | default: site.lang | default: "en-US" }}">
+
+<head>
+	<base target="_blank">
+	<meta http-equiv="refresh" content="60000">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="/styles.css">
+	<link rel="manifest" href="/manifest.json">
+
+<style>
+    #secretArea {
+        display: none; 
+    }
+    
+    .hint {
+        color: #888;
+        font-size: 14px;
+    }
+
+	#helloWorld {
+		display: block;
+    }
+	/*#helloWorld:hover { transform: scale(1.1); }*/
+    
+    /* 密碼輸入燈箱 */
+    #passwordOverlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.95);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 999;
+    }
+    #passwordInput {
+        font-size: 28px;
+        padding: 15px 20px;
+        width: 300px;
+        text-align: center;
+        border: none;
+        border-bottom: 3px solid #00ff88;
+        background: transparent;
+        color: #fff;
+        outline: none;
+    }
+    #passwordInput:focus {
+        border-bottom-color: #00ff88;
+    }
+    .tip {
+        margin-top: 20px;
+        color: #888;
+        font-size: 14px;
+    }
+</style>
+
+<title>{% if page.title %}{{ page.title }}{% else %}{{ page.name }}{% endif %}</title>
+</head>
+<body>
+<div id="Start">
+	<iframe src="/UML%20now.html" style="width:100%; height:100vh; border:none;"></iframe>
+	<div id="helloWorld">..........................................</div>
+	<div id="passwordOverlay">
+		<input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off">
+	</div>
+</div>
+<div id="secretArea">
+{{ content }}
+</div>
+
+
+<script>
+const PASSWORD = "{{ lock }} ";
+const SALT = "{{ salt }}"
+let buffer = [];        
+const MAX_BUFFER = 99;
+
+async function hashPassword(password, salt) {
+    const encoder = new TextEncoder(); 
+    const data = encoder.encode(password + salt); 
+    const hashBuffer = await crypto.subtle.digest('SHA-512', data);
+    const hashArray = new Uint8Array(hashBuffer);
+    const hashHex = Array.from(hashArray).map(byte => byte.toString(16).padStart(2, '0')).join(''); 
+    return hashHex;
+}
+async function checkPassword(inputPassword, storedSalt, storedHash) {
+    const inputHash = await hashPassword(inputPassword, storedSalt);
+    if (inputHash === storedHash) {
+        //console.log("密碼正確！");
+		return true;
+    } else {
+        //console.log("密碼錯誤！");
+		return false;
+    }
+}
+
+document.addEventListener("keydown", async function(e) {
+    if (e.key.length === 1) {
+        buffer.push(e.key.toLowerCase()); 
+        if (e.key === ' ') { 
+			buffer=[]; 
+			return;
+		}
+        if (buffer.length > MAX_BUFFER) {
+            buffer.shift();
+        }
+        if ( await checkPassword(buffer.join(""), SALT, PASSWORD) ) {
+          document.getElementById("secretArea").style.display = "block";
+          //document.getElementById("helloWorld").style.display = "none";
+          //document.getElementById("passwordOverlay").style.display = "none";
+          document.getElementById("Start").style.display = "none";
+          document.removeEventListener("keydown", arguments.callee);
+          buffer = []; 
+        }
+		updateDisplay();
+    }
+    if (e.key === "Backspace") {
+        buffer.pop();
+    }
+});
+
+const display = document.getElementById("helloWorld");
+function updateDisplay() {
+    if (buffer.length === 0) {
+        display.textContent = '';           // 沒輸入就清空
+        return;
+    }
+    // 最後一個字元明文顯示，其他用 • 代替
+    const masked = '•'.repeat(buffer.length - 1) + buffer[buffer.length - 1];
+    //display.textContent = masked;
+}
+
+document.getElementById("helloWorld").onclick = function() {
+	document.getElementById("passwordOverlay").style.display = "flex";
+    document.getElementById("passwordInput").focus();
+    this.style.display = "none";  // 隱藏 HelloWorld
+};
+
+document.getElementById("passwordInput").onkeydown = async function(e) {
+    if (e.key === "Enter") {
+        if (await checkPassword(this.value, SALT, PASSWORD)) {
+            //document.getElementById("passwordOverlay").style.display = "none";
+            document.getElementById("secretArea").style.display = "block";
+            //document.getElementById("helloWorld").style.display = "none";
+            document.getElementById("Start").style.display = "none";
+        } else {
+            this.style.borderBottomColor = "#ff0088";
+            this.value = "";
+            this.placeholder = "訊息已送出！";
+        }
+    }
+};
+
+
+</script>
+</body>
+
+</html>
