@@ -129,8 +129,9 @@ function updateDisplay() {
         return;
     }
     // 最後一個字元明文顯示，其他用 • 代替
-    const masked = '•'.repeat(buffer.length - 1) + buffer[buffer.length - 1];
-    //display.textContent = masked;
+    //const masked = '•'.repeat(buffer.length - 1) + buffer[buffer.length - 1];
+    const masked = '•'.repeat(buffer.length);
+    display.textContent = masked;
 }
 
 document.getElementById("helloWorld").onclick = function() {
