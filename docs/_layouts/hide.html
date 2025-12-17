@@ -62,7 +62,7 @@
 <body>
 <div id="Start">
 	<iframe src="/UML%20now.html" style="width:100%; height:100vh; border:none;"></iframe>
-	<div id="helloWorld">••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</div>
+	<div id="helloWorld">.</div>
 	<div id="passwordOverlay">
 		<input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off">
 	</div>
@@ -133,7 +133,8 @@ function updateDisplay() {
     const masked = '•'.repeat(buffer.length);
     display.textContent = masked;
 }
-
+display.textContent =  '•'.repeat(MAX_BUFFER);
+	
 document.getElementById("helloWorld").onclick = function() {
 	document.getElementById("passwordOverlay").style.display = "flex";
     document.getElementById("passwordInput").focus();
