@@ -78,6 +78,9 @@ const SALT = "{{ page.salt }}"
 let buffer = [];        
 const MAX_BUFFER = 99;
 
+function cleanBuffer(){
+	buffer = []; 
+}
 async function hashPassword(password, salt) {
     const encoder = new TextEncoder(); 
     const data = encoder.encode(password + salt); 
@@ -101,7 +104,7 @@ document.addEventListener("keydown", async function(e) {
     if (e.key.length === 1) {
         buffer.push(e.key.toLowerCase()); 
         if (e.key === ' ') { 
-			buffer=[]; 
+			cleanBuffer(); 
 			return;
 		}
         if (buffer.length > MAX_BUFFER) {
@@ -113,7 +116,7 @@ document.addEventListener("keydown", async function(e) {
           //document.getElementById("passwordOverlay").style.display = "none";
           document.getElementById("Start").style.display = "none";
           document.removeEventListener("keydown", arguments.callee);
-          buffer = []; 
+          cleanBuffer(); 
         }
 		updateDisplay();
     }
@@ -140,6 +143,7 @@ document.getElementById("helloWorld").onclick = function() {
 	document.getElementById("passwordOverlay").style.display = "flex";
     document.getElementById("passwordInput").focus();
     this.style.display = "none";  // 隱藏 HelloWorld
+	cleanBuffer(); 
 };
 
 document.getElementById("passwordInput").onkeydown = async function(e) {
@@ -153,6 +157,7 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
             this.style.borderBottomColor = "#ff0088";
             this.value = "";
             this.placeholder = "訊息已送出！";
+			cleanBuffer(); 
         }
     }
 };
