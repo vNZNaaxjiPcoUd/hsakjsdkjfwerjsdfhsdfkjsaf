@@ -131,10 +131,10 @@ function updateDisplay() {
     // 最後一個字元明文顯示，其他用 • 代替
     //const masked = '•'.repeat(buffer.length - 1) + buffer[buffer.length - 1];
     const masked = '•'.repeat(MAX_BUFFER-buffer.length);
-    display.textContent = masked;
+    //display.textContent = masked;
 }
 //display.textContent =  '•'.repeat(MAX_BUFFER);
-display.textContent =  '•'.repeat(MAX_BUFFER);
+//display.textContent =  '•'.repeat(MAX_BUFFER);
 	
 document.getElementById("helloWorld").onclick = function() {
 	document.getElementById("passwordOverlay").style.display = "flex";
