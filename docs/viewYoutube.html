@@ -17,7 +17,8 @@ title: 1 View youtube and loop
 #secretArea { display: none; }
 .hint { color: #888; font-size: 14px; }
 #helloWorld { display: block; }
-#helloWorld:hover { transform: scale(1.1); }
+/*#helloWorld:hover { transform: scale(1.1); }
+*/
 #passwordOverlay {
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
@@ -86,13 +87,11 @@ document.getElementById("helloWorld").onclick = function() {
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
         const updateURL = allText.replaceAll('AAURL',this.value);
-		/*
         document.getElementById("passwordOverlay").style.display = "none";
         document.getElementById("allT").innerHTML = updateURL ;
         document.getElementById("secretArea").style.display = "block";
         document.getElementById("helloWorld").style.display = "none";       
-		*/
-        document.body.innerHTML = updateURL;
+//        document.body.innerHTML = updateURL;
     }
 };
 </script>
