@@ -1,0 +1,22 @@
+{
+  "name": "Story",
+  "short_name": "BS",
+  "description": "這是歷史",
+  "start_url": "/?source=pwa",
+  "display": "standalone",
+  "theme_color": "#2196F3",
+  "background_color": "#F0F0F0",
+  "icons": [
+    {
+      "src": "https://h.jwint.net/favicon192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://h.jwint.net/favicon512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "orientation": "portrait"
+}
