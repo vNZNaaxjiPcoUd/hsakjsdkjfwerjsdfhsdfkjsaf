@@ -52,7 +52,7 @@ title: 1 View youtube and loop
 <body>
 
 <div id="secretArea"><div id="allT">.</div></div>
-<div id="clocknow"><label id="cnT">00:00:00</label> [ <label id="url">.</label> ]</div>
+<div id="clocknow"><label id="cnT">00:00:00</label> <br> </be>[ <label id="uID">.</label> ]</div>
 <div id="helloWorld">hello World! </div>
 <div id="passwordOverlay"><input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off"></div>
 
@@ -84,12 +84,22 @@ document.getElementById("helloWorld").onclick = function() {
 	this.style.display = "none";
 };
 
+function getID(url) {
+  const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
+  const match = url.match(regex);
+  
+  return match ? (match[1] || match[2]) : null;
+}
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
-        const updateURL = allText.replaceAll('AAURL',this.value);
+		let id = this.value;
+		if(id.length > 11){
+			id = getID(id);
+		}
+        const updateURL = allText.replaceAll('AAURL',id);
         document.getElementById("passwordOverlay").style.display = "none";
         document.getElementById("allT").innerHTML = updateURL ;
-		document.getElementById("url").innerHTML = this.value;
+		document.getElementById("uID").innerHTML = id;
         document.getElementById("secretArea").style.display = "block";
         document.getElementById("helloWorld").style.display = "none";       
 //        document.body.innerHTML = updateURL;
