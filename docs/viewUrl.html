@@ -86,7 +86,7 @@ function getID(url) {
   const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
   const match = url.match(regex);
   
-  return match ? (match[1] || match[2]) : null;
+  return match ? (match[1] || match[2]) : "no";
 }
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
