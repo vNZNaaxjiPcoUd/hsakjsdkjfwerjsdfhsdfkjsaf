@@ -1,0 +1,117 @@
+---
+layout: empty
+title: View youtube and loop
+---
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://h.jwint.net/styles.css">
+	<link rel="manifest" href="https://h.jwint.net/manifest.json">
+	<title>View</title>
+<style>
+#secretArea { display: none; }
+.hint { color: #888; font-size: 14px; }
+#helloWorld { display: block; }
+/*#helloWorld:hover { transform: scale(1.1); }
+*/
+#passwordOverlay {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0,0,0,0.95);
+	display: none;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	z-index: 999;
+}
+#passwordInput {
+	font-size: 28px;
+	padding: 15px 20px;
+	width: 300px;
+	text-align: center;
+	border: none;
+	border-bottom: 3px solid #00ff88;
+	background: transparent;
+	color: #fff;
+	outline: none;
+}
+#passwordInput:focus { border-bottom-color: #00ff88; }
+.tip {
+	margin-top: 20px;
+	color: #888;
+	font-size: 14px;
+}
+</style>
+
+</head>
+<body>
+
+<div id="secretArea"><div id="allT">.</div></div>
+<div id="clocknow"><label id="cnT">00:00:00</label> <br> </be>[ <label id="uID">.</label> ]</div>
+<div id="helloWorld">Fill in your feedback message !</div>
+<div id="passwordOverlay"><input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off"></div>
+
+<script>
+// update clock
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+function showTime() {
+  const currentDate = new Date();
+  const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
+  const timestamp = currentDate.toLocaleString('en-US', options);
+  let labelElement = document.getElementById("cnT");
+  labelElement.innerHTML = timestamp;
+}    
+setInterval(showTime, 1000);
+showTime();
+</script>
+
+<script>
+// get url, replace and show page
+const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1" 
+title="titleName" frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+document.getElementById("helloWorld").onclick = function() {
+	document.getElementById("passwordOverlay").style.display = "flex";
+	document.getElementById("passwordInput").focus();
+	this.style.display = "none";
+};
+const IDL = 11;
+function getID(url) {
+	const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
+	const match = url.match(regex);
+  
+	return match ? (match[1] || match[2]) : "no";
+}
+document.getElementById("passwordInput").onkeydown = async function(e) {
+    if (e.key === "Enter") {
+		let id = this.value;
+		if(id.length > IDL){
+			id = getID(id);
+		}
+		if (id.length === IDL){
+	        const updateURL = allText.replaceAll('AAURL',id);
+	        document.getElementById("passwordOverlay").style.display = "none";
+	        document.getElementById("allT").innerHTML = updateURL ;
+			document.getElementById("uID").innerHTML = id;
+	        document.getElementById("secretArea").style.display = "block";
+	        document.getElementById("helloWorld").style.display = "none";       
+//		        document.body.innerHTML = updateURL;
+		}else {
+            this.style.borderBottomColor = "#ff0088";
+            this.value = "";
+            this.placeholder = "訊息已送出！";
+        }
+    }else{
+		document.getElementById("uID").innerHTML = e.key;
+	}
+};
+</script>
+
+</body>
+</html>
