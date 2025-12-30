@@ -94,7 +94,7 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 		if(id.length > IDL){
 			id = getID(id);
 		}
-		if (id.length == IDL){
+		if (id.length === IDL){
 	        const updateURL = allText.replaceAll('AAURL',id);
 	        document.getElementById("passwordOverlay").style.display = "none";
 	        document.getElementById("allT").innerHTML = updateURL ;
