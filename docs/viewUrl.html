@@ -81,35 +81,55 @@ document.getElementById("helloWorld").onclick = function() {
 	document.getElementById("passwordInput").focus();
 	this.style.display = "none";
 };
+
 const IDL = 11;
+
 function getID(url) {
 	const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
 	const match = url.match(regex);
 	return match ? (match[1] || match[2]) : "no";
 }
-document.getElementById("passwordInput").onkeydown = async function(e) {
-    if (e.key === "Enter") {
-		let id = this.value;
+	
+function handleID(id){
 		if(id.length > IDL){
 			id = getID(id);
 		}
 		if (id.length === IDL){
-	        const updateURL = allText.replaceAll('AAURL',id);
-	        document.getElementById("passwordOverlay").style.display = "none";
-	        document.getElementById("allT").innerHTML = updateURL ;
+			const updateURL = allText.replaceAll('AAURL',id);
+			document.getElementById("passwordOverlay").style.display = "none";
+			document.getElementById("allT").innerHTML = updateURL ;
 			document.getElementById("uID").innerHTML = id;
-	        document.getElementById("secretArea").style.display = "block";
-	        document.getElementById("helloWorld").style.display = "none";       
-//		        document.body.innerHTML = updateURL;
+			document.getElementById("secretArea").style.display = "block";
+			document.getElementById("helloWorld").style.display = "none";       
+			//		        document.body.innerHTML = updateURL;
 		}else {
             this.style.borderBottomColor = "#ff0088";
             this.value = "";
             this.placeholder = "訊息已送出！";
-        }
+        }	
+}
+  
+function checkUrlPara() {
+            const lastPart = window.location.search.slice(1);
+            if ( lastPart === ""){
+            	console.log("Nono");
+            }else{
+            	console.log(lastPart);
+            	handleID(lastPart);
+            }
+}
+	
+document.getElementById("passwordInput").onkeydown = async function(e) {
+    if (e.key === "Enter") {
+		let id = this.value;
+		handleID(id);
     }else{
 		document.getElementById("uID").innerHTML = e.key;
 	}
 };
+
+checkUrlPara();
+
 </script>
 
 </body>
