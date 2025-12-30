@@ -5,28 +5,13 @@
     <title>Go</title>
 </head>
 <body>
-    <p id="message"></p>
+    <p id="message">Hello!</p>
 
     <script>
         function processAndRedirect() {
-            const baseUrl = "{{ page.go }}";
-            /*
-            const params = new URLSearchParams(window.location.search);
-            const customOutput = Array.from(params)
-            .map(([key, value]) => value ? `${key}=${value}` : key)
-            .join("&");
-            */
-            
             const lastPart = window.location.search.slice(1);
-            
-            //const url = window.location.href;
-            //const lastPart = url.match(/[^/]+$/)?.[0] ?? "";
-            
-            const result = lastPart.replace(/\+/g, "%20");
-            
-            const kk1 = `${baseUrl}${result}`;
-            let okU = kk1.replace(/(?<!:)\/+/g, "/");
-            window.location.href = okU;
+            console.log(window.location.search);
+            console.log(lastPart);
         }
 
         //window.onload = processAndRedirect;
