@@ -83,7 +83,7 @@ document.getElementById("helloWorld").onclick = function() {
 };
 const IDL = 11;
 function getID(url) {
-  const regex = /[?&]v=([A-Za-z0-9_-]{IDL})|youtu\.be\/([A-Za-z0-9_-]{IDL})/;
+  const regex = /[?&]v=([A-Za-z0-9_-]{${IDL}})|youtu\.be\/([A-Za-z0-9_-]{${IDL}})/;
   const match = url.match(regex);
   
   return match ? (match[1] || match[2]) : "no";
