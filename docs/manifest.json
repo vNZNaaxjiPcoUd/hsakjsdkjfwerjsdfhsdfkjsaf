@@ -2,7 +2,6 @@
   "name": "Story",
   "short_name": "BS",
   "description": "這是歷史",
-  "start_url": "/?source=pwa",
   "display": "standalone",
   "theme_color": "#2196F3",
   "background_color": "#F0F0F0",
@@ -16,6 +15,13 @@
       "src": "https://h.jwint.net/favicon512.png",
       "sizes": "512x512",
       "type": "image/png"
+    }
+  ],  
+  "shortcuts": [
+    {
+      "name": "Start",
+      "url": "/quick-start/",
+      "icons": [{ "src": "https://h.jwint.net/favicon96.png", "sizes": "96x96" }]
     }
   ],
   "orientation": "portrait"
