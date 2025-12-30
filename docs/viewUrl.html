@@ -81,9 +81,9 @@ document.getElementById("helloWorld").onclick = function() {
 	document.getElementById("passwordInput").focus();
 	this.style.display = "none";
 };
-
+const IDL = 11;
 function getID(url) {
-  const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
+  const regex = /[?&]v=([A-Za-z0-9_-]{IDL})|youtu\.be\/([A-Za-z0-9_-]{IDL})/;
   const match = url.match(regex);
   
   return match ? (match[1] || match[2]) : "no";
@@ -91,10 +91,10 @@ function getID(url) {
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
 		let id = this.value;
-		if(id.length > 11){
+		if(id.length > IDL){
 			id = getID(id);
 		}
-		if (id.length == 11){
+		if (id.length == IDL){
 	        const updateURL = allText.replaceAll('AAURL',id);
 	        document.getElementById("passwordOverlay").style.display = "none";
 	        document.getElementById("allT").innerHTML = updateURL ;
