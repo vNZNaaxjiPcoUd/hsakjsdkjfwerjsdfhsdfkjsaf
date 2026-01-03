@@ -13,6 +13,7 @@ title: 1.View youtube and loop
 	<title>View</title>
 <style>
 #secretArea { display: none; }
+#countdown {display: none;}
 .hint { color: #888; font-size: 14px; }
 #helloWorld { display: block; }
 /*#helloWorld:hover { transform: scale(1.1); }
@@ -52,9 +53,9 @@ title: 1.View youtube and loop
 <div id="secretArea"><div id="allT">.</div></div>
 <div id="clocknow"><label id="cnT">00:00:00</label> <br> </be>[ <label id="uID">.</label> ]</div>
 <div id="helloWorld">Fill in your feedback message !</div>
-<div id="passwordOverlay"><input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off"></div>
+<div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"></div>
 <div id="countdown">
-<input type="number" id="minutes" placeholder="分鐘數">
+<input type="number" id="minutes" placeholder="分鐘">
 <button onclick="startTimer()">開始</button>
 </div>
 	
@@ -104,12 +105,14 @@ function handleID(id){
 			document.getElementById("allT").innerHTML = updateURL ;
 			document.getElementById("uID").innerHTML = id;
 			document.getElementById("secretArea").style.display = "block";
+			document.getElementById("countdown").style.display = "block";
 			document.getElementById("helloWorld").style.display = "none";       
 			//		        document.body.innerHTML = updateURL;
 		}else {
-            this.style.borderBottomColor = "#ff0088";
-            this.value = "";
-            this.placeholder = "訊息已送出！";
+			const displayA= document.getElementById('passwordInput');
+            displayA.style.borderBottomColor = "#ff0088";
+            displayA.value = "";
+            displayA.placeholder = "訊息已送出！";
         }	
 }
   
@@ -126,9 +129,10 @@ function checkUrlPara() {
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
 		let id = this.value;
+		console.log(id);
 		handleID(id);
     }else{
-		document.getElementById("uID").innerHTML = e.key;
+		console.log(e.key);
 	}
 };
 
