@@ -64,12 +64,12 @@ title: 1.View youtube and loop
 // update clock
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 function showTime() {
-  const currentDate = new Date();
-  const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
-  const timestamp = currentDate.toLocaleString('en-US', options);
-  let labelElement = document.getElementById("cnT");
-  labelElement.innerHTML = timestamp;
-}    
+	  const currentDate = new Date();
+	  const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
+	  const timestamp = currentDate.toLocaleString('en-US', options);
+	  let labelElement = document.getElementById("cnT");
+	  labelElement.innerHTML = timestamp;
+	}    
 setInterval(showTime, 1000);
 showTime();
 </script>
@@ -83,18 +83,18 @@ allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; pic
 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
 document.getElementById("helloWorld").onclick = function() {
-	document.getElementById("passwordOverlay").style.display = "flex";
-	document.getElementById("passwordInput").focus();
-	this.style.display = "none";
-};
+		document.getElementById("passwordOverlay").style.display = "flex";
+		document.getElementById("passwordInput").focus();
+		this.style.display = "none";
+	};
 
 const IDL = 11;
 
 function getID(url) {
-	const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
-	const match = url.match(regex);
-	return match ? (match[1] || match[2]) : "no";
-}
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})/;
+		const match = url.match(regex);
+		return match ? (match[1] || match[2]) : "no";
+	}
 	
 function handleID(id){
 		if(id.length > IDL){
@@ -117,44 +117,44 @@ function handleID(id){
             displayA.value = "";
             displayA.placeholder = "訊息已送出！";
         }	
-}
+	}
   
 function checkUrlPara() {
-            const lastPart = window.location.search.slice(1);
-            if ( lastPart === ""){
-            	console.log("Nono");
-            }else{
-            	console.log(lastPart);
-            	handleID(lastPart);
-            }
-}
+		const lastPart = window.location.search.slice(1);
+		if ( lastPart === ""){
+			console.log("Nono");
+		}else{
+			console.log(lastPart);
+			handleID(lastPart);
+		}
+	}
 	
 document.getElementById("passwordInput").onkeydown = async function(e) {
-    if (e.key === "Enter") {
-		let id = this.value;
-		console.log(id);
-		handleID(id);
-    }else{
-		console.log(e.key);
-	}
-};
+	    if (e.key === "Enter") {
+			let id = this.value;
+			console.log(id);
+			handleID(id);
+	    }else{
+			console.log(e.key);
+		}
+	};
 
 checkUrlPara();
 
 function startTimer() {
-            const minutes = parseFloat(document.getElementById('minutes').value);
-            if (isNaN(minutes) || minutes <= 0) {
-                alert('請輸入正數！');
-                return;
-            }
-			document.getElementById('minutes').placeholder = "開始" + minutes;
-			document.getElementById('minutes').value = "";
-            const ms = minutes * 60 * 1000;
-            setTimeout(() => {
-                console.log('時間到了！');
-                location.reload();
-            }, ms);
-        }
+		const minutes = parseFloat(document.getElementById('minutes').value);
+		if (isNaN(minutes) || minutes <= 0) {
+			alert('請輸入正數！');
+			return;
+		}
+		document.getElementById('minutes').placeholder = "開始" + minutes;
+		document.getElementById('minutes').value = "";
+		const ms = minutes * 60 * 1000;
+		setTimeout(() => {
+			console.log('時間到了！');
+			location.reload();
+		}, ms);
+	}
 	
 </script>
 
