@@ -144,6 +144,8 @@ function startTimer() {
                 alert('請輸入正數！');
                 return;
             }
+			document.getElementById('minutes').placeholder = "開始" + minutes;
+			document.getElementById('minutes').value = "";
             const ms = minutes * 60 * 1000;
             setTimeout(() => {
                 console.log('時間到了！');
