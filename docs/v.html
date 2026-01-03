@@ -53,7 +53,11 @@ title: 1.View youtube and loop
 <div id="clocknow"><label id="cnT">00:00:00</label> <br> </be>[ <label id="uID">.</label> ]</div>
 <div id="helloWorld">Fill in your feedback message !</div>
 <div id="passwordOverlay"><input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off"></div>
-
+<div id="countdown">
+<input type="number" id="minutes" placeholder="分鐘數">
+<button onclick="startTimer()">開始</button>
+</div>
+	
 <script defer>
 // update clock
 const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -130,6 +134,19 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 
 checkUrlPara();
 
+function startTimer() {
+            const minutes = parseFloat(document.getElementById('minutes').value);
+            if (isNaN(minutes) || minutes <= 0) {
+                alert('請輸入正數！');
+                return;
+            }
+            const ms = minutes * 60 * 1000;
+            setTimeout(() => {
+                console.log('時間到了！');
+                location.reload();
+            }, ms);
+        }
+	
 </script>
 
 </body>
