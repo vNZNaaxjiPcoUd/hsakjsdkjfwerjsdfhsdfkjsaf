@@ -1,0 +1,186 @@
+---
+layout: empty
+title: View youtube and loop
+---
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<base target="_blank">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>View</title>
+<style>
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px; /* 基礎文字大小 */
+    color: #f0f0f0; /* 淺灰文字，適應黑底 */
+    background-color: #000000; /* 純黑背景 */
+}
+a,
+a.visited {
+	color: inherit;
+	text-decoration: none;
+}
+#secretArea { display: none; }
+#countdown {display: none;}
+#uID {display: none;}
+.hint { color: #888; font-size: 14px; }
+#helloWorld { display: block; }
+/*#helloWorld:hover { transform: scale(1.1); }
+*/
+#passwordOverlay {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0,0,0,0.95);
+	display: none;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	z-index: 999;
+}
+#passwordInput {
+	font-size: 28px;
+	padding: 15px 20px;
+	width: 300px;
+	text-align: center;
+	border: none;
+	border-bottom: 3px solid #00ff88;
+	background: transparent;
+	color: #fff;
+	outline: none;
+}
+#passwordInput:focus { border-bottom-color: #00ff88; }
+.tip {
+	margin-top: 20px;
+	color: #888;
+	font-size: 14px;
+}
+</style>
+
+</head>
+<body>
+
+<div id="secretArea"><div id="allT">.</div></div>
+<div id="clocknow"><label id="cnT">00:00:00</label></div>
+<div id="helloWorld"><br><br><br>Fill in your feedback message !</div>
+<div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
+<div id="countdown">
+<input type="number" id="minutes" placeholder="分鐘">
+<button onclick="startTimer()">開始</button><button onclick="reStart()">重來</button>
+</div>
+<div id="uID"></div>
+	
+<script defer>
+// update clock
+const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+function showTime() {
+	  const currentDate = new Date();
+	  const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
+	  const timestamp = currentDate.toLocaleString('en-US', options);
+	  let labelElement = document.getElementById("cnT");
+	  labelElement.innerHTML = timestamp;
+	}    
+setInterval(showTime, 1000);
+showTime();
+</script>
+
+<script defer>
+// get url, replace and show page
+const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
+src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1" 
+title="titleName" frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+document.getElementById("helloWorld").onclick = function() {
+		document.getElementById("passwordOverlay").style.display = "flex";
+		document.getElementById("passwordInput").focus();
+		this.style.display = "none";
+	};
+
+const IDL = 11;
+
+function getID(url) {
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
+		const match = url.match(regex);
+		return match ? (match[1] || match[2] || match[3]) : "no";
+	}
+	
+function handleID(id){
+		if(id.length > IDL){
+			id = getID(id);
+		}
+		if (id.length === IDL){
+			const updateURL = allText.replaceAll('AAURL',id);
+			document.getElementById("allT").innerHTML = updateURL ;
+			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+id;
+			const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
+			document.getElementById("uID").innerHTML = b;
+			document.getElementById("uID").style.display = "block";
+			document.getElementById("secretArea").style.display = "block";
+			document.getElementById("countdown").style.display = "block";
+			document.getElementById("helloWorld").style.display = "none";       
+			document.getElementById("passwordOverlay").style.display = "none";
+			//		        document.body.innerHTML = updateURL;
+		}else {
+			const displayA= document.getElementById('passwordInput');
+            displayA.style.borderBottomColor = "#ff0088";
+            displayA.value = "";
+            displayA.placeholder = "訊息已送出！";
+        }	
+	}
+  
+function checkUrlPara() {
+		const lastPart = window.location.search.slice(1);
+		if ( lastPart === ""){
+			console.log("Nono");
+		}else{
+			console.log(lastPart);
+			handleID(lastPart);
+		}
+	}
+	
+document.getElementById("passwordInput").onkeydown = async function(e) {
+	    if (e.key === "Enter") {
+			let id = this.value;
+			console.log(id);
+			handleID(id);
+	    }else{
+			console.log(e.key);
+		}
+	};
+
+function bntStart(){
+		const id = document.getElementById("passwordInput").value;
+		console.log(id);
+		handleID(id);
+	}
+
+checkUrlPara();
+
+function reStart(){
+		console.log('重來了！');
+		location.reload();
+	}
+
+function startTimer() {
+		const minutes = parseFloat(document.getElementById('minutes').value);
+		if (isNaN(minutes) || minutes <= 0) {
+			alert('請輸入正數！');
+			return;
+		}
+		document.getElementById('minutes').placeholder = "開始" + minutes;
+		document.getElementById('minutes').value = "";
+		const ms = minutes * 60 * 1000;
+		setTimeout(() => {
+			console.log('時間到了！');
+			location.reload();
+		}, ms);
+	}
+	
+</script>
+
+</body>
+</html>
