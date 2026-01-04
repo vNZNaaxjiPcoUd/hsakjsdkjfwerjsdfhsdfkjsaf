@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<base target="_blank">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://h.jwint.net/styles.css">
+	<link rel="manifest" href="https://h.jwint.net/manifest.json">
+	<title>Show</title>
+</head>
+<body>
+
+<div id="secretArea"><div id="allT">.</div></div>
+	
+<script defer>
+// get url, replace and show page
+const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
+src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1" 
+title="titleName" frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+function getID(url) {
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
+		const match = url.match(regex);
+		return match ? (match[1] || match[2] || match[3]) : "no";
+	}
+	
+function handleID(id){
+		if(id.length > 11){
+			id = getID(id);
+		}
+		if (id.length === 11){
+			const updateURL = allText.replaceAll('AAURL',id);
+			document.getElementById("allT").innerHTML = updateURL ;
+
+		}else {
+			document.getElementById("allT").innerHTML = "Hello World" ;
+        }	
+    	document.getElementById("secretArea").style.display = "block";
+	}
+function extractMiddle(str) {
+        const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
+        const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
+        
+        // 檢查是否以 prefix 開頭、以 suffix 結尾
+        if (str.startsWith(prefix) && str.endsWith(suffix)) {
+            // 取出中間部分
+            const middle = str.slice(prefix.length, -suffix.length);
+            return middle;
+        } else {
+            console.log("nomatch");
+            return "nomatch";
+        }
+    }
+
+function checkUrlPara() {
+		const lastPart = window.location.search.slice(1);
+		if ( lastPart === ""){
+			document.getElementById("allT").innerHTML = "Nono";
+            document.getElementById("secretArea").style.display = "block";
+		}else{
+			console.log(lastPart);
+            const pID = extractMiddle(lastPart);
+            console.log(pID);
+			handleID(pID);
+		}
+	}
+
+checkUrlPara();
+</script>
+
+</body>
+</html>
