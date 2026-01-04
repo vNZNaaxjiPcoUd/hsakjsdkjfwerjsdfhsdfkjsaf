@@ -57,7 +57,7 @@ title: 1.View youtube and loop
 <div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
 <div id="countdown">
 <input type="number" id="minutes" placeholder="分鐘">
-<button onclick="startTimer()">開始</button>
+<button onclick="startTimer()">開始</button><button onclick="reStart()">重來</button>
 </div>
 	
 <script defer>
@@ -146,6 +146,11 @@ function bntStart(){
 	}
 
 checkUrlPara();
+
+function reStart(){
+		console.log('重來了！');
+		location.reload();
+	}
 
 function startTimer() {
 		const minutes = parseFloat(document.getElementById('minutes').value);
