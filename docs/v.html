@@ -25,6 +25,7 @@ a.visited {
 }
 #secretArea { display: none; }
 #countdown {display: none;}
+#uID {display: none;}
 .hint { color: #888; font-size: 14px; }
 #helloWorld { display: block; }
 /*#helloWorld:hover { transform: scale(1.1); }
@@ -62,7 +63,8 @@ a.visited {
 <body>
 
 <div id="secretArea"><div id="allT">.</div></div>
-<div id="clocknow"><label id="cnT">00:00:00</label> <br> </be>[ <label id="uID">.</label> ]</div>
+<div id="clocknow"><label id="cnT">00:00:00</label></div>
+<div id="uID"></div>
 <div id="helloWorld">Fill in your feedback message !</div>
 <div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
 <div id="countdown">
@@ -112,14 +114,15 @@ function handleID(id){
 		}
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
-			document.getElementById("passwordOverlay").style.display = "none";
 			document.getElementById("allT").innerHTML = updateURL ;
 			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+id;
-			const b=`<a href="${nUrl}">${nUrl}</a>`;
+			const b=`<a href="${nUrl}">-- ${nUrl} --</a>`;
 			document.getElementById("uID").innerHTML = b;
+			document.getElementById("uID").style.display = "block";
 			document.getElementById("secretArea").style.display = "block";
 			document.getElementById("countdown").style.display = "block";
 			document.getElementById("helloWorld").style.display = "none";       
+			document.getElementById("passwordOverlay").style.display = "none";
 			//		        document.body.innerHTML = updateURL;
 		}else {
 			const displayA= document.getElementById('passwordInput');
