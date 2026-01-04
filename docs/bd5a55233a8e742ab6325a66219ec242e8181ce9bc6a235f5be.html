@@ -25,6 +25,7 @@ body {
 . . . . . . . . . . . . . . . . . . 
 <br><br>
 . . . . . . . . . . . . . . . . . . 
+<div id="uID"></div>
 
 <script defer>
 // get url, replace and show page
@@ -47,7 +48,7 @@ function handleID(id){
 		if (id.length === 11){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
-
+			document.getElementById("uID").innerHTML = id ;
 		}else {
 			document.getElementById("allT").innerHTML = "Hello World" ;
         }	
