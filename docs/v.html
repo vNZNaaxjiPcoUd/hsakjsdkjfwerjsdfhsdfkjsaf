@@ -109,13 +109,15 @@ function getID(url) {
 	}
 	
 function handleID(id){
+	    const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
+        const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
 		if(id.length > IDL){
 			id = getID(id);
 		}
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
-			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+id;
+			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
 			const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
 			document.getElementById("uID").innerHTML = b;
 			document.getElementById("uID").style.display = "block";
