@@ -97,6 +97,7 @@ referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 document.getElementById("helloWorld").onclick = function() {
 		document.getElementById("passwordOverlay").style.display = "flex";
 		document.getElementById("passwordInput").focus();
+		document.getElementById('passwordInput').value = "";
 		this.style.display = "none";
 	};
 
