@@ -95,6 +95,9 @@ checkUrlPara();
 
 function startTimer() {
 		const minutes = parseFloat(document.getElementById('minutes').value);
+		if ( minutes === 0){
+			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+		}
 		if (isNaN(minutes) || minutes <= 0) {
 			alert('請輸入正數！');
 			return;
@@ -108,12 +111,13 @@ function startTimer() {
 			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
 		}, ms);
 	}
-	
+
 setTimeout(() => {
 	console.log('時間到了！');
 	//location.reload();
 	window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
-}, 12*60*60*1000);
+	}, 12*60*60*1000);
+	
 </script>
 
 </body>
