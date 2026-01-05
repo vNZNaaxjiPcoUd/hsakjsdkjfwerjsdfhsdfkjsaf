@@ -25,7 +25,7 @@ a.visited {
 }
 #secretArea { display: none; }
 #countdown {display: none;}
-#uID {display: none;}
+#showID {display: none;}
 .hint { color: #888; font-size: 14px; }
 #helloWorld { display: block; }
 /*#helloWorld:hover { transform: scale(1.1); }
@@ -68,9 +68,9 @@ a.visited {
 <div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
 <div id="countdown">
 <input type="number" id="minutes" placeholder="分鐘">
-<button onclick="startTimer()">開始</button><button onclick="reStart()">重來</button>
+<button onclick="startTimer()">開始</button>
 </div>
-<div id="uID"></div>
+<div id="showID"><div id="uID"></div><br><br><button onclick="reStart()">重來</button></div>
 	
 <script defer>
 // update clock
@@ -121,7 +121,7 @@ function handleID(id){
 			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
 			const b=`<br><a href="${nUrl}">Message wait to send .......</a><br>`;
 			document.getElementById("uID").innerHTML = b;
-			document.getElementById("uID").style.display = "block";
+			document.getElementById("showID").style.display = "block";
 			//document.getElementById("secretArea").style.display = "block";
 			//document.getElementById("countdown").style.display = "block";
 			document.getElementById("helloWorld").style.display = "none";       
