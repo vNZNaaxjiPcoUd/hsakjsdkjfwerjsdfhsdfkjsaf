@@ -57,7 +57,6 @@ function handleID(id){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
 			document.getElementById("uID").innerHTML = id ;
-			nowID = id;
 		}else {
 			document.getElementById("allT").innerHTML = "Hello World" ;
         }	
@@ -70,6 +69,7 @@ function extractMiddle(str) {
         // 檢查是否以 prefix 開頭、以 suffix 結尾
         if (str.startsWith(prefix) && str.endsWith(suffix)) {
             // 取出中間部分
+			nowID = str;
             const middle = str.slice(prefix.length, -suffix.length);
             return middle;
         } else {
