@@ -95,6 +95,9 @@ checkUrlPara();
 
 function startTimer() {
 		const minutes = parseFloat(document.getElementById('minutes').value);
+		if ( minutes === 0){
+			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+		}
 		if (isNaN(minutes) || minutes <= 0) {
 			alert('請輸入正數！');
 			return;
