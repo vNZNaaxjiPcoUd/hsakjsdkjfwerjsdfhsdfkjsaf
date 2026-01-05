@@ -41,6 +41,8 @@ title="titleName" frameborder="0"
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
+let nowID = ""; 
+	
 function getID(url) {
 		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
 		const match = url.match(regex);
@@ -55,6 +57,7 @@ function handleID(id){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
 			document.getElementById("uID").innerHTML = id ;
+			nowID = id;
 		}else {
 			document.getElementById("allT").innerHTML = "Hello World" ;
         }	
@@ -102,7 +105,7 @@ function startTimer() {
 		setTimeout(() => {
 			console.log('時間到了！');
 			//location.reload();
-			window.location.href = "https://h.jwint.net/HelloWorld";
+			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
 		}, ms);
 	}
 </script>
