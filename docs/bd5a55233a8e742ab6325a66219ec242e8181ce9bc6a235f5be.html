@@ -56,7 +56,8 @@ function handleID(id){
 		if (id.length === 11){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
-			document.getElementById("uID").innerHTML = id ;
+			nUrl = "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+nowID;
+			document.getElementById("uID").innerHTML = `<a href="${nUrl}">${id}</a>` ;
 		}else {
 			document.getElementById("allT").innerHTML = "Hello World" ;
         }	
