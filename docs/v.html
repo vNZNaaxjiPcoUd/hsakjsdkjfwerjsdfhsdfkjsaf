@@ -70,8 +70,8 @@ a.visited {
 <input type="number" id="minutes" placeholder="min">
 <button onclick="startTimer()">Start</button>
 </div>
-<div id="showID"><div id="uID"></div><br><br><button onclick="reStart()">reload</button></div>
-<div id="keep"><a href="https://v.jwint.net/qm">keep</a></div>
+<div id="showID"><div id="uID"></div><br><br><button onclick="goKeep()">keep</button><button onclick="reStart()">reload</button></div>
+
 	
 <script defer>
 // update clock
@@ -166,6 +166,10 @@ function bntStart(){
 
 //checkUrlPara();
 
+function goKeep(){
+		console.log('go keep！');
+		window.location.href = "https://v.jwint.net/qm";
+	}
 function reStart(){
 		console.log('重來了！');
 		location.reload();
