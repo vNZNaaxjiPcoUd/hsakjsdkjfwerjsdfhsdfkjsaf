@@ -80,26 +80,29 @@ a.visited {
 </head>
 <body>
 
-<div id="secretArea"><div id="allT">.</div><br></div>
+<div id="secretArea">
+	<div id="allT">.</div>
+	<br>
+</div>
 <div id="helloWorld">Feedback message !</div>
-<div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
-<div id="countdown">
-<br>
-<br>
-<input type="number" id="minutes" placeholder="min">
-<button onclick="startTimer()">Start</button>
-</div>
 <div id="showID">
-<div id="uID"></div>
-<br>
-<br>
-<button class="glass-btn" onclick="window.open('https://v.jwint.net/qm', '_blank')">keep</button> 
-<button class="glass-btn" onclick="window.open('https://h.jwint.net/v', '_blank')">new</button> 
-<button class="glass-btn" onclick="reStart()">reload</button>
-<br>
-<br>
+	<br>
+	<div id="uID"></div>
+	<br>
+	<button class="glass-btn" onclick="window.open('https://v.jwint.net/qm', '_blank')">keep</button> 
+	<button class="glass-btn" onclick="window.open('https://h.jwint.net/v', '_blank')">new</button> 
+	<button class="glass-btn" onclick="reStart()">reload</button>
 </div>
-<div id="clocknow"><label id="cnT">00:00:00</label></div>
+<div id="clocknow">
+	<br>
+	<label id="cnT">00:00:00</label>
+</div>
+<div id="countdown">
+	<br>
+	<input type="number" id="minutes" placeholder="min">
+	<button onclick="startTimer()">Start</button>
+</div>
+<div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
 
 	
 <script defer>
