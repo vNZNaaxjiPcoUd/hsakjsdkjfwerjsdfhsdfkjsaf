@@ -136,14 +136,14 @@ function handleID(id){
 		}
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
-			//document.getElementById("allT").innerHTML = updateURL ;
+			document.getElementById("allT").innerHTML = updateURL ;
 			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
 			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
 			const b=`<br><a href="${nUrl}">The message is being processed ..........</a><br>`;
 			document.getElementById("uID").innerHTML = b;
 			document.getElementById("showID").style.display = "block";
-			//document.getElementById("secretArea").style.display = "block";
-			//document.getElementById("countdown").style.display = "block";
+			document.getElementById("secretArea").style.display = "block";
+			document.getElementById("countdown").style.display = "block";
 			document.getElementById("helloWorld").style.display = "block";
 			document.getElementById('passwordInput').value = "";
 			document.getElementById("passwordOverlay").style.display = "none";
