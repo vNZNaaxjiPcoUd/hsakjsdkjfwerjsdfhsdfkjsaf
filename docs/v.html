@@ -273,8 +273,9 @@ function setCookie(name, value, days) {
 }
 
 // 使用範例：寫入 A，有效期 30 天
+console.log("使用範例：寫入 A，有效期 30 天 :",A);
 let A = "sdsdlkjflijsdkljsfd";
-setCookie("user_session", A, 30);
+setCookie("myToken", A, 30);
 
 function getCookie(name) {
   const value = `; ${document.cookie}`;
@@ -283,11 +284,9 @@ function getCookie(name) {
   return null;
 }
 
-// 使用範例
-let A = getCookie("myToken");
-console.log("讀取到的值為:", A);
+let B = getCookie("myToken");
+console.log("讀取到的值為:", B);
 
-	
 </script>
 
 </body>
