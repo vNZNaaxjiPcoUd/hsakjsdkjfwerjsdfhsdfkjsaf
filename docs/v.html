@@ -80,19 +80,23 @@ a.visited {
 </head>
 <body>
 
-<div id="secretArea"><div id="allT">.</div></div>
-<div id="helloWorld"><br>Feedback message !<br></div>
+<div id="secretArea"><div id="allT">.</div><br></div>
+<div id="helloWorld">Feedback message !</div>
 <div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off"><button onclick="bntStart()">send</button></div>
 <div id="countdown">
+<br>
+<br>
 <input type="number" id="minutes" placeholder="min">
 <button onclick="startTimer()">Start</button>
 </div>
 <div id="showID">
 <div id="uID"></div>
 <br>
+<br>
 <button class="glass-btn" onclick="window.open('https://v.jwint.net/qm', '_blank')">keep</button> 
 <button class="glass-btn" onclick="window.open('https://h.jwint.net/v', '_blank')">new</button> 
 <button class="glass-btn" onclick="reStart()">reload</button>
+<br>
 <br>
 </div>
 <div id="clocknow"><label id="cnT">00:00:00</label></div>
@@ -215,6 +219,45 @@ function startTimer() {
 			location.reload();
 		}, ms);
 	}
+	
+const showAllCookies = () => {
+  const cookieStr = document.cookie;
+  if (!cookieStr) {
+    console.log("當前沒有可讀取的 Cookie");
+    return;
+  }
+
+  const cookies = cookieStr.split(';').reduce((acc, cookie) => {
+    const [key, value] = cookie.split('=').map(c => c.trim());
+    acc[key] = decodeURIComponent(value);
+    return acc;
+  }, {});
+
+  console.table(cookies); // 使用表格形式呈現，非常清晰
+};
+
+showAllCookies();
+
+const clearAllCookies = () => {
+  const cookies = document.cookie.split(";");
+
+  for (let i = 0; i < cookies.length; i++) {
+    const cookie = cookies[i];
+    const eqPos = cookie.indexOf("=");
+    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+    
+    // 核心邏輯：將 expires 設為 1970 年，並強制路徑為根目錄 /
+    // 注意：如果原 Cookie 有指定特定的 domain，這行可能無效
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+    
+    // 針對可能有指定當前網域的情況進行額外嘗試
+    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}`;
+  }
+  
+  console.log("清除指令已執行，請檢查 Application 頁籤。");
+};
+
+clearAllCookies();
 	
 </script>
 
