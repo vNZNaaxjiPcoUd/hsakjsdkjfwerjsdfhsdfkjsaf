@@ -121,10 +121,17 @@ showTime();
 
 <script defer>
 // get url, replace and show page
+/*
 const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
 src="https://www.youtube.com/embed/AAURL?playlist=AAURL" 
 title="titleName" frameborder="0" 
 allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+*/
+
+const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
+src="https://www.youtube-nocookie.com/embed/AAURL?playlist=AAURL" 
+title="titleName" frameborder="0" 
 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
 document.getElementById("helloWorld").onclick = function() {
