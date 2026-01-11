@@ -158,7 +158,8 @@ function handleID(id){
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
 			document.getElementById("allT").innerHTML = updateURL ;
-			const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
+			const nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
+			//const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
 			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
 			const b=`<br><a href="${nUrl}">The message is being processed ..........</a><br>`;
 			document.getElementById("uID").innerHTML = b;
