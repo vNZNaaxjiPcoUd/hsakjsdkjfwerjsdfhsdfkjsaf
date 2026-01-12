@@ -22,6 +22,7 @@
 </head>
 <body>
 <div id="secretArea"><div id="allT">.</div></div>
+<div id="otherInfo">
 <br><br>
 . . . . . . . . . . . . . . . . . . 
 <br><br>
@@ -36,7 +37,7 @@
 <br><br>
 <div id="uID"></div>
 <br><br><br><br>
-
+</div>
 
 <script defer>
 // get url, replace and show page
@@ -65,6 +66,7 @@ function handleID(id){
 			document.getElementById("uID").innerHTML = `<a href="${nUrl}">${id}</a>` ;
 		}else {
 			document.getElementById("allT").innerHTML = "Hello World" ;
+			document.getElementById("otherInfo").style.display = "none";
         }	
     	document.getElementById("secretArea").style.display = "block";
 	}
@@ -87,8 +89,9 @@ function extractMiddle(str) {
 function checkUrlPara() {
 		const lastPart = window.location.search.slice(1);
 		if ( lastPart === ""){
-			document.getElementById("allT").innerHTML = "Nono";
+			document.getElementById("allT").innerHTML = "hello!";
             document.getElementById("secretArea").style.display = "block";
+			document.getElementById("otherInfo").style.display = "none";
 		}else{
 			console.log(lastPart);
             const pID = extractMiddle(lastPart);
