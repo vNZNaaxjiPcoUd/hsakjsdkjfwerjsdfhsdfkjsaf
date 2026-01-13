@@ -95,6 +95,7 @@ a.visited {
 </div>
 <div id="clocknow">
 	<br>
+	<label id="startT">00:00:00</label><br>
 	<label id="cnT">00:00:00</label>
 </div>
 <div id="countdown">
@@ -115,8 +116,15 @@ function showTime() {
 	  let labelElement = document.getElementById("cnT");
 	  labelElement.innerHTML = timestamp;
 	}    
+function startTime() {
+	  const currentDate = new Date();
+	  const options = { timeZone: timeZone, hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false};
+	  const timestamp = currentDate.toLocaleString('en-US', options);
+	  let labelElement = document.getElementById("startT");
+	  labelElement.innerHTML = timestamp;
+	}    
 setInterval(showTime, 1000);
-showTime();
+startTime();
 </script>
 
 <script defer>
