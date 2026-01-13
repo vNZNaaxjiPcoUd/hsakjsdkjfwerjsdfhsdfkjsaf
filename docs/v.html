@@ -243,53 +243,53 @@ function startTimer() {
 	}
 	
 const showAllCookies = () => {
-  const cookieStr = document.cookie;
-  if (!cookieStr) {
-    console.log("當前沒有可讀取的 Cookie");
-    return;
-  }
-
-  const cookies = cookieStr.split(';').reduce((acc, cookie) => {
-    const [key, value] = cookie.split('=').map(c => c.trim());
-    acc[key] = decodeURIComponent(value);
-    return acc;
-  }, {});
-
-  console.table(cookies); // 使用表格形式呈現，非常清晰
-};
+	  const cookieStr = document.cookie;
+	  if (!cookieStr) {
+	    console.log("當前沒有可讀取的 Cookie");
+	    return;
+	  }
+	
+	  const cookies = cookieStr.split(';').reduce((acc, cookie) => {
+	    const [key, value] = cookie.split('=').map(c => c.trim());
+	    acc[key] = decodeURIComponent(value);
+	    return acc;
+	  }, {});
+	
+	  console.table(cookies); // 使用表格形式呈現，非常清晰
+	};
 
 showAllCookies();
 
 const clearAllCookies = () => {
-  const cookies = document.cookie.split(";");
-
-  for (let i = 0; i < cookies.length; i++) {
-    const cookie = cookies[i];
-    const eqPos = cookie.indexOf("=");
-    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
-    
-    // 核心邏輯：將 expires 設為 1970 年，並強制路徑為根目錄 /
-    // 注意：如果原 Cookie 有指定特定的 domain，這行可能無效
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
-    
-    // 針對可能有指定當前網域的情況進行額外嘗試
-    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}`;
-  }
-  
-  console.log("清除指令已執行，請檢查 Application 頁籤。");
-};
+	  const cookies = document.cookie.split(";");
+	
+	  for (let i = 0; i < cookies.length; i++) {
+	    const cookie = cookies[i];
+	    const eqPos = cookie.indexOf("=");
+	    const name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+	    
+	    // 核心邏輯：將 expires 設為 1970 年，並強制路徑為根目錄 /
+	    // 注意：如果原 Cookie 有指定特定的 domain，這行可能無效
+	    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+	    
+	    // 針對可能有指定當前網域的情況進行額外嘗試
+	    document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/; domain=${window.location.hostname}`;
+	  }
+	  
+	  console.log("清除指令已執行，請檢查 Application 頁籤。");
+	};
 
 clearAllCookies();
 
 function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        let date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (value || "") + expires + "; path=/";
-}
+	    let expires = "";
+	    if (days) {
+	        let date = new Date();
+	        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+	        expires = "; expires=" + date.toUTCString();
+	    }
+	    document.cookie = name + "=" + (value || "") + expires + "; path=/";
+	}
 
 // 使用範例：寫入 A，有效期 30 天
 let A = "sdsdlkjflijsdkljsfd";
@@ -297,14 +297,23 @@ setCookie("myToken", A, 30);
 console.log("使用範例：寫入 A，有效期 30 天 :",A);
 
 function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
+	  const value = `; ${document.cookie}`;
+	  const parts = value.split(`; ${name}=`);
+	  if (parts.length === 2) return parts.pop().split(';').shift();
+	  return null;
+	}
 
 let B = getCookie("myToken");
 console.log("讀取到的值為:", B);
+
+function randomString(length = 20) {
+	  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+	  let result = "";
+	  for (let i = 0; i < length; i++) {
+	    result += chars.charAt(Math.floor(Math.random() * chars.length));
+	  }
+	  return result;
+	}
 
 </script>
 
