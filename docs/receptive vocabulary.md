@@ -67,6 +67,7 @@
 這不是單看單字量，而是透過標準化考試來證明整體英文能力（聽、說、讀、寫）。以下是2025–2026年最新的主流要求總結（基於頂尖到中上大學的實際數據）：
 
 ### 常見英文能力考試最低門檻（國際學生適用）
+
 | 考試類型          | 最低要求（一般大學）          | 競爭性強/頂尖大學（如CMU、Stanford、Berkeley、UIUC、Georgia Tech等） | 備註說明                                                                 |
 |-------------------|-------------------------------|-----------------------------------------------------------------------|--------------------------------------------------------------------------|
 | **TOEFL iBT**    | 80–90                        | 100+（有些部門要求Speaking 22–27+）                                  | 最常見的考試；Georgia Tech要求100，UCSD 85，Virginia 90，UT Dallas 80 |
@@ -99,6 +100,47 @@
 - **目標分數**：想衝頂尖校 → TOEFL 105+ / IELTS 7.5+（Speaking 7.0+最保險）。
 - **現在準備**：CS碩士申請除了GPA、背景、SOP、推薦信，英文分數是硬門檻，低分常被直接刷掉。
 - 有些學校Fall 2026開始TOEFL計分方式有變（新量表），但目前主流還是舊的0-120分。
+
+# **42,000 個字典單字（lemmas）的完整列表**，實際上**不存在公開的免費完整版**，因為這個數字來自2016年Brysbaert et al.的研究（大型眾包測試，基於超過百萬人參與的詞彙辨識實驗），他們使用的62,000個詞列表是用來測試的刺激詞（stimuli），但**原始完整列表並未公開發布**（研究者提到避免版權問題，自行彙整而不依賴特定字典）。
+
+這個42,000是**平均值**（20歲美國母語者認識的lemmas數），範圍從約27,000到51,700不等，不是一個固定、官方的「字典」列表。研究團隊後續擴展到更多詞（English Crowdsourcing Project，現在超過62,000詞），但完整raw list仍限於研究使用，無法直接下載完整42k版。
+
+### 最接近的公開可用大型lemmas列表（免費下載，接近或超過40,000）
+以下是目前最可靠、公開的替代方案（基於大型語料庫如COCA、SUBTLEX等，聚焦lemmas/base forms，不含專有名詞或太多變形）：
+
+1. **COCA Top 60,000 Lemmas（最推薦，接近42k水平）**  
+   - 來源：Corpus of Contemporary American English (COCA)，美國當代最大平衡語料庫。  
+   - 提供top 60,000 lemmas（包含頻率、dispersion等資訊）。  
+   - 免費下載：http://www.wordfrequency.info/files/wordlist_60k.xls （Excel格式，每7個詞取樣，但完整版需購買；免費樣本已很實用）  
+   - 為什麼接近？COCA lemmas列表是現代研究中最常參考的，涵蓋日常到學術詞，平均母語成人認識的很大部分就在前40–50k內。
+
+2. **Brysbaert concreteness norms（37,000+ lemmas）**  
+   - 2014年Brysbaert團隊發布的37,058個一般已知English lemmas（加上2,896個multiword），附concreteness評分。  
+   - 這是他們2016年42k估計的子集（只包含至少85%的人認識的詞）。  
+   - 下載：可在ResearchGate或Springer搜"Concreteness ratings for 40 thousand generally known English word lemmas"，常有PDF附表或數據連結（免費學術下載）。
+
+3. **其他大型公開word lists（lemmas或近似，40k+）**  
+   - GitHub dwyl/english-words：479,000+ words（包含大量lemmas，但混雜變形和罕見詞；words_alpha.txt是最乾淨的字母排序列表）。  
+     → https://github.com/dwyl/english-words  
+   - 12dicts項目（Kevin Atkinson）：有lemmatized very large lists（如2+2+3lem，超過數十萬，但可過濾到常見40k）。  
+     → http://wordlist.aspell.net/12dicts  
+   - Wiktionary frequency lists：top 60,000 lemmas sampled from COCA（免費頁面可瀏覽/下載部分）。  
+     → https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/English  
+
+### 快速比較表
+
+| 列表名稱                  | 大小（約）     | 是否lemmas？ | 免費？ | 最適合用途                  | 連結/來源                          |
+|---------------------------|----------------|--------------|--------|-----------------------------|------------------------------------|
+| COCA Top 60k             | 60,000        | 是          | 部分免費 | 最接近母語者實際認識範圍   | wordfrequency.info                |
+| Brysbaert Concreteness   | 37,000+       | 是          | 是     | 研究級、一般已知詞         | Springer/ResearchGate             |
+| dwyl/english-words       | 479,000       | 部分        | 是     | 廣泛字典用途（可過濾）     | GitHub                            |
+| Google 10k / 常見列表    | 10,000        | 是          | 是     | 只適合基礎，不夠42k        | GitHub first20hours               |
+
+### 結論與建議
+- **沒有一個公開的「正好42,000個」完整列表**，因為它是統計平均，不是固定字典。  
+- 如果你想練習或測試接近這個水平的詞彙，建議從**COCA 60k**或**Brysbaert 37k**開始（前者更全面，後者更聚焦「一般人認識」的詞）。  
+- 想自己建一個？可以用Python從GitHub下載大列表 + lemmatize（用nltk/spacy），過濾頻率高的前40–50k。  
+- 如果你需要特定領域（如CS、學術）、或想測自己的詞彙量，推薦直接去http://vocabulary.ugent.be/ 做Brysbaert團隊的在線測試（免費，會估計你的個人大小）！
 
 
 
