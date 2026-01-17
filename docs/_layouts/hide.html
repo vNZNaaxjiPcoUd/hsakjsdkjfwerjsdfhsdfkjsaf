@@ -67,7 +67,7 @@
 	</div>
 </div>
 <div id="secretArea">
-{{ content }}
+Hello World!
 </div>
 
 
@@ -110,9 +110,8 @@ document.addEventListener("keydown", async function(e) {
             buffer.shift();
         }
         if ( await checkPassword(buffer.join(""), SALT, PASSWORD) ) {
+          document.getElementById("secretArea").innerHTML = `{{ content }}` ;
           document.getElementById("secretArea").style.display = "block";
-          //document.getElementById("helloWorld").style.display = "none";
-          //document.getElementById("passwordOverlay").style.display = "none";
           document.getElementById("Start").style.display = "none";
           document.removeEventListener("keydown", arguments.callee);
           cleanBuffer(); 
