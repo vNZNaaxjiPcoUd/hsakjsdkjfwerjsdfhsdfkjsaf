@@ -14,3 +14,4 @@ salt: d98c58e204ea4700326622e1dffffa556c9c4fc5d6cb35c1e0a3906c3b11210cdc003e0a6a
 * 味道：微酸、帶點氣泡（因為發酵會產生少量二氧化碳），有些人說像稀稀的氣泡優格
 * 開始方式：用板橋的電話連絡採購原菌團，再加上相應的牛奶，三個月後，就可以吃到好吃的Kefir。
 
+[Hide example](https://github.com/vNZNaaxjiPcoUd/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/hideTemple.md)
