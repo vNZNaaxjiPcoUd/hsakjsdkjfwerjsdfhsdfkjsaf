@@ -102,6 +102,10 @@ document.addEventListener("keydown", async function(e) {
         buffer.push(e.key.toLowerCase()); 
         if (e.key === ' ') { 
 			cleanBuffer(); 
+			msg.focus();
+			window.scrollTo({ top: 0, behavior: 'smooth' });
+			console.log("back to top");
+			updateDisplay();
 			return;
 		}
         if (buffer.length > MAX_BUFFER) {
@@ -127,7 +131,7 @@ function updateDisplay() {
         return;
     }
     const masked = '•'.repeat(MAX_BUFFER-buffer.length);
-	msg.textContent = masked;
+	msg.textContent = buffer[buffer.length-1]+masked;
 	//msg.textContent =  '•'.repeat(MAX_BUFFER);
 }
 
