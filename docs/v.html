@@ -95,7 +95,7 @@ a.visited {
 </div>
 <div>
 	<br>
-	<a href="https://h.jwint.net/vv">large view of your message!</a>
+	<div onclick="setShowView()">large view of your message!</div>
 </div>
 <div id="clocknow">
 	<br>
@@ -162,7 +162,20 @@ function getID(url) {
 		const match = url.match(regex);
 		return match ? (match[1] || match[2] || match[3]) : "no";
 	}
-	
+
+let showView = 0;
+
+function setShowView(){
+	if ( showView === 99 ) {
+		showView = 0;
+		document.getElementById("secretArea").style.display = "none";
+	}
+	else{
+		showView = 99;
+		document.getElementById("secretArea").style.display = "block";
+	}
+}
+
 function handleID(id){
 	    const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
         const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
@@ -189,13 +202,12 @@ function handleID(id){
 		}
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
-			//document.getElementById("allT").innerHTML = updateURL ;
+
+			document.getElementById("allT").innerHTML = updateURL ;
 			//document.getElementById("secretArea").style.display = "block";
 
-            let nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
-			//const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
-			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
-			
+            let nUrl= "";
+			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
 			const b = `<a href="${nUrl}">this message is being processed. looping and keep looping to trans!</a>`;
 			
 			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
