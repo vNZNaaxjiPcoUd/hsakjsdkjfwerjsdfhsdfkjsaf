@@ -6,5 +6,5 @@ salt: d98c58e204ea4700326622e1dffffa556c9c4fc5d6cb35c1e0a3906c3b11210cdc003e0a6a
 1.home maintain.
 =================
 
-- [9826](https://h.jwint.net/9826.html)
-- [729F](https://h.jwint.net/729F)
+- [9826](/9826)
+- [729F](/729F)
