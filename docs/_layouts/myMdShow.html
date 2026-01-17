@@ -80,8 +80,8 @@
 <script>
 // Markdown 來源 URL
 const mdSrc = "{{ page.url }}";
-
-const markdownUrl = mdSrc.replace(/\.html$/, ".md");
+const baseH = "https://h.jwint.net"
+const markdownUrl = baseH + mdSrc.replace(/\.html$/, ".md");
 
 // 建立 Showdown 轉換器
 const converter = new showdown.Converter({
@@ -97,6 +97,7 @@ const converter = new showdown.Converter({
 
 async function loadAndRenderMarkdown() {
   console.log(mdSrc);
+  console.log(markdownUrl);
   try {
     const response = await fetch(markdownUrl);
     
