@@ -79,9 +79,8 @@
 
 <script>
 // Markdown 來源 URL
-const mdSrc = "{{ page.url }}";
-const baseH = "https://h.jwint.net"
-const markdownUrl = baseH + mdSrc.replace(/\.html$/, ".md");
+const mdSrc = "{{ page.srcMd }}";
+const markdownUrl = mdSrc.replace(/\.html$/, ".md");
 
 // 建立 Showdown 轉換器
 const converter = new showdown.Converter({
