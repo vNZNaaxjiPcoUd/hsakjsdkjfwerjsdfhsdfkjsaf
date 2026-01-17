@@ -43,7 +43,7 @@ a.visited {
 
 #secretArea { display: none; }
 #countdown {display: none;}
-#showID {display: none;}
+#showID {display: block;}
 .hint { color: #888; font-size: 14px; }
 #helloWorld { display: block; }
 /*#helloWorld:hover { transform: scale(1.1); }
@@ -89,9 +89,8 @@ a.visited {
 	<br>
 	<div id="uID"></div>
 	<br>
-	<button class="glass-btn" onclick="window.open('https://v.jwint.net/zzz240424143118', '_blank')">ptqm</button> 
-	<button class="glass-btn" onclick="window.open('https://h.jwint.net/v', '_blank')">new tab</button> 
-	<button class="glass-btn" onclick="reStart()">reload</button>
+	<button class="glass-btn" onclick="window.open('https://v.jwint.net/zzz240424143118', '_blank')">ptqm</button>  
+	<button class="glass-btn" onclick="window.open('https://h.jwint.net/vv', '_blank')">large</button>
 </div>
 <div id="clocknow">
 	<br>
@@ -124,7 +123,8 @@ function startTime() {
 	  labelElement.innerHTML = timestamp;
 	}    
 //setInterval(showTime, 1000);
-showTime();
+//showTime();
+document.getElementById("cnT").style.display = "none"; 
 startTime();
 </script>
 
@@ -193,20 +193,22 @@ function handleID(id){
 		}
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
-			document.getElementById("allT").innerHTML = updateURL ;
-			const nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
+			//document.getElementById("allT").innerHTML = updateURL ;
+			//document.getElementById("secretArea").style.display = "block";
+
+            const nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
 			//const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
 			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
 			const b=`<br><a href="${nUrl}">The message is being processed ..........</a><br>`;
-			//document.getElementById("uID").innerHTML = b;
-			//document.getElementById("secretArea").style.display = "block";
+			document.getElementById("uID").innerHTML = b;
+            document.getElementById("showID").style.display = "block";
 
-      document.getElementById("showID").style.display = "block";
-			document.getElementById("countdown").style.display = "block";
+            //document.getElementById("countdown").style.display = "block";
 			document.getElementById("helloWorld").style.display = "block";
 			document.getElementById('passwordInput').value = "";
 			document.getElementById("passwordOverlay").style.display = "none";
-			//		        document.body.innerHTML = updateURL;
+            startTime();
+			//document.body.innerHTML = updateURL;
 		}else {
 			const displayA= document.getElementById('passwordInput');
             displayA.style.borderBottomColor = "#ff0088";
