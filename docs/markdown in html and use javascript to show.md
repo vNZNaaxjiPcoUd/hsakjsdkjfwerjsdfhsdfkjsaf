@@ -1,6 +1,7 @@
 ---
 title: markdown in html and use javascript to show
 layout: empty
+srcM: https://h.jwint.net/Google%20DDNS.html
 ---
 <html lang="zh-TW">
 <head>
