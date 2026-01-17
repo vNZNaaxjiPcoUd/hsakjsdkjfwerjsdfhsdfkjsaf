@@ -60,7 +60,7 @@
 </head>
 <body>
 <div id="Start">
-	<div id="helloWorld"><hr></div>
+	<div id="keyIn"><hr></div>
 	<div><iframe src="https://h.jwint.net/UML%20now.html" style="width:100%; height:110vh; border:none;"></iframe></div>
 	<div id="passwordOverlay">
 		<input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off">
@@ -91,11 +91,9 @@ async function hashPassword(password, salt) {
 async function checkPassword(inputPassword, storedSalt, storedHash) {
     const inputHash = await hashPassword(inputPassword, storedSalt);
     if (inputHash === storedHash) {
-      //console.log("密碼正確！");
-		  return true;
+      return true;
     } else {
-      //console.log("密碼錯誤！");
-		  return false;
+      return false;
     }
 }
 
@@ -122,33 +120,29 @@ document.addEventListener("keydown", async function(e) {
     }
 });
 
-const display = document.getElementById("helloWorld");
+const msg = document.getElementById("keyIn");
 function updateDisplay() {
     if (buffer.length === 0) {
-        display.textContent = '';           // 沒輸入就清空
+        msg.textContent = ''; 
         return;
     }
-    // 最後一個字元明文顯示，其他用 • 代替
-    //const masked = '•'.repeat(buffer.length - 1) + buffer[buffer.length - 1];
     const masked = '•'.repeat(MAX_BUFFER-buffer.length);
-    //display.textContent = masked;
+	msg.textContent = masked;
+	//msg.textContent =  '•'.repeat(MAX_BUFFER);
 }
-//display.textContent =  '•'.repeat(MAX_BUFFER);
-//display.textContent =  '•'.repeat(MAX_BUFFER);
+
 	
-document.getElementById("helloWorld").onclick = function() {
+msg.onclick = function() {
 	document.getElementById("passwordOverlay").style.display = "flex";
     document.getElementById("passwordInput").focus();
-    this.style.display = "none";  // 隱藏 HelloWorld
+    this.style.display = "none";
 	cleanBuffer(); 
 };
 
 document.getElementById("passwordInput").onkeydown = async function(e) {
     if (e.key === "Enter") {
         if (await checkPassword(this.value, SALT, PASSWORD)) {
-            //document.getElementById("passwordOverlay").style.display = "none";
             document.getElementById("secretArea").style.display = "block";
-            //document.getElementById("helloWorld").style.display = "none";
             document.getElementById("Start").style.display = "none";
         } else {
             this.style.borderBottomColor = "#ff0088";
@@ -159,8 +153,6 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
     }
 };
 
-
 </script>
 </body>
-
 </html>
