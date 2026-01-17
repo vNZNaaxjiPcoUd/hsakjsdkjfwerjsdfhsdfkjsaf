@@ -2,7 +2,6 @@
 title: markdown in html and use javascript to show
 layout: empty
 ---
-<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
