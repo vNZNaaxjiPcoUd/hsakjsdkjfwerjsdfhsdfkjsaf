@@ -169,29 +169,20 @@ function handleID(id){
 
 	    clearAllCookies();
 
-		if(id === "test")
-			id = "wM0g8EoUZ_E" ;
-
-		if( id === "abc" )
-			id = "iipR5yUp36o" ;
-
-		if( id === "sea" )
-			id = "NSXavEj1R9E" ;		
-	
-		if( id === "500" )
-			id = "Uk3aOuBV6i0" ;		
-	
-		if( id === "sing" )
-			id = "fzyO3fLV5O0" ;		
-	
-		if( id === "run" )
-			id = "KyT4qSK8lJo" ;		
-
-		if( id === "eng" )
-			id = "MvVTk0LX6fs" ;		
-
-		if( id === "qin" )
-			id = "XWmb1BYNOLg" ;		
+		const idMap = {
+		  "test": "wM0g8EoUZ_E",   // 華視
+		  "abc":  "iipR5yUp36o",   // ABC news
+		  "sea":  "NSXavEj1R9E",   // 海 聲
+		  "500":  "Uk3aOuBV6i0",   // 500
+		  "sing": "fzyO3fLV5O0",   // 貝多芬合唱
+		  "run":  "KyT4qSK8lJo",   // 地震
+		  "eng":  "MvVTk4LX6fs",   // 英文句
+		  "qin":  "XWmb1BYNOLg",   // 蜀中琴韻
+		  "dong": "t8hTKQeLHqk",   // 東海漁歌
+		};
+		
+		// 使用方式
+		id = idMap[id] || id;  // 如果沒找到就保持原值
 
 		if(id.length > IDL){
 			id = getID(id);
