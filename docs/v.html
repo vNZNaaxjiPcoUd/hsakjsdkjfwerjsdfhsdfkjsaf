@@ -198,11 +198,17 @@ function handleID(id){
 			//document.getElementById("allT").innerHTML = updateURL ;
 			//document.getElementById("secretArea").style.display = "block";
 
-            const nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
+            let nUrl= "https://h.jwint.net/b?"+prefix+id+suffix;
 			//const nUrl= "https://h.jwint.net/bd5a55233a8e742ab6325a66219ec242e8181ce9bc6a235f5be?"+prefix+id+suffix;
 			//const b=`<br><a href="${nUrl}">${nUrl}</a><br>`;
-			const b=`<br><a href="${nUrl}">this message is being processed. please wait for customer service to reply!</a><br>`;
-			document.getElementById("uID").innerHTML = b;
+			
+			const b = `<br><a href="${nUrl}">this message is being processed. looping and keep looping to trans!</a><br>`;
+			
+			const nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
+			const c = `<br><a href="${nUrl}">A one-time message analysis result!</a><br>`;
+			
+			const bc= b+c;
+			document.getElementById("uID").innerHTML = bc;
             document.getElementById("showID").style.display = "block";
 
             //document.getElementById("countdown").style.display = "block";
