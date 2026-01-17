@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<base target="_blank">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Show</title>
+	<style>
+	body {
+	    font-family: 'Inter', sans-serif;
+	    font-size: 16px; /* 基礎文字大小 */
+	    color: #f0f0f0; /* 淺灰文字，適應黑底 */
+	    background-color: #000000; /* 純黑背景 */
+	}
+	a,
+	a.visited {
+		color: inherit;
+		text-decoration: none;
+	}
+	</style>
+</head>
+<body>
+<div id="secretArea"><div id="allT">.</div></div>
+<div id="otherInfo">
+<br><br>
+. 
+<br><br>
+.  
+<br><br>
+<div id="countdown">
+<input type="number" id="minutes" placeholder="訊息內容">
+<button onclick="startTimer()">發送</button>
+</div>
+<br><br>
+. .  
+<br><br>
+<div id="uID"></div>
+<br><br>
+<div id="closeWindow">
+	<button id="closeWindowBnt" onclick="window.close()">Close</button>
+</div>
+<br><br>
+</div>
+
+<script defer>
+// get url, replace and show page
+const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
+src="https://www.youtube.com/embed/AAURL?playlist=AAURL" 
+title="titleName" frameborder="0" 
+allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" 
+referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
+
+let nowID = ""; 
+	
+function getID(url) {
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
+		const match = url.match(regex);
+		return match ? (match[1] || match[2] || match[3]) : "no";
+	}
+	
+function handleID(id){
+		if(id.length > 11){
+			id = getID(id);
+		}
+		if (id.length === 11){
+			const updateURL = allText.replaceAll('AAURL',id);
+			document.getElementById("allT").innerHTML = updateURL ;
+			nUrl = "https://h.jwint.net/b?"+nowID;
+			document.getElementById("uID").innerHTML = `<a href="${nUrl}">${id}</a>` ;
+		}else {
+			document.getElementById("allT").innerHTML = "Hello World" ;
+			document.getElementById("otherInfo").style.display = "none";
+        }	
+    	document.getElementById("secretArea").style.display = "block";
+	}
+function extractMiddle(str) {
+        const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
+        const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
+        
+        // 檢查是否以 prefix 開頭、以 suffix 結尾
+        if (str.startsWith(prefix) && str.endsWith(suffix)) {
+            // 取出中間部分
+			nowID = str;
+            const middle = str.slice(prefix.length, -suffix.length);
+            return middle;
+        } else {
+            console.log("nomatch");
+            return "nomatch";
+        }
+    }
+
+function checkUrlPara() {
+		const lastPart = window.location.search.slice(1);
+		if ( lastPart === ""){
+			document.getElementById("allT").innerHTML = "hello!";
+            document.getElementById("secretArea").style.display = "block";
+			document.getElementById("otherInfo").style.display = "none";
+		}else{
+			console.log(lastPart);
+            const pID = extractMiddle(lastPart);
+            console.log(pID);
+			handleID(pID);
+		}
+	}
+
+checkUrlPara();
+
+function startTimer() {
+		const minutes = parseFloat(document.getElementById('minutes').value);
+		if ( minutes === 0){
+			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+		}
+		if (isNaN(minutes) || minutes <= 0) {
+			alert('請輸入正數！');
+			return;
+		}
+		document.getElementById('minutes').placeholder = "開始" + minutes;
+		document.getElementById('minutes').value = "";
+		const ms = minutes * 60 * 1000;
+		setTimeout(() => {
+			console.log('時間到了！');
+			//location.reload();
+			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+		}, ms);
+	}
+
+	/*
+setTimeout(() => {
+	console.log('時間到了！');
+	//location.reload();
+	window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+	}, 12*60*60*1000);
+	*/
+</script>
+
+</body>
+</html>
