@@ -101,10 +101,9 @@ document.addEventListener("keydown", async function(e) {
     if (e.key.length === 1) {
         buffer.push(e.key.toLowerCase()); 
         if (e.key === ' ') { 
+			e.preventDefault();
 			cleanBuffer(); 
-			msg.focus();
 			window.scrollTo({ top: 0, behavior: 'smooth' });
-			console.log("back to top");
 			updateDisplay();
 			return;
 		}
