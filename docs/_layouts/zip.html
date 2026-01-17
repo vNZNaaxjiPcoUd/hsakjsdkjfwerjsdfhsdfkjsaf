@@ -9,19 +9,13 @@
 </head>
 <body>
 <div id="lockScreen">
-	<h2>
-    <p>Allo</p>
 	<div> {{ content }} </div>
-    <input type="password" id="password" placeholder="here is" autocomplete="off" autofocus>
-    <br>
+    <input type="password" id="password" placeholder="here" autocomplete="off" autofocus>
     <button onclick="unlock()">show</button>
-	</h2>
 </div>
 
-<!--- <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script> --->
 <script src="/static/crypto-js.min.js"></script>
 <script>
-
 const ENCRYPTED_CONTENT = "{{ page.zip }}"; 
 
 function unlock() {
@@ -34,11 +28,10 @@ function unlock() {
     try {
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
-		//console.log(originalHTML);
+		
         if (originalHTML) {  
             document.body.innerHTML = originalHTML;
         } else {
-            //throw new Error();
 			document.getElementById("password").value = "";
 			document.body.innerHTML = "<h2>Hello World!</h2>";
         }
