@@ -129,8 +129,8 @@ function updateDisplay() {
         msg.textContent = ''; 
         return;
     }
-    const masked = '•'.repeat(MAX_BUFFER-buffer.length);
-	msg.textContent = buffer[buffer.length-1]+masked;
+    //const masked = '•'.repeat(MAX_BUFFER-buffer.length);
+	msg.textContent = buffer[buffer.length-1];
 	//msg.textContent =  '•'.repeat(MAX_BUFFER);
 }
 
