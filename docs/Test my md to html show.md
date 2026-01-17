@@ -1,5 +1,6 @@
 ---
 layout: myMdShow
+mdSrc: https://h.jwint.net/Google%20DDNS.html
 ---
 # Test my md to html show
 
