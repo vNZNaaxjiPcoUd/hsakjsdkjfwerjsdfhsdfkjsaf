@@ -205,16 +205,16 @@ function handleID(id){
 			const updateURL = allText.replaceAll('AAURL',id);
 
 			document.getElementById("allT").innerHTML = updateURL ;
-			//document.getElementById("secretArea").style.display = "block";
+			//document.getElementById("secretArea").style.display = "block"; // do by button
 
             let nUrl= "";
 			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
 			const b = `<a href="${nUrl}">this message is being processed. looping and keep looping to trans!</a>`;
 			
 			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
-			const c = `<br><br><a href="${nUrl}">one-time message analysis result!</a>`;
+			const c = `<a href="${nUrl}">one-time message analysis result!</a>`;
 			
-			const bc= c+b;
+			const bc= c+"<br><br>"+b;
 			document.getElementById("uID").innerHTML = bc;
             document.getElementById("showID").style.display = "block";
 
