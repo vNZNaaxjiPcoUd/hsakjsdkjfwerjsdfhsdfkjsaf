@@ -1,229 +1,157 @@
 ---
 title: markdown 2 html
+layout: empty
 ---
+<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown 即時預覽器</title>
+    <title>Markdown 即時預覽編輯器</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style id="user-custom-style">
+        /* 預設的結果顯示樣式 */
+        #preview {
+            padding: 20px;
+            background-color: white;
+            min-height: 100%;
+        }
+    </style>
 
     <style>
-        :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --border-color: #ddd;
-            --toolbar-bg: #f5f5f5;
-        }
-
-        [data-theme="dark"] {
-            --bg-color: #1e1e1e;
-            --text-color: #e0e0e0;
-            --border-color: #444;
-            --toolbar-bg: #2d2d2d;
-        }
-
-        body {
-            margin: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            transition: background 0.3s;
-        }
-
-        /* 工具列 */
-        .toolbar {
-            display: flex;
-            gap: 10px;
-            padding: 10px;
-            background: var(--toolbar-bg);
-            border-bottom: 1px solid var(--border-color);
-            flex-wrap: wrap;
-            align-items: center;
-        }
-
-        button, label {
-            padding: 8px 12px;
-            cursor: pointer;
-            background: #007bff;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-
-        button:hover { background: #0056b3; }
-
-        .theme-toggle { background: #6c757d; }
-
-        /* 主容器 */
-        .container {
-            display: flex;
-            height: calc(100vh - 60px);
-        }
-
-        textarea, .preview {
-            width: 50%;
-            height: 100%;
-            padding: 20px;
-            box-sizing: border-box;
-            overflow-y: auto;
-            border: none;
-            outline: none;
-        }
-
-        textarea {
-            border-right: 1px solid var(--border-color);
-            background: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Fira Code', monospace;
-            font-size: 16px;
-            resize: none;
-        }
-
-        .preview {
-            background: var(--bg-color);
-        }
-
-        /* Markdown 樣式修正 */
-        .preview img { max-width: 100%; }
-        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; }
-        [data-theme="dark"] pre { background: #161b22; }
+        body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        header { background: #333; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .controls { display: flex; gap: 10px; align-items: center; }
+        
+        main { display: flex; flex: 1; overflow: hidden; }
+        .pane { flex: 1; display: flex; flex-direction: column; border: 1px solid #ccc; }
+        textarea { flex: 1; padding: 15px; font-family: monospace; font-size: 14px; border: none; resize: none; outline: none; }
+        #preview-container { flex: 1; overflow-y: auto; background: #f9f9f9; }
+        
+        .hidden { display: none !important; }
+        button, label { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; }
+        button:hover, label:hover { background: #0056b3; }
+        input[type="file"] { display: none; }
+        select { padding: 8px; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div class="toolbar">
-    <button onclick="toggleTheme()" class="theme-toggle">切換深色模式</button>
-    <input type="file" id="fileInput" style="display:none" accept=".md">
-    <button onclick="document.getElementById('fileInput').click()">上傳 .md</button>
-    <button onclick="downloadHTML()">下載為 HTML</button>
-    <span style="margin-left: auto; font-size: 12px; opacity: 0.7;">
-        快捷鍵: Ctrl+B (粗體), Ctrl+I (斜體), Ctrl+S (存檔)
-    </span>
+<header>
+    <div class="controls">
+        <label for="upload-md">📁 上傳 .md</label>
+        <input type="file" id="upload-md" accept=".md">
+        
+        <select id="view-mode">
+            <option value="split">雙邊顯示</option>
+            <option value="preview">僅顯示結果</option>
+        </select>
+    </div>
+
+    <div class="controls">
+        <button onclick="downloadHTML()">📥 下載 HTML</button>
+        <button onclick="downloadPDF()">📄 下載 PDF</button>
+    </div>
+</header>
+
+<div style="padding: 10px; background: #eee; border-bottom: 1px solid #ddd;">
+    <span style="font-size: 14px; margin-right: 10px;">自訂 CSS (貼上後立即生效):</span>
+    <textarea id="css-input" placeholder="例如: h1 { color: red; } body { font-family: serif; }" style="height: 40px; width: 100%; margin-top: 5px;"></textarea>
 </div>
 
-<div class="container">
-    <textarea id="editor" placeholder="在此貼上 Markdown..."></textarea>
-    <div id="preview" class="preview"></div>
-</div>
+<main>
+    <section id="editor-pane" class="pane">
+        <textarea id="markdown-input" placeholder="在此貼上 Markdown 內容..."></textarea>
+    </section>
+    
+    <section id="preview-pane" class="pane">
+        <div id="preview-container">
+            <div id="preview"></div>
+        </div>
+    </section>
+</main>
 
 <script>
-    const editor = document.getElementById('editor');
+    const markdownInput = document.getElementById('markdown-input');
     const preview = document.getElementById('preview');
-    const fileInput = document.getElementById('fileInput');
+    const cssInput = document.getElementById('css-input');
+    const userStyle = document.getElementById('user-custom-style');
+    const viewMode = document.getElementById('view-mode');
+    const editorPane = document.getElementById('editor-pane');
 
-    // 配置 marked 支援程式碼高亮
-    marked.setOptions({
-        highlight: function(code, lang) {
-            return hljs.highlightAuto(code).value;
-        },
-        breaks: true
+    // 1. 即時渲染 Markdown
+    markdownInput.addEventListener('input', () => {
+        preview.innerHTML = marked.parse(markdownInput.value);
     });
 
-    // 1. 即時預覽與 LocalStorage 儲存
-    editor.addEventListener('input', () => {
-        updatePreview();
-        localStorage.setItem('markdown_content', editor.value);
+    // 2. 切換顯示模式
+    viewMode.addEventListener('change', () => {
+        if (viewMode.value === 'preview') {
+            editorPane.classList.add('hidden');
+        } else {
+            editorPane.classList.remove('hidden');
+        }
     });
 
-    function updatePreview() {
-        preview.innerHTML = marked.parse(editor.value);
-    }
-
-    // 2. 初始化加載
-    window.onload = () => {
-        const savedContent = localStorage.getItem('markdown_content');
-        if (savedContent) editor.value = savedContent;
-        
-        const savedTheme = localStorage.getItem('theme') || 'light';
-        setTheme(savedTheme);
-        
-        updatePreview();
-    };
-
-    // 3. 深色模式切換
-    function toggleTheme() {
-        const current = document.documentElement.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        setTheme(next);
-    }
-
-    function setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        document.getElementById('hljs-light').disabled = (theme === 'dark');
-        document.getElementById('hljs-dark').disabled = (theme === 'light');
-    }
-
-    // 4. 上傳 .md 檔案
-    fileInput.addEventListener('change', (e) => {
+    // 3. 上傳 .md 檔案
+    document.getElementById('upload-md').addEventListener('change', function(e) {
         const file = e.target.files[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = (e) => {
-            editor.value = e.target.result;
-            updatePreview();
-            localStorage.setItem('markdown_content', editor.value);
+        reader.onload = function(e) {
+            markdownInput.value = e.target.result;
+            preview.innerHTML = marked.parse(markdownInput.value);
         };
         reader.readAsText(file);
     });
 
-    // 5. 下載成 HTML
+    // 4. 自訂 CSS
+    cssInput.addEventListener('input', () => {
+        userStyle.innerHTML = cssInput.value || ' #preview { padding: 20px; background: white; }';
+    });
+
+    // 5. 下載 HTML
     function downloadHTML() {
-        const htmlContent = `
+        const fullHTML = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Exported Markdown</title>
-    <style>
-        body { padding: 40px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: auto; }
-        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
-        code { font-family: monospace; }
-    </style>
+    <style>${userStyle.innerHTML}</style>
 </head>
 <body>
-    ${preview.innerHTML}
+    <div class="markdown-body">
+        ${preview.innerHTML}
+    </div>
 </body>
 </html>`;
-        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const blob = new Blob([fullHTML], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'exported.html';
+        a.href = url;
+        a.download = 'export.html';
         a.click();
+        URL.revokeObjectURL(url);
     }
 
-    // 6. 快捷鍵支援
-    editor.addEventListener('keydown', (e) => {
-        if (e.ctrlKey || e.metaKey) {
-            let start = editor.selectionStart;
-            let end = editor.selectionEnd;
-            let text = editor.value;
-            let selected = text.substring(start, end);
+    // 6. 下載 PDF
+    function downloadPDF() {
+        const element = preview;
+        const opt = {
+            margin:       10,
+            filename:     'export.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2 },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    }
 
-            switch (e.key.toLowerCase()) {
-                case 'b': // 粗體
-                    e.preventDefault();
-                    editor.setRangeText(`**${selected}**`, start, end, 'select');
-                    break;
-                case 'i': // 斜體
-                    e.preventDefault();
-                    editor.setRangeText(`*${selected}*`, start, end, 'select');
-                    break;
-                case 's': // 存檔 (手動觸發)
-                    e.preventDefault();
-                    localStorage.setItem('markdown_content', editor.value);
-                    alert('內容已儲存！');
-                    break;
-            }
-            updatePreview();
-        }
-    });
+    // 初始化範例
+    markdownInput.value = "# Hello Markdown\n\n這是一個即時編輯器。\n\n* 支援 **粗體**\n* 支援 [連結](https://google.com)\n* 支援上傳與下載！";
+    preview.innerHTML = marked.parse(markdownInput.value);
 </script>
 
 </body>
