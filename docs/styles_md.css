@@ -1,0 +1,113 @@
+/* === Laurence Tsai - Resume PDF CSS === */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Roboto', 'Calibri', 'Arial', sans-serif;
+    font-size: 10.8pt;
+    line-height: 1.45;
+    color: #1a1a1a;
+    background: white;
+    padding: 48pt 50pt 50pt 50pt;  /* 上下左右邊距，剛好符合一頁美式履歷標準 */
+    margin: 0 auto;
+}
+
+h1 {
+    font-size: 26pt;
+    font-weight: 700;
+    color: #1e40af;
+    margin-bottom: 6pt;
+    letter-spacing: -0.5pt;
+}
+
+h2 {
+    font-size: 10pt;
+    font-weight: 700;
+    color: #1e40af;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 18pt 0 8pt 0;
+    padding-bottom: 4pt;
+    border-bottom: 1.5pt solid #1e40af;
+}
+
+h3 {
+    font-size: 13pt;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 14pt 0 4pt 0;
+}
+
+h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: #1e40af;
+    margin-bottom: 2pt;
+}
+
+ul {
+    margin: 6pt 0;
+    padding-left: 18pt;
+}
+
+li {
+    margin-bottom: 4pt;
+}
+
+strong {
+    color: #000;
+}
+
+a {
+    color: #1e40af;
+    text-decoration: none;
+}
+
+/* 頂部聯絡資訊 */
+.contact-info {
+    font-size: 10pt;
+    color: #444;
+    margin-bottom: 12pt;
+}
+
+/* 讓日期與公司並排 */
+.job-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10.5pt;
+    margin-bottom: 3pt;
+}
+
+.job-title {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.company {
+    font-weight: 600;
+    color: #1e40af;
+}
+
+.date {
+    color: #555;
+    font-style: italic;
+}
+
+/* 技能欄兩欄 */
+.skills-grid {
+    column-count: 2;
+    column-gap: 30pt;
+    margin: 8pt 0;
+}
+
+/* 印表機友好設定 */
+@media print {
+    body { padding: 40pt 45pt; }
+    a { color: #1e40af !important; }
+    @page { margin: 0.5in; }
+}
