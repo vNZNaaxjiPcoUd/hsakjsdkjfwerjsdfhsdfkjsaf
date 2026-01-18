@@ -1,0 +1,230 @@
+---
+title: markdown 2 html
+---
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 即時預覽器</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark" disabled>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-color: #333333;
+            --border-color: #ddd;
+            --toolbar-bg: #f5f5f5;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --border-color: #444;
+            --toolbar-bg: #2d2d2d;
+        }
+
+        body {
+            margin: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background 0.3s;
+        }
+
+        /* 工具列 */
+        .toolbar {
+            display: flex;
+            gap: 10px;
+            padding: 10px;
+            background: var(--toolbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        button, label {
+            padding: 8px 12px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        button:hover { background: #0056b3; }
+
+        .theme-toggle { background: #6c757d; }
+
+        /* 主容器 */
+        .container {
+            display: flex;
+            height: calc(100vh - 60px);
+        }
+
+        textarea, .preview {
+            width: 50%;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+            overflow-y: auto;
+            border: none;
+            outline: none;
+        }
+
+        textarea {
+            border-right: 1px solid var(--border-color);
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            font-size: 16px;
+            resize: none;
+        }
+
+        .preview {
+            background: var(--bg-color);
+        }
+
+        /* Markdown 樣式修正 */
+        .preview img { max-width: 100%; }
+        pre { background: #f6f8fa; padding: 16px; border-radius: 6px; }
+        [data-theme="dark"] pre { background: #161b22; }
+    </style>
+</head>
+<body>
+
+<div class="toolbar">
+    <button onclick="toggleTheme()" class="theme-toggle">切換深色模式</button>
+    <input type="file" id="fileInput" style="display:none" accept=".md">
+    <button onclick="document.getElementById('fileInput').click()">上傳 .md</button>
+    <button onclick="downloadHTML()">下載為 HTML</button>
+    <span style="margin-left: auto; font-size: 12px; opacity: 0.7;">
+        快捷鍵: Ctrl+B (粗體), Ctrl+I (斜體), Ctrl+S (存檔)
+    </span>
+</div>
+
+<div class="container">
+    <textarea id="editor" placeholder="在此貼上 Markdown..."></textarea>
+    <div id="preview" class="preview"></div>
+</div>
+
+<script>
+    const editor = document.getElementById('editor');
+    const preview = document.getElementById('preview');
+    const fileInput = document.getElementById('fileInput');
+
+    // 配置 marked 支援程式碼高亮
+    marked.setOptions({
+        highlight: function(code, lang) {
+            return hljs.highlightAuto(code).value;
+        },
+        breaks: true
+    });
+
+    // 1. 即時預覽與 LocalStorage 儲存
+    editor.addEventListener('input', () => {
+        updatePreview();
+        localStorage.setItem('markdown_content', editor.value);
+    });
+
+    function updatePreview() {
+        preview.innerHTML = marked.parse(editor.value);
+    }
+
+    // 2. 初始化加載
+    window.onload = () => {
+        const savedContent = localStorage.getItem('markdown_content');
+        if (savedContent) editor.value = savedContent;
+        
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        setTheme(savedTheme);
+        
+        updatePreview();
+    };
+
+    // 3. 深色模式切換
+    function toggleTheme() {
+        const current = document.documentElement.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        setTheme(next);
+    }
+
+    function setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+        document.getElementById('hljs-light').disabled = (theme === 'dark');
+        document.getElementById('hljs-dark').disabled = (theme === 'light');
+    }
+
+    // 4. 上傳 .md 檔案
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            editor.value = e.target.result;
+            updatePreview();
+            localStorage.setItem('markdown_content', editor.value);
+        };
+        reader.readAsText(file);
+    });
+
+    // 5. 下載成 HTML
+    function downloadHTML() {
+        const htmlContent = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Exported Markdown</title>
+    <style>
+        body { padding: 40px; font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: auto; }
+        pre { background: #f4f4f4; padding: 10px; border-radius: 5px; }
+        code { font-family: monospace; }
+    </style>
+</head>
+<body>
+    ${preview.innerHTML}
+</body>
+</html>`;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'exported.html';
+        a.click();
+    }
+
+    // 6. 快捷鍵支援
+    editor.addEventListener('keydown', (e) => {
+        if (e.ctrlKey || e.metaKey) {
+            let start = editor.selectionStart;
+            let end = editor.selectionEnd;
+            let text = editor.value;
+            let selected = text.substring(start, end);
+
+            switch (e.key.toLowerCase()) {
+                case 'b': // 粗體
+                    e.preventDefault();
+                    editor.setRangeText(`**${selected}**`, start, end, 'select');
+                    break;
+                case 'i': // 斜體
+                    e.preventDefault();
+                    editor.setRangeText(`*${selected}*`, start, end, 'select');
+                    break;
+                case 's': // 存檔 (手動觸發)
+                    e.preventDefault();
+                    localStorage.setItem('markdown_content', editor.value);
+                    alert('內容已儲存！');
+                    break;
+            }
+            updatePreview();
+        }
+    });
+</script>
+
+</body>
+</html>
