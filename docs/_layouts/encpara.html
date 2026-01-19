@@ -31,11 +31,9 @@ function unlock() {
     if (!input) {
         return;
     }
-    console.log(para);
+    
     try {
-        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
-        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
-		
+        const originalHTML = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input).toString(CryptoJS.enc.Utf8);
         if (originalHTML) {  
             document.body.innerHTML = originalHTML;
         } else {
