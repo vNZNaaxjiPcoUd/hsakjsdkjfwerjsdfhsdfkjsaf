@@ -26,13 +26,3 @@ ctl +space 切換中英文
 - 3840 * 2160
 -  打開 * 高動態範圍
 
-
-
-
-
-
-
-
-
-### backup in
-https://vnzn.jwint.net/hsakjsdkjfwerjsdfhsdfkjsaf/blob/ver22/docs/mac%20tip.md
