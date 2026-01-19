@@ -43,7 +43,7 @@ async function unlock() {
 			}
 			const markdownText = await response.text();
 			const newHTML = converter.makeHtml(markdownText); // 轉換成 HTML
-			console.log((newHTML);
+			console.log(newHTML);
 			
             document.open();
             document.write(newHTML); // 這裡面的 script 會執行
