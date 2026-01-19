@@ -1,7 +1,7 @@
 ---
 layout: lock
 ---
-lock demo with in markdown
+0lock0
 ==========================
 
 
