@@ -20,7 +20,7 @@
 const ENCRYPTED_CONTENT = "{{ page.lock }}"; 
 const srcURL = `{{ page.url }}`;
   
-function unlock() {
+async function unlock() {
     const input = document.getElementById("password").value;
 
 
