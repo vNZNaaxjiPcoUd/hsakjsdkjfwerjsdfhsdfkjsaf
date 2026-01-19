@@ -54,7 +54,7 @@ async function unlock() {
     }
 }
 
-document.getElementById("password").addEventListener("keypress", function(e) {
+document.getElementById("password").addEventListener("keypress", async function(e) {
     if (e.key === "Enter") await unlock();
 });
 </script>
