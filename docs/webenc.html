@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>enc</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #111;
+        color: #eee;
+        line-height: 1.6;
+    }
+    h1 { color: #0f0; text-align:center; }
+    textarea, input {
+        width: 100%;
+        padding: 12px;
+        margin: 10px 0;
+        font-size: 16px;
+        background: #222;
+        color: #0f0;
+        border: 1px solid #0f0;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+    textarea { height: 240px; font-family: Consolas, monospace; }
+    button {
+        padding: 14px 30px;
+        font-size: 18px;
+        background: #0f0;
+        color: #000;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin: 20px 0;
+    }
+    button:hover { background: #0c0; }
+    #result {
+        background: #000;
+        padding: 15px;
+        border: 2px dashed #0f0;
+        word-break: break-all;
+        min-height: 80px;
+        margin-top: 20px;
+    }
+    .copy {
+        float: right;
+        padding: 8px 16px;
+        background: #333;
+        color: #0f0;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+
+<h1>AES</h1>
+<p>加密成亂碼</p>
+
+<label>1. 輸入密碼</label>
+<input type="password" id="pwd" placeholder="abc" value="">
+
+<label>2. 貼上你要加密的</label>
+<textarea id="plain" placeholder='<h1 style="color:red;">HIHI</h1><p>only you</p><script>alert("Show")</script>'></textarea>
+
+<button onclick="encrypt()">產生</button>
+
+<label>3. 加密結果</label>
+<div id="result">Yes here!</div>
+<button class="copy" onclick="copyResult()" style="display:none;" id="copyBtn">複製</button>
+
+<!-- 引入 CryptoJS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+<script>
+function encrypt() {
+    const password = document.getElementById("pwd").value.trim();
+    const plainHTML = document.getElementById("plain").value;
+
+    if (!password) {
+        alert("key！");
+        return;
+    }
+    if (!plainHTML) {
+        alert("say some thing！");
+        return;
+    }
+
+    try {
+        const encrypted = CryptoJS.AES.encrypt(plainHTML, password).toString();
+        document.getElementById("result").textContent = encrypted;
+        document.getElementById("copyBtn").style.display = "inline";
+    } catch (e) {
+        alert("wrong");
+    }
+}
+
+function copyResult() {
+    const text = document.getElementById("result").textContent;
+    navigator.clipboard.writeText(text).then(() => {
+        console.log("OK"); //alert("done！");
+    });
+}
+
+document.getElementById("pwd").addEventListener("keypress", e => { if (e.key === "Enter") encrypt(); });
+document.getElementById("plain").addEventListener("keypress", e => { if (e.key === "Enter" && e.ctrlKey) encrypt(); });
+</script>
+
+
+</body>
+</html>
