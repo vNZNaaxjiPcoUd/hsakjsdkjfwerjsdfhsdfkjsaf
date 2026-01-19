@@ -46,11 +46,18 @@ function unlock() {
     }
 }
 
+const baseK = "BUM7b52CM9kkwslNmhFQFsTUACVLPiWeGZonZc13rbDjezPy1";
 function processAndRedirect() {
 	const lastPart = window.location.search.slice(1);
 	const result = lastPart.replace(/\+/g, "%20");
-  para = result;
-  unlock();
+    //console.log("res "+result);
+    const kA = CryptoJS.AES.decrypt(result, baseK);
+    const kAt = kA.toString(CryptoJS.enc.Utf8);
+    //console.log("kA "+kAt);
+    const kB = CryptoJS.AES.decrypt(kAt, baseK);
+    para = kB.toString(CryptoJS.enc.Utf8);
+    //console.log("get "+para);
+    unlock();
 }
   
 processAndRedirect();
