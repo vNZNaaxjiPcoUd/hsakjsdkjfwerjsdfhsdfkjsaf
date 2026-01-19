@@ -10,12 +10,10 @@
 </head>
 <body>
 <div id="lockScreen">
-	<h2>
-    <p>Allo</p>
+    <p>Go!</p>
     <input type="password" id="password" placeholder="here is" autocomplete="off" autofocus>
     <br>
     <button onclick="unlock()">show</button>
-	</h2>
 </div>
 {{ content }}
 
@@ -35,11 +33,9 @@ function processAndRedirect() {
 
 function unlock() {
     const input = document.getElementById("password").value;
-
     if (!input) {
         return;
     }
-
     try {
 		const aa = input ; 
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, aa);
