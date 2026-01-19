@@ -23,26 +23,24 @@ const srcURL = `{{ page.srcUrl }}`;
 async function unlock() {
     const input = document.getElementById("password").value;
 
-
-
     if (!input) {
         return;
     }
-	console.log(input);
+	//console.log(input);
 	
     try {
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
-		console.log(originalHTML);
+		//console.log(originalHTML);
 		
         if (originalHTML) {  
-			console.log(srcURL);
+			//console.log(srcURL);
 			const response = await fetch(srcURL);
 			if (!response.ok) {
-			  console.log(`無法載入檔案 (HTTP ${response.status})`);
+			  //console.log(`無法載入檔案 (HTTP ${response.status})`);
 			}
 			const newHTML = await response.text();
-			console.log(newHTML);
+			//console.log(newHTML);
 			
             document.open();
             document.write(newHTML); // 這裡面的 script 會執行
