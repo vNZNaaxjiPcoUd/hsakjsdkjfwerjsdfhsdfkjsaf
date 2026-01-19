@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
+<link rel="stylesheet" href="https://h.jwint.net/styles_white.css">
+</head>
+<body>
+<div id="mdPart">nice!</div>
+
+<script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+<script defer>
+const ENCRYPTED_CONTENT = "{{ content }}";
+let para = "";
+
+function unlock() {
+    const input = para;
+
+    if (!input) {
+        return;
+    }
+    console.log(para);
+    try {
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+		
+        if (originalHTML) {  
+            document.body.innerHTML = originalHTML;
+        } else {
+      			console.log("dec fail");
+        }
+    } catch (e) {
+        console.log("catch");
+    }
+}
+
+function processAndRedirect() {
+	const lastPart = window.location.search.slice(1);
+	const result = lastPart.replace(/\+/g, "%20");
+  para = result;
+  unlock();
+}
+  
+processAndRedirect();
+
+</script>
+
+</body>
+</html>
