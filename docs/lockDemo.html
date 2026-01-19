@@ -71,7 +71,7 @@ lock: U2FsdGVkX180Ylk2si4pJSx/DB3dIRl1w5k00dlN2Rl0tLbEb6XVtIKc0Af8hT8dPVaxNtjcFl
 <input type="password" id="pwd" placeholder="abc" value="">
 
 <label>2. 貼上你要加密的</label>
-<textarea id="plain" placeholder='<h1 style="color:red;">HIHI</h1><p>only you</p><script>alert("Show")</script>'></textarea>
+<textarea id="plain" placeholder='<h1 style="color:red;">HIHI</h1><p>only you</p><script>alert("Show")<\/script>'></textarea>
 
 <button onclick="encrypt()">產生</button>
 
@@ -80,7 +80,7 @@ lock: U2FsdGVkX180Ylk2si4pJSx/DB3dIRl1w5k00dlN2Rl0tLbEb6XVtIKc0Af8hT8dPVaxNtjcFl
 <button class="copy" onclick="copyResult()" style="display:none;" id="copyBtn">複製</button>
 
 <!-- 引入 CryptoJS -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"><\/script>
 
 <script>
 function encrypt() {
@@ -114,7 +114,7 @@ function copyResult() {
 
 document.getElementById("pwd").addEventListener("keypress", e => { if (e.key === "Enter") encrypt(); });
 document.getElementById("plain").addEventListener("keypress", e => { if (e.key === "Enter" && e.ctrlKey) encrypt(); });
-</script>
+<\/script>
 
 
 </body>
