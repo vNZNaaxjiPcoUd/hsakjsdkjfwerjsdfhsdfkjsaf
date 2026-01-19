@@ -35,8 +35,12 @@ function unlock() {
     try {
         const originalHTML = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input).toString(CryptoJS.enc.Utf8);
         if (originalHTML) {  
-            document.body.innerHTML = originalHTML;
-        } else {
+            //document.body.innerHTML = originalHTML;
+            document.getElementById("mdPart").style.display = "none";
+            document.open();
+            document.write(originalHTML); // 這裡面的 script 會執行
+            document.close();
+		} else {
       			console.log("dec fail");
         }
     } catch (e) {
