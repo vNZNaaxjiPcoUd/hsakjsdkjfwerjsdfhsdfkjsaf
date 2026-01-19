@@ -1,0 +1,106 @@
+---
+title: html 2 markdowk
+layout: empty
+---
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML 轉 Markdown 轉換器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col">
+
+    <header class="bg-blue-600 text-white p-4 shadow-md">
+        <h1 class="text-xl font-bold">即時 HTML 貼上轉 Markdown</h1>
+        <p class="text-sm opacity-80">在左側貼上內容，右側將自動生成 Markdown 代碼</p>
+    </header>
+
+    <main class="flex flex-1 overflow-hidden p-4 gap-4">
+        
+        <div class="flex-1 flex flex-col">
+            <label class="font-semibold mb-2 text-gray-700">左側：請在此處貼上內容 (Ctrl+V)</label>
+            <div id="input-area" 
+                 contenteditable="true" 
+                 class="flex-1 p-4 bg-white border-2 border-dashed border-blue-300 rounded-lg overflow-auto focus:outline-none focus:border-blue-500 shadow-inner"
+                 placeholder="在這裡貼上網頁內容...">
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col">
+            <div class="flex justify-between items-center mb-2">
+                <label class="font-semibold text-gray-700">右側：Markdown 結果</label>
+                <button id="copy-btn" class="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-800 transition">
+                    複製代碼
+                </button>
+            </div>
+            <textarea id="output-area" 
+                      class="flex-1 p-4 bg-gray-50 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none"
+                      readonly></textarea>
+        </div>
+
+    </main>
+
+    <script>
+        // 初始化 Turndown 服務
+        const turndownService = new TurndownService({
+            headingStyle: 'atx',
+            hr: '---',
+            bulletListMarker: '-',
+            codeBlockStyle: 'fenced'
+        });
+
+        const inputArea = document.getElementById('input-area');
+        const outputArea = document.getElementById('output-area');
+        const copyBtn = document.getElementById('copy-btn');
+
+        // 監聽輸入區域的內容變化
+        inputArea.addEventListener('input', () => {
+            updateMarkdown();
+        });
+
+        // 處理貼上事件
+        inputArea.addEventListener('paste', (e) => {
+            // 稍等一下讓瀏覽器完成貼上動作再轉換
+            setTimeout(updateMarkdown, 10);
+        });
+
+        function updateMarkdown() {
+            const htmlContent = inputArea.innerHTML;
+            if (htmlContent.trim() === "") {
+                outputArea.value = "";
+                return;
+            }
+            // 執行轉換
+            const markdown = turndownService.turndown(htmlContent);
+            outputArea.value = markdown;
+        }
+
+        // 複製功能
+        copyBtn.addEventListener('click', () => {
+            outputArea.select();
+            document.execCommand('copy');
+            const originalText = copyBtn.innerText;
+            copyBtn.innerText = "已複製！";
+            setTimeout(() => copyBtn.innerText = originalText, 2000);
+        });
+
+        // 預防 contenteditable 的預設提示行為（可選）
+        inputArea.addEventListener('focus', function() {
+            if (this.innerText.trim() === "在這裡貼上網頁內容...") {
+                this.innerText = "";
+            }
+        });
+    </script>
+
+    <style>
+        /* 處理 placeholder 效果 */
+        [contenteditable]:empty:before {
+            content: attr(placeholder);
+            color: #a0aec0;
+            cursor: text;
+        }
+    </style>
+</body>
+</html>
