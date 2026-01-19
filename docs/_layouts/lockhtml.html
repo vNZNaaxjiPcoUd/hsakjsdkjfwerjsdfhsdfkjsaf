@@ -12,6 +12,7 @@
     <input type="password" id="password" placeholder="here" autocomplete="off" autofocus>
     <button onclick="unlock()">show</button>
 </div>
+<div id="hidePart"></div>
 
 <script src="/static/crypto-js.min.js"></script>
 <script>
@@ -20,7 +21,9 @@
 const A = "{{ page.lock }}"; 
 const ENCRYPTED_CONTENT = A === "" ? "U2FsdGVkX180Ylk2si4pJSx/DB3dIRl1w5k00dlN2Rl0tLbEb6XVtIKc0Af8hT8dPVaxNtjcFltjp5ZwJmADfO6XQCHKM2o/rvhktEVMX3O0ZiryC5hpugBxJ7RuJ7Uy" : A;
 const newHTML = `{{ content }}`; // content中，以下的東西要換寫 <\/script> , \` 
-  
+
+document.getElementById("hidePart").style.display = "none";
+
 function unlock() {
     const input = document.getElementById("password").value;
 
@@ -33,6 +36,7 @@ function unlock() {
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
 		
         if (originalHTML) {  
+			//document.getElementById("hidePart").style.display = "block";
             //document.body.innerHTML = originalHTML;
             document.open();
             document.write(newHTML); // 這裡面的 script 會執行
