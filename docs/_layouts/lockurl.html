@@ -18,10 +18,12 @@
 
 
 const ENCRYPTED_CONTENT = "{{ page.lock }}"; 
-const newHTML = `{{ content }}`;
+const srcURL = `{{ page.url }}`;
   
 function unlock() {
     const input = document.getElementById("password").value;
+
+
 
     if (!input) {
         return;
@@ -32,7 +34,13 @@ function unlock() {
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
 		
         if (originalHTML) {  
-            //document.body.innerHTML = originalHTML;
+			const response = await fetch(srcURL);
+			if (!response.ok) {
+			  console.log(`無法載入檔案 (HTTP ${response.status})`);
+			}
+			const markdownText = await response.text();
+			const newHTML = converter.makeHtml(markdownText); // 轉換成 HTML
+			
             document.open();
             document.write(newHTML); // 這裡面的 script 會執行
             document.close();
