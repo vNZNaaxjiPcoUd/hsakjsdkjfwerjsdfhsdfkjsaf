@@ -12,7 +12,7 @@
     <input type="password" id="password" placeholder="here" autocomplete="off" autofocus>
     <button onclick="unlock()">show</button>
 </div>
-<div id="mdPart"> {{ content }} </div>
+<div id="mdPart"> {{ content }} <hr></div>
 
 <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
 <script defer>
@@ -45,7 +45,7 @@ function unlock() {
     }
 }
 	
-document.getElementById("mdPart").addEventListener("keypress", function(e) {
+document.getElementById("mdPart").addEventListener("click", function(e) {
     document.getElementById("lockScreen").style.display="block";
 });
 	
