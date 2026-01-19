@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% if page.title == "" %}{{ page.name }}{% else %}{{ page.title }}{% endif %}</title>
+<link rel="stylesheet" href="/styles_white.css">
+</head>
+<body>
+<div id="lockScreen">
+    <input type="password" id="password" placeholder="here" autocomplete="off" autofocus>
+    <button onclick="unlock()">show</button>
+</div>
+
+<script src="/static/crypto-js.min.js"></script>
+<script>
+
+
+const A = "{{ page.lock }}"; 
+const ENCRYPTED_CONTENT = A === "" ? "U2FsdGVkX180Ylk2si4pJSx/DB3dIRl1w5k00dlN2Rl0tLbEb6XVtIKc0Af8hT8dPVaxNtjcFltjp5ZwJmADfO6XQCHKM2o/rvhktEVMX3O0ZiryC5hpugBxJ7RuJ7Uy" : A;
+const newHTML = `{{ content }}`; // content中，以下的東西要換寫 <\/script> , \` 
+  
+function unlock() {
+    const input = document.getElementById("password").value;
+
+    if (!input) {
+        return;
+    }
+
+    try {
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, input);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+		
+        if (originalHTML) {  
+            document.body.innerHTML = newHTML;
+        } else {
+			document.getElementById("password").value = "";
+			document.body.innerHTML = "<h2>Hello World!</h2>";
+        }
+    } catch (e) {
+        document.getElementById("password").value = "";
+		document.body.innerHTML = "<h2>Hello!</h2>";
+    }
+}
+
+document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") unlock();
+});
+</script>
+
+</body>
+</html>
