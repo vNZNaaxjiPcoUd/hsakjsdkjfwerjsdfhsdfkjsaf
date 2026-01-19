@@ -16,6 +16,7 @@ https://county-taxes.net/dmv/hillsborough/hillsborough/vehicle-registration
 
 #### 2. **親自到 DMV 辦公室辦理**
    - 前往 Hillsborough County Tax Collector 的 Driver License Service Center。以下是主要地點（建議提前預約，避免排隊）：
+     
      | 辦公室名稱          | 地址                          | 電話號碼          | 營業時間（平日） |
      |---------------------|-------------------------------|-------------------|------------------|
      | Downtown Tampa     | 601 E. Kennedy Blvd., Tampa, FL 33602 | (813) 635-5200   | 8:00 AM - 5:00 PM |
