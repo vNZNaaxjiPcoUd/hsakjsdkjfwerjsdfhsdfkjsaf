@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<title>dec</title>
+<style>
+    body {
+        margin:0; background:#000; color:#0f9; font-family:Arial, sans-serif;
+        display:flex; flex-direction:column; height:100vh;
+    }
+    header {
+        background:#111; padding:20px; text-align:center; border-bottom:3px solid #0f9;
+    }
+    h1 { margin:0; color:#0f9; }
+    main {
+        flex:1; padding:30px; overflow:auto;
+    }
+    textarea, input {
+        width:100%; padding:15px; margin:15px 0; background:#111; color:#0f9;
+        border:2px solid #0f9; border-radius:8px; font-size:16px; font-family:Consolas, monospace;
+    }
+    textarea { height:180px; resize:vertical; }
+    button {
+        padding:14px 32px; font-size:18px; background:#0f9; color:#000;
+        border:none; border-radius:8px; cursor:pointer; margin:10px 5px;
+    }
+    button:hover { background:#0c8; }
+    #preview {
+        margin-top:30px; padding:25px; background:#001; border:2px dashed #0f9;
+        border-radius:10px; min-height:200px; display:none;
+    }
+    .info { color:#888; font-size:14px; text-align:center; margin:20px; }
+</style>
+</head>
+<body>
+
+<header>
+    <h1>解密</h1>
+</header>
+
+<main>
+    <label>1. 密碼</label>
+    <input type="password" id="pwd" placeholder="例如：abc" value="">
+
+    <label>2. 亂碼</label>
+    <textarea id="encrypted" placeholder="U2FsdGVkX1+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"></textarea>
+
+    <div style="text-align:center;">
+        <button onclick="decryptAndShow()">解密</button>
+        <button onclick="document.getElementById('preview').style.display='none'">清除</button>
+    </div>
+
+    <div id="preview">
+        <div id="realContent"></div>
+    </div>
+
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+
+<script>
+function decryptAndShow() {
+    const password = document.getElementById("pwd").value.trim();
+    const encryptedText = document.getElementById("encrypted").value.trim();
+    const preview = document.getElementById("preview");
+    const container = document.getElementById("realContent");
+
+    if (!password || !encryptedText) {
+        alert("missing");
+        return;
+    }
+
+    try {
+        const bytes = CryptoJS.AES.decrypt(encryptedText, password);
+        const decryptedHTML = bytes.toString(CryptoJS.enc.Utf8);
+
+        if (!decryptedHTML) throw new Error("error");
+
+        container.innerHTML = decryptedHTML;
+        preview.style.display = "block";
+
+        container.querySelectorAll("script").forEach(old => {
+            const script = document.createElement("script");
+            script.textContent = old.textContent;
+            if (old.src) script.src = old.src;
+            old.parentNode.replaceChild(script, old);
+        });
+
+    } catch (e) {
+        alert("lose some thing");
+        preview.style.display = "none";
+    }
+}
+
+document.getElementById("encrypted").addEventListener("keydown", e => {
+    if (e.ctrlKey && e.key === "Enter") decryptAndShow();
+});
+</script>
+
+</body>
+</html>
