@@ -17,6 +17,7 @@
 <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
 <script defer>
 const ENCRYPTED_CONTENT = "{{ page.zip }}"; 
+document.getElementById("lockScreen").style.display="none";
 
 function unlock() {
     const input = document.getElementById("password").value;
@@ -43,7 +44,11 @@ function unlock() {
 		document.body.innerHTML = "<h2>Hello!</h2>";
     }
 }
-
+	
+document.getElementById("mdPart").addEventListener("keypress", function(e) {
+    document.getElementById("lockScreen").style.display="block";
+});
+	
 document.getElementById("password").addEventListener("keypress", function(e) {
     if (e.key === "Enter") unlock();
 });
