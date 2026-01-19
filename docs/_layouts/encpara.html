@@ -8,12 +8,22 @@
 <link rel="stylesheet" href="https://h.jwint.net/styles_white.css">
 </head>
 <body>
-<div id="mdPart">nice!</div>
+<div id="mdPart">{{ content }}</div>
+<div id="defShow">Nice!</div>
 
 <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
 <script defer>
-const ENCRYPTED_CONTENT = "{{ content }}";
+const ENCRYPTED_CONTENT = "{{ page.doc }}";
 let para = "";
+const cont = `{{ content }}`;
+
+if ( cont === ""){
+	document.getElementById("defShow").style.display = "block";
+	document.getElementById("mdPart").style.display = "none";
+}else{
+	document.getElementById("defShow").style.display = "none";
+	document.getElementById("mdPart").style.display = "block";
+}
 
 function unlock() {
     const input = para;
