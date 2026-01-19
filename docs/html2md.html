@@ -6,48 +6,84 @@ layout: empty
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HTML 轉 Markdown 轉換器</title>
+    <title>HTML 轉 Markdown 轉換器 (固定比例版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/turndown/dist/turndown.js"></script>
-</head>
-<body class="bg-gray-100 h-screen flex flex-col">
+    <style>
+        /* 核心自定義樣式 */
+        #input-area {
+            /* 確保內容不會擠壓到另一邊，且超出時顯示滾動條 */
+            overflow-x: auto;
+            overflow-y: auto;
+            white-space: normal; /* 若想強制完全不換行可改為 nowrap，但通常內容建議保留原樣 */
+        }
 
-    <header class="bg-blue-600 text-white p-4 shadow-md">
-        <h1 class="text-xl font-bold">即時 HTML 貼上轉 Markdown</h1>
-        <p class="text-sm opacity-80">在左側貼上內容，右側將自動生成 Markdown 代碼</p>
+        /* 讓貼進來的 HTML 內容保持其原始寬度，不被父層擠壓 */
+        #input-area > * {
+            min-width: max-content;
+        }
+
+        /* 美化滾動條 (可選) */
+        ::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-slate-800 text-white p-3 shadow-md flex justify-between items-center">
+        <div>
+            <h1 class="text-lg font-bold">HTML ⮕ Markdown 轉換器</h1>
+            <p class="text-xs text-slate-400">左側貼上內容，右側即時生成</p>
+        </div>
+        <div class="text-xs bg-slate-700 px-3 py-1 rounded text-slate-300">
+            markdown
+        </div>
     </header>
 
     <main class="flex flex-1 overflow-hidden p-4 gap-4">
         
-        <div class="flex-1 flex flex-col">
-            <label class="font-semibold mb-2 text-gray-700">左側：請在此處貼上內容 (Ctrl+V)</label>
+        <section class="w-1/2 flex flex-col min-w-[50%]">
+            <div class="flex justify-between items-center mb-2">
+                <label class="font-semibold text-gray-700">左側：貼上 HTML 畫面</label>
+                <button onclick="document.getElementById('input-area').innerHTML=''" class="text-xs text-red-500 hover:underline">清空</button>
+            </div>
             <div id="input-area" 
                  contenteditable="true" 
-                 class="flex-1 p-4 bg-white border-2 border-dashed border-blue-300 rounded-lg overflow-auto focus:outline-none focus:border-blue-500 shadow-inner"
+                 class="flex-1 p-4 bg-white border-2 border-blue-200 rounded-lg shadow-inner focus:outline-none focus:border-blue-500"
                  placeholder="在這裡貼上網頁內容...">
             </div>
-        </div>
+        </section>
 
-        <div class="flex-1 flex flex-col">
+        <section class="w-1/2 flex flex-col min-w-[50%]">
             <div class="flex justify-between items-center mb-2">
                 <label class="font-semibold text-gray-700">右側：Markdown 結果</label>
-                <button id="copy-btn" class="bg-gray-700 text-white px-3 py-1 rounded text-sm hover:bg-gray-800 transition">
-                    複製代碼
+                <button id="copy-btn" class="bg-blue-600 text-white px-4 py-1 rounded text-sm hover:bg-blue-700 transition active:scale-95">
+                    複製結果
                 </button>
             </div>
             <textarea id="output-area" 
-                      class="flex-1 p-4 bg-gray-50 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none"
-                      readonly></textarea>
-        </div>
+                      class="flex-1 p-4 bg-gray-50 border border-gray-300 rounded-lg font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      readonly 
+                      placeholder="Markdown 代碼將顯示於此..."></textarea>
+        </section>
 
     </main>
 
     <script>
-        // 初始化 Turndown 服務
         const turndownService = new TurndownService({
             headingStyle: 'atx',
-            hr: '---',
-            bulletListMarker: '-',
             codeBlockStyle: 'fenced'
         });
 
@@ -55,51 +91,41 @@ layout: empty
         const outputArea = document.getElementById('output-area');
         const copyBtn = document.getElementById('copy-btn');
 
-        // 監聽輸入區域的內容變化
-        inputArea.addEventListener('input', () => {
-            updateMarkdown();
-        });
-
-        // 處理貼上事件
-        inputArea.addEventListener('paste', (e) => {
-            // 稍等一下讓瀏覽器完成貼上動作再轉換
-            setTimeout(updateMarkdown, 10);
-        });
-
-        function updateMarkdown() {
+        // 轉換邏輯
+        function performConversion() {
             const htmlContent = inputArea.innerHTML;
-            if (htmlContent.trim() === "") {
+            if (htmlContent.trim() === "" || htmlContent === "<br>") {
                 outputArea.value = "";
                 return;
             }
-            // 執行轉換
             const markdown = turndownService.turndown(htmlContent);
             outputArea.value = markdown;
         }
 
-        // 複製功能
-        copyBtn.addEventListener('click', () => {
-            outputArea.select();
-            document.execCommand('copy');
-            const originalText = copyBtn.innerText;
-            copyBtn.innerText = "已複製！";
-            setTimeout(() => copyBtn.innerText = originalText, 2000);
-        });
+        // 監聽貼上與輸入
+        inputArea.addEventListener('input', performConversion);
+        inputArea.addEventListener('paste', () => setTimeout(performConversion, 20));
 
-        // 預防 contenteditable 的預設提示行為（可選）
-        inputArea.addEventListener('focus', function() {
-            if (this.innerText.trim() === "在這裡貼上網頁內容...") {
-                this.innerText = "";
-            }
+        // 複製按鈕
+        copyBtn.addEventListener('click', () => {
+            if (!outputArea.value) return;
+            navigator.clipboard.writeText(outputArea.value).then(() => {
+                const originalText = copyBtn.innerText;
+                copyBtn.innerText = "成功！";
+                copyBtn.classList.replace('bg-blue-600', 'bg-green-600');
+                setTimeout(() => {
+                    copyBtn.innerText = originalText;
+                    copyBtn.classList.replace('bg-green-600', 'bg-blue-600');
+                }, 2000);
+            });
         });
     </script>
 
     <style>
-        /* 處理 placeholder 效果 */
+        /* Placeholder 實作 */
         [contenteditable]:empty:before {
             content: attr(placeholder);
-            color: #a0aec0;
-            cursor: text;
+            color: #94a3b8;
         }
     </style>
 </body>
