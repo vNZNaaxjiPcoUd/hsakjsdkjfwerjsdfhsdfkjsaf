@@ -7,6 +7,11 @@ layout: lock
 
 Here is a demo when lock function use markdown page. 
 
+content中，以下的東西要換寫 
+```
+<\/script>
+\` 
+```
 -----------
 
 Mac Tip
