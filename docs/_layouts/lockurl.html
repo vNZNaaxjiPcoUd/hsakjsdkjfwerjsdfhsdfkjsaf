@@ -41,8 +41,7 @@ async function unlock() {
 			if (!response.ok) {
 			  console.log(`無法載入檔案 (HTTP ${response.status})`);
 			}
-			const markdownText = await response.text();
-			const newHTML = converter.makeHtml(markdownText); // 轉換成 HTML
+			const newHTML = await response.text();
 			console.log(newHTML);
 			
             document.open();
