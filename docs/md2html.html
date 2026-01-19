@@ -17,6 +17,8 @@ layout: empty
             padding: 20px;
             background-color: white;
             min-height: 100%;
+            /* 讓預覽區內容若太寬也能捲動 */
+            word-wrap: break-word; 
         }
     </style>
 
@@ -25,12 +27,42 @@ layout: empty
         header { background: #333; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .controls { display: flex; gap: 10px; align-items: center; }
         
-        main { display: flex; flex: 1; overflow: hidden; }
-        .pane { flex: 1; display: flex; flex-direction: column; border: 1px solid #ccc; }
-        textarea { flex: 1; padding: 15px; font-family: monospace; font-size: 14px; border: none; resize: none; outline: none; }
-        #preview-container { flex: 1; overflow-y: auto; background: #f9f9f9; }
+        main { display: flex; flex: 1; overflow: hidden; width: 100%; }
         
+        /* 修改這裡：固定各佔一半，並允許內部溢出捲動 */
+        .pane { 
+            flex: 0 0 50%; /* 固定 50% 不縮放 */
+            width: 50%;
+            display: flex; 
+            flex-direction: column; 
+            border: 1px solid #ccc; 
+            box-sizing: border-box;
+            overflow: auto; /* 若內容超出則顯示捲軸 */
+        }
+
+        /* 讓文字框不自動換行，產生橫向捲軸 */
+        textarea#markdown-input { 
+            flex: 1; 
+            padding: 15px; 
+            font-family: monospace; 
+            font-size: 14px; 
+            border: none; 
+            resize: none; 
+            outline: none;
+            white-space: pre; /* 強制不換行，產生橫向捲軸 */
+            overflow: auto;
+        }
+
+        #preview-container { 
+            flex: 1; 
+            overflow: auto; /* 預覽容器也允許捲動 */
+            background: #f9f9f9; 
+        }
+        
+        /* 當切換到「僅顯示結果」時，預覽區佔滿 100% */
         .hidden { display: none !important; }
+        #preview-pane.full-width { flex: 0 0 100%; width: 100%; }
+
         button, label { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; }
         button:hover, label:hover { background: #0056b3; }
         input[type="file"] { display: none; }
@@ -80,6 +112,7 @@ layout: empty
     const userStyle = document.getElementById('user-custom-style');
     const viewMode = document.getElementById('view-mode');
     const editorPane = document.getElementById('editor-pane');
+    const previewPane = document.getElementById('preview-pane');
 
     // 1. 即時渲染 Markdown
     markdownInput.addEventListener('input', () => {
@@ -90,8 +123,10 @@ layout: empty
     viewMode.addEventListener('change', () => {
         if (viewMode.value === 'preview') {
             editorPane.classList.add('hidden');
+            previewPane.classList.add('full-width');
         } else {
             editorPane.classList.remove('hidden');
+            previewPane.classList.remove('full-width');
         }
     });
 
@@ -149,8 +184,8 @@ layout: empty
         html2pdf().set(opt).from(element).save();
     }
 
-    // 初始化範例
-    markdownInput.value = "# Hello Markdown\n\n這是一個即時編輯器。\n\n* 支援 **粗體**\n* 支援 [連結](https://google.com)\n* 支援上傳與下載！";
+    // 初始化範例 (加入一行很長的字測試捲軸)
+    markdownInput.value = "# Hello Markdown\n\n這是一行超長文字測試捲軸效果：ABCDEFGHIJKLMNOPQRSTUVWXYZ_ABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890\n\n* 支援 **粗體**\n* 支援 [連結](https://google.com)";
     preview.innerHTML = marked.parse(markdownInput.value);
 </script>
 
