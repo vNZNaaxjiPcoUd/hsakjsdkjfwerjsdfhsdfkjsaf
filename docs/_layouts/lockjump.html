@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://h.jwint.net/styles.css">
+<link rel="manifest" href="https://h.jwint.net/manifest.json">
+<title>Allo</title>
+</head>
+<body>
+<div id="lockScreen">
+	<h2>
+    <p>Allo</p>
+    <input type="password" id="password" placeholder="here is" autocomplete="off" autofocus>
+    <br>
+    <button onclick="unlock()">show</button>
+	</h2>
+</div>
+{{ content }}
+
+<script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+<script>
+
+const ENCRYPTED_CONTENT = "{{ page.key }}"; 
+
+function processAndRedirect() {
+    const baseUrl = "{{ page.go }}";
+    const lastPart = window.location.search.slice(1);
+    const result = lastPart.replace(/\+/g, "%20");
+    const kk1 = `${baseUrl}${result}`;
+    let okU = kk1.replace(/(?<!:)\/+/g, "/");
+    window.location.href = okU;
+}
+
+function unlock() {
+    const input = document.getElementById("password").value;
+
+    if (!input) {
+        return;
+    }
+
+    try {
+		const aa = input ; 
+        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, aa);
+        const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
+		//console.log(originalHTML);
+        if (originalHTML) {  
+            //document.body.innerHTML = originalHTML;
+			processAndRedirect();
+        } else {
+            //throw new Error();
+			document.getElementById("password").value = "";
+			document.body.innerHTML = "<h2>Hello World!</h2>";
+        }
+    } catch (e) {
+        document.getElementById("password").value = "";
+		document.body.innerHTML = "<h2>Hello!</h2>";
+    }
+}
+
+document.getElementById("password").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") unlock();
+});
+
+</script>
+
+</body>
+</html>
