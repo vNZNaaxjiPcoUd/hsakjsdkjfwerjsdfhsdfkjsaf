@@ -8,3 +8,5 @@ salt: d98c58e204ea4700326622e1dffffa556c9c4fc5d6cb35c1e0a3906c3b11210cdc003e0a6a
 
 demo in [https://h.jwint.net/lock%20jump%20demo](https://h.jwint.net/lock%20jump%20demo)
 
+[reference](https://c73.jwint.net/keyInfo/lock%20jump.md)
+
