@@ -61,7 +61,8 @@
 <body>
 <div id="Start">
 	<div id="keyIn"><hr></div>
-	<div><iframe src="https://h.jwint.net/%E4%B9%BE%E7%87%A5%E5%8A%91%E3%80%80%E6%B0%AF%E5%8C%96%E9%88%A3.html" style="width:100%; height:110vh; border:none;"></iframe></div>
+	<!--<div id="msg"><iframe src="https://h.jwint.net/%E4%B9%BE%E7%87%A5%E5%8A%91%E3%80%80%E6%B0%AF%E5%8C%96%E9%88%A3.html" style="width:100%; height:110vh; border:none;"></iframe></div>-->
+	<div id="msg"></div>
 	<div id="passwordOverlay">
 		<input type="password" id="passwordInput" placeholder="訊息內容" autocomplete="off">
 	</div>
@@ -157,5 +158,22 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 };
 
 </script>
+
+<script>
+// update msg html
+
+async function showPage(srcURL,divN){
+    const response = await fetch(srcURL);
+    if (!response.ok) {
+        //console.log(`無法載入檔案 (HTTP ${response.status})`);
+    }
+    const newHTML = await response.text();
+    document.getElementById(divN).innerHTML = newHTML ;
+}
+
+showPage("https://h.jwint.net/%E4%B9%BE%E7%87%A5%E5%8A%91%E3%80%80%E6%B0%AF%E5%8C%96%E9%88%A3.html","msg");
+
+</script>
+
 </body>
 </html>
