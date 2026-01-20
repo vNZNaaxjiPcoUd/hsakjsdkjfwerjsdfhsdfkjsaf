@@ -249,7 +249,13 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 			console.log(id);
 			handleID(id);
 	    }else{
+			if(e.key === "@"){
+				document.getElementById("passwordOverlay").style.display = "none";
+				document.getElementById("helloWorld").style.display = "block";
+				document.getElementById('passwordInput').value = "";
+			}else{
 			console.log(e.key);
+			}
 		}
 	};
 
@@ -285,25 +291,6 @@ function startTimer() {
 			location.reload();
 		}, ms);
 	}
-	
-const showAllCookies = () => {
-	  const cookieStr = document.cookie;
-	  if (!cookieStr) {
-	    console.log("當前沒有可讀取的 Cookie");
-	    return;
-	  }
-	
-	  const cookies = cookieStr.split(';').reduce((acc, cookie) => {
-	    const [key, value] = cookie.split('=').map(c => c.trim());
-	    acc[key] = decodeURIComponent(value);
-	    return acc;
-	  }, {});
-	
-	  console.table(cookies); // 使用表格形式呈現，非常清晰
-	};
-
-showAllCookies();
-
 const clearAllCookies = () => {
 	  const cookies = document.cookie.split(";");
 	
@@ -324,6 +311,26 @@ const clearAllCookies = () => {
 	};
 
 clearAllCookies();
+/*	
+const showAllCookies = () => {
+	  const cookieStr = document.cookie;
+	  if (!cookieStr) {
+	    console.log("當前沒有可讀取的 Cookie");
+	    return;
+	  }
+	
+	  const cookies = cookieStr.split(';').reduce((acc, cookie) => {
+	    const [key, value] = cookie.split('=').map(c => c.trim());
+	    acc[key] = decodeURIComponent(value);
+	    return acc;
+	  }, {});
+	
+	  console.table(cookies); // 使用表格形式呈現，非常清晰
+	};
+
+showAllCookies();
+
+
 
 function setCookie(name, value, days) {
 	    let expires = "";
@@ -358,7 +365,7 @@ function randomString(length = 20) {
 	  }
 	  return result;
 	}
-
+*/
 </script>
 
 </body>
