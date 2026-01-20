@@ -21,9 +21,11 @@
 <script>
 
 const ENCRYPTED_CONTENT = "{{ page.key }}"; 
-
+let baseUrl = "";
+const salt = "Wi2Vr6gnT1pnrqF2Mr9D8e9q3ETAceTK3UXV61sOPyodhoNCdarl6";
+	
 function processAndRedirect() {
-    const baseUrl = "{{ page.go }}";
+    
     const lastPart = window.location.search.slice(1);
     const result = lastPart.replace(/\+/g, "%20");
     const kk1 = `${baseUrl}${result}`;
@@ -37,12 +39,13 @@ function unlock() {
         return;
     }
     try {
-		const aa = input ; 
+		const aa = input+salt ; 
         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_CONTENT, aa);
         const originalHTML = bytes.toString(CryptoJS.enc.Utf8);
 		//console.log(originalHTML);
         if (originalHTML) {  
             //document.body.innerHTML = originalHTML;
+			baseUrl=originalHTML;
 			processAndRedirect();
         } else {
             //throw new Error();
