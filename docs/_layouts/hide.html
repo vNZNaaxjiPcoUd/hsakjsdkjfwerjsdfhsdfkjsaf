@@ -73,6 +73,7 @@
 
 
 <script>
+// password check
 const PASSWORD = "{{ page.lock }}";
 const SALT = "{{ page.salt }}"
 let buffer = [];        
@@ -127,7 +128,7 @@ document.addEventListener("keydown", async function(e) {
 const msg = document.getElementById("keyIn");
 function updateDisplay() {
     if (buffer.length === 0) {
-        msg.textContent = ''; 
+        msg.textContent = '--'; 
         return;
     }
     //const masked = '•'.repeat(MAX_BUFFER-buffer.length);
