@@ -72,8 +72,9 @@
 </div>
 
 
-<script>
-// password check
+<script defer>
+// password check and show content
+	
 const PASSWORD = "{{ page.lock }}";
 const SALT = "{{ page.salt }}"
 let buffer = [];        
@@ -128,7 +129,7 @@ document.addEventListener("keydown", async function(e) {
 const msg = document.getElementById("keyIn");
 function updateDisplay() {
     if (buffer.length === 0) {
-        msg.textContent = '--'; 
+        msg.textContent = '-'; 
         return;
     }
     //const masked = '•'.repeat(MAX_BUFFER-buffer.length);
@@ -158,10 +159,12 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
     }
 };
 
+updateDisplay();
+	
 </script>
 
-<script>
-// update msg html
+<script defer>
+// show temp page , use innerHTML to replace iframe. 
 
 async function showPage(srcURL,divN){
     const response = await fetch(srcURL);
