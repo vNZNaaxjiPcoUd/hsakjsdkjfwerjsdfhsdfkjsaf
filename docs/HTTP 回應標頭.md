@@ -2,6 +2,7 @@
 # HTTP 回應標頭
 
 以下的各欄位，是什麼意思？
+```
 * Request completely sent off
 < HTTP/2 200 
 < server: GitHub.com
@@ -24,6 +25,7 @@
 < vary: Accept-Encoding
 < x-fastly-request-id: da8fd721be7ec11c88868ab658b5ebcec8bd6ce3
 < content-length: 648
+```
 
 這些是 **HTTP response headers**（HTTP 回應標頭），通常出現在你用 `curl -v` 或瀏覽器開發者工具看到伺服器回傳的原始資訊。
 
