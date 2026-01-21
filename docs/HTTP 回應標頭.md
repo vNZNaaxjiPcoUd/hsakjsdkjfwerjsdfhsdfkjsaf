@@ -155,4 +155,4 @@ Fastly 自己的請求追蹤 ID（跟 x-github-request-id 類似，但屬於 Fas
 - 由 **Miami 的 Fastly 節點** 處理
 - GitHub 內部追蹤 ID 都有（出問題可以報給 GitHub 客服）
 
-希望這個解釋清楚！如果還有哪一行特別想再深入了解，告訴我～
+
