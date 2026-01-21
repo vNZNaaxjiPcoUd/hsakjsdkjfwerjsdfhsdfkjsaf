@@ -3,7 +3,7 @@ layout: hide
 lock: 01b44cfffe456bb8171a8248251dadafead8c1327c6c41ee56fc90de6779defce5d27d1429d66a5ac1f075bf25433a526aee67994fd197048f509a0b78055189
 salt: d98c58e204ea4700326622e1dffffa556c9c4fc5d6cb35c1e0a3906c3b11210cdc003e0a6a318bc27a0cf9e6df777c09651ff046729ae47f77196993b60a4f94
 ---
-0lock jump0
+0lockjump0
 ===========
 
 demo in [https://h.jwint.net/lock%20jump%20demo](https://h.jwint.net/lock%20jump%20demo)
