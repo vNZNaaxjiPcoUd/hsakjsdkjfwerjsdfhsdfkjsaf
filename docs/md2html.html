@@ -10,7 +10,7 @@ layout: empty
     <title>Markdown 進階編輯器 (優化 PDF 版)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
+   
     <style id="user-custom-style">
         #preview {
             padding: 20px;
@@ -28,82 +28,74 @@ layout: empty
             height: auto;
         }
     </style>
-
     <style>
         body { font-family: sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
         header { background: #333; color: white; padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         .controls { display: flex; gap: 10px; align-items: center; }
-        
+       
         main { display: flex; flex: 1; overflow: hidden; width: 100%; }
-        
-        .pane { 
-            flex: 0 0 50%; 
+       
+        .pane {
+            flex: 0 0 50%;
             width: 50%;
-            display: flex; 
-            flex-direction: column; 
-            border: 1px solid #ccc; 
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #ccc;
             box-sizing: border-box;
         }
-
-        textarea#markdown-input { 
-            flex: 1; 
-            padding: 15px; 
-            font-family: monospace; 
-            font-size: 14px; 
-            border: none; 
-            resize: none; 
+        textarea#markdown-input {
+            flex: 1;
+            padding: 15px;
+            font-family: monospace;
+            font-size: 14px;
+            border: none;
+            resize: none;
             outline: none;
-            white-space: pre; 
+            white-space: pre;
             overflow: auto;
         }
-
-        #preview-container { 
-            flex: 1; 
-            overflow: auto; 
-            background: #f9f9f9; 
+        #preview-container {
+            flex: 1;
+            overflow: auto;
+            background: #f9f9f9;
         }
-        
+       
         .hidden { display: none !important; }
         #preview-pane.full-width { flex: 0 0 100%; width: 100%; }
-
         button, label { background: #007bff; color: white; border: none; padding: 8px 15px; cursor: pointer; border-radius: 4px; font-size: 14px; }
         button:hover, label:hover { background: #0056b3; }
         input[type="file"] { display: none; }
         select { padding: 8px; border-radius: 4px; }
-
         /* PDF 匯出時的特殊處理類別 */
         .printing { overflow: visible !important; height: auto !important; }
     </style>
 </head>
 <body>
-
 <header>
     <div class="controls">
         <label for="upload-md">📁 上傳 .md</label>
         <input type="file" id="upload-md" accept=".md">
-        
+       
         <select id="view-mode">
             <option value="split">雙邊顯示</option>
             <option value="preview">僅顯示結果</option>
         </select>
     </div>
-
     <div class="controls">
+        <button onclick="showHTMLSource()">🔍 查看 HTML 原始碼</button>
         <button onclick="downloadHTML()">📥 下載 HTML</button>
         <button onclick="downloadPDF()">📄 下載 PDF</button>
     </div>
 </header>
-
 <div style="padding: 10px; background: #eee; border-bottom: 1px solid #ddd;">
     <span style="font-size: 14px; margin-right: 10px;">自訂 CSS:</span>
     <textarea id="css-input" placeholder="例如: img { border-radius: 10px; }" style="height: 40px; width: 100%; margin-top: 5px;"></textarea>
 </div>
-
 <main>
     <section id="editor-pane" class="pane">
         <textarea id="markdown-input" placeholder="在此貼上 Markdown 內容..."></textarea>
     </section>
-    
+   
     <section id="preview-pane" class="pane">
         <div id="preview-container">
             <div id="preview"></div>
@@ -150,42 +142,104 @@ layout: empty
     cssInput.addEventListener('input', () => {
         const baseStyle = `
         #preview { padding: 20px; background: white; min-height: 100%; line-height: 1.6; }
-        #preview p, #preview h1, #preview h2, #preview h3, #preview img, #preview li { 
-            page-break-inside: avoid; break-inside: avoid; 
+        #preview p, #preview h1, #preview h2, #preview h3, #preview img, #preview li {
+            page-break-inside: avoid; break-inside: avoid;
         }
         #preview img { max-width: 100%; height: auto; }`;
         userStyle.innerHTML = baseStyle + cssInput.value;
     });
 
+    // 新增：顯示 HTML 原始碼
+    function showHTMLSource() {
+        const fullHTML = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轉換後的 Markdown 文件</title>
+    <style>
+${userStyle.innerHTML}
+        /* 常見的 markdown 樣式（可選） */
+        .markdown-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        .markdown-body img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+<div class="markdown-body">
+${preview.innerHTML}
+</div>
+</body>
+</html>`;
+
+        // 開新視窗顯示原始碼
+        const sourceWindow = window.open('', '_blank');
+        sourceWindow.document.write(`
+            <html>
+            <head><title>HTML 原始碼</title></head>
+            <body>
+                <h2>轉換後的 HTML 原始碼</h2>
+                <p>可直接複製以下內容儲存為 .html 檔案</p>
+                <pre style="background:#f4f4f4; padding:15px; border-radius:6px; overflow:auto; max-height:90vh;">${escapeHtml(fullHTML)}</pre>
+            </body>
+            </html>
+        `);
+        sourceWindow.document.close();
+    }
+
+    // 輔助函數：防止 XSS，將 < > & 等轉義
+    function escapeHtml(unsafe) {
+        return unsafe
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+    }
+
     function downloadHTML() {
-        const fullHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>${userStyle.innerHTML}</style></head><body><div class="markdown-body">${preview.innerHTML}</div></body></html>`;
+        const fullHTML = `<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <title>轉換後的 Markdown 文件</title>
+    <style>
+${userStyle.innerHTML}
+    </style>
+</head>
+<body>
+<div class="markdown-body">
+${preview.innerHTML}
+</div>
+</body>
+</html>`;
+
         const blob = new Blob([fullHTML], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = 'export.html';
         a.click();
+        URL.revokeObjectURL(url);
     }
 
     async function downloadPDF() {
         const element = document.getElementById('preview');
-        
-        // 設定 PDF 選項
+       
         const opt = {
-            margin:       [15, 15], // 上下左右邊界
-            filename:     'document.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { 
-                scale: 2, 
-                useCORS: true, // 關鍵：允許跨域圖片
-                letterRendering: true
-            },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            // 分頁邏輯：avoid-all 會盡量嘗試不切斷 HTML 元素
-            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
+            margin:           [15, 15],
+            filename:         'document.pdf',
+            image:            { type: 'jpeg', quality: 0.98 },
+            html2canvas:      { scale: 2, useCORS: true, letterRendering: true },
+            jsPDF:            { unit: 'mm', format: 'a4', orientation: 'portrait' },
+            pagebreak:        { mode: ['avoid-all', 'css', 'legacy'] }
         };
 
-        // 執行下載
         try {
             await html2pdf().set(opt).from(element).save();
         } catch (error) {
@@ -195,9 +249,9 @@ layout: empty
     }
 
     // 初始化內容
-    markdownInput.value = "# PDF 測試\n\n這是一段測試文字，目的是看它在分頁時是否會被切斷。若文字很長，它應該會自動跳到下一頁起始位置。\n\n![範例圖片](https://picsum.photos/800/400)\n\n### 列表測試\n* 項目 1\n* 項目 2\n* 項目 3\n\n> 這裡是引用區塊，測試在 PDF 中的呈現效果。";
+    markdownInput.value = "# PDF 測試\n\n這是一段測試文字，目的是看它在分頁時是否會被切斷。\n\n![範例圖片](https://picsum.photos/800/400)\n\n### 列表測試\n* 項目 1\n* 項目 2\n* 項目 3\n\n> 這裡是引用區塊，測試在 PDF 中的呈現效果。";
     updatePreview();
 </script>
-
 </body>
 </html>
+
