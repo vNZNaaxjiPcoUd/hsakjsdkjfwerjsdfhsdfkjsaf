@@ -197,7 +197,7 @@ function handleID(id){
 		};
 		
 		// 使用方式
-		id = idMap[id] || id;  // 如果沒找到就保持原值
+		id = idMap[id?.toLowerCase()] || id;  // 如果沒找到就保持原值
 
 		if(id.length > IDL){
 			id = getID(id);
