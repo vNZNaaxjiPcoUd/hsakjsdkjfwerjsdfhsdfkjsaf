@@ -9,46 +9,26 @@ Test Table
 
 
 {% assign pp = site.pages | sort_natural: "title" %}
-{% for p in pp %}{% if p.title %}{% if p.layout == "movie" %}
-movie [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "s" %}
-s [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "shorturl" %}
-shorturl [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "jump" %}
-jump [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "hide" %}
-hide [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "default" %}
-[{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "lockjump" %}
-lockjump [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "empty" %}
-empty [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "listpage" %}
-listpage [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "lockhtml" %}
-lockhtml [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "lock" %}
-lock [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "movieList" %}
-movieList [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "myMdShow" %}
-myMdShow [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "pt" %}
-pt [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "encpara" %}
-encpara [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "lockurl" %}
-lockurl [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "zip" %}
-zip [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "enc" %}
-enc [{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "" %}
-x-[{{ p.title }}  ]({{ p.url }}) 
-{% else %}
-xx-{{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
+{% for p in pp %}{% if p.title %}{% if p.layout == "movie" %}movie [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "s" %}s [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "shorturl" %}shorturl [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "jump" %}jump [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "hide" %}hide [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "default" %}[{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lockjump" %}lockjump [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "empty" %}empty [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "listpage" %}listpage [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lockhtml" %}lockhtml [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lock" %}lock [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "movieList" %}movieList [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "myMdShow" %}myMdShow [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "pt" %}pt [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "encpara" %}encpara [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lockurl" %}lockurl [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "zip" %}zip [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "enc" %}enc [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "" %}x-[{{ p.title }}  ]({{ p.url }}) 
+{% else %}xx-{{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
 {% endif %}{% endif %} {% endfor %}
 
 
