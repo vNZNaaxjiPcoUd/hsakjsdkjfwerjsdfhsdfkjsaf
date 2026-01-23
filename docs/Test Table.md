@@ -29,12 +29,28 @@ lockjump [{{ p.title }}  ]({{ p.url }})
 empty [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "listpage" %}
 listpage [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lockhtml" %}
+lockhtml [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lock" %}
+lock [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "movieList" %}
+movieList [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "myMdShow" %}
+myMdShow [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "pt" %}
+pt [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "encpara" %}
+encpara [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "lockurl" %}
+lockurl [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "zip" %}
+zip [{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "enc" %}
+enc [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "" %}
-x[{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "" %}
-xx[{{ p.title }}  ]({{ p.url }}) 
+x-[{{ p.title }}  ]({{ p.url }}) 
 {% else %}
-nomatch {{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
+xx-{{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
 {% endif %}
 {% endif %} 
 {% endfor %}
