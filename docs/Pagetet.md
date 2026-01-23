@@ -13,7 +13,7 @@ Pagetet
 {% elsif p.layout == "shorturl" %}🔄[{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "jump" %}🔄[{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "lockjump" %}🔒🔄[{{ p.title }}  ]({{ p.url }}) 
-{% elsif p.layout == "default" %} ..[{{ p.title }}  ]({{ p.url }}) 
+{% elsif p.layout == "default" %} >[{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "listpage" %}.[{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "movieList" %}.[{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "myMdShow" %}.[{{ p.title }}  ]({{ p.url }}) 
