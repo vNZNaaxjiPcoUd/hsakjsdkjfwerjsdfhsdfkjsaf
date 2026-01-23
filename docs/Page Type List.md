@@ -8,7 +8,8 @@ Page Type List
 
 
 {% assign pp = site.pages | sort_natural: "title" %}
-{% for p in pp %}{% if p.title %}{% if p.layout == "movie" %}movie [{{ p.title }}  ]({{ p.url }}) 
+{% for p in pp %}{% if p.title %}
+{% if p.layout == "movie" %}movie [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "s" %}s [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "shorturl" %}shorturl [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "jump" %}jump [{{ p.title }}  ]({{ p.url }}) 
@@ -28,6 +29,7 @@ Page Type List
 {% elsif p.layout == "enc" %}enc [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "" %}x-[{{ p.title }}  ]({{ p.url }}) 
 {% else %}xx-{{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
-{% endif %}{% endif %} {% endfor %}
+{% endif %}
+{% endif %}{% endfor %}
 
 
