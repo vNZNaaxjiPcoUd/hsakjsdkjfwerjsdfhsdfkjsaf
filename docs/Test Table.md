@@ -9,9 +9,7 @@ Test Table
 
 
 {% assign pp = site.pages | sort_natural: "title" %}
-{% for p in pp %} 
-{% if p.title %}
-{% if p.layout == "movie" %}
+{% for p in pp %}{% if p.title %}{% if p.layout == "movie" %}
 movie [{{ p.title }}  ]({{ p.url }}) 
 {% elsif p.layout == "s" %}
 s [{{ p.title }}  ]({{ p.url }}) 
@@ -51,8 +49,6 @@ enc [{{ p.title }}  ]({{ p.url }})
 x-[{{ p.title }}  ]({{ p.url }}) 
 {% else %}
 xx-{{ p.layout }} [{{ p.title }}  ]({{ p.url }}) 
-{% endif %}
-{% endif %} 
-{% endfor %}
+{% endif %}{% endif %} {% endfor %}
 
 
