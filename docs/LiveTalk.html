@@ -9,7 +9,7 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
         :root { --primary: #007bff; --bg: #f8f9fa; --user-bg: #e1f5fe; --ai-bg: #ffffff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 85vh; }
         
         /* 頂部狀態 */
         .status-bar { background: #212529; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
@@ -91,8 +91,8 @@
             if (!text) return;
 
             // 處理解密指令
-            if (text.startsWith("key=")) {
-                const password = text.replace("key=", "");
+            if (text.startsWith("key ")) {
+                const password = text.replace("key ", "");
                 try {
                     const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, password);
                     const originalKey = bytes.toString(CryptoJS.enc.Utf8);
@@ -101,7 +101,7 @@
                         apiKey = originalKey;
                         lockStatus.innerText = "● 已解鎖";
                         lockStatus.className = "badge active";
-                        addBubble('ai', "✅ **解鎖成功！** 我是您的生活百科助手，請問今天有什麼我可以幫您的？<br><small>(例如：如何保存沒吃完的酪梨？)</small>");
+                        addBubble('ai', "**解鎖成功！** 我是您的生活百科助手，請問今天有什麼我可以幫您的？<br><small>(例如：如何保存沒吃完的酪梨？)</small>");
                     } else {
                         throw new Error();
                     }
@@ -114,7 +114,7 @@
 
             // 檢查是否已解鎖
             if (!apiKey) {
-                addBubble('ai', "⚠️ **請先解鎖**。輸入 `key=您的密碼` 才能開始對話。");
+                addBubble('ai', "**請先解鎖**。輸入 `key 您的密碼` 才能開始對話。");
                 return;
             }
 
