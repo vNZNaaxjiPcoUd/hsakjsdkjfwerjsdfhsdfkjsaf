@@ -87,17 +87,15 @@ KDP 不支援：
 
 #### 🔧視頻中涉及的工具
 
-►Canva：[https://www.canva.com/](https%3A%2F%2Fwww.canva.com%2F&v=j9pZirPx9lQ)
+►Canva：[https://www.canva.com/](https://www.canva.com)
 
-►ChatGPT：[https://chat.openai.com/](https%3A%2F%2Fchat.openai.com%2F&v=j9pZirPx9lQ)
+►ChatGPT：[https://chat.openai.com/](https://chat.openai.com)
 
-►AIPRM for ChatGPT：[https://www.aiprm.com/](https%3A%2F%2Fwww.aiprm.com%2F&v=j9pZirPx9lQ)
+►AIPRM for ChatGPT：[https://www.aiprm.com/](https://www.aiprm.com)
 
-►Amazon KDP\_Format Your Paperback：[https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG201834190&v=j9pZirPx9lQ)
+►Amazon KDP\_Format Your Paperback：[https://kdp.amazon.com/en_US/help/topic/G201834190)
 
-►Kindle Create：
-
-[https://www.amazon.com/Kindle-Create/...](https%3A%2F%2Fwww.amazon.com%2FKindle-Create%2Fb%3Fie%3DUTF8%26node%3D18292298011&v=j9pZirPx9lQ)
+►Kindle Create： [https://www.amazon.com/Kindle-Create/...](https://www.amazon.com/Kindle-Create/b?ie=UTF8&node=18292298011)
 
   
 
@@ -105,23 +103,19 @@ KDP 不支援：
 
 #### 🔗視頻中提及的參考資訊：
 
-►Amazon Kindle Direct Publishing 亞馬遜自助出版平台：[https://kdp.amazon.com/en\_US/](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2F&v=j9pZirPx9lQ)
+►Amazon Kindle Direct Publishing 亞馬遜自助出版平台：[https://kdp.amazon.com/en\_US/](https://kdp.amazon.com/en_US)
 
-►KDP Help Center: [https://kdp.amazon.com/en\_US/help/top...](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG200634280&v=j9pZirPx9lQ)
+►KDP Help Center: [https://kdp.amazon.com/en\_US/help/top...](https://kdp.amazon.com/en_US/help/topic/G200634280)
 
-►印刷书籍定价页：
+►印刷书籍定价页： [https://kdp.amazon.com/en\_US/help/top...](https://kdp.amazon.com/en_US/help/topic/G8BKPU9AGVZSF9QF)
 
-[https://kdp.amazon.com/en\_US/help/top...](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG8BKPU9AGVZSF9QF&v=j9pZirPx9lQ)
+►扩大分销条件： [https://kdp.amazon.com/en\_US/help/top...](https://kdp.amazon.com/en_US/help/topic/GQTT4W3T5AYK7L45#eligibility)
 
-►扩大分销条件：
+►电子书封面\*要求：[https://kdp.amazon.com/en\_US/help/top...](https://kdp.amazon.com/en_US/help/topic/G200645690)
 
-[https://kdp.amazon.com/en\_US/help/top...](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FGQTT4W3T5AYK7L45%23eligibility&v=j9pZirPx9lQ)
+►电子书定价要求：[https://kdp.amazon.com/en\_US/help/top...](https://kdp.amazon.com/en_US/help/topic/G200634560)
 
-►电子书封面\*要求：[https://kdp.amazon.com/en\_US/help/top...](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG200645690&v=j9pZirPx9lQ)
-
-►电子书定价要求：[https://kdp.amazon.com/en\_US/help/top...](https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG200634560&v=j9pZirPx9lQ)
-
-►电子书定价页：[https://kdp.amazon.com/en\_US/help/top...](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbGdSTERhT3RZY0FOOGFyMTFtbDBmN3J1OXhaQXxBQ3Jtc0trc3hTN2gyS3M3eTNrZjMtVnJGUk00QWRNdnBvNkg5VV9fd0cweDNhaEh3TDdLR1A5b2V0VDY1dHJqM2IzNkJiVmJ2UXI0YmJzalQtQlZ2OHNSUk04NE5la0dNeWdIYUowcFFKQ3pNcXdUaTZWbi13dw&q=https%3A%2F%2Fkdp.amazon.com%2Fen_US%2Fhelp%2Ftopic%2FG200634500&v=j9pZirPx9lQ)
+►电子书定价页：[https://kdp.amazon.com/en\_US/help/top...](https://www.youtube.com/redirect?event=video_description&redir_token=QUFFLUhqbGdSTERhT3RZY0FOOGFyMTFtbDBmN3J1OXhaQXxBQ3Jtc0trc3hTN2gyS3M3eTNrZjMtVnJGUk00QWRNdnBvNkg5VV9fd0cweDNhaEh3TDdLR1A5b2V0VDY1dHJqM2IzNkJiVmJ2UXI0YmJzalQtQlZ2OHNSUk04NE5la0dNeWdIYUowcFFKQ3pNcXdUaTZWbi13dw&q=https://kdp.amazon.com/en_US/help/topic/G200634500)
 
   
 
@@ -129,6 +123,6 @@ KDP 不支援：
 
 #### 📖《Little Monkey Chases the Moon》（小猴子追新月）亞馬遜銷售鏈接
 
-平裝書: [https://www.amazon.com/dp/B0DG95RJSC](https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0DG95RJSC&v=j9pZirPx9lQ)
+平裝書: [https://www.amazon.com/dp/B0DG95RJSC](https://www.amazon.com/dp/B0DG95RJSC)
 
-Kindle電子書: [https://www.amazon.com/dp/B0DG93TLFM](https%3A%2F%2Fwww.amazon.com%2Fdp%2FB0DG93TLFM&v=j9pZirPx9lQ)
+Kindle電子書: [https://www.amazon.com/dp/B0DG93TLFM](https://www.amazon.com/dp/B0DG93TLFM)
