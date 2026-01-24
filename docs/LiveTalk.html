@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生活百科</title>
+    <!-- 引入必要的庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root { --primary: #007bff; --bg: #f8f9fa; --user-bg: #e1f5fe; --ai-bg: #ffffff; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; display: flex; flex-direction: column; height: 100vh; }
+        
+        /* 頂部狀態 */
+        .status-bar { background: #212529; color: #fff; padding: 10px 20px; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        .badge { padding: 4px 8px; border-radius: 4px; background: #dc3545; }
+        .badge.active { background: #28a745; }
+
+        /* 聊天區域 */
+        #chat-window { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .bubble { max-width: 85%; padding: 12px 16px; border-radius: 15px; line-height: 1.6; word-wrap: break-word; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .user { align-self: flex-end; background: var(--user-bg); border-bottom-right-radius: 2px; }
+        .ai { align-self: flex-start; background: var(--ai-bg); border-bottom-left-radius: 2px; }
+        
+        /* Markdown 內容微調 */
+        .bubble p { margin: 5px 0; }
+        .bubble ul, .bubble ol { padding-left: 20px; }
+
+        /* 輸入區域 */
+        .input-panel { padding: 20px; background: #fff; border-top: 1px solid #dee2e6; display: flex; gap: 10px; }
+        #userInput { flex-grow: 1; padding: 12px 18px; border: 1px solid #ced4da; border-radius: 25px; outline: none; font-size: 16px; }
+        #userInput:focus { border-color: var(--primary); }
+        #sendBtn { background: var(--primary); color: white; border: none; padding: 10px 24px; border-radius: 25px; cursor: pointer; font-weight: bold; }
+        #sendBtn:disabled { background: #ccc; }
+
+        /* 載入動畫 */
+        .loader { color: #6c757d; font-size: 14px; display: none; margin-left: 20px; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="status-bar">
+        <span>🤖</span>
+        <span id="lock-status" class="badge">密鑰未解鎖</span>
+    </div>
+
+    <div id="chat-window">
+        <div class="bubble ai">
+            歡迎使用生活百科助手！<br>
+            <b>請先解鎖以啟用功能：</b><br>
+            在輸入框輸入 <code>key=您的解密密碼</code>。
+        </div>
+    </div>
+
+    <div id="loading" class="loader">AI 正在搜尋生活知識...</div>
+
+    <div class="input-panel">
+        <input type="text" id="userInput" placeholder="輸入問題或 key=..." autocomplete="off">
+        <button id="sendBtn">發送</button>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION: 填入你加密後的字串
+        // ==========================================
+        const ENCRYPTED_DATA = "U2FsdGVkX19TWFKXZDoeRn3pa1DWBE3MCjDHHS0O77GEbVCGf9Utbx4UHFeH3WFcbd4jaY5XsPMNlda7aehiag=="; 
+        // ==========================================
+
+        let apiKey = "";
+        let chatHistory = [];
+        const chatWindow = document.getElementById('chat-window');
+        const userInput = document.getElementById('userInput');
+        const sendBtn = document.getElementById('sendBtn');
+        const lockStatus = document.getElementById('lock-status');
+        const loading = document.getElementById('loading');
+
+        // 系統指令：讓 AI 專注於生活知識
+        const SYSTEM_PROMPT = "你是一個親切的生活百科專家，專長是：家居收納、烹飪食譜、健康知識、日常修理、清潔妙招、以及科技產品使用建議。請用繁體中文回答，內容要具體且有條理，多使用清單列點。";
+
+        function addBubble(role, content) {
+            const div = document.createElement('div');
+            div.className = `bubble ${role}`;
+            div.innerHTML = role === 'ai' ? marked.parse(content) : content;
+            chatWindow.appendChild(div);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+            return div;
+        }
+
+        async function handleAction() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            // 處理解密指令
+            if (text.startsWith("key=")) {
+                const password = text.replace("key=", "");
+                try {
+                    const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, password);
+                    const originalKey = bytes.toString(CryptoJS.enc.Utf8);
+
+                    if (originalKey && originalKey.length > 20) {
+                        apiKey = originalKey;
+                        lockStatus.innerText = "● 已解鎖";
+                        lockStatus.className = "badge active";
+                        addBubble('ai', "✅ **解鎖成功！** 我是您的生活百科助手，請問今天有什麼我可以幫您的？<br><small>(例如：如何保存沒吃完的酪梨？)</small>");
+                    } else {
+                        throw new Error();
+                    }
+                } catch (e) {
+                    addBubble('ai', "❌ **密碼錯誤**。請檢查後重新輸入。");
+                }
+                userInput.value = "";
+                return;
+            }
+
+            // 檢查是否已解鎖
+            if (!apiKey) {
+                addBubble('ai', "⚠️ **請先解鎖**。輸入 `key=您的密碼` 才能開始對話。");
+                return;
+            }
+
+            // 一般對話
+            addBubble('user', text);
+            userInput.value = "";
+            loading.style.display = "block";
+            sendBtn.disabled = true;
+
+            try {
+                // 使用你提供的清單中最強的穩定版模型
+                const MODEL = "gemini-2.5-flash"; 
+                const URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
+
+                const response = await fetch(URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                        contents: [
+                            ...chatHistory,
+                            { role: "user", parts: [{ text: text }] }
+                        ],
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 2000
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.error) throw new Error(data.error.message);
+
+                const aiMsg = data.candidates[0].content.parts[0].text;
+                addBubble('ai', aiMsg);
+
+                // 更新紀錄
+                chatHistory.push({ role: "user", parts: [{ text: text }] });
+                chatHistory.push({ role: "model", parts: [{ text: aiMsg }] });
+
+                // 保持歷史紀錄不要太長，避免超過 Token 限制
+                if (chatHistory.length > 10) chatHistory.splice(0, 2);
+
+            } catch (err) {
+                addBubble('ai', "❌ **錯誤：** " + err.message);
+            } finally {
+                loading.style.display = "none";
+                sendBtn.disabled = false;
+            }
+        }
+
+        sendBtn.addEventListener('click', handleAction);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAction();
+        });
+    </script>
+</body>
+</html>
