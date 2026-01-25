@@ -115,7 +115,8 @@
         // CONFIG: 請替換為你加密後的字串
         const ENCRYPTED_DATA = "U2FsdGVkX1/cMjoWs1ribSHx3tUhUwlvgd5vYvPO7rulKa12/ghN7G0G96B0xJzvPtEFuUI+mRSbF65UlGEaPg"; 
         // ==========================================
-
+        // ref: https://c73/Note/gemini%20API.md
+        
         let apiKey = "";
         let chatHistory = [];
         const chatList = document.getElementById('chat-list');
@@ -212,7 +213,8 @@
 
             try {
                 // 指向 Gemini 2.5 Flash
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                //const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
