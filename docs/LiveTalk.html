@@ -236,6 +236,10 @@
                 });
 
                 const data = await response.json();
+                if (response.status === 429) {
+                    // 429 是 Too Many Requests (額度超限)
+                    loadingRow.querySelector('.bubble').innerHTML = " 滿了 "；
+                }
                 if (data.error) throw new Error(data.error.message);
 
                 const aiMsg = data.candidates[0].content.parts[0].text;
