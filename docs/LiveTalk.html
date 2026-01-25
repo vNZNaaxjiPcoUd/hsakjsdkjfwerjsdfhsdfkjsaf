@@ -83,7 +83,7 @@
 <body>
 
     <nav class="navbar">
-        <h1>🏠 生活百科 AI</h1>
+        <h1>🏠 生活百科</h1>
         <div id="status" class="status-badge">未解鎖</div>
     </nav>
 
@@ -94,7 +94,7 @@
                     <div class="avatar ai-avatar">AI</div>
                     <div class="bubble">
                         您好！我是您的生活百科專家。🧪<br><br>
-                        請輸入 <code>key=您的解密密碼</code> 以開始。
+                        請輸入 <code>key 密碼</code> 以開始。
                     </div>
                 </div>
             </div>
@@ -103,7 +103,7 @@
 
     <div class="input-area">
         <div class="input-wrapper">
-            <input type="text" id="userInput" placeholder="輸入訊息或 key=密碼..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="聊什麼..." autocomplete="off">
             <button id="sendBtn">
                 <svg stroke="currentColor" fill="none" stroke-width="2" viewBox="0 0 24 24" height="20" width="20"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
             </button>
@@ -188,8 +188,9 @@
             const val = userInput.value.trim();
             if (!val) return;
 
-            if (val.startsWith("key=")) {
-                const pass = val.replace("key=", "");
+            if (/^key /i.test(val)) {
+                // 使用 replace 配合正規表達式將開頭的 key= (不論大小寫) 移除
+                const pass = val.replace(/^key /i, "");
                 try {
                     const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
                     const decoded = bytes.toString(CryptoJS.enc.Utf8);
@@ -203,7 +204,7 @@
                 userInput.value = ""; return;
             }
 
-            if (!apiKey) { appendMessage('ai', "⚠️ 請輸入 `key=密碼`。"); return; }
+            if (!apiKey) { appendMessage('ai', "⚠️ 請輸入 `key 密碼`。"); return; }
 
             appendMessage('user', val);
             userInput.value = "";
@@ -213,8 +214,7 @@
 
             try {
                 // 指向 Gemini 2.5 Flash
-                //const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
 
                 const response = await fetch(API_URL, {
                     method: 'POST',
@@ -236,9 +236,11 @@
                 });
 
                 const data = await response.json();
+                console.log(response.status);
                 if (response.status === 429) {
                     // 429 是 Too Many Requests (額度超限)
-                    loadingRow.querySelector('.bubble').innerHTML = " 滿了 "；
+                    loadingRow.remove();
+                    appendMessage('ai', " 滿了 ");;
                 }
                 if (data.error) throw new Error(data.error.message);
 
