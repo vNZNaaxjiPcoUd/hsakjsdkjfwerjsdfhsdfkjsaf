@@ -22,61 +22,92 @@
             margin: 0; padding: 0;
             font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
             background-color: white; color: var(--text-main);
-            display: flex; flex-direction: column; height: 80vh; overflow: hidden;
+            display: flex; flex-direction: column; 
+            height: 100vh; height: 100dvh; overflow: hidden;
         }
 
-        /* 導航列 */
+        /* 導航列：極致壓縮 */
         .navbar {
-            padding: 12px 20px; background: white; border-bottom: 1px solid var(--border-color);
+            padding: 4px 10px;
+            background: white; border-bottom: 1px solid var(--border-color);
             display: flex; justify-content: space-between; align-items: center;
             position: sticky; top: 0; z-index: 100;
         }
-        .navbar h1 { margin: 0; font-size: 1.1rem; }
-        .status-badge { font-size: 12px; padding: 4px 12px; border-radius: 20px; background: #ef4444; color: white; }
+        .navbar h1 { margin: 0; font-size: 0.9rem; font-weight: 600; }
+        .status-badge { font-size: 10px; padding: 1px 6px; border-radius: 3px; background: #ef4444; color: white; }
         .status-badge.unlocked { background: var(--primary-color); }
 
-        /* 對話容器 */
+        /* 對話容器：最大化寬度 */
         #chat-container { flex: 1; overflow-y: auto; width: 100%; scroll-behavior: smooth; }
-        .chat-content { max-width: 850px; margin: 0 auto; width: 100%; }
+        .chat-content { max-width: 1200px; margin: 0 auto; width: 100%; }
 
-        .message-row { padding: 24px 20px; display: flex; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        /* 訊息列：極窄上下間距 */
+        .message-row { 
+            padding: 6px 10px; 
+            display: flex; justify-content: center; border-bottom: 1px solid rgba(0,0,0,0.03); 
+        }
         .message-row.user-type { background-color: white; }
         .message-row.ai-type { background-color: var(--ai-bubble); }
 
-        .message-wrapper { max-width: 850px; width: 100%; display: flex; gap: 20px; position: relative; }
-        .avatar { width: 30px; height: 30px; border-radius: 4px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-weight: bold; font-size: 12px; color: white; }
+        .message-wrapper { 
+            max-width: 100%; width: 100%; display: flex; 
+            gap: 8px; position: relative; 
+        }
+
+        /* 頭像縮小，不佔空間 */
+        .avatar { 
+            width: 22px; height: 22px; 
+            border-radius: 3px; display: flex; align-items: center; justify-content: center; 
+            flex-shrink: 0; font-weight: bold; font-size: 9px; color: white; margin-top: 3px;
+        }
         .user-avatar { background: #5436da; }
         .ai-avatar { background: var(--primary-color); }
 
-        .bubble { flex: 1; font-size: 16px; line-height: 1.6; word-wrap: break-word; position: relative; }
+        /* 內容區：字體適中，行高緊湊 */
+        .bubble { flex: 1; font-size: 15px; line-height: 1.5; word-wrap: break-word; position: relative; }
+        .bubble p { margin: 2px 0; } 
         
-        /* 複製按鈕樣式 */
+        /* 「複製原文」按鈕：保持小巧精簡 */
         .copy-btn {
-            display: flex; align-items: center; gap: 4px;
+            display: inline-flex; align-items: center; gap: 4px;
             background: transparent; border: 1px solid #d1d1d6; color: #8e8e93;
-            padding: 4px 8px; border-radius: 6px; cursor: pointer;
-            font-size: 12px; margin-top: 10px; transition: 0.2s;
+            padding: 2px 6px; border-radius: 4px; cursor: pointer;
+            font-size: 11px; margin-top: 5px; transition: 0.2s;
+            line-height: 1;
         }
         .copy-btn:hover { background: #e5e5ea; color: #1c1c1e; }
-        .copy-btn svg { width: 14px; height: 14px; }
+        .copy-btn svg { width: 12px; height: 12px; }
 
-        /* 輸入區域 */
-        .input-area { padding: 20px; background: linear-gradient(transparent, white 20%); }
-        .input-wrapper { max-width: 850px; margin: 0 auto; position: relative; display: flex; align-items: center; box-shadow: 0 0 15px rgba(0,0,0,0.1); border-radius: 12px; background: white; border: 1px solid var(--border-color); }
-        #userInput { width: 100%; border: none; padding: 14px 50px 14px 16px; border-radius: 12px; font-size: 16px; outline: none; }
-        #sendBtn { position: absolute; right: 8px; background: transparent; border: none; cursor: pointer; color: #acacbe; padding: 4px; display: flex; }
+        /* 輸入區域：節省底部空間 */
+        .input-area { 
+            padding: 6px 10px; 
+            background: white; border-top: 1px solid var(--border-color);
+        }
+        .input-wrapper { 
+            max-width: 1200px; margin: 0 auto; position: relative; 
+            display: flex; align-items: center; border-radius: 6px; 
+            background: white; border: 1px solid var(--border-color); 
+        }
+        #userInput { 
+            width: 100%; border: none; padding: 8px 40px 8px 12px; 
+            border-radius: 6px; font-size: 15px; outline: none; 
+        }
+        #sendBtn { position: absolute; right: 4px; background: transparent; border: none; cursor: pointer; color: #acacbe; padding: 4px; }
+        #sendBtn svg { width: 18px; height: 18px; }
 
         /* 載入中動畫 */
-        .loading-dots { display: inline-flex; gap: 4px; }
-        .dot { width: 4px; height: 4px; background: #666; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
-        .dot:nth-child(1) { animation-delay: -0.32s; }
-        .dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1.0); } }
+        .loading-dots { display: inline-flex; gap: 3px; }
+        .dot { width: 3px; height: 3px; background: #666; border-radius: 50%; animation: bounce 1.4s infinite ease-in-out both; }
 
+        /* 手機端優化：極致利用螢幕寬度 */
         @media (max-width: 600px) {
-            .message-row { padding: 16px 12px; }
-            .message-wrapper { gap: 12px; }
-            .bubble { font-size: 15px; }
+            .navbar { padding: 4px 6px; }
+            .message-row { padding: 4px 6px; }
+            .message-wrapper { gap: 6px; }
+            .bubble { font-size: 14.5px; }
+            .input-area { padding: 4px 6px; }
+            .avatar { width: 18px; height: 18px; font-size: 8px; }
+            .copy-btn { padding: 2px 5px; font-size: 10px; }
         }
     </style>
 </head>
@@ -215,7 +246,7 @@
             try {
                 // 指向 Gemini 2.5 Flash
                 //const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
                 
 
                 const response = await fetch(API_URL, {
