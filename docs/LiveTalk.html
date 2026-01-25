@@ -268,6 +268,61 @@
                     })
                 });
 
+
+                /* 
+                // <使用 v1>
+                const API_KEY = apiKey;
+                const MODEL_ID = "gemini-2.0-flash-lite"; //gemini-2.0-flash-lite-001 // //gemini-2.5-flash-lite
+                const URL = `https://generativelanguage.googleapis.com/v1/models/${MODEL_ID}:generateContent?key=${API_KEY}`;
+
+
+                let contents = [];
+
+                if (chatHistory.length === 0) {
+                     
+                    //情境 1：第一輪對話
+                    //將系統指令直接與使用者訊息合併，作為第一則 user 訊息
+                    
+                    contents.push({
+                        role: "user",
+                        parts: [{ 
+                            text: `指令：${SYSTEM_PROMPT}\n\n接下來請根據以上指令回答我的問題：${val}` 
+                        }]
+                    });
+                } else {
+                    
+                    //情境 2：已經有對話歷史
+                    //直接把歷史帶入，並加上最新的 user 訊息
+                    
+                    contents = [
+                        ...chatHistory, 
+                        { role: "user", parts: [{ text: val }] }
+                    ];
+                }
+
+                const response = await fetch(URL, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        contents: contents, // 這裡只傳 contents，不傳 system_instruction
+                        generationConfig: {
+                            temperature: 0.7,
+                            maxOutputTokens: 4096,
+                            topP: 0.95,
+                            topK: 40
+                        }
+                    })
+                });
+                // </使用 v1 >
+                */
+
+
+
+
+
+                
                 const data = await response.json();
                 console.log(response.status);
                 if (response.status === 429) {
