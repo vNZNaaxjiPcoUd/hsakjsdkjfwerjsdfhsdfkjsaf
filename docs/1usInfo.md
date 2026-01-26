@@ -43,7 +43,19 @@
   - [Tesla補助7500](https://h.jwint.net/Tesla%20%E8%A3%9C%E5%8A%A9%207500.html)
   - [自營稅](/自營稅)
 - **投資**
-  - [相關資訊](/S&P500)
+  - [標普500](/S&P500)
+  - VOO [https://stocks.apple.com/symbol/VOO](https://stocks.apple.com/symbol/VOO)
+  - IVV [https://stocks.apple.com/symbol/IVV](https://stocks.apple.com/symbol/IVV)
+  - SPY	[https://stocks.apple.com/symbol/SPY](https://stocks.apple.com/symbol/SPY)
+  - TSM 美國台積電 [https://stocks.apple.com/symbol/TSM](https://stocks.apple.com/symbol/TSM)
+  - 台灣台積電 [https://stocks.apple.com/symbol/2330.TW](https://stocks.apple.com/symbol/2330.TW)
+  - 元大台灣50 [https://stocks.apple.com/symbol/0050.TW](https://stocks.apple.com/symbol/0050.TW)
+  - 道瓊 Dow Jones [https://stocks.apple.com/symbol/%5EDJI](https://stocks.apple.com/symbol/%5EDJI)
+  - 台灣股市 [https://stocks.apple.com/symbol/%5ETWII](https://stocks.apple.com/symbol/%5ETWII)
+  - 標普500行情 [https://stocks.apple.com/symbol/%5ESPX](https://stocks.apple.com/symbol/%5ESPX)
+  - [Schwab 投資公司](/Schwab)
+  - [Fidelity 投資公司](/Fidelity)
+    
 - **其他**  
   - [美國律師類型](https://h.jwint.net/%E7%BE%8E%E5%9C%8B%E5%BE%8B%E5%B8%AB.html)
   - [薪資&僱傭成本指數](https://h.jwint.net/%E8%96%AA%E8%B3%87%E6%B0%B4%E5%B9%B3.html)
