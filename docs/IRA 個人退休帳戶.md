@@ -1,5 +1,4 @@
-# IRA 帳戶
-
+# IRA（Individual Retirement Account） 個人退休帳戶
 在美國理財，**IRA（Individual Retirement Account，個人退休帳戶）** 是除了公司提供的 401(k) 之外，最核心的退休與省稅工具。
 
 2026 年已經到來，稅務局（IRS）也根據通貨膨脹微調了額度。以下為你整理的 IRA 全方位指南：
