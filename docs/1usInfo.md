@@ -65,7 +65,7 @@ layout: page_blank
   - 標普500行情 [https://stocks.apple.com/symbol/%5ESPX](https://stocks.apple.com/symbol/%5ESPX)
   - [Schwab 投資公司](/Schwab)
   - [Fidelity 投資公司](/Fidelity)
-  - [IRA 個人退休帳戶](/IRA 個人退休帳戶)
+  - [IRA 個人退休帳戶](/IRA%20個人退休帳戶)
     
 
 ## 其他
