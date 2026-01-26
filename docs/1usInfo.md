@@ -5,6 +5,7 @@
   - [美國時區圖](https://h.jwint.net/USA%20Map.html)
   - [來到希爾斯伯勒縣](https://h.jwint.net/New%20to%20Hillsborough%20County.html)
   - [隨身攜帶綠卡](https://h.jwint.net/sushencidailvka.html)
+
 ##  交通
   - [路上有狀況](/在美國馬路上發生狀況如何處理)
   - [駕照地址變更指南](https://h.jwint.net/%E9%A7%95%E7%85%A7%E5%9C%B0%E5%9D%80%E8%AE%8A%E6%9B%B4%E6%8C%87%E5%8D%97.html)
@@ -14,6 +15,7 @@
   - [佛州自行車手冊](https://h.jwint.net/%E8%87%AA%E8%A1%8C%E8%BB%8A%E8%A6%8F%E5%89%87%20FL.html)
   - [車輛故障](/在美國馬路上發生狀況如何處理)
   - 充電
+
 ## 醫療
   - [看病的流程](/美國%20看病的流程)
   - [社安金 退休積分如何計算 社會安全退休福利](/社會安全退休福利)
@@ -22,18 +24,21 @@
   - [Medicaid](https://h.jwint.net/Medicaid.html)
   - [亞馬遜的one medical](https://h.jwint.net/one%20medical.html)
   - [非移民醫保](/非移民醫保)
+
 ## 簽証
   - [雙重國籍入出境注意事項](https://h.jwint.net/%E9%9B%99%E9%87%8D%E5%9C%8B%E7%B1%8D.html)
   - [西雅圖 國際線轉國內線的流程](https://h.jwint.net/%E8%A5%BF%E9%9B%85%E5%9C%96%20%E5%9C%8B%E9%9A%9B%E7%B7%9A%E8%BD%89%E5%9C%8B%E5%85%A7%E7%B7%9A%E7%9A%84%E6%B5%81%E7%A8%8B.html)
   - [護照常見問題](https://h.jwint.net/PassportQA.html)
   - [簽證類型](https://h.jwint.net/%E7%B0%BD%E8%A8%BC%E9%A1%9E%E5%88%A5.html)
   - [如何保持绿卡有效](/如何保持绿卡有效)
+
 ## 英文 
   - [英文3000字](https://h.jwint.net/%E8%8B%B1%E6%96%87%203000%20%E5%96%AE%E5%AD%97.html)
   - [動詞片語](/動詞片語)
   - [常用機場英語](https://h.jwint.net/%E6%A9%9F%E5%A0%B4%E5%B8%B8%E7%94%A8%E8%8B%B1%E6%96%87.html)
   - [海關英文](https://h.jwint.net/%E6%B5%B7%E9%97%9C%E8%8B%B1%E6%96%87.html)
   - [佛州英文學習課程](/佛州英文學習課程)
+
 ## 稅 
   - [報稅](/美國報稅)
   - [紅藍卡與白卡](/紅藍卡與白卡)
@@ -42,6 +47,7 @@
   - [聯邦電車稅抵扣](https://h.jwint.net/Federal%20Electric%20Vehicle%20Tax%20Credit.html)
   - [Tesla補助7500](https://h.jwint.net/Tesla%20%E8%A3%9C%E5%8A%A9%207500.html)
   - [自營稅](/自營稅)
+
 ## 投資
   - [標普500](/S&P500)
   - VOO [https://stocks.apple.com/symbol/VOO](https://stocks.apple.com/symbol/VOO)
@@ -56,6 +62,7 @@
   - [Schwab 投資公司](/Schwab)
   - [Fidelity 投資公司](/Fidelity)
     
+
 ## 其他
   - [美國律師類型](https://h.jwint.net/%E7%BE%8E%E5%9C%8B%E5%BE%8B%E5%B8%AB.html)
   - [薪資&僱傭成本指數](https://h.jwint.net/%E8%96%AA%E8%B3%87%E6%B0%B4%E5%B9%B3.html)
@@ -64,5 +71,6 @@
   - [佛羅里達州成立個人公司](https://h.jwint.net/%E4%BD%9B%E7%BE%85%E9%87%8C%E9%81%94%E5%B7%9E%E6%88%90%E7%AB%8B%E5%80%8B%E4%BA%BA%E5%85%AC%E5%8F%B8.html)
   - [美國洪水危險分區](https://h.jwint.net/%E7%BE%8E%E5%9C%8B%E6%B4%AA%E6%B0%B4%E5%8D%80%E5%9C%96.html)
   - [攜帶工具刀規定](/攜帶工具刀規定)
+  - [美國槍枝法規](/美國槍枝法規)
 
 
