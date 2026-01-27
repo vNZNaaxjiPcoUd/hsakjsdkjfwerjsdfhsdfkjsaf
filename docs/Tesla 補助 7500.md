@@ -5,6 +5,8 @@ Tesla 補助 7500
 
 這是美國國稅局（IRS）針對 **2024 年及之後** 購車實施的新規定中最有利於消費者的一點。以下是詳細的拆解：
 
+相應的連結如下，在 Q4 ： [IRS.org](https://www.irs.gov/newsroom/topic-h-frequently-asked-questions-about-transfer-of-new-clean-vehicle-credit-and-previously-owned-clean-vehicles-credit?utm_source=chatgpt.com)
+
 ### 1. 什麼是「點對點折抵」（Point of Sale Transfer）？
 
 從 2024 年 1 月 1 日起，買家可以選擇將稅收抵免「轉讓」給經銷商。這樣你不用等到隔年報稅，買車時就能直接扣掉 $7,500。
