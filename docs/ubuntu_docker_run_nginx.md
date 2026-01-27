@@ -310,3 +310,155 @@ docker compose up -d
 
 **設定好之後，你是要用它來對外發布其他的 Docker 服務（例如一個 Python API 或 Node.js 網站）嗎？我可以教你如何設定 Internal Docker Network 連線。**
 
+# 使用 **Docker Compose** 安裝 Portainer 是更優雅的做法，因為這能讓你把設定紀錄在檔案中，未來要遷移或調整設定時會方便許多。
+
+以下是使用 Docker Compose 安裝 Portainer 的步驟：
+
+### 1. 建立 Portainer 專案目錄
+
+為了保持系統整潔，我們先建立一個專屬資料夾：
+
+```bash
+mkdir portainer-manager && cd portainer-manager
+
+```
+
+### 2. 建立 `docker-compose.yml`
+
+建立檔案並貼入以下內容：
+
+```yaml
+version: '3.8'
+
+services:
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /var/run/docker.sock:/var/run/docker.sock  # 讓 Portainer 存取本機 Docker 資訊
+      - portainer_data:/data                       # 持久化儲存 Portainer 的設定資料
+    ports:
+      - "9443:9443"  # HTTPS 管理介面
+      - "8000:8000"  # 用於邊緣代理 (Edge Agent) 通訊
+    networks:
+      - portainer_network
+
+networks:
+  portainer_network:
+    driver: bridge
+
+volumes:
+  portainer_data:
+
+```
+
+### 3. 啟動容器
+
+在該目錄下執行：
+
+```bash
+docker compose up -d
+
+```
+
+---
+
+### 4. 初始化設定
+
+1. **開啟網頁**：訪問 `https://你的伺服器IP:9443`。
+2. **建立帳號**：第一次啟動時，你必須在 **5 分鐘內** 完成管理員帳號設定，否則 Portainer 出於安全考量會自動關閉，屆時你需要重啟容器。
+3. **連線環境**：點選 **"Get Started"** 連結本機環境 (Local Environment)。
+
+---
+
+### 5. 高階技巧：將 NPM 與 Portainer 串起來
+
+既然你之前安裝了 **Nginx Proxy Manager (NPM)**，你一定不希望每次都要背 `9443` 這個埠號，且還要忍受瀏覽器的「不安全連線」警告。
+
+**你可以這樣做：**
+
+1. 在 **NPM** 中新增一個 **Proxy Host**。
+2. **Domain Names**: `portainer.yourdomain.com`。
+3. **Forward Hostname**: 輸入伺服器的內網 IP（或如果它們在同一個 Docker Network，直接輸入 `portainer`）。
+4. **Forward Port**: `9443`。
+5. **重要：** 在 NPM 的設定中，**Scheme** 記得選 `https`，因為 Portainer 預設強制使用 SSL。
+6. 在 SSL 頁籤勾選 **Request a new SSL Certificate**。
+
+---
+
+### 總結你的工具箱
+
+目前你已經擁有了一套強大的 Ubuntu 伺服器管理組合：
+
+* **Ubuntu + systemctl**: 基礎系統服務管理。
+* **PostgreSQL**: 強大的關聯式資料庫。
+* **Nginx Proxy Manager**: 圖形化管理網站入口與 SSL。
+* **Portainer**: 圖形化管理所有的 Docker 容器。
+
+**你想試著將剛才的 PostgreSQL 資料庫也加入 Portainer 進行監控嗎？或者有其他的 Docker 服務想要部署？**
+
+# 是的，這個 `docker-compose.yml` **確實有連結**到你剛建立的 volume。
+
+在 YAML 檔案中，它是透過以下兩個部分來完成連結的：
+
+### 1. 服務層級的掛載 (Mapping)
+
+在 `services` -> `portainer` -> `volumes` 底下：
+
+```yaml
+    volumes:
+      - portainer_data:/data
+
+```
+
+這行指令的意思是：將名為 **`portainer_data`** 的 Volume，掛載到容器內部的 **`/data`** 路徑（Portainer 儲存所有設定的地方）。
+
+### 2. 定義層級的宣告 (Declaration)
+
+在檔案的最底部：
+
+```yaml
+volumes:
+  portainer_data:
+
+```
+
+這部分是告訴 Docker Compose：「嘿，這個專案會用到一個叫做 `portainer_data` 的資料卷」。
+
+---
+
+### 重要細節：它是「新建」還是「沿用」？
+
+這裡有一個 Linux/Docker 的小細節要注意：
+
+* **如果你之前手動執行過** `docker volume create portainer_data`：
+Docker Compose 預設會尋找名為 `portainer-manager_portainer_data`（加上了資料夾前綴）的新 Volume。
+* **如果你想「強制連結」到之前手動建立的那個 Volume**：
+你需要將底部的定義改成 `external: true`，如下所示：
+
+```yaml
+volumes:
+  portainer_data:
+    external: true  # 告訴 Docker Compose 去找外面已經存在的 Volume，不要自己創新的
+
+```
+
+### 如何驗證？
+
+你可以執行以下指令來查看目前系統中所有的 Volume，確認 Portainer 到底是在讀哪一個：
+
+```bash
+docker volume ls
+
+```
+
+如果你看到一個 `portainer-manager_portainer_data`，那就是 Compose 剛幫你新建立的。
+
+**你想確認 Portainer 內的資料是否有正確保存下來（例如重啟後帳號還在不在），還是需要我幫你修改成使用特定的本機路徑（Bind Mount）來儲存資料？**
+
+
+
