@@ -263,3 +263,113 @@ Tesla 補助 7500
 **結論**
 
 以你的收入$10,000，選擇即時折扣是最佳方式，因為它能讓你直接享受$7,500的車價減免，且不受稅務負擔的限制。只要車輛和經銷商符合資格，就不會有問題。建議在購車前確認車型資格並與經銷商詳細溝通。
+
+# 下面用**中文整理**目前美國聯邦電動車 (EV) 補助中 **Point of Sale Transfer（POS 轉讓）** 的主要細節、官方說明連結、當你的 **稅額少於 7,500 美元** 會如何處理，以及相關法規依據。
+
+---
+
+## 📌 1. 什麼是 Point of Sale Transfer (POS轉讓)
+
+**Point of Sale Transfer**（點銷售抵免轉讓）是指你購買符合資格的電動車時，可以 **把聯邦EV稅收抵免 (最高7,500美元新車、4,000美元二手車)** **轉讓給經銷商或賣方**，讓經銷商直接在你購車時 **給你等值的優惠（像是降價或現金）**，而不是等到隔年報稅時才扣抵税款。([IRS][1])
+
+🔹 **關鍵點**
+
+* 適用 **新車稅收抵免 (IRC §30D)** 及 **二手車抵免 (IRC §25E)**。([IRS][1])
+* 經銷商必須是 **IRS註冊的「清潔車輛銷售商/經銷商」** 才能接受轉讓。([IRS][2])
+* 你在購車時告知並選擇轉讓抵免，經銷商就可以透過 IRS 的 **Energy Credits Online (ECO) portal** 申請**提前付款**。([U of I Tax School][3])
+
+📍這種做法是從 **2024 年 1 月起** 開始執行的。([IRS][1])
+
+---
+
+## 🌐 2. 官方網站連結
+
+你可以在 IRS 官方網站直接查閱正式資訊：
+
+🔗 **IRS – Clean Vehicle Tax Credits (包含新車 & 二手車)**
+[https://www.irs.gov/zh-hant/clean-vehicle-tax-credits](https://www.irs.gov/zh-hant/clean-vehicle-tax-credits) ([IRS][4])
+
+🔗 **IRS – 如何申請 Clean Vehicle Tax Credit**
+[https://www.irs.gov/credits-deductions/how-to-claim-a-clean-vehicle-tax-credit](https://www.irs.gov/credits-deductions/how-to-claim-a-clean-vehicle-tax-credit) ([IRS][5])
+
+🔗 **IRS FAQ – 關於 Clean Vehicle Credit 轉讓（Point of Sale）的常見問題**
+[https://www.irs.gov/newsroom/topic-h-frequently-asked-questions-about-transfer-of-new-clean-vehicle-credit-and-previously-owned-clean-vehicles-credit](https://www.irs.gov/newsroom/topic-h-frequently-asked-questions-about-transfer-of-new-clean-vehicle-credit-and-previously-owned-clean-vehicles-credit) ([IRS][1])
+
+---
+
+## 📄 3. 稅額少於 7,500 美元會怎樣？
+
+這是很多人關心的問題：當你用 **POS 轉讓** 並且你的**當年度稅額 (tax liability) 少於可用的稅收抵免額**（例如你只欠 5,000 美元稅，但抵免是 7,500 美元），會發生什麼？
+
+✅ **根據官方規定與 IRS FAQ：如果你已在購車時選擇將抵免轉讓給經銷商，**
+
+* 即使你當年度的聯邦稅負低於 $7,500，**你也可以接受完整的 $7,500 優惠，且 IRS 不會因為稅率不夠而要你退還差額。**
+* 這是因為在 POS 轉讓模式下 IRS 沒有權力因為信用額高於納稅額而要求補回差額。([IRS][1])
+
+📌 **換句話說：**
+你在購車時就已經”兌現”了稅收抵免 = $7,500 現金價值（折扣/首付款），不需要等到年底報稅，也**不用因為你稅額不足而還給 IRS**。([IRS][6])
+
+---
+
+## 📊 4. 重要資格條件與限制
+
+要能使用 POS 轉讓以及完全獲得 $7,500 或 $4,000（舊車）：
+
+### ✔ 個人資格
+
+* 車輛須主要供你個人使用（非轉售）。([IRS][1])
+* 你的**調整後總收入 (MAGI)** 必須在限額內（例如新車：單身 <$150k、聯合申報 <$300k 等）。([IRS][1])
+
+### ✔ 車輛資格
+
+* 新車需符合電池與製造原產地要求等條件（由 IRS 確認）。([Hyundai USA][7])
+* 二手車需在 $25,000 以下並滿足 IRC §25E 定義。([IRS][8])
+
+### ✔ 經銷商資格
+
+* 經銷商必須 **登記於 IRS 的 Energy Credits Online 系統**，並在 3 天內提交銷售報告。([IRS][2])
+
+---
+
+## 📜 5. 相關法規依據
+
+主要法規與政策來源包括：
+
+📌 **Internal Revenue Code (IRC) §30D** – 新清潔能源車輛稅收抵免，現可轉讓給經銷商。([IRS][6])
+📌 **Internal Revenue Code (IRC) §25E** – 舊電動車清潔能源抵免。([IRS][9])
+📌 IRS 的 FAQ Guidance – 關於抵免可超過稅負且該差額不需退還的規定。([IRS][1])
+
+---
+
+## 🧾 6. 稅季報稅時的流程
+
+當年你要在報稅時附上 **Form 8936 (Clean Vehicle Credits)** 並註明你已選擇使用 POS 轉讓。即使你已在購車時拿到優惠，也要報備這份表格。([IRS][1])
+
+---
+
+## 📝 總結
+
+| 項目                              | 重點                                  |
+| ------------------------------- | ----------------------------------- |
+| **Point of Sale Transfer 是什麼？** | 將 EV 抵免直接給經銷商換現金優惠（購車時折抵）。          |
+| **官方連結**                        | IRS EV 稅收抵免頁面、FAQ、申請流程。             |
+| **稅額不足時**                       | 不會因為你當年度稅額 < 抵免額而要退還差額（只要有 POS 轉讓）。 |
+| **依據法規**                        | IRC §30D、§25E 及 IRS 指南。             |
+| **報稅需知**                        | 需在報稅附上 Form 8936 並報告已轉讓。            |
+
+---
+
+如你有特定車型或想比較不同車款是否符合這個抵免，我也可以幫你查詢最新 IRS 清單！
+
+[1]: https://www.irs.gov/newsroom/topic-h-frequently-asked-questions-about-transfer-of-new-clean-vehicle-credit-and-previously-owned-clean-vehicles-credit?utm_source=chatgpt.com "Frequently asked questions about transfer of New Clean Vehicle ..."
+[2]: https://www.irs.gov/credits-deductions/clean-vehicle-credit-seller-or-dealer-requirements?utm_source=chatgpt.com "Clean vehicle credit seller or dealer requirements - IRS"
+[3]: https://taxschool.illinois.edu/post/how-to-cash-in-clean-vehicle-tax-credits-at-point-of-purchase/?utm_source=chatgpt.com "How to Cash In Clean Vehicle Tax Credits at Point of Purchase"
+[4]: https://www.irs.gov/zh-hant/clean-vehicle-tax-credits?utm_source=chatgpt.com "清潔能源汽車稅收抵免 | Internal Revenue Service"
+[5]: https://www.irs.gov/credits-deductions/how-to-claim-a-clean-vehicle-tax-credit?utm_source=chatgpt.com "How to claim a clean vehicle tax credit | Internal Revenue Service"
+[6]: https://www.irs.gov/newsroom/topic-a-frequently-asked-questions-about-the-eligibility-rules-for-the-new-clean-vehicle-credit-under-ss30d-effective-jan-1-2023?utm_source=chatgpt.com "Topic A — Frequently asked questions about the eligibility rules for ..."
+[7]: https://www.hyundaiusa.com/us/zh/special-programs/ev-federal-tax-credit?utm_source=chatgpt.com "電動車聯邦稅額扣抵 | 美國現代汽車"
+[8]: https://www.irs.gov/zh-hant/credits-deductions/used-clean-vehicle-credit?utm_source=chatgpt.com "二手清潔能源車輛抵免 | Internal Revenue Service"
+[9]: https://www.irs.gov/credits-deductions/used-clean-vehicle-credit?utm_source=chatgpt.com "Used Clean Vehicle Credit | Internal Revenue Service"
+
+
+
