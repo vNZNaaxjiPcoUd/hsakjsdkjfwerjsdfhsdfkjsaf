@@ -193,10 +193,10 @@ function handleID(id){
       			document.getElementById("allT").innerHTML = updateURL ;
             let nUrl= "";
       			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
-      			const b = `<a href="${nUrl}"></a>`;
+      			const b = `<a href="${nUrl}">重複連結</a>`;
       			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
       			const c = `<a href="${nUrl}">查看連結</a>`;
-      			const bc= c;
+      			const bc= c+"<br><br>"+b;
       			document.getElementById("uID").innerHTML = bc;
             document.getElementById("showID").style.display = "block";
 
