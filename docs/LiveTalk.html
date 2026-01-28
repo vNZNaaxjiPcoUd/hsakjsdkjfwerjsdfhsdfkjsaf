@@ -147,7 +147,7 @@ title: LiveTalk
     <script>
         // ==========================================
         // CONFIG: 請替換為你加密後的字串
-        const ENCRYPTED_DATA = "U2FsdGVkX1/cMjoWs1ribSHx3tUhUwlvgd5vYvPO7rulKa12/ghN7G0G96B0xJzvPtEFuUI+mRSbF65UlGEaPg"; 
+        const ENCRYPTED_DATA = "U2FsdGVkX1+OGZUAOn5BRKNx1N0FsD9vP+gpQ0H1ksSk0S+NP+lgi0TG436ourOk6Qfl/x0ogqrpp/U1H9z0ag"; 
         // ==========================================
         // ref: https://c73/Note/gemini%20API.md
         
@@ -230,15 +230,15 @@ title: LiveTalk
                     const decoded = bytes.toString(CryptoJS.enc.Utf8);
                     if (decoded.length > 10) {
                         apiKey = decoded;
-                        statusBadge.innerText = "已解鎖";
+                        statusBadge.innerText = "四十大盜寶庫門開";
                         statusBadge.className = "status-badge unlocked";
-                        appendMessage('ai', "🔓 **解鎖成功！** 請問有什麼生活知識可以幫您的？");
+                        appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
                     } else { throw new Error(); }
-                } catch (e) { appendMessage('ai', "❌ 密碼錯誤。"); }
+                } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
                 userInput.value = ""; return;
             }
 
-            if (!apiKey) { appendMessage('ai', "⚠️ 請輸入 `key 密碼`。"); return; }
+            if (!apiKey) { appendMessage('ai', "⚠️ 請輸入 `阿里巴巴的通關密語`。"); return; }
 
             appendMessage('user', val);
             userInput.value = "";
