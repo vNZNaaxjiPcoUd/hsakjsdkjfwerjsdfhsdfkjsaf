@@ -303,7 +303,9 @@ layout: empty
                         generationConfig: {
                             temperature: 0.7,
                             maxOutputTokens: 8192,
-                            thinking_budget: 0
+                            "thinkingConfig": {
+                                "thinkingBudget": 0
+                            }
                         },
                         safetySettings: [ // 放寬安全設定防止誤判截斷
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
