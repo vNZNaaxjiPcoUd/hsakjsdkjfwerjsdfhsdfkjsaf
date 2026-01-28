@@ -171,6 +171,8 @@ layout: empty
         const userInput = document.getElementById('userInput');
         const sendBtn = document.getElementById('sendBtn');
         const statusBadge = document.getElementById('status');
+        const encNote = "U2FsdGVkX1/cZ8GiGq9vW9iSrwjjOCW6c3R3zgReP36YEXchPOVqr1gV6BZViO7YX8kUI0MygeWYKJDPLVR2Og";
+        let decNote = "";
 
         const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
 
@@ -283,6 +285,7 @@ layout: empty
                             statusBadge.className = "status-badge unlocked";
                             appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
                             document.getElementById('buttonbutton').style.display = "block";
+                            decNote = CryptoJS.AES.decrypt(encNote, pass).toString(CryptoJS.enc.Utf8);
                         } else { throw new Error(); }
                     } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
                     userInput.value = ""; 
@@ -366,7 +369,7 @@ layout: empty
         });
         
         function openPT(){
-            window.open("https://v.jwint.net/zzz240424143118", '_blank');
+            window.open(decNote, '_blank');
         }
         // 綁定新按鈕事件
         document.getElementById('copyAllBtn').onclick = copyAllAIMarkdown;
