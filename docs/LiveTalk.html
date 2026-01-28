@@ -269,28 +269,38 @@ layout: empty
         async function handleSend() {
             const val = userInput.value.trim();
             if (!val) return;
+            if (!apiKey) {
+                if (/^key /i.test(val)) {
+                    // 使用 replace 配合正規表達式將開頭的 key= (不論大小寫) 移除
+                    const AA = val.replace(/^key /i, "");
+                    try {
+                        const pass = CryptoJS.SHA512(AA).toString();
+                        const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
+                        const decoded = bytes.toString(CryptoJS.enc.Utf8);
+                        if (decoded.length > 10) {
+                            apiKey = decoded;
+                            statusBadge.innerText = "四十大盜寶庫門開";
+                            statusBadge.className = "status-badge unlocked";
+                            appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
+                            document.getElementById('buttonbutton').style.display = "block";
+                        } else { throw new Error(); }
+                    } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
+                    userInput.value = ""; 
+                    return;
+                }
 
-            if (/^key /i.test(val)) {
-                // 使用 replace 配合正規表達式將開頭的 key= (不論大小寫) 移除
-                const AA = val.replace(/^key /i, "");
-                try {
-                    const pass = CryptoJS.SHA512(AA).toString();
-                    const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
-                    const decoded = bytes.toString(CryptoJS.enc.Utf8);
-                    if (decoded.length > 10) {
-                        apiKey = decoded;
-                        statusBadge.innerText = "四十大盜寶庫門開";
-                        statusBadge.className = "status-badge unlocked";
-                        appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
-                        document.getElementById('buttonbutton').style.display = "block";
-                    } else { throw new Error(); }
-                } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
-                userInput.value = ""; 
-                return;
+                if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); userInput.value = ""; return; }
+            }else{
+                if (/^restart/i.test(val)) {
+                    location.reload();userInput.value = ""; return;
+                }
+                if (/^reboot/i.test(val)) {
+                    location.reload();userInput.value = ""; return;
+                }
+                if (/^ptnote/i.test(val)) {
+                    openPT();userInput.value = ""; return;
+                }
             }
-
-            if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); userInput.value = ""; return; }
-
             appendMessage('user', val);
             userInput.value = "";
             sendBtn.disabled = true;
@@ -298,11 +308,8 @@ layout: empty
             const loadingRow = appendMessage('ai', `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div> 思考中...`);
 
             try {
-                // 指向 Gemini 2.5 Flash
-                //const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
                 
-
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
