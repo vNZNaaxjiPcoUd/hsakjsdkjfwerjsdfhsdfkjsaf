@@ -138,10 +138,16 @@ layout: empty
 
     <div class="input-area">
         <!-- 新增的「複製所有AI回答」按鈕 -->
-        <button id="copyAllBtn" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            複製所有回答
-        </button>
+        <div style="display: flex; justify-content: center; gap: 10px;">
+            <button id="copyAllBtn" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                複製所有回答
+            </button>
+            <button id="ptGo" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                ptGo
+            </button>
+        </div>
         <div class="input-wrapper">
             <input type="text" id="userInput" placeholder="聊什麼..." autocomplete="off">
             <button id="sendBtn">
@@ -349,8 +355,12 @@ layout: empty
             if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
         });
         
+        function openPT(){
+            window.open("https://v.jwint.net/zzz240424143118", '_blank');
+        }
         // 綁定新按鈕事件
         document.getElementById('copyAllBtn').onclick = copyAllAIMarkdown;
+        document.getElementById('ptGo').onclick = openPT;
     </script>
 </body>
 </html>
