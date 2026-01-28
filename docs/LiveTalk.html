@@ -138,15 +138,17 @@ layout: empty
 
     <div class="input-area">
         <!-- 新增的「複製所有AI回答」按鈕 -->
-        <div style="display: flex; justify-content: center; gap: 10px;">
-            <button id="copyAllBtn" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                複製所有回答
-            </button>
-            <button id="ptGo" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                ptGo
-            </button>
+        <div id="buttonbutton">
+            <div style="display: flex; justify-content: center; gap: 10px;" >
+                <button id="copyAllBtn" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    複製所有回答
+                </button>
+                <button id="ptGo" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    ptGo
+                </button>
+            </div>
         </div>
         <div class="input-wrapper">
             <input type="text" id="userInput" placeholder="聊什麼..." autocomplete="off">
@@ -161,7 +163,6 @@ layout: empty
         // CONFIG: 請替換為你加密後的字串
         const ENCRYPTED_DATA = "U2FsdGVkX19WygULfNPDcgvpFEK3NMC4wVDk+NqnoP9U2EGDwSnJdmpq6OLJ4kmKnVcB2xdU8zT5FMCjb/QXpw"; 
         // ==========================================
-        // ref: https://c73/Note/gemini%20API.md
         
         let apiKey = "";
         let chatHistory = [];
@@ -281,12 +282,14 @@ layout: empty
                         statusBadge.innerText = "四十大盜寶庫門開";
                         statusBadge.className = "status-badge unlocked";
                         appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
+                        document.getElementById('buttonbutton').style.display = "block";
                     } else { throw new Error(); }
                 } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
-                userInput.value = ""; return;
+                userInput.value = ""; 
+                return;
             }
 
-            if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); return; }
+            if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); userInput.value = ""; return; }
 
             appendMessage('user', val);
             userInput.value = "";
@@ -361,6 +364,7 @@ layout: empty
         // 綁定新按鈕事件
         document.getElementById('copyAllBtn').onclick = copyAllAIMarkdown;
         document.getElementById('ptGo').onclick = openPT;
+        document.getElementById('buttonbutton').style.display = "none";
     </script>
 </body>
 </html>
