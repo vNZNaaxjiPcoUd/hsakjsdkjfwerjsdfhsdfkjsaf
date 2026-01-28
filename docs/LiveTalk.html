@@ -148,7 +148,7 @@ layout: empty
     <script>
         // ==========================================
         // CONFIG: 請替換為你加密後的字串
-        const ENCRYPTED_DATA = "U2FsdGVkX1+OGZUAOn5BRKNx1N0FsD9vP+gpQ0H1ksSk0S+NP+lgi0TG436ourOk6Qfl/x0ogqrpp/U1H9z0ag"; 
+        const ENCRYPTED_DATA = "U2FsdGVkX19WygULfNPDcgvpFEK3NMC4wVDk+NqnoP9U2EGDwSnJdmpq6OLJ4kmKnVcB2xdU8zT5FMCjb/QXpw"; 
         // ==========================================
         // ref: https://c73/Note/gemini%20API.md
         
@@ -225,8 +225,9 @@ layout: empty
 
             if (/^key /i.test(val)) {
                 // 使用 replace 配合正規表達式將開頭的 key= (不論大小寫) 移除
-                const pass = val.replace(/^key /i, "");
+                const AA = val.replace(/^key /i, "");
                 try {
+                    const pass = CryptoJS.SHA512(AA).toString();
                     const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
                     const decoded = bytes.toString(CryptoJS.enc.Utf8);
                     if (decoded.length > 10) {
