@@ -302,7 +302,8 @@ layout: empty
                         contents: [...chatHistory, { role: "user", parts: [{ text: val }] }],
                         generationConfig: {
                             temperature: 0.7,
-                            maxOutputTokens: 8192, // 提高 Token 上限防止中斷
+                            maxOutputTokens: 8192,
+                            thinking_budget: 0
                         },
                         safetySettings: [ // 放寬安全設定防止誤判截斷
                             { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
