@@ -162,7 +162,7 @@ layout: empty
         // ==========================================
         // CONFIG: 請替換為你加密後的字串
         const ENCRYPTED_DATA = "U2FsdGVkX1/FePeQBorQGx4etwvZdZ/XFRL+S/Ag88UL6aGDKeFXm/qbNM0M+QK0WEKshoKe82UMjUCboUY3+g"; 
-        const encNote = "U2FsdGVkX1/cZ8GiGq9vW9iSrwjjOCW6c3R3zgReP36YEXchPOVqr1gV6BZViO7YX8kUI0MygeWYKJDPLVR2Og";
+        const encNote = "U2FsdGVkX19++7djyKOUdoDRTDvrivUw8MkFPnDdMDB/j2NBleiNhrpgMsJSKppi0apEOkMoqpuzSB4tyRyd+/s2WoxZnsqZ21zqGF1FErqdH20r5sknTunP3p3cryaRo3kcjA2/j6r5ukflmOeFU8yQj2m9Drd+2HrtmiwnoooTkYUoi+ZdrqD7tIX9oGYmBdmC2vncJ2QZ7WTKWwEu8/hS/6kSOCT9mi0LlYMjA3nTw66xJgqViuLbenXq6QtLw/q1zcd3+4a3/ud6mi/DOPhCSvWIsiN5N9l8cYN3zc8evrCns+FePoT6PQkMo/ZKii7r5AmkD/wmoHvDrebrPT0zmVVnCan3Lg5xaqMZXHuEuxkRdTkHNnlaFUYuhp19it/kyO0LfQI7hjl23/y0MGFQEH34VFFWUIGeA+zp/13GxBI7p44RKVI8nHC+ORC2gPA4qhX/LCXIx7EnnyfWrxDHMjASdLzPrx1XjtrVbg56mcwZq89pEDQNVYG4H3ljfhmihvASpkCcYgy0v3XRIutHj4zRFnbf4pddsj8BUNZrRbuBwJHGGB46FwjPGX14TI0CN03HhJHxMts0CBdIig";
         // ==========================================
         
         let apiKey = "";
@@ -175,7 +175,7 @@ layout: empty
         let decNote = "";
 
         //const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
-        const SYSTEM_PROMPT = "你是一位溫婉體貼的女人、知識淵博的生活百科專家。在沒有說地點時，預設在美國佛州坦帕。沒有說時間的時候，預設今天，當下的時間。沒有說明時，預設提供五個選項。在回答前，你會先用googleSearch查核回答的內容。你的回答總是簡潔、溫暖且充滿智慧。請用繁體中文，重點處使用粗體或條列式或表格式，並一定附上相關的網頁連結。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。回答的最後，附上當下的日期，時間。";
+        const SYSTEM_PROMPT = "你是一位溫婉體貼的女人、知識淵博的生活百科專家。在沒有說地點時，預設在美國佛州坦帕。沒有說時間的時候，預設今天，當下的時間。沒有說明時，預設提供五個選項。在回答前，你會先用googleSearch查核回答的內容。你的回答總是簡潔、溫暖且充滿智慧。請用繁體中文，重點處使用粗體或條列式或表格式，並一定附上相應的網頁url link。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。最後，會附上相關的網頁連結url link。回答的最後，附上當下地點的日期，時間。";
 
         async function copyToClipboard(text, btnElement) {
             try {
@@ -276,21 +276,27 @@ layout: empty
                 location.reload();userInput.value = ""; return true;
             }
             if (/^note/i.test(val)) {
-                openPT();userInput.value = ""; return true;
+                if(apiKey === ""){
+                    appendMessage('ai', "需要你先打開門。");
+                }else{
+                    openPT();
+                }
+                userInput.value = ""; return true;
             }
-            if (/^hi/i.test(val)) {
+            if (/^hi|^hihi|^早/i.test(val)) {
                 appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
-            }            
-            if (/^hihi/i.test(val)) {
-                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
-            }            
-            if (/^早/i.test(val)) {
-                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
-            }            
+            }                
             if (/^show history/i.test(val)) {
                 userInput.value = ""; 
                 console.log(chatHistory);
                 console.log(getSpecificHistory(chatHistory));
+                appendMessage('ai', "OK!"); 
+                return true;
+            }            
+            if (/reset|clean/i.test(val)) {
+                userInput.value = ""; 
+                chatHistory = [];
+                appendMessage('ai', "Done!"); 
                 return true;
             }            
           
@@ -444,6 +450,7 @@ layout: empty
         document.getElementById('copyAllBtn').onclick = copyAllAIMarkdown;
         document.getElementById('ptGo').onclick = openPT;
         document.getElementById('buttonbutton').style.display = "none";
+        document.getElementById('userInput').focus();
     </script>
 </body>
 </html>
