@@ -301,11 +301,8 @@ layout: empty
             let retN = false;
             let ansT = "";
             let keepN = false;
-            if (/^restart/i.test(val)) {
+            if (/^restart|^reboot|^reload/i.test(val)) {
                 location.reload();userInput.value = ""; ansT = "Relad now"; retN = true;
-            }
-            if (/^reboot/i.test(val)) {
-                location.reload();userInput.value = ""; ansT = "reboot now"; retN = true;
             }
             if (/^note/i.test(val)) {
                 if(apiKey === ""){
