@@ -270,19 +270,7 @@ layout: empty
             return row;
         }
 
-        const talk = {
-        "hi": "Hi Hi 你好呀！",
-        "where": "Tampa!",
-        "who": "Lili",
-        "who are you": "Lili",
-        "when": "Now",
-        "how": "Keep moveing and going.",
-        "whom": "you and me",
-        "why": "you like",
-        "list": "reboot, clean, note, show history!",
-        "ver": "1.2",
-        "ok": "fine",
-        "go": "move now",
+        let talk = {
         "gogo": "now now now now",
         };
         function talkA(A) {
@@ -523,9 +511,12 @@ layout: empty
         document.getElementById('userInput').focus();
 
         async function getPrompt(){
-            const response = await fetch("https://h.jwint.net/LiveTalkKey",{cache:"no-cache"}); 
-		  	const text = await response.clone().text();
+            let response = await fetch("https://h.jwint.net/LiveTalkKey",{cache:"no-cache"}); 
+		  	let text = await response.clone().text();
             ENCRYPTED_DATA = text;
+            response = await fetch("https://h.jwint.net/LiveTalkPair",{cache:"no-cache"}); 
+		  	text = await response.clone().text();
+            talk = JSON.parse(text);
         }
         getPrompt();
 
