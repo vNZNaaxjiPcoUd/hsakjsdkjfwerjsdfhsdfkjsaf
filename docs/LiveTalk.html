@@ -174,9 +174,9 @@ layout: empty
         const encNote = "U2FsdGVkX1/cZ8GiGq9vW9iSrwjjOCW6c3R3zgReP36YEXchPOVqr1gV6BZViO7YX8kUI0MygeWYKJDPLVR2Og";
         let decNote = "";
 
-        const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
+        //const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
+        const SYSTEM_PROMPT = "你是一位溫婉可人、知識淵博的生活百科專家。你的回答總是簡潔、溫暖且充滿智慧。你不會主動提問，只會專注於提供清晰、實用的解答。在每次回答前，你會先給予一個親切的生活問候，例如『您好！很高興為您服務。』或『您好！今天有什麼我可以幫您的嗎？』。你的目標是幫助使用者解決日常生活中的各種疑問，讓他們感到安心與受用。";
 
-        // 複製單一訊息功能函數 (不變動)
         async function copyToClipboard(text, btnElement) {
             try {
                 await navigator.clipboard.writeText(text);
@@ -313,7 +313,7 @@ layout: empty
                             apiKey = decoded;
                             statusBadge.innerText = "四十大盜寶庫門開";
                             statusBadge.className = "status-badge unlocked";
-                            appendMessage('ai', "🔓 **開門成功！** 請問有什麼生活知識可以幫您的？");
+                            appendMessage('ai', "🔓 **開門成功！**");
                             document.getElementById('buttonbutton').style.display = "block";
                             decNote = CryptoJS.AES.decrypt(encNote, pass).toString(CryptoJS.enc.Utf8);
                         } else { throw new Error(); }
