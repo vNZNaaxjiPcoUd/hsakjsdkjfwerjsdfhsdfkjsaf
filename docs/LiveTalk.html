@@ -146,7 +146,7 @@ layout: empty
                 </button>
                 <button id="ptGo" class="copy-btn" style="display: block; margin: 0 auto 8px auto; border-color: var(--primary-color); color: var(--primary-color); background: white;">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    ptGo
+                    筆記
                 </button>
             </div>
         </div>
@@ -175,7 +175,7 @@ layout: empty
         let decNote = "";
 
         //const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
-        const SYSTEM_PROMPT = "你是一位溫婉可人、知識淵博的生活百科專家。你的回答總是簡潔、溫暖且充滿智慧。你不會主動提問，只會專注於提供清晰、實用的解答。在每次回答前，你會先給予一個親切的生活問候，例如『您好！很高興為您服務。』或『您好！今天有什麼我可以幫您的嗎？』。你的目標是幫助使用者解決日常生活中的各種疑問，讓他們感到安心與受用。";
+        const SYSTEM_PROMPT = "你是一位溫婉體貼的女人、知識淵博的生活百科專家。在沒有說地點時，預設在美國佛州坦帕。沒有說時間的時候，預設今天，當下的時間。沒有說明時，預設提供五個選項。在回答前，你會先用googleSearch查核回答的內容。你的回答總是簡潔、溫暖且充滿智慧。請用繁體中文，重點處使用粗體或條列式或表格式，並一定附上相關的網頁連結。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。回答的最後，附上當下的日期，時間。";
 
         async function copyToClipboard(text, btnElement) {
             try {
@@ -290,11 +290,41 @@ layout: empty
             if (/^show history/i.test(val)) {
                 userInput.value = ""; 
                 console.log(chatHistory);
+                console.log(getSpecificHistory(chatHistory));
                 return true;
             }            
           
             return false;
         }
+
+        function getSpecificHistory(inH) {
+            const A = [];
+            let lastModelMessage = null;
+
+            // 1. 收集所有 role 為 "user" 的訊息
+            for (const message of inH) {
+                if (message.role === "user") {
+                    A.push(message);
+                }
+            }
+
+            // 2. 找出最後一個 role 為 "model" 的訊息
+            // 從後往前遍歷，找到第一個 role 為 "model" 的訊息即為最後一個
+            for (let i = inH.length - 1; i >= 0; i--) {
+                if (inH[i].role === "model") {
+                    lastModelMessage = inH[i];
+                    break; // 找到後即停止
+                }
+            }
+
+            // 3. 如果找到了最後一個 model 訊息，則加入 A 陣列
+            if (lastModelMessage) {
+                A.push(lastModelMessage);
+            }
+
+            return A;
+        }
+
         async function handleSend() {
             const val = userInput.value.trim();
             if (!val) return;
@@ -354,16 +384,17 @@ layout: empty
                         threshold: "BLOCK_MEDIUM_AND_ABOVE" // 保持中等或以上風險才阻擋
                     }
                 ];
-
+                
+                const hist = getSpecificHistory(chatHistory);
                 const response = await fetch(API_URL, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({
                                         system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
                                         tools,
-                                        contents: [...chatHistory, { role: "user", parts: [{ text: val }] }],
+                                        contents: [...hist, { role: "user", parts: [{ text: val }] }],
                                         generationConfig: {
-                                            temperature: 0.5,
+                                            temperature: 1,
                                             maxOutputTokens: 8192,
                                             "thinkingConfig": {
                                                 "thinkingBudget": 0
@@ -389,7 +420,8 @@ layout: empty
 
                 chatHistory.push({ role: "user", parts: [{ text: val }] });
                 chatHistory.push({ role: "model", parts: [{ text: aiMsg }] });
-                if (chatHistory.length > 12) chatHistory.splice(0, 2);
+                if (chatHistory.length > 20) chatHistory.splice(0, 2);
+                userInput.value = "";
 
             } catch (err) {
                 loadingRow.querySelector('.bubble').innerHTML = "❌ **錯誤：** "; //+ err.message;
