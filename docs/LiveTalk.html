@@ -164,8 +164,7 @@ layout: empty
     <script>
         // ==========================================
         // CONFIG: 請替換為你加密後的字串
-        const ENCRYPTED_DATA = "U2FsdGVkX1/FePeQBorQGx4etwvZdZ/XFRL+S/Ag88UL6aGDKeFXm/qbNM0M+QK0WEKshoKe82UMjUCboUY3+g"; 
-        const encNote = "U2FsdGVkX19++7djyKOUdoDRTDvrivUw8MkFPnDdMDB/j2NBleiNhrpgMsJSKppi0apEOkMoqpuzSB4tyRyd+/s2WoxZnsqZ21zqGF1FErqdH20r5sknTunP3p3cryaRo3kcjA2/j6r5ukflmOeFU8yQj2m9Drd+2HrtmiwnoooTkYUoi+ZdrqD7tIX9oGYmBdmC2vncJ2QZ7WTKWwEu8/hS/6kSOCT9mi0LlYMjA3nTw66xJgqViuLbenXq6QtLw/q1zcd3+4a3/ud6mi/DOPhCSvWIsiN5N9l8cYN3zc8evrCns+FePoT6PQkMo/ZKii7r5AmkD/wmoHvDrebrPT0zmVVnCan3Lg5xaqMZXHuEuxkRdTkHNnlaFUYuhp19it/kyO0LfQI7hjl23/y0MGFQEH34VFFWUIGeA+zp/13GxBI7p44RKVI8nHC+ORC2gPA4qhX/LCXIx7EnnyfWrxDHMjASdLzPrx1XjtrVbg56mcwZq89pEDQNVYG4H3ljfhmihvASpkCcYgy0v3XRIutHj4zRFnbf4pddsj8BUNZrRbuBwJHGGB46FwjPGX14TI0CN03HhJHxMts0CBdIig";
+        let ENCRYPTED_DATA = "";
         // ==========================================
         
         let apiKey = "";
@@ -176,9 +175,7 @@ layout: empty
         const sendBtn = document.getElementById('sendBtn');
         const statusBadge = document.getElementById('status');
         let decNote = "";
-
-        //const SYSTEM_PROMPT = "你是一位親切的生活百科專家。任務是解答日常生活問題。請用繁體中文，重點處使用粗體或條列式或表格式。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。";
-        const SYSTEM_PROMPT = "你是一位溫婉體貼的女人、知識淵博的生活百科專家。在沒有說地點時，預設在美國佛州坦帕。沒有說時間的時候，預設今天，當下的時間。沒有說明時，預設提供五個選項。在回答前，你會先用googleSearch查核回答的內容。你的回答總是簡潔、溫暖且充滿智慧。請用繁體中文，重點處使用粗體或條列式或表格式，並一定附上相應的網頁url link。用最簡單精要的方式回答，不需要問候。若回答內容較長，請確保完整輸出不要中斷。最後，會附上相關的網頁連結url link。回答的最後，附上當下地點的日期，時間。";
+        let SYSTEM_PROMPT = "";
 
         async function copyToClipboard(text, btnElement) {
             try {
@@ -404,14 +401,24 @@ layout: empty
                     try {
                         const pass = CryptoJS.SHA512(AA).toString();
                         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
-                        const decoded = bytes.toString(CryptoJS.enc.Utf8);
+                        let decoded = bytes.toString(CryptoJS.enc.Utf8);
                         if (decoded.length > 10) {
-                            apiKey = decoded;
+                            let jsData = null;
+                            try {
+                                jsData = JSON.parse(decoded);
+                            } catch (error) {
+                                console.error("JSON 解析失敗！錯誤類型：", error.name);
+                                console.error("錯誤訊息：", error.message);
+                                appendMessage('ai', "❌ 資料包錯了");
+                                return;
+                            }
+                            apiKey = jsData.Key;
                             statusBadge.innerText = "寶庫打開";
                             statusBadge.className = "status-badge unlocked";
                             appendMessage('ai', "🔓 **開門成功！**");
                             document.getElementById('buttonbutton').style.display = "block";
-                            decNote = CryptoJS.AES.decrypt(encNote, pass).toString(CryptoJS.enc.Utf8);
+                            if(jsData.Note != "") decNote = jsData.Note;
+                            if(jsData.Prompt != "") SYSTEM_PROMPT = jsData.Prompt;
                         } else { throw new Error(); }
                     } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
                     userInput.value = ""; 
@@ -514,6 +521,14 @@ layout: empty
         document.getElementById('ptGo').onclick = openPT;
         document.getElementById('buttonbutton').style.display = "none";
         document.getElementById('userInput').focus();
+
+        async function getPrompt(){
+            const response = await fetch("https://h.jwint.net/LiveTalkKey",{cache:"no-cache"}); 
+		  	const text = await response.clone().text();
+            ENCRYPTED_DATA = text;
+        }
+        getPrompt();
+
     </script>
 </body>
 </html>
