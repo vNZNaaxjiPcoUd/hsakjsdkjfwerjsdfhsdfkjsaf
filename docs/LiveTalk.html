@@ -7,6 +7,8 @@ layout: empty
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="stylesheet" href="https://h.jwint.net/styles_white.css">
+	<link rel="manifest" href="https://h.jwint.net/manifest.json">
     <title>生活百科 AI 助手</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -195,8 +197,10 @@ layout: empty
         // 新增的複製所有 AI 回覆 Markdown 的功能函數
         async function copyAllAIMarkdown() {
             // 篩選出所有 'model' 角色（即 AI 回覆）的內容
+            //const aiResponses = chatHistory
+            //    .filter(msg => msg.role === 'model')
+            //    .map(msg => msg.parts[0].text);
             const aiResponses = chatHistory
-                .filter(msg => msg.role === 'model')
                 .map(msg => msg.parts[0].text);
 
             if (aiResponses.length === 0) {
@@ -268,38 +272,74 @@ layout: empty
             return row;
         }
 
+        const talk = {
+        "hi": "Hi Hi 你好呀！",
+        "where": "Tampa!",
+        "who": "Lili",
+        "who are you": "Lili",
+        "when": "Now",
+        "how": "Keep moveing and going.",
+        "whom": "you and me",
+        "why": "you like",
+        "list": "reboot, clean, note, show history!"
+        };
+        function talkA(A) {
+            const lowerCaseA = A.toLowerCase();
+            const result = talk[lowerCaseA];
+            if (result === undefined) {
+                return ""; 
+            } else {
+                return result; 
+            }
+        }
         function handleMyAnswer(val){
+            let retN = false;
+            let ansT = "";
             if (/^restart/i.test(val)) {
-                location.reload();userInput.value = ""; return true;
+                location.reload();userInput.value = ""; ansT = "Relad now"; retN = true;
             }
             if (/^reboot/i.test(val)) {
-                location.reload();userInput.value = ""; return true;
+                location.reload();userInput.value = ""; ansT = "reboot now"; retN = true;
             }
             if (/^note/i.test(val)) {
                 if(apiKey === ""){
-                    appendMessage('ai', "需要你先打開門。");
+                    ansT = "需要你先打開門。";
                 }else{
                     openPT();
+                    ansT = "Open Note";
                 }
-                userInput.value = ""; return true;
+                retN = true;
             }
             if (/^hi|^hihi|^早/i.test(val)) {
-                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
-            }                
+                ansT = "Hi Hi 你好呀！" ; retN = true;
+            }                          
             if (/^show history/i.test(val)) {
                 userInput.value = ""; 
                 console.log(chatHistory);
                 console.log(getSpecificHistory(chatHistory));
-                appendMessage('ai', "OK!"); 
-                return true;
+                ansT = "OK!" ; retN = true;
             }            
             if (/reset|clean/i.test(val)) {
                 userInput.value = ""; 
                 chatHistory = [];
-                appendMessage('ai', "Done!"); 
+                ansT = "Clean done!!" ; retN = true;
+            }
+
+            let tAns = talkA(val);
+            if ( tAns != ""){
+                retN = true;
+                ansT = tAns;
+            }
+
+            if ( retN === true){
+                appendMessage('user', val);
+                appendMessage('ai', ansT);
+                chatHistory.push({ role: "user", parts: [{ text: val }] });
+                chatHistory.push({ role: "model", parts: [{ text: ansT }] });
+                if (chatHistory.length > 50) chatHistory.splice(0, 2);
+                userInput.value = "";                
                 return true;
-            }            
-          
+            }
             return false;
         }
 
@@ -359,9 +399,10 @@ layout: empty
                 }
 
                 if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！！"); userInput.value = ""; return; }
-            }else{
-
             }
+
+
+
             appendMessage('user', val);
             userInput.value = "";
             sendBtn.disabled = true;
@@ -414,7 +455,7 @@ layout: empty
                 if (response.status === 429) {
                     // 429 是 Too Many Requests (額度超限)
                     loadingRow.remove();
-                    appendMessage('ai', " 滿了 ");;
+                    appendMessage('ai', " 滿了 ");
                 }
                 if (data.error) throw new Error(data.error.message);
 
@@ -426,7 +467,7 @@ layout: empty
 
                 chatHistory.push({ role: "user", parts: [{ text: val }] });
                 chatHistory.push({ role: "model", parts: [{ text: aiMsg }] });
-                if (chatHistory.length > 20) chatHistory.splice(0, 2);
+                if (chatHistory.length > 50) chatHistory.splice(0, 2);
                 userInput.value = "";
 
             } catch (err) {
