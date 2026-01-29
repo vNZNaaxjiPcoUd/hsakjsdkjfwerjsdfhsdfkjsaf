@@ -482,7 +482,7 @@ layout: empty
                 userInput.value = "";
 
             } catch (err) {
-                loadingRow.querySelector('.bubble').innerHTML = "❌ **錯誤：** "; //+ err.message;
+                loadingRow.querySelector('.bubble').innerHTML = "❌ "+ err.message;
                 console.log("AI error "+err.message);
             } finally {
                 sendBtn.disabled = false;
