@@ -271,7 +271,7 @@ layout: empty
         }
 
         let talk = {
-        "gogo": "now now now now",
+        "test": "test 1 2 3 4",
         };
         function talkA(A) {
             const lowerCaseA = A.toLowerCase();
@@ -288,6 +288,18 @@ layout: empty
             let keepN = false;
             if (/^restart|^reboot|^reload/i.test(val)) {
                 location.reload();userInput.value = ""; ansT = "Relad now"; retN = true;
+            }
+            if (/^page/i.test(val)) {
+                if( ENCRYPTED_DATA === ""){
+                    const AA = val.replace(/^page /i, "");
+                    const pageU = "https://h.jwint.net/"+AA;
+                    getPrompt(pageU);
+                    ansT = "Load it"; 
+                    console.log(ENCRYPTED_DATA);
+                }else{
+                    ansT = "no load more";
+                }
+                retN = true;
             }
             if (/^note/i.test(val)) {
                 if(apiKey === ""){
@@ -375,6 +387,8 @@ layout: empty
 
             return A;
         }
+
+
         let lastQ = "";
         async function handleSend() {
             const val = userInput.value.trim();
@@ -510,15 +524,15 @@ layout: empty
         document.getElementById('buttonbutton').style.display = "none";
         document.getElementById('userInput').focus();
 
-        async function getPrompt(){
-            let response = await fetch("https://h.jwint.net/LiveTalkKey",{cache:"no-cache"}); 
+        async function getPrompt(page){
+            let response = await fetch(page,{cache:"no-cache"}); 
 		  	let text = await response.clone().text();
             ENCRYPTED_DATA = text;
             response = await fetch("https://h.jwint.net/LiveTalkPair",{cache:"no-cache"}); 
 		  	text = await response.clone().text();
             talk = JSON.parse(text);
         }
-        getPrompt();
+        //getPrompt();
 
     </script>
 </body>
