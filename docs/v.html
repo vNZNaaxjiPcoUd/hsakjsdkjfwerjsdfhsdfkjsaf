@@ -177,6 +177,9 @@ function setShowView(){
 	}
 }
 
+let jumpA = "";
+let jumpB = "";
+
 function handleID(id){
 	    const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
         const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
@@ -211,9 +214,11 @@ function handleID(id){
             let nUrl= "";
 			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
 			const b = `<a href="${nUrl}">this message is being processed. looping and keep looping to trans!</a>`;
+			jumpA = nUrl;
 			
 			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
 			const c = `<a href="${nUrl}">one-time message analysis result!</a>`;
+			jumpB = nUrl;
 			
 			const bc= c+"<br><br>"+b;
 			document.getElementById("uID").innerHTML = bc;
@@ -311,6 +316,22 @@ const clearAllCookies = () => {
 	};
 
 clearAllCookies();
+
+document.addEventListener('keydown', function(event) {
+	// 檢查按下的鍵是否是 'a' 鍵 (不區分大小寫)
+	if (event.key === 'a' || event.key === 'A' || event.key === '1') {
+		event.preventDefault();
+		window.open(jumpA, '_blank');
+	}
+	if (event.key === 'b' || event.key === 'B' || event.key === '2') {
+		event.preventDefault();
+		window.open(jumpA, '_blank');
+	}
+});
+
+</script>
+
+<script>
 /*	
 const showAllCookies = () => {
 	  const cookieStr = document.cookie;
