@@ -126,7 +126,7 @@ layout: empty
         <div class="chat-content" id="chat-list">
             <div class="message-row ai-type">
                 <div class="message-wrapper">
-                    <div class="avatar ai-avatar">AI</div>
+                    <div class="avatar ai-avatar">寶</div>
                     <div class="bubble">
                         您好！我是您的生活百科專家。🧪<br><br>
                         請輸入 <code>通關密語</code> 來開始。
@@ -237,7 +237,7 @@ layout: empty
             wrapper.className = 'message-wrapper';
             
             // 建立內容
-            const avatar = `<div class="avatar ${isAI ? 'ai-avatar' : 'user-avatar'}">${isAI ? 'AI' : '我'}</div>`;
+            const avatar = `<div class="avatar ${isAI ? 'ai-avatar' : 'user-avatar'}">${isAI ? '寶' : '我'}</div>`;
             const bubbleContent = isAI ? marked.parse(content) : content;
             
             let html = `${avatar}<div class="bubble">${bubbleContent}`;
@@ -268,9 +268,39 @@ layout: empty
             return row;
         }
 
+        function handleMyAnswer(val){
+            if (/^restart/i.test(val)) {
+                location.reload();userInput.value = ""; return true;
+            }
+            if (/^reboot/i.test(val)) {
+                location.reload();userInput.value = ""; return true;
+            }
+            if (/^ptnote/i.test(val)) {
+                openPT();userInput.value = ""; return true;
+            }
+            if (/^hi/i.test(val)) {
+                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
+            }            
+            if (/^hihi/i.test(val)) {
+                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
+            }            
+            if (/^早/i.test(val)) {
+                appendMessage('ai', " Hi Hi 你好呀！ "); userInput.value = ""; return true;
+            }            
+            if (/^show history/i.test(val)) {
+                userInput.value = ""; 
+                console.log(chatHistory);
+                return true;
+            }            
+          
+            return false;
+        }
         async function handleSend() {
             const val = userInput.value.trim();
             if (!val) return;
+
+            if(handleMyAnswer(val)=== true){ return; }
+
             if (!apiKey) {
                 if (/^key /i.test(val)) {
                     // 使用 replace 配合正規表達式將開頭的 key= (不論大小寫) 移除
@@ -294,15 +324,7 @@ layout: empty
 
                 if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); userInput.value = ""; return; }
             }else{
-                if (/^restart/i.test(val)) {
-                    location.reload();userInput.value = ""; return;
-                }
-                if (/^reboot/i.test(val)) {
-                    location.reload();userInput.value = ""; return;
-                }
-                if (/^ptnote/i.test(val)) {
-                    openPT();userInput.value = ""; return;
-                }
+
             }
             appendMessage('user', val);
             userInput.value = "";
@@ -313,28 +335,43 @@ layout: empty
             try {
                 const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
                 
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-                        contents: [...chatHistory, { role: "user", parts: [{ text: val }] }],
-                        generationConfig: {
-                            temperature: 0.5,
-                            maxOutputTokens: 8192,
-                            "thinkingConfig": {
-                                "thinkingBudget": 0
-                            }
-                        },
-                        safetySettings: [ // 放寬安全設定防止誤判截斷
-                            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                        ]
-                    })
-                });
+                const tools = [ { googleSearch: {} } ];
+                const safetySettings = [
+                    {
+                        category: "HARM_CATEGORY_HARASSMENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE" // 保持中等或以上風險才阻擋
+                    },
+                    {
+                        category: "HARM_CATEGORY_HATE_SPEECH",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE" // 保持中等或以上風險才阻擋
+                    },
+                    {
+                        category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE" // 保持中等或以上風險才阻擋
+                    },
+                    {
+                        category: "HARM_CATEGORY_DANGEROUS_CONTENT",
+                        threshold: "BLOCK_MEDIUM_AND_ABOVE" // 保持中等或以上風險才阻擋
+                    }
+                ];
 
+                const response = await fetch(API_URL, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
+                                        tools,
+                                        contents: [...chatHistory, { role: "user", parts: [{ text: val }] }],
+                                        generationConfig: {
+                                            temperature: 0.5,
+                                            maxOutputTokens: 8192,
+                                            "thinkingConfig": {
+                                                "thinkingBudget": 0
+                                            }
+                                        },
+                                        safetySettings,
+                                    })
+                                });
                 const data = await response.json();
                 console.log(response.status);
                 if (response.status === 429) {
