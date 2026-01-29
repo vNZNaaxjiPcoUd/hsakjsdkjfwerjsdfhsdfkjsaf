@@ -159,9 +159,9 @@ document.getElementById("helloWorld").onclick = function() {
 const IDL = 11;
 
 function getID(url) {
-		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})|\/live\/([A-Za-z0-9_-]{11})/;
 		const match = url.match(regex);
-		return match ? (match[1] || match[2] || match[3]) : "no";
+		return match ? (match[1] || match[2] || match[3]|| match[4]) : "no";
 	}
 
 let showView = 0;
