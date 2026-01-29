@@ -284,6 +284,9 @@ layout: empty
         "why": "you like",
         "list": "reboot, clean, note, show history!",
         "ver": "1.1",
+        "ok": "fine",
+        "go": "move now",
+        "gogo": "now now now now",
         };
         function talkA(A) {
             const lowerCaseA = A.toLowerCase();
@@ -297,6 +300,7 @@ layout: empty
         function handleMyAnswer(val){
             let retN = false;
             let ansT = "";
+            let keepN = false;
             if (/^restart/i.test(val)) {
                 location.reload();userInput.value = ""; ansT = "Relad now"; retN = true;
             }
@@ -313,7 +317,9 @@ layout: empty
                 retN = true;
             }
             if (/^hi|^hihi|^早/i.test(val)) {
-                ansT = "Hi Hi 你好呀！" ; retN = true;
+                ansT = "Hi Hi 你好呀！" ; 
+                keepN = true; 
+                retN = true;
             }                          
             if (/^show history/i.test(val)) {
                 userInput.value = ""; 
@@ -336,9 +342,12 @@ layout: empty
             if ( retN === true){
                 appendMessage('user', val);
                 appendMessage('ai', ansT);
-                chatHistory.push({ role: "user", parts: [{ text: val }] });
-                chatHistory.push({ role: "model", parts: [{ text: ansT }] });
-                if (chatHistory.length > 50) chatHistory.splice(0, 2);
+                if (keepN === true){
+                    chatHistory.push({ role: "user", parts: [{ text: val }] });
+                    chatHistory.push({ role: "model", parts: [{ text: ansT }] });
+                    if (chatHistory.length > 50) chatHistory.splice(0, 2);
+                }
+                
                 userInput.value = "";                
                 return true;
             }
