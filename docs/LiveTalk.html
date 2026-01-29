@@ -332,6 +332,18 @@ layout: empty
                 chatHistory = [];
                 ansT = "Clean done!!" ; retN = true;
             }
+            if (/rr/i.test(val)) {
+                if(lastQ === ""){
+                    lastQ = "";
+                    ansT = "not Thing to do.";
+                    retN = true;
+                }else{
+                    userInput.value = lastQ; 
+                    lastQ = "";
+                    handleSend();
+                    ansT = "repeat done!" ; retN = true;
+                }
+            }
 
             let tAns = talkA(val);
             if ( tAns != ""){
@@ -381,7 +393,7 @@ layout: empty
 
             return A;
         }
-
+        let lastQ = "";
         async function handleSend() {
             const val = userInput.value.trim();
             if (!val) return;
@@ -409,7 +421,7 @@ layout: empty
                     return;
                 }
 
-                if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！！"); userInput.value = ""; return; }
+                if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！！"); userInput.value = "";return; }
             }
 
 
@@ -466,7 +478,8 @@ layout: empty
                 if (response.status === 429) {
                     // 429 是 Too Many Requests (額度超限)
                     loadingRow.remove();
-                    appendMessage('ai', " 滿了 ");
+                    appendMessage('ai', "我太累了！");
+                    lastQ = val;
                 }
                 if (data.error) throw new Error(data.error.message);
 
@@ -484,6 +497,7 @@ layout: empty
             } catch (err) {
                 loadingRow.querySelector('.bubble').innerHTML = "❌ "+ err.message;
                 console.log("AI error "+err.message);
+                lastQ = val;
             } finally {
                 sendBtn.disabled = false;
                 chatContainer.scrollTop = chatContainer.scrollHeight;
