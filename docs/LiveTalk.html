@@ -119,7 +119,7 @@ layout: empty
 
     <nav class="navbar">
         <h1>🏠 生活百科</h1>
-        <div id="status" class="status-badge">未解鎖</div>
+        <div id="status" class="status-badge">四十大盗的寶庫門緊閉著！</div>
     </nav>
 
     <div id="chat-container">
@@ -311,7 +311,7 @@ layout: empty
                         const decoded = bytes.toString(CryptoJS.enc.Utf8);
                         if (decoded.length > 10) {
                             apiKey = decoded;
-                            statusBadge.innerText = "四十大盜寶庫門開";
+                            statusBadge.innerText = "寶庫打開";
                             statusBadge.className = "status-badge unlocked";
                             appendMessage('ai', "🔓 **開門成功！**");
                             document.getElementById('buttonbutton').style.display = "block";
@@ -322,7 +322,7 @@ layout: empty
                     return;
                 }
 
-                if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！。"); userInput.value = ""; return; }
+                if (!apiKey) { appendMessage('ai', "⚠️ 不行喔！！"); userInput.value = ""; return; }
             }else{
 
             }
