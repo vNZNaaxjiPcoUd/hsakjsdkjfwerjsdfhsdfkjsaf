@@ -122,19 +122,10 @@
     }
 
     /* 按鈕顏色分類 */
-    /* 加密/解密: 綠色 */
     #encryptBtn, #decryptBtn { background-color: #4CAF50; }
-    
-    /* 複製: 黃色 */
     #copyBtn { background-color: #ff9800; }
-    
-    /* 資料庫: 紫色 */
     #saveDBBtn, #readDBBtn { background-color: #9c27b0; }
-
-    /* 檔案操作: 橘紅色 */
     #exportBtn, #importBtnTrigger { background-color: #FF5722; }
-
-    /* 外部連結: 灰色 */
     .external-link-btn { background-color: #607d8b; }
 
     #TabA button:hover { opacity: 0.9; }
@@ -150,12 +141,14 @@
         font-family: monospace;
     }
 
-    /* --- 分頁 B (筆記) 樣式 --- */
+    /* --- 分頁 B (筆記) 樣式 - 修改版 --- */
     #TabB { }
 
-    .sub-tabs {
+    /* 子分頁容器：使用 Flex 並允許換行 */
+    .sub-tabs-header {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: wrap; /* 允許整個頭部換行，確保按鈕不跑版 */
+        align-items: flex-end;
         border-bottom: 1px solid #ccc;
         background-color: #f9f9f9;
         padding-top: 5px;
@@ -163,10 +156,17 @@
         min-height: 35px;
     }
 
+    .sub-tabs {
+        display: flex;
+        flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 */
+        flex-grow: 1;
+        margin-bottom: -1px; /* 為了配合 border */
+    }
+
     .sub-tab-button {
         background-color: #e7e7e7;
         border: 1px solid #ccc;
-        border-bottom: none;
+        border-bottom: 1px solid #ccc; /* 預設有底線 */
         outline: none;
         cursor: pointer;
         padding: 8px 12px;
@@ -174,18 +174,21 @@
         border-radius: 5px 5px 0 0;
         margin-right: 3px;
         font-size: 13px;
-        margin-bottom: -1px;
+        margin-bottom: 2px; /* 換行時增加上下間距 */
         display: flex;
         align-items: center;
+        white-space: nowrap; /* 防止按鈕內文字換行 */
     }
 
     .sub-tab-button:hover { background-color: #ddd; }
     
     .sub-tab-button.active {
         background-color: #ffffff;
-        border-bottom: 1px solid #ffffff; 
+        border-bottom: 1px solid #ffffff; /* 蓋過底線 */
         font-weight: bold;
         z-index: 10;
+        margin-bottom: -1px; /* 讓 active 的按鈕貼齊底部 */
+        position: relative;
     }
 
     .delete-sub-btn {
@@ -240,18 +243,20 @@
         box-sizing: border-box;
     }
 
+    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 */
     #addSubPageBtn {
-        position: absolute;
-        top: 5px;
-        right: 5px;
-        padding: 5px 10px;
+        position: static;
+        margin: 5px;
+        padding: 6px 12px;
         background-color: #008CBA;
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
         font-size: 12px;
-        z-index: 20;
+        flex-shrink: 0;
+        height: fit-content;
+        align-self: center; /* 讓按鈕在該行置中或靠下 */
     }
 
 </style>
@@ -289,8 +294,9 @@
         </div>
 
         <div id="TabB" class="tab-content">
-            <div style="position: relative; display: flex; align-items: flex-end;">
-                <div id="subTabNav" class="sub-tabs" style="flex-grow: 1; padding-right: 80px;"></div>
+            <!-- 修改結構：移除 inline style，改用 class -->
+            <div class="sub-tabs-header">
+                <div id="subTabNav" class="sub-tabs"></div>
                 <button id="addSubPageBtn">新</button>
             </div>
             
