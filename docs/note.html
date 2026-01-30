@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Note</title>
+    <title>Note (IndexedDB)</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -12,16 +12,15 @@
         height: 100%;
         margin: 0;
         padding: 0;
-        overflow: hidden; /* 防止雙重滾動條 */
+        overflow: hidden;
         font-family: Arial, sans-serif;
         background-color: #f4f4f9;
     }
 
-    /* 容器樣式：給予 padding 並扣除底部狀態列的高度 */
     .main-container {
         display: flex;
         flex-direction: column;
-        height: calc(100% - 30px); /* 預留底部狀態列空間 */
+        height: calc(100% - 30px);
         padding: 10px;
         box-sizing: border-box;
     }
@@ -44,7 +43,7 @@
 
     /* --- 主分頁按鈕樣式 --- */
     .tabs {
-        flex-shrink: 0; /* 防止按鈕被壓縮 */
+        flex-shrink: 0;
         margin-bottom: 0;
     }
 
@@ -76,10 +75,10 @@
         border: 1px solid #ccc;
         border-top: none;
         background-color: white;
-        flex-grow: 1; /* 讓內容區塊填滿剩餘空間 */
-        overflow: hidden; /* 內部滾動由子元素控制 */
+        flex-grow: 1;
+        overflow: hidden;
         box-sizing: border-box;
-        height: 100%; /* 確保填滿父容器 */
+        height: 100%;
     }
 
     .tab-content.active {
@@ -122,12 +121,11 @@
     
     #copyBtn { background-color: #ff9800; }
     
-    /* 新增存取 Cookie 按鈕樣式 (藍色) */
-    #saveCookieBtn, #readCookieBtn { background-color: #2196F3; }
+    /* 改成紫色系以區分是 DB 操作 */
+    #saveDBBtn, #readDBBtn { background-color: #9c27b0; }
 
     #TabA button:hover { opacity: 0.9; }
 
-    /* 密文內容輸入框：最大化 */
     #encryptedContent {
         width: 100%;
         flex-grow: 1;
@@ -140,11 +138,8 @@
     }
 
     /* --- 分頁 B (筆記) 樣式 --- */
-    #TabB {
-        /* flex layout inherited */
-    }
+    #TabB { }
 
-    /* 子分頁導航欄 */
     .sub-tabs {
         display: flex;
         flex-wrap: wrap;
@@ -180,7 +175,6 @@
         z-index: 10;
     }
 
-    /* 刪除按鈕樣式 */
     .delete-sub-btn {
         margin-left: 8px;
         color: #999;
@@ -193,7 +187,6 @@
         color: #ff0000;
     }
 
-    /* 子分頁內容容器 */
     .sub-tab-content-container {
         flex-grow: 1;
         position: relative;
@@ -211,7 +204,6 @@
         display: flex;
     }
 
-    /* 子分頁標題編輯輸入框 */
     .block-name {
         display: none;
         width: 100%;
@@ -223,7 +215,6 @@
         box-sizing: border-box;
     }
 
-    /* 筆記編輯區 */
     .editable-text {
         width: 100%;
         flex-grow: 1;
@@ -258,7 +249,6 @@
         <div class="tabs">
             <button class="tab-button" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
-            
         </div>
 
         <div id="TabA" class="tab-content">
@@ -270,8 +260,9 @@
                 <button id="encryptBtn">編碼</button>
                 <button id="decryptBtn">解譯</button>
                 <button id="copyBtn">複製</button>
-                <button id="saveCookieBtn">存</button>
-                <button id="readCookieBtn">讀</button>
+                <!-- 按鈕 ID 已變更 -->
+                <button id="saveDBBtn">存DB</button>
+                <button id="readDBBtn">讀DB</button>
                 <button class="tab-button" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">入庫</button>
                 <button class="tab-button" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核對</button>
             </div>
@@ -280,15 +271,12 @@
         </div>
 
         <div id="TabB" class="tab-content">
-            
             <div style="position: relative; display: flex; align-items: flex-end;">
-                <div id="subTabNav" class="sub-tabs" style="flex-grow: 1; padding-right: 80px;">
-                    </div>
+                <div id="subTabNav" class="sub-tabs" style="flex-grow: 1; padding-right: 80px;"></div>
                 <button id="addSubPageBtn">新頁面 +</button>
             </div>
             
-            <div id="subTabContentContainer" class="sub-tab-content-container">
-                </div>
+            <div id="subTabContentContainer" class="sub-tab-content-container"></div>
         </div>
     </div>
 
@@ -304,16 +292,20 @@ const subTabContentContainer = document.getElementById('subTabContentContainer')
 const statusMessage = document.getElementById('statusMessage');
 let blockCounter = 0;
 
-// --- 取得當前動態 Cookie 名稱 ---
-function getDynamicCookieName() {
-    // 取得 URL 的 query string (例如 ?ABC)
+// --- IndexedDB 配置 ---
+const DB_NAME = "CipherNoteDB";
+const DB_VERSION = 1;
+const STORE_NAME = "notes";
+let dbInstance = null;
+
+// --- 取得 URL 參數 (作為 Key) ---
+function getDynamicKeyName() {
     const search = window.location.search;
     if (search && search.length > 1) {
-        // 去掉問號，並取得第一個參數名
         const param = search.substring(1).split('=')[0];
-        return param || "noteCipher";
+        return param || "defaultNote";
     }
-    return "noteCipher"; // 預設名稱
+    return "defaultNote";
 }
 
 // --- 狀態訊息顯示函式 ---
@@ -338,44 +330,102 @@ function updateStatus(message, type = 'info') {
     }, 5000);
 }
 
-// --- Cookie 操作函數 ---
-function setCookie(name, value, days) {
-    let expires = "";
-    if (days) {
-        let date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-        expires = "; expires=" + date.toUTCString();
-    }
-    document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/";
+// --- IndexedDB 操作邏輯 ---
+
+// 1. 初始化資料庫
+function initDB() {
+    return new Promise((resolve, reject) => {
+        if (dbInstance) {
+            resolve(dbInstance);
+            return;
+        }
+
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            // 建立 Object Store，keyPath 為 id
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "id" });
+            }
+        };
+
+        request.onsuccess = (event) => {
+            dbInstance = event.target.result;
+            console.log("IndexedDB initialized");
+            resolve(dbInstance);
+        };
+
+        request.onerror = (event) => {
+            console.error("IndexedDB error:", event.target.errorCode);
+            reject("資料庫開啟失敗");
+        };
+    });
 }
 
-function getCookie(name) {
-    let nameEQ = name + "=";
-    let ca = document.cookie.split(';');
-    for(let i=0;i < ca.length;i++) {
-        let c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+// 2. 儲存資料
+async function saveDataToDB(content) {
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const keyName = getDynamicKeyName();
+
+        const request = store.put({ id: keyName, content: content, timestamp: new Date() });
+
+        request.onsuccess = () => {
+            updateStatus(`已存入 DB [${keyName}]`, 'success');
+        };
+
+        request.onerror = (e) => {
+            updateStatus("儲存失敗: " + e.target.error, 'error');
+        };
+    } catch (err) {
+        updateStatus("DB 錯誤: " + err, 'error');
     }
-    return null;
 }
+
+// 3. 讀取資料
+async function readDataFromDB() {
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const keyName = getDynamicKeyName();
+
+        const request = store.get(keyName);
+
+        request.onsuccess = (event) => {
+            const result = event.target.result;
+            if (result && result.content) {
+                encryptedContentArea.value = result.content;
+                updateStatus(`已讀取 DB [${keyName}]`, 'success');
+            } else {
+                updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
+            }
+        };
+
+        request.onerror = (e) => {
+            updateStatus("讀取失敗: " + e.target.error, 'error');
+        };
+    } catch (err) {
+        updateStatus("DB 錯誤: " + err, 'error');
+    }
+}
+
 
 // --- 主分頁切換邏輯 ---
 function openTab(evt, tabName) {
     var i, tabcontent, tablinks;
-
     tabcontent = document.getElementsByClassName("tab-content");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
     }
-
     tablinks = document.getElementsByClassName("tab-button");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
     }
-
     document.getElementById(tabName).classList.add("active");
-    
     if (evt && evt.currentTarget) {
         evt.currentTarget.className += " active";
     }
@@ -391,7 +441,6 @@ function switchSubTab(blockId, enterEditMode = false) {
     const targetContent = document.getElementById('sub-content-' + blockId);
     if (targetContent) {
         targetContent.classList.add('active');
-        
         const nameInput = targetContent.querySelector('.block-name');
         if (enterEditMode) {
             nameInput.style.display = 'block';
@@ -411,21 +460,17 @@ function handleSubTabClick(blockId) {
     }
 }
 
-// --- 刪除子分頁邏輯 ---
 function deleteSubTab(event, blockId) {
-    event.stopPropagation(); // 防止觸發分頁切換
-    
+    event.stopPropagation();
     if (!confirm("確定要刪除這個分頁嗎？")) return;
 
     const btn = document.getElementById(`sub-btn-${blockId}`);
     const content = document.getElementById(`sub-content-${blockId}`);
-    
     const wasActive = btn.classList.contains('active');
 
     btn.remove();
     content.remove();
 
-    // 如果刪除的是當前選中的分頁，切換到剩下的最後一個
     if (wasActive) {
         const remainingBtns = document.querySelectorAll('.sub-tab-button');
         if (remainingBtns.length > 0) {
@@ -436,7 +481,6 @@ function deleteSubTab(event, blockId) {
     updateStatus("分頁已刪除", "info");
 }
 
-// --- 建立新的可編輯區塊 (子分頁) ---
 function addEditableBlock(title = null, content = "") {
     blockCounter++;
     const currentId = blockCounter;
@@ -446,14 +490,12 @@ function addEditableBlock(title = null, content = "") {
     const newBtn = document.createElement('button');
     newBtn.id = `sub-btn-${blockIdString}`;
     newBtn.className = 'sub-tab-button';
-    // 新增文字內容與刪除按鈕
     newBtn.innerHTML = `
         <span class="btn-text">${displayTitle}</span>
         <span class="delete-sub-btn" title="刪除分頁">×</span>
     `;
     newBtn.onclick = () => handleSubTabClick(blockIdString);
     
-    // 綁定刪除按鈕事件
     const delBtn = newBtn.querySelector('.delete-sub-btn');
     delBtn.onclick = (e) => deleteSubTab(e, blockIdString);
     
@@ -497,9 +539,7 @@ function addEditableBlock(title = null, content = "") {
     switchSubTab(blockIdString, false);
 }
 
-
 // --- 加密/解密 核心邏輯 (SHA512 + AES) ---
-
 function getContentFromTabB() {
     const contents = [];
     const blocks = document.querySelectorAll('.sub-tab-content');
@@ -596,38 +636,19 @@ document.getElementById('copyBtn').addEventListener('click', () => {
         .catch(() => updateStatus("複製失敗", 'error'));
 });
 
-// 按鈕事件綁定 - 存入 Cookie
-document.getElementById('saveCookieBtn').addEventListener('click', () => {
+// 按鈕事件綁定 - 存入 DB
+document.getElementById('saveDBBtn').addEventListener('click', () => {
     const content = encryptedContentArea.value;
-    const cookieName = getDynamicCookieName();
-    
     if (!content) { 
         updateStatus("無內容可存", 'error'); 
         return; 
     }
-    
-    if (encodeURIComponent(content).length > 4000) {
-        updateStatus("警告：內容過長，Cookie 可能無法儲存完整", 'error');
-    }
-
-    try {
-        setCookie(cookieName, content, 365);
-        updateStatus(`已存入 Cookie [${cookieName}]`, 'success');
-    } catch(e) {
-        updateStatus("儲存 Cookie 失敗", 'error');
-    }
+    saveDataToDB(content);
 });
 
-// 按鈕事件綁定 - 讀取 Cookie
-document.getElementById('readCookieBtn').addEventListener('click', () => {
-    const cookieName = getDynamicCookieName();
-    const content = getCookie(cookieName);
-    if (content) {
-        encryptedContentArea.value = content;
-        updateStatus(`已讀取 Cookie [${cookieName}]`, 'success');
-    } else {
-        updateStatus(`找不到 Cookie [${cookieName}]`, 'error');
-    }
+// 按鈕事件綁定 - 讀取 DB
+document.getElementById('readDBBtn').addEventListener('click', () => {
+    readDataFromDB();
 });
 
 document.getElementById('addSubPageBtn').addEventListener('click', () => {
@@ -639,12 +660,13 @@ document.addEventListener('DOMContentLoaded', () => {
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     addEditableBlock();
     
-    // 初始化顯示當前 Cookie 名稱
-    const currentName = getDynamicCookieName();
-    updateStatus(`目前使用 Cookie 名稱: ${currentName}`, 'info');
+    // 初始化 DB (確保載入時就建立好連線結構)
+    initDB();
+
+    const currentKey = getDynamicKeyName();
+    updateStatus(`使用 ID: ${currentKey}`, 'info');
 });
 
     </script>
 </body>
 </html>
-
