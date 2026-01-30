@@ -119,7 +119,12 @@
         margin-right: 5px; 
         margin-top: 5px;
     }
+    
     #copyBtn { background-color: #ff9800; }
+    
+    /* 新增存取 Cookie 按鈕樣式 (藍色) */
+    #saveCookieBtn, #readCookieBtn { background-color: #2196F3; }
+
     #TabA button:hover { opacity: 0.9; }
 
     /* 密文內容輸入框：最大化 */
@@ -236,19 +241,21 @@
 
     <div class="main-container">
         <div class="tabs">
-            <button class="tab-button" onclick="openTab(event, 'TabA')">加密/解密</button>
             <button class="tab-button" onclick="openTab(event, 'TabB')">筆記</button>
+            <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
         </div>
 
         <div id="TabA" class="tab-content">
             <div class="control-row">
-                <input type="password" id="aesKey" value="mySecretKey123" placeholder="輸入 AES 密鑰">
+                <input type="password" id="aesKey" value="helloworld!" placeholder="輸入 AES 密鑰">
             </div>
             
             <div class="control-row">
-                <button id="encryptBtn">加密</button>
-                <button id="decryptBtn">解密</button>
+                <button id="encryptBtn">編碼</button>
+                <button id="decryptBtn">解譯</button>
                 <button id="copyBtn">複製</button>
+                <button id="saveCookieBtn">存(Cookie)</button>
+                <button id="readCookieBtn">讀(Cookie)</button>
             </div>
 
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
@@ -299,6 +306,30 @@ function updateStatus(message, type = 'info') {
         statusMessage.style.backgroundColor = '#eee';
         statusMessage.style.color = '#333';
     }, 5000);
+}
+
+// --- Cookie 操作函數 ---
+function setCookie(name, value, days) {
+    let expires = "";
+    if (days) {
+        let date = new Date();
+        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        expires = "; expires=" + date.toUTCString();
+    }
+    // 使用 encodeURIComponent 確保密文中的特殊字元不會破壞 Cookie 格式
+    document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/";
+}
+
+function getCookie(name) {
+    let nameEQ = name + "=";
+    let ca = document.cookie.split(';');
+    console.log(ca);
+    for(let i=0;i < ca.length;i++) {
+        let c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1,c.length);
+        if (c.indexOf(nameEQ) == 0) return decodeURIComponent(c.substring(nameEQ.length,c.length));
+    }
+    return null;
 }
 
 // --- 主分頁切換邏輯 ---
@@ -402,7 +433,7 @@ function addEditableBlock(title = null, content = "") {
 }
 
 
-// --- 加密/解密 核心邏輯 (已修改為 SHA512 + AES) ---
+// --- 加密/解密 核心邏輯 (SHA512 + AES) ---
 
 function getContentFromTabB() {
     const contents = [];
@@ -455,10 +486,7 @@ document.getElementById('encryptBtn').addEventListener('click', () => {
     if (!content.trim()) { updateStatus("筆記無內容", 'error'); return; }
 
     try {
-        // [修改] 對密鑰進行 SHA512 雜湊
         const keyHash = CryptoJS.SHA512(key).toString();
-        
-        // 使用雜湊後的 key 進行加密
         const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
         
         encryptedContentArea.value = encrypted;
@@ -477,10 +505,7 @@ document.getElementById('decryptBtn').addEventListener('click', () => {
     if (!encryptedText) { updateStatus("無密文內容", 'error'); return; }
 
     try {
-        // [修改] 對密鑰進行 SHA512 雜湊
         const keyHash = CryptoJS.SHA512(key).toString();
-        
-        // 使用雜湊後的 key 進行解密
         const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
         
@@ -497,11 +522,44 @@ document.getElementById('decryptBtn').addEventListener('click', () => {
     }
 });
 
+// 按鈕事件綁定 - 複製
 document.getElementById('copyBtn').addEventListener('click', () => {
     if (!encryptedContentArea.value) return;
     navigator.clipboard.writeText(encryptedContentArea.value)
         .then(() => updateStatus("密文已複製", 'success'))
         .catch(() => updateStatus("複製失敗", 'error'));
+});
+
+// 按鈕事件綁定 - 存入 Cookie
+document.getElementById('saveCookieBtn').addEventListener('click', () => {
+    const content = encryptedContentArea.value;
+    if (!content) { 
+        updateStatus("無內容可存", 'error'); 
+        return; 
+    }
+    
+    // Cookie 長度安全檢查 (通常 4096 bytes)
+    if (encodeURIComponent(content).length > 4000) {
+        updateStatus("警告：內容過長，Cookie 可能無法儲存完整", 'error');
+    }
+
+    try {
+        setCookie("noteCipher", content, 365); // 儲存 365 天
+        updateStatus("密文已存入 Cookie", 'success');
+    } catch(e) {
+        updateStatus("儲存 Cookie 失敗", 'error');
+    }
+});
+
+// 按鈕事件綁定 - 讀取 Cookie
+document.getElementById('readCookieBtn').addEventListener('click', () => {
+    const content = getCookie("noteCipher");
+    if (content) {
+        encryptedContentArea.value = content;
+        updateStatus("已從 Cookie 讀取密文", 'success');
+    } else {
+        updateStatus("Cookie 中找不到密文資料", 'error');
+    }
 });
 
 document.getElementById('addSubPageBtn').addEventListener('click', () => {
@@ -510,7 +568,7 @@ document.getElementById('addSubPageBtn').addEventListener('click', () => {
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
-    openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabA');
+    openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     addEditableBlock();
 });
 
