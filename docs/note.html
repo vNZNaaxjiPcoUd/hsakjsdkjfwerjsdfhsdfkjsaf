@@ -271,7 +271,7 @@
 
         <div id="TabA" class="tab-content">
             <div class="control-row">
-                <input type="password" id="aesKey" value="helloworld!" placeholder="輸入 AES 密鑰">
+                <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰">
             </div>
             
             <div class="control-row">
@@ -387,7 +387,7 @@ async function saveDataToDB(content) {
         const store = transaction.objectStore(STORE_NAME);
         const keyName = getDynamicKeyName();
         const request = store.put({ id: keyName, content: content, timestamp: new Date() });
-        request.onsuccess = () => updateStatus(`已存入 DB [${keyName}]`, 'success');
+        request.onsuccess = () => updateStatus(`已存入 ${keyName}`, 'success');
         request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
     } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }
@@ -403,7 +403,7 @@ async function readDataFromDB() {
             const result = event.target.result;
             if (result && result.content) {
                 encryptedContentArea.value = result.content;
-                updateStatus(`已讀取 DB [${keyName}]`, 'success');
+                updateStatus(`已讀取 ${keyName}`, 'success');
             } else {
                 updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
             }
@@ -695,6 +695,7 @@ document.addEventListener('DOMContentLoaded', () => {
     addEditableBlock();
     initDB();
     const currentKey = getDynamicKeyName();
+    document.title = currentKey; 
     updateStatus(`使用 ID: ${currentKey}`, 'info');
 });
 
