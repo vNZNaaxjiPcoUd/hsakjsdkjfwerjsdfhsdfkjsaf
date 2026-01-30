@@ -176,6 +176,7 @@ layout: empty
         const statusBadge = document.getElementById('status');
         let decNote = "";
         let SYSTEM_PROMPT = "";
+        let modelN="";
 
         async function copyToClipboard(text, btnElement) {
             try {
@@ -271,7 +272,7 @@ layout: empty
         }
 
         let talk = {
-        "test": "test 1 2 3 4",
+        "go": "test 1 2 3 4",
         };
         function talkA(A) {
             const lowerCaseA = A.toLowerCase();
@@ -290,17 +291,21 @@ layout: empty
                 location.reload();userInput.value = ""; ansT = "Relad now"; retN = true;
             }
             if (/^page/i.test(val)) {
-                if( ENCRYPTED_DATA === ""){
-                    const AA = val.replace(/^page /i, "");
-                    const pageU = "https://h.jwint.net/"+AA;
-                    getPrompt(pageU);
-                    ansT = "Load it"; 
-                    console.log(ENCRYPTED_DATA);
-                }else{
-                    ansT = "no load more";
+                const AA = val.replace(/^page /i, "");
+                let pageU = "";
+                if(/^https?:\/\//i.test(AA) === false){
+                    pageU = "./"+AA;
                 }
+                pageU = AA;
+                getPrompt(pageU);
+                ansT = "loading";
                 retN = true;
             }
+            if (/show info/i.test(val)) {
+                ansT = "apiKey: "+apiKey+"<br>talk: "+JSON.stringify(talk)+"<br>ENCRYPTED_DATA: "+ENCRYPTED_DATA+"<br>modelN: "+modelN; 
+                retN = true;
+            }
+
             if (/^note/i.test(val)) {
                 if(apiKey === ""){
                     ansT = "需要你先打開門。";
@@ -315,7 +320,7 @@ layout: empty
                 keepN = true; 
                 retN = true;
             }                          
-            if (/^show history/i.test(val)) {
+            if (/show history/i.test(val)) {
                 userInput.value = ""; 
                 console.log(chatHistory);
                 console.log(getSpecificHistory(chatHistory));
@@ -388,6 +393,23 @@ layout: empty
             return A;
         }
 
+        function parsePara(SS){
+
+            let jsData = null;
+            try {
+                jsData = JSON.parse(SS);
+            } catch (error) {
+                console.error("JSON 解析失敗！錯誤類型：", error.name);
+                console.error("錯誤訊息：", error.message);
+                appendMessage('ai', "❌ 資料包錯了");
+                return;
+            }
+            if(jsData.Key)apiKey = jsData.Key;
+            if(jsData.Note)decNote = jsData.Note;
+            if(jsData.Prompt)SYSTEM_PROMPT = jsData.Prompt;
+            if(jsData.Conv)talk = jsData.Conv;
+            if(jsData.Model)modelN = jsData.Model;
+        }
 
         let lastQ = "";
         async function handleSend() {
@@ -405,22 +427,11 @@ layout: empty
                         const bytes = CryptoJS.AES.decrypt(ENCRYPTED_DATA, pass);
                         let decoded = bytes.toString(CryptoJS.enc.Utf8);
                         if (decoded.length > 10) {
-                            let jsData = null;
-                            try {
-                                jsData = JSON.parse(decoded);
-                            } catch (error) {
-                                console.error("JSON 解析失敗！錯誤類型：", error.name);
-                                console.error("錯誤訊息：", error.message);
-                                appendMessage('ai', "❌ 資料包錯了");
-                                return;
-                            }
-                            apiKey = jsData.Key;
+                            parsePara(decoded);
                             statusBadge.innerText = "寶庫打開";
                             statusBadge.className = "status-badge unlocked";
                             appendMessage('ai', "🔓 **開門成功！**");
                             document.getElementById('buttonbutton').style.display = "block";
-                            if(jsData.Note != "") decNote = jsData.Note;
-                            if(jsData.Prompt != "") SYSTEM_PROMPT = jsData.Prompt;
                         } else { throw new Error(); }
                     } catch (e) { appendMessage('ai', "❌ 芝麻不開門。"); }
                     userInput.value = ""; 
@@ -435,11 +446,11 @@ layout: empty
             appendMessage('user', val);
             userInput.value = "";
             sendBtn.disabled = true;
-            
+
             const loadingRow = appendMessage('ai', `<div class="loading-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div> 思考中...`);
 
             try {
-                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`;
+                const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${modelN}:generateContent?key=${apiKey}`;
                 
                 const tools = [ { googleSearch: {} } ];
                 const safetySettings = [
@@ -528,11 +539,10 @@ layout: empty
             let response = await fetch(page,{cache:"no-cache"}); 
 		  	let text = await response.clone().text();
             ENCRYPTED_DATA = text;
-            response = await fetch("https://h.jwint.net/LiveTalkPair",{cache:"no-cache"}); 
-		  	text = await response.clone().text();
-            talk = JSON.parse(text);
+            console.log(ENCRYPTED_DATA);
+            apiKey="";
         }
-        //getPrompt();
+        getPrompt("https://h.jwint.net/LiveTalkKey");
 
     </script>
 </body>
