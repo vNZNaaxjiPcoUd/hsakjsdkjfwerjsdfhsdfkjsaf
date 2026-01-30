@@ -167,6 +167,8 @@
         margin-right: 3px;
         font-size: 13px;
         margin-bottom: -1px;
+        display: flex;
+        align-items: center;
     }
 
     .sub-tab-button:hover { background-color: #ddd; }
@@ -176,6 +178,19 @@
         border-bottom: 1px solid #ffffff; 
         font-weight: bold;
         z-index: 10;
+    }
+
+    /* 刪除按鈕樣式 */
+    .delete-sub-btn {
+        margin-left: 8px;
+        color: #999;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 1;
+        padding: 0 2px;
+    }
+    .delete-sub-btn:hover {
+        color: #ff0000;
     }
 
     /* 子分頁內容容器 */
@@ -286,6 +301,18 @@ const subTabContentContainer = document.getElementById('subTabContentContainer')
 const statusMessage = document.getElementById('statusMessage');
 let blockCounter = 0;
 
+// --- 取得當前動態 Cookie 名稱 ---
+function getDynamicCookieName() {
+    // 取得 URL 的 query string (例如 ?ABC)
+    const search = window.location.search;
+    if (search && search.length > 1) {
+        // 去掉問號，並取得第一個參數名
+        const param = search.substring(1).split('=')[0];
+        return param || "noteCipher";
+    }
+    return "noteCipher"; // 預設名稱
+}
+
 // --- 狀態訊息顯示函式 ---
 function updateStatus(message, type = 'info') {
     statusMessage.textContent = message;
@@ -316,14 +343,12 @@ function setCookie(name, value, days) {
         date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
         expires = "; expires=" + date.toUTCString();
     }
-    // 使用 encodeURIComponent 確保密文中的特殊字元不會破壞 Cookie 格式
     document.cookie = name + "=" + (encodeURIComponent(value) || "") + expires + "; path=/";
 }
 
 function getCookie(name) {
     let nameEQ = name + "=";
     let ca = document.cookie.split(';');
-    console.log(ca);
     for(let i=0;i < ca.length;i++) {
         let c = ca[i];
         while (c.charAt(0)==' ') c = c.substring(1,c.length);
@@ -376,11 +401,36 @@ function switchSubTab(blockId, enterEditMode = false) {
 
 function handleSubTabClick(blockId) {
     const btn = document.getElementById('sub-btn-' + blockId);
-    if (btn.classList.contains('active')) {
+    if (btn && btn.classList.contains('active')) {
         switchSubTab(blockId, true);
     } else {
         switchSubTab(blockId, false);
     }
+}
+
+// --- 刪除子分頁邏輯 ---
+function deleteSubTab(event, blockId) {
+    event.stopPropagation(); // 防止觸發分頁切換
+    
+    if (!confirm("確定要刪除這個分頁嗎？")) return;
+
+    const btn = document.getElementById(`sub-btn-${blockId}`);
+    const content = document.getElementById(`sub-content-${blockId}`);
+    
+    const wasActive = btn.classList.contains('active');
+
+    btn.remove();
+    content.remove();
+
+    // 如果刪除的是當前選中的分頁，切換到剩下的最後一個
+    if (wasActive) {
+        const remainingBtns = document.querySelectorAll('.sub-tab-button');
+        if (remainingBtns.length > 0) {
+            const lastBtnId = remainingBtns[remainingBtns.length - 1].id.replace('sub-btn-', '');
+            switchSubTab(lastBtnId);
+        }
+    }
+    updateStatus("分頁已刪除", "info");
 }
 
 // --- 建立新的可編輯區塊 (子分頁) ---
@@ -393,8 +443,17 @@ function addEditableBlock(title = null, content = "") {
     const newBtn = document.createElement('button');
     newBtn.id = `sub-btn-${blockIdString}`;
     newBtn.className = 'sub-tab-button';
-    newBtn.textContent = displayTitle;
+    // 新增文字內容與刪除按鈕
+    newBtn.innerHTML = `
+        <span class="btn-text">${displayTitle}</span>
+        <span class="delete-sub-btn" title="刪除分頁">×</span>
+    `;
     newBtn.onclick = () => handleSubTabClick(blockIdString);
+    
+    // 綁定刪除按鈕事件
+    const delBtn = newBtn.querySelector('.delete-sub-btn');
+    delBtn.onclick = (e) => deleteSubTab(e, blockIdString);
+    
     subTabNav.appendChild(newBtn);
 
     const newContentDiv = document.createElement('div');
@@ -410,7 +469,10 @@ function addEditableBlock(title = null, content = "") {
     nameInput.addEventListener('input', function() {
         const btnId = this.getAttribute('data-target-btn');
         const btn = document.getElementById(btnId);
-        if (btn) btn.textContent = this.value;
+        if (btn) {
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) textSpan.textContent = this.value;
+        }
     });
 
     nameInput.addEventListener('keydown', function(e) {
@@ -473,7 +535,8 @@ function setContentToTabB(fullContent) {
     });
 
     if (blockCounter > 0) {
-        switchSubTab('block-1', false);
+        const firstId = document.querySelector('.sub-tab-button').id.replace('sub-btn-', '');
+        switchSubTab(firstId, false);
     }
 }
 
@@ -511,7 +574,7 @@ document.getElementById('decryptBtn').addEventListener('click', () => {
         
         if (originalText) {
             setContentToTabB(originalText);
-            openTab({currentTarget: document.querySelectorAll('.tab-button')[1]}, 'TabB');
+            openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
             updateStatus("解密成功！", 'success');
         } else {
             updateStatus("解密失敗：密鑰錯誤或內容損壞", 'error');
@@ -533,19 +596,20 @@ document.getElementById('copyBtn').addEventListener('click', () => {
 // 按鈕事件綁定 - 存入 Cookie
 document.getElementById('saveCookieBtn').addEventListener('click', () => {
     const content = encryptedContentArea.value;
+    const cookieName = getDynamicCookieName();
+    
     if (!content) { 
         updateStatus("無內容可存", 'error'); 
         return; 
     }
     
-    // Cookie 長度安全檢查 (通常 4096 bytes)
     if (encodeURIComponent(content).length > 4000) {
         updateStatus("警告：內容過長，Cookie 可能無法儲存完整", 'error');
     }
 
     try {
-        setCookie("noteCipher", content, 365); // 儲存 365 天
-        updateStatus("密文已存入 Cookie", 'success');
+        setCookie(cookieName, content, 365);
+        updateStatus(`已存入 Cookie [${cookieName}]`, 'success');
     } catch(e) {
         updateStatus("儲存 Cookie 失敗", 'error');
     }
@@ -553,12 +617,13 @@ document.getElementById('saveCookieBtn').addEventListener('click', () => {
 
 // 按鈕事件綁定 - 讀取 Cookie
 document.getElementById('readCookieBtn').addEventListener('click', () => {
-    const content = getCookie("noteCipher");
+    const cookieName = getDynamicCookieName();
+    const content = getCookie(cookieName);
     if (content) {
         encryptedContentArea.value = content;
-        updateStatus("已從 Cookie 讀取密文", 'success');
+        updateStatus(`已讀取 Cookie [${cookieName}]`, 'success');
     } else {
-        updateStatus("Cookie 中找不到密文資料", 'error');
+        updateStatus(`找不到 Cookie [${cookieName}]`, 'error');
     }
 });
 
@@ -570,8 +635,13 @@ document.getElementById('addSubPageBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     addEditableBlock();
+    
+    // 初始化顯示當前 Cookie 名稱
+    const currentName = getDynamicCookieName();
+    updateStatus(`目前使用 Cookie 名稱: ${currentName}`, 'info');
 });
 
     </script>
 </body>
 </html>
+
