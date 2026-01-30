@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Note (IndexedDB)</title>
+    <title>Note</title>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -98,6 +98,9 @@
     .control-row {
         margin-bottom: 10px;
         flex-shrink: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px; /* 按鈕間距 */
     }
 
     #TabA input[type="password"] { 
@@ -106,23 +109,33 @@
         border-radius: 4px; 
         width: 100%; 
         box-sizing: border-box;
+        margin-bottom: 5px;
     }
 
     #TabA button { 
-        padding: 8px 15px; 
-        background-color: #4CAF50; 
+        padding: 8px 12px; 
         color: white; 
         border: none; 
         border-radius: 4px; 
         cursor: pointer; 
-        margin-right: 5px; 
-        margin-top: 5px;
+        font-size: 13px;
     }
+
+    /* 按鈕顏色分類 */
+    /* 加密/解密: 綠色 */
+    #encryptBtn, #decryptBtn { background-color: #4CAF50; }
     
+    /* 複製: 黃色 */
     #copyBtn { background-color: #ff9800; }
     
-    /* 改成紫色系以區分是 DB 操作 */
+    /* 資料庫: 紫色 */
     #saveDBBtn, #readDBBtn { background-color: #9c27b0; }
+
+    /* 檔案操作: 橘紅色 */
+    #exportBtn, #importBtnTrigger { background-color: #FF5722; }
+
+    /* 外部連結: 灰色 */
+    .external-link-btn { background-color: #607d8b; }
 
     #TabA button:hover { opacity: 0.9; }
 
@@ -260,11 +273,16 @@
                 <button id="encryptBtn">編碼</button>
                 <button id="decryptBtn">解譯</button>
                 <button id="copyBtn">複製</button>
-                <!-- 按鈕 ID 已變更 -->
+                
                 <button id="saveDBBtn">存</button>
                 <button id="readDBBtn">讀</button>
-                <button class="tab-button" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">入庫</button>
-                <button class="tab-button" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核對</button>
+                
+                <button id="exportBtn" title="下載為 .txt 檔案">匯出</button>
+                <button id="importBtnTrigger" title="從 .txt 檔案載入">匯入</button>
+                <input type="file" id="importFile" accept=".txt" style="display: none;">
+
+                <button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">入庫</button>
+                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核對</button>
             </div>
 
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
@@ -332,30 +350,23 @@ function updateStatus(message, type = 'info') {
 
 // --- IndexedDB 操作邏輯 ---
 
-// 1. 初始化資料庫
 function initDB() {
     return new Promise((resolve, reject) => {
         if (dbInstance) {
             resolve(dbInstance);
             return;
         }
-
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-
         request.onupgradeneeded = (event) => {
             const db = event.target.result;
-            // 建立 Object Store，keyPath 為 id
             if (!db.objectStoreNames.contains(STORE_NAME)) {
                 db.createObjectStore(STORE_NAME, { keyPath: "id" });
             }
         };
-
         request.onsuccess = (event) => {
             dbInstance = event.target.result;
-            console.log("IndexedDB initialized");
             resolve(dbInstance);
         };
-
         request.onerror = (event) => {
             console.error("IndexedDB error:", event.target.errorCode);
             reject("資料庫開啟失敗");
@@ -363,38 +374,25 @@ function initDB() {
     });
 }
 
-// 2. 儲存資料
 async function saveDataToDB(content) {
     try {
         const db = await initDB();
         const transaction = db.transaction([STORE_NAME], "readwrite");
         const store = transaction.objectStore(STORE_NAME);
         const keyName = getDynamicKeyName();
-
         const request = store.put({ id: keyName, content: content, timestamp: new Date() });
-
-        request.onsuccess = () => {
-            updateStatus(`已存入 DB [${keyName}]`, 'success');
-        };
-
-        request.onerror = (e) => {
-            updateStatus("儲存失敗: " + e.target.error, 'error');
-        };
-    } catch (err) {
-        updateStatus("DB 錯誤: " + err, 'error');
-    }
+        request.onsuccess = () => updateStatus(`已存入 DB [${keyName}]`, 'success');
+        request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }
 
-// 3. 讀取資料
 async function readDataFromDB() {
     try {
         const db = await initDB();
         const transaction = db.transaction([STORE_NAME], "readonly");
         const store = transaction.objectStore(STORE_NAME);
         const keyName = getDynamicKeyName();
-
         const request = store.get(keyName);
-
         request.onsuccess = (event) => {
             const result = event.target.result;
             if (result && result.content) {
@@ -404,13 +402,8 @@ async function readDataFromDB() {
                 updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
             }
         };
-
-        request.onerror = (e) => {
-            updateStatus("讀取失敗: " + e.target.error, 'error');
-        };
-    } catch (err) {
-        updateStatus("DB 錯誤: " + err, 'error');
-    }
+        request.onerror = (e) => updateStatus("讀取失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }
 
 
@@ -583,52 +576,39 @@ function setContentToTabB(fullContent) {
     }
 }
 
-// 按鈕事件綁定 - 加密
+// 按鈕事件 - 加密
 document.getElementById('encryptBtn').addEventListener('click', () => {
     const key = keyInput.value;
     const content = getContentFromTabB();
-    
     if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
     if (!content.trim()) { updateStatus("筆記無內容", 'error'); return; }
-
     try {
         const keyHash = CryptoJS.SHA512(key).toString();
         const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
-        
         encryptedContentArea.value = encrypted;
-        updateStatus("加密成功 (SHA512+AES)！", 'success');
-    } catch (e) {
-        updateStatus("加密失敗: " + e.message, 'error');
-    }
+        updateStatus("加密成功！", 'success');
+    } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); }
 });
 
-// 按鈕事件綁定 - 解密
+// 按鈕事件 - 解密
 document.getElementById('decryptBtn').addEventListener('click', () => {
     const key = keyInput.value;
     const encryptedText = encryptedContentArea.value;
-
     if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
     if (!encryptedText) { updateStatus("無密文內容", 'error'); return; }
-
     try {
         const keyHash = CryptoJS.SHA512(key).toString();
         const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
         const originalText = bytes.toString(CryptoJS.enc.Utf8);
-        
         if (originalText) {
             setContentToTabB(originalText);
             openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
             updateStatus("解密成功！", 'success');
-        } else {
-            updateStatus("解密失敗：密鑰錯誤或內容損壞", 'error');
-        }
-    } catch (e) {
-        updateStatus("解密發生錯誤", 'error');
-        console.error(e);
-    }
+        } else { updateStatus("解密失敗：密鑰或內容錯誤", 'error'); }
+    } catch (e) { updateStatus("解密發生錯誤", 'error'); }
 });
 
-// 按鈕事件綁定 - 複製
+// 按鈕事件 - 複製
 document.getElementById('copyBtn').addEventListener('click', () => {
     if (!encryptedContentArea.value) return;
     navigator.clipboard.writeText(encryptedContentArea.value)
@@ -636,20 +616,68 @@ document.getElementById('copyBtn').addEventListener('click', () => {
         .catch(() => updateStatus("複製失敗", 'error'));
 });
 
-// 按鈕事件綁定 - 存入 DB
+// 按鈕事件 - 存入 DB
 document.getElementById('saveDBBtn').addEventListener('click', () => {
     const content = encryptedContentArea.value;
-    if (!content) { 
-        updateStatus("無內容可存", 'error'); 
-        return; 
-    }
+    if (!content) { updateStatus("無內容可存", 'error'); return; }
     saveDataToDB(content);
 });
 
-// 按鈕事件綁定 - 讀取 DB
+// 按鈕事件 - 讀取 DB
 document.getElementById('readDBBtn').addEventListener('click', () => {
     readDataFromDB();
 });
+
+// --- 新增功能：匯出 (下載為檔案，含時分秒) ---
+document.getElementById('exportBtn').addEventListener('click', () => {
+    const content = encryptedContentArea.value;
+    if (!content) { updateStatus("無內容可匯出", 'error'); return; }
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // 生成時間戳記: YYYY-MM-DD_HHmmss
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    
+    const timeString = `${y}-${m}-${d}_${h}${min}${s}`;
+    
+    const keyName = getDynamicKeyName();
+    a.download = `CipherNote_${keyName}_${timeString}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    updateStatus("已下載匯出檔案", 'success');
+});
+
+// --- 新增功能：匯入 (從檔案讀取) ---
+document.getElementById('importBtnTrigger').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        encryptedContentArea.value = e.target.result;
+        updateStatus("檔案已匯入至密文區 (請解密或存DB)", 'success');
+        document.getElementById('importFile').value = '';
+    };
+    reader.readAsText(file);
+});
+
 
 document.getElementById('addSubPageBtn').addEventListener('click', () => {
     addEditableBlock();
@@ -659,10 +687,7 @@ document.getElementById('addSubPageBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', () => {
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     addEditableBlock();
-    
-    // 初始化 DB (確保載入時就建立好連線結構)
     initDB();
-
     const currentKey = getDynamicKeyName();
     updateStatus(`使用 ID: ${currentKey}`, 'info');
 });
