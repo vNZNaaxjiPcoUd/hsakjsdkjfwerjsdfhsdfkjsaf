@@ -291,7 +291,7 @@
         <div id="TabB" class="tab-content">
             <div style="position: relative; display: flex; align-items: flex-end;">
                 <div id="subTabNav" class="sub-tabs" style="flex-grow: 1; padding-right: 80px;"></div>
-                <button id="addSubPageBtn">新頁面 +</button>
+                <button id="addSubPageBtn">新</button>
             </div>
             
             <div id="subTabContentContainer" class="sub-tab-content-container"></div>
@@ -311,7 +311,7 @@ const statusMessage = document.getElementById('statusMessage');
 let blockCounter = 0;
 
 // --- IndexedDB 配置 ---
-const DB_NAME = "CipherNoteDB";
+const DB_NAME = "hDB";
 const DB_VERSION = 1;
 const STORE_NAME = "notes";
 let dbInstance = null;
@@ -321,9 +321,9 @@ function getDynamicKeyName() {
     const search = window.location.search;
     if (search && search.length > 1) {
         const param = search.substring(1).split('=')[0];
-        return param || "defaultNote";
+        return param || "Note1";
     }
-    return "defaultNote";
+    return "Note1";
 }
 
 // --- 狀態訊息顯示函式 ---
@@ -478,7 +478,7 @@ function addEditableBlock(title = null, content = "") {
     blockCounter++;
     const currentId = blockCounter;
     const blockIdString = `block-${currentId}`;
-    const displayTitle = title || (currentId === 1 ? "封面" : `頁面 ${currentId}`);
+    const displayTitle = title || (currentId === 1 ? "封面" : `${currentId}`);
 
     const newBtn = document.createElement('button');
     newBtn.id = `sub-btn-${blockIdString}`;
