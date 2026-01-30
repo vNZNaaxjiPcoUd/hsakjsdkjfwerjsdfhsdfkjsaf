@@ -274,7 +274,7 @@
         </div>
     </div>
 
-    <div id="statusMessage" class="status-info">等待操作...</div>
+    <div id="statusMessage" class="status-info">待...</div>
 
     <script>
 
@@ -302,7 +302,7 @@ function updateStatus(message, type = 'info') {
     }
 
     setTimeout(() => {
-        statusMessage.textContent = "等待操作...";
+        statusMessage.textContent = "待...";
         statusMessage.style.backgroundColor = '#eee';
         statusMessage.style.color = '#333';
     }, 5000);
