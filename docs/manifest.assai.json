@@ -1,7 +1,7 @@
 {
   "name": "聊天",
-  "short_name": "s",
-  "description": "這是歷史",
+  "short_name": "聊天",
+  "description": "聊天",
   "display": "standalone",
   "theme_color": "#2196F3",
   "background_color": "#F0F0F0",
