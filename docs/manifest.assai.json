@@ -5,7 +5,7 @@
   "display": "standalone",
   "theme_color": "#2196F3",
   "background_color": "#F0F0F0",
-  "start_url": "/AssAi",
+  "start_url": "/AssAi.html",
   "scope": "/",
   "icons": [
     {
