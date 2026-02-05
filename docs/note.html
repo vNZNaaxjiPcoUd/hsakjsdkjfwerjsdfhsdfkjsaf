@@ -658,7 +658,7 @@ function setContentToTabB(fullContent) {
 
 // 按鈕事件 - 加密
 function encData(){
-    const key = keyInput.value;
+    const key = getKey();
     encryptedContentArea.value = "";
     const content = getContentFromTabB();
     if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
@@ -677,9 +677,13 @@ function encData(){
 document.getElementById('encryptBtn').addEventListener('click', encData);
 
 
+function getKey(){
+    return keyInput.value+getDynamicKeyName()+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+}
+
 // 按鈕事件 - 解密
 function decData(){
-    const key = keyInput.value;
+    const key = getKey();
     const encryptedText = encryptedContentArea.value;
     //console.log("取得密文內容...",encryptedText,encryptedContentArea.value);
     if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
