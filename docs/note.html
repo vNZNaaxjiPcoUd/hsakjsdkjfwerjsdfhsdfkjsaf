@@ -729,10 +729,11 @@ function saveDBBtnHandler() {
 document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
 
 document.getElementById('TabB').addEventListener('keydown', function(e) {
-    if (e.ctrlKey && e.key === 's') {
+    //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
         e.preventDefault();
         saveDBBtnHandler();
-        console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
     }
 });
 
