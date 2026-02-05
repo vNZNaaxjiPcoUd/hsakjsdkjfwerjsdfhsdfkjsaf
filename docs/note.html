@@ -324,8 +324,8 @@
             <div class="control-row">
                 <button id="saveDBBtn">存</button>
                 <button id="readDBBtn">讀</button>
-                <button id="decryptBtn">解譯</button>
-                <button id="encryptBtn">編碼</button>
+                <button id="decryptBtn">解</button>
+                <button id="encryptBtn">密</button>
                 
                 <button id="exportBtn" title="下載檔案">匯出</button>
                 <button id="importBtnTrigger" title="從檔案載入">匯入</button>
@@ -383,9 +383,9 @@ function getDynamicKeyName() {
     }
     if (search && search.length > 1) {
         const param = search.substring(1).split('=')[0];
-        return param || "Note1";
+        return param || "A";
     }
-    return "Note1";
+    return "A";
 }
 
 // --- 狀態訊息顯示函式 ---
@@ -641,15 +641,15 @@ function setContentToTabB(fullContent) {
 function encData(){
     const key = keyInput.value;
     const content = getContentFromTabB();
-    if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
-    if (!content.trim()) { updateStatus("筆記無內容", 'error'); return; }
+    if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
+    if (!content.trim()) { updateStatus("筆記無內容", 'error'); return false; }
     try {
         const keyHash = CryptoJS.SHA512(key).toString();
         const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
         encryptedContentArea.value = encrypted;
         updateStatus("加密成功！", 'success');
-    } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); }
-
+    } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); return false;}
+    return true;
 }
 
 // 按鈕事件 - 加密
@@ -659,7 +659,7 @@ document.getElementById('encryptBtn').addEventListener('click', encData);
 function decData(){
     const key = keyInput.value;
     const encryptedText = encryptedContentArea.value;
-    if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
+    if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
     if (!encryptedText) { updateStatus("無密文內容", 'error'); return; }
     try {
         const keyHash = CryptoJS.SHA512(key).toString();
@@ -669,8 +669,9 @@ function decData(){
             setContentToTabB(originalText);
             openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
             updateStatus("解密成功！", 'success');
-        } else { updateStatus("解密失敗：密鑰或內容錯誤", 'error'); }
-    } catch (e) { updateStatus("解密發生錯誤", 'error'); }    
+        } else { updateStatus("解密失敗：密鑰或內容錯誤", 'error'); return false}
+    } catch (e) { updateStatus("解密發生錯誤", 'error'); return false; }    
+    return true;
 }
 
 
@@ -680,7 +681,7 @@ document.getElementById('decryptBtn').addEventListener('click', decData);
 
 // 按鈕事件 - 複製
 document.getElementById('copyBtn').addEventListener('click', () => {
-    encData();
+    if(!encData()) return;
 
     if (!encryptedContentArea.value) return;
     navigator.clipboard.writeText(encryptedContentArea.value)
@@ -690,7 +691,7 @@ document.getElementById('copyBtn').addEventListener('click', () => {
 
 // 按鈕事件 - 存入 DB
 document.getElementById('saveDBBtn').addEventListener('click', () => {
-    encData();
+    if(!encData()) return;
 
     const content = encryptedContentArea.value;
     if (!content) { updateStatus("無內容可存", 'error'); return; }
@@ -700,11 +701,12 @@ document.getElementById('saveDBBtn').addEventListener('click', () => {
 // 按鈕事件 - 讀取 DB
 document.getElementById('readDBBtn').addEventListener('click', () => {
     readDataFromDB();
+    decData();
 });
 
 // --- 新增功能：匯出 (下載為檔案，含時分秒) ---
 document.getElementById('exportBtn').addEventListener('click', () => {
-    encData();
+    if(!encData()) return;
 
     const content = encryptedContentArea.value;
     if (!content) { updateStatus("無內容可匯出", 'error'); return; }
