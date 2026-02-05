@@ -260,6 +260,51 @@
         align-self: center; /* 讓按鈕在該行置中或靠下 */
     }
 
+    #keyNameDef {
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        width: 120px; 
+        box-sizing: border-box;
+        display: none;
+    }
+
+    #listBtn {
+        padding: 8px 12px; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 13px;
+        background-color: #795548;
+    }
+
+    #nameBtn {
+        background-color: #3f51b5;
+    }   
+
+    #listBtn:hover, #nameBtn:hover {
+        opacity: 0.9;
+    }   
+
+    #delBtn {
+        padding: 8px 12px; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 13px;
+        background-color: #f44336;
+    }
+
+    #delNameDef {
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        width: 120px; 
+        box-sizing: border-box;
+    }
+
 </style>
 </head>
 <body>
@@ -276,19 +321,24 @@
             </div>
             
             <div class="control-row">
-                <button id="encryptBtn">編碼</button>
-                <button id="decryptBtn">解譯</button>
-                <button id="copyBtn">複製</button>
-                
                 <button id="saveDBBtn">存</button>
                 <button id="readDBBtn">讀</button>
+                <button id="decryptBtn">解譯</button>
+                <button id="encryptBtn">編碼</button>
                 
-                <button id="exportBtn" title="下載為 .txt 檔案">匯出</button>
-                <button id="importBtnTrigger" title="從 .txt 檔案載入">匯入</button>
+                <button id="exportBtn" title="下載檔案">匯出</button>
+                <button id="importBtnTrigger" title="從檔案載入">匯入</button>
                 <input type="file" id="importFile" accept=".txt" style="display: none;">
 
-                <button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">入庫</button>
-                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核對</button>
+                <button id="nameBtn" onclick = "changeKeyName()">冊名</button>
+                <input type="text" id="keyNameDef" value="Note2" placeholder="本冊命名">
+                <button id="listBtn" onclick = "listKeyNames()">列冊</button>
+                <button id="delBtn" onclick = "deleteKeyName()">刪冊</button>
+                <input type="text" id="delNameDef" value="" placeholder="刪冊名稱">
+
+                <button id="copyBtn">複製</button>
+                <button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
+                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button>
             </div>
 
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
@@ -322,10 +372,14 @@ const DB_NAME = "hDB";
 const DB_VERSION = 1;
 const STORE_NAME = "notes";
 let dbInstance = null;
+let gKeyName = "";
 
 // --- 取得 URL 參數 (作為 Key) ---
 function getDynamicKeyName() {
     const search = window.location.search;
+    if( gKeyName !== ""){
+        return gKeyName;
+    }
     if (search && search.length > 1) {
         const param = search.substring(1).split('=')[0];
         return param || "Note1";
@@ -583,8 +637,7 @@ function setContentToTabB(fullContent) {
     }
 }
 
-// 按鈕事件 - 加密
-document.getElementById('encryptBtn').addEventListener('click', () => {
+function encData(){
     const key = keyInput.value;
     const content = getContentFromTabB();
     if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
@@ -595,10 +648,14 @@ document.getElementById('encryptBtn').addEventListener('click', () => {
         encryptedContentArea.value = encrypted;
         updateStatus("加密成功！", 'success');
     } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); }
-});
 
-// 按鈕事件 - 解密
-document.getElementById('decryptBtn').addEventListener('click', () => {
+}
+
+// 按鈕事件 - 加密
+//document.getElementById('encryptBtn').addEventListener('click', () => {});
+document.getElementById('encryptBtn').addEventListener('click', encData);
+
+function decData(){
     const key = keyInput.value;
     const encryptedText = encryptedContentArea.value;
     if (!key) { updateStatus("請輸入密鑰", 'error'); return; }
@@ -612,11 +669,18 @@ document.getElementById('decryptBtn').addEventListener('click', () => {
             openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
             updateStatus("解密成功！", 'success');
         } else { updateStatus("解密失敗：密鑰或內容錯誤", 'error'); }
-    } catch (e) { updateStatus("解密發生錯誤", 'error'); }
-});
+    } catch (e) { updateStatus("解密發生錯誤", 'error'); }    
+}
+
+
+// 按鈕事件 - 解密
+//document.getElementById('decryptBtn').addEventListener('click', () => {});
+document.getElementById('decryptBtn').addEventListener('click', decData);
 
 // 按鈕事件 - 複製
 document.getElementById('copyBtn').addEventListener('click', () => {
+    encData();
+
     if (!encryptedContentArea.value) return;
     navigator.clipboard.writeText(encryptedContentArea.value)
         .then(() => updateStatus("密文已複製", 'success'))
@@ -625,6 +689,8 @@ document.getElementById('copyBtn').addEventListener('click', () => {
 
 // 按鈕事件 - 存入 DB
 document.getElementById('saveDBBtn').addEventListener('click', () => {
+    encData();
+
     const content = encryptedContentArea.value;
     if (!content) { updateStatus("無內容可存", 'error'); return; }
     saveDataToDB(content);
@@ -637,6 +703,8 @@ document.getElementById('readDBBtn').addEventListener('click', () => {
 
 // --- 新增功能：匯出 (下載為檔案，含時分秒) ---
 document.getElementById('exportBtn').addEventListener('click', () => {
+    encData();
+
     const content = encryptedContentArea.value;
     if (!content) { updateStatus("無內容可匯出", 'error'); return; }
 
@@ -700,6 +768,78 @@ document.addEventListener('DOMContentLoaded', () => {
     updateStatus(`使用 ID: ${currentKey}`, 'info');
 });
 
+
+// --- 更改冊名按鈕邏輯 ---
+function changeKeyName(){
+    const keyNameInput = document.getElementById('keyNameDef');
+
+    if(keyNameInput.style.display === "none"){
+        keyNameInput.style.display = "block";
+        keyNameInput.focus();
+    }else{
+        const newName = keyNameInput.value.trim();
+        if(newName === ""){
+            alert("冊名不可為空！");
+            return;
+        }
+        gKeyName = newName;
+        keyNameInput.style.display = "none";
+        document.title = gKeyName;
+        updateStatus(`冊名已更改為: ${gKeyName}`, 'success');
+    }
+}   
+document.getElementById('keyNameDef').style.display = "none";
+
+// --- 刪除冊名按鈕邏輯 ---
+async function deleteKeyName(){
+    const delNameInput = document.getElementById('delNameDef');
+    const delName = delNameInput.value.trim();
+    if(delNameInput.style.display === "none"){
+        delNameInput.style.display = "block";
+        delNameInput.focus();
+        return;
+    }else{  
+        delNameInput.style.display = "none";
+        delNameInput.value = "";
+    }
+    if(delName === ""){
+        alert("請輸入欲刪除的冊名！");
+        return;
+    }
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(delName);
+        request.onsuccess = () => updateStatus(`已刪除冊名 ${delName}`, 'success');
+        request.onerror = (e) => updateStatus("刪除失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}   
+document.getElementById('delNameDef').style.display = "none";
+document.getElementById('delNameDef').value = "";
+
+
+
+// --- 列出所有冊名按鈕邏輯 ---
+async function listKeyNames(){
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAllKeys();
+        request.onsuccess = (event) => {
+            const keys = event.target.result;
+            if (keys.length === 0) {
+                alert("資料庫中沒有任何冊名。");
+                return;
+            }
+            //alert("目前資料庫中的冊名：\n" + keys.join("\n"));
+            document.getElementById('encryptedContent').value = "目前資料庫中的冊名：\n" + keys.join("\n");
+            updateStatus(`已列出 ${keys.length} 個冊名`, 'success');
+        };
+        request.onerror = (e) => updateStatus("讀取冊名失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}   
     </script>
 </body>
 </html>
