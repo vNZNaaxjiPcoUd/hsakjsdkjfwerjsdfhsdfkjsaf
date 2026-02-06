@@ -310,6 +310,7 @@
         <div class="tabs">
             <button class="tab-button" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
+            <button class="tab-button" onclick="saveDBBtnHandler()">存</button>
             <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰">
         </div>
 
@@ -500,6 +501,11 @@ function openTab(evt, tabName) {
     document.getElementById(tabName).classList.add("active");
     if (evt && evt.currentTarget) {
         evt.currentTarget.className += " active";
+    }
+    if(tabName === 'TabA'){
+        keyInput.style.display = "block";
+    }else{
+        keyInput.style.display = "none";
     }
 }
 
