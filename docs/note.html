@@ -124,8 +124,10 @@
 
     /* 按鈕顏色分類 */
     #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
-    #saveDBBtn, #readDBBtn { background-color: #9c27b0; }
+    #saveDBBtn, #readDBBtn{ background-color: #9c27b0; }
     #exportBtn, #importBtnTrigger { background-color: #FF5722; }
+    #saveDBBtn2{ background-color: #9c27b0; color: white;}
+    
     .external-link-btn { background-color: #607d8b; }
 
     #TabA button:hover { opacity: 0.9; }
@@ -310,7 +312,7 @@
         <div class="tabs">
             <button class="tab-button" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
-            <button class="tab-button" onclick="saveDBBtnHandler()">存</button>
+            <button class="tab-button" id="saveDBBtn2" onclick="saveDBBtnHandler()">存</button>
             <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰">
         </div>
 
@@ -915,10 +917,19 @@ document.addEventListener('DOMContentLoaded', () => {
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     addEditableBlock();
     initDB();
+    
+    // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
     const currentKey = getDynamicKeyName();
     document.title = currentKey; 
     updateStatus(`使用 ID: ${currentKey}`, 'info');
+    
+    //開始時，讀取 DB 內容（如果有的話）
     readDBBtnHandler();
+
+    /*// 定時存入 DB（每 5 分鐘）
+    setInterval(() => {
+        saveDBBtnHandler();
+    }, 5 * 60 * 1000);  */
 });
 
     </script>
