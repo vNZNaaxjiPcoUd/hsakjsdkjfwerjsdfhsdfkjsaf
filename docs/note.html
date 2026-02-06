@@ -742,7 +742,8 @@ function saveDBBtnHandler() {
 
 document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
 
-document.getElementById('TabB').addEventListener('keydown', function(e) {
+//document.getElementById('TabB').addEventListener('keydown', function(e) {
+subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
         e.preventDefault();
@@ -753,6 +754,50 @@ document.getElementById('TabB').addEventListener('keydown', function(e) {
     if (document.getElementById('saveDBBtn2').style.color === "black") {
         document.getElementById('saveDBBtn2').style.color = "white";  
     }
+    if (e.key === 'Tab') {
+        const activeDiv = document.querySelector('.sub-tab-content.active');
+        if (!activeDiv) {
+            console.log('沒有找到 active 的 .sub-tab-content');
+            return;
+        }
+        const activeContent = activeDiv.querySelector('textarea.editable-text');
+
+        if (activeContent) {
+            //console.log('找到了：', activeContent);
+            // 可以在這裡對該元素進行操作
+            // 1. 阻止瀏覽器預設的切換欄位行為
+            e.preventDefault();
+
+            // 2. 獲取當前游標的位置
+            const start = activeContent.selectionStart;
+            const end = activeContent.selectionEnd;
+            //console.log("游標位置：", start, end);
+
+            // 3. 設定要插入的字元（可以改為兩個或四個空格 "  "）
+            const tabChar = "\t"; 
+
+            // 4. 更新文字框內容：前半段 + Tab + 後半段
+            nowContent = activeContent.value;
+            if(nowContent === undefined) {
+                nowContent = "";
+                console.log("內容為 undefined，已設為空字串");  
+            }
+
+            //console.log("原內容：", nowContent);
+            activeContent.value = nowContent.substring(0, start) + 
+                        tabChar + 
+                        nowContent.substring(end);
+
+            // 5. 將游標移動到插入的 Tab 之後（否則游標會跳到最後面）
+            activeContent.selectionStart = activeContent.selectionEnd = start + tabChar.length;       
+            //console.log("更新後內容：", activeContent.value);                          
+        } else {
+            console.log('目前沒有 active 的項目');
+        }
+
+    }
+
+    
 });
 
 // 按鈕事件 - 讀取 DB
