@@ -736,6 +736,8 @@ function saveDBBtnHandler() {
     const content = encryptedContentArea.value;
     if (!content) { updateStatus("無內容可存", 'error'); return; }
     saveDataToDB(content);
+    document.getElementById('saveDBBtn2').style.color = "black";
+    //console.log("已觸發存檔功能");
 }   
 
 document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
@@ -746,6 +748,10 @@ document.getElementById('TabB').addEventListener('keydown', function(e) {
         e.preventDefault();
         saveDBBtnHandler();
         //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+    if (document.getElementById('saveDBBtn2').style.color === "black") {
+        document.getElementById('saveDBBtn2').style.color = "white";  
     }
 });
 
@@ -930,6 +936,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         saveDBBtnHandler();
     }, 5 * 60 * 1000);  */
+
+    // 文字已存檔
+    document.getElementById('saveDBBtn2').style.color = "black";
 });
 
     </script>
