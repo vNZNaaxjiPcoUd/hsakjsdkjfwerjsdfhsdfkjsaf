@@ -1387,7 +1387,7 @@ async function saveBookToDB() {
         const contentStr = CryptoJS.AES.encrypt(JSON.stringify(bookData), DBKEY).toString();
         //console.log("要存入 DB 的加密內容:", contentStr);
         const request = store.put({ id: keyName, content: contentStr, timestamp: new Date() });
-        request.onsuccess = () => updateStatus(`已存入 bookData ${keyName}`, 'success');
+        request.onsuccess = () => { updateStatus(`已存入 bookData ${keyName}`, 'success');document.title = bookData.Name; }
         request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
     } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }
@@ -1459,39 +1459,39 @@ document.addEventListener('DOMContentLoaded', async () => {
             await getAESKey();
             await saveBookToDB();
         }
-    }
-    // console.log("當前 Key 名稱:", bookData.Name);
-
-    // --- 初始化時，先將存取按鈕設為需要儲存狀態（白色） ---
-    document.getElementById('saveDBBtn2').style.color = "white";
-    document.getElementById('getDBBtn2').style.color = "white"; 
-    // --- 下載資料 ---
-
-
-    openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
-    if(res.status !== "success") {
-        addEditableBlock("封面", "");
-    }
-    //initDB();
     
-    // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
-    //const currentKey = getDynamicKeyName();
-    document.title = bookData.Name; 
-    document.getElementById('bookTabBtn').value = bookData.Name;
-    //updateStatus(`使用 ID: ${currentKey}`, 'info');
-    
-    //開始時，讀取 DB 內容（如果有的話）
-    //readDBBtnHandler();
+        // console.log("當前 Key 名稱:", bookData.Name);
 
-    // 從上取
-    //document.getElementById('TabB').style.display = "none";
+        // --- 初始化時，先將存取按鈕設為需要儲存狀態（白色） ---
+        document.getElementById('saveDBBtn2').style.color = "white";
+        document.getElementById('getDBBtn2').style.color = "white"; 
+        // --- 下載資料 ---
 
-    //document.getElementById('TabB').style.display = "block";
 
-    /*// 定時存入 DB（每 5 分鐘）
-    setInterval(() => {
-        saveDBBtnHandler();
-    }, 5 * 60 * 1000);  */
+        openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
+        if(res.status !== "success") {
+            addEditableBlock("封面", "");
+        }
+        //initDB();
+        
+        // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
+        //const currentKey = getDynamicKeyName();
+        document.title = bookData.Name; 
+        //updateStatus(`使用 ID: ${currentKey}`, 'info');
+        
+        //開始時，讀取 DB 內容（如果有的話）
+        //readDBBtnHandler();
+
+        // 從上取
+        //document.getElementById('TabB').style.display = "none";
+
+        //document.getElementById('TabB').style.display = "block";
+
+        /*// 定時存入 DB（每 5 分鐘）
+        setInterval(() => {
+            saveDBBtnHandler();
+        }, 5 * 60 * 1000);  */
+    }
 });
 
 // 離開提醒
