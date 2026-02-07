@@ -17,10 +17,6 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f9;
     }
-    button {
-        background-color: blue;
-        color: white;
-    }
 
     .main-container {
         display: flex;
@@ -130,7 +126,7 @@
     #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
     #saveDBBtn, #readDBBtn{ background-color: #9c27b0; }
     #exportBtn, #importBtnTrigger { background-color: #FF5722; }
-    #saveDBBtn2{ background-color: #9c27b0; color: white;}
+    #saveDBBtn2, #getDBBtn2, #newPageBtn{ background-color: #9c27b0; color: white;}
     
     .external-link-btn { background-color: #607d8b; }
 
@@ -347,6 +343,7 @@
     <div class="main-container">
         <div class="tabs">
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
+            <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
@@ -375,10 +372,6 @@
                 <button id="delBtn" onclick = "deleteKeyName()">刪</button>
                 <input type="text" id="delNameDef" value="" placeholder="刪冊名稱">
 
-                <button id="saveAPI" onclick = "saveToAPI()">上存</button>
-                <button id="getAPI" onclick = "getFromAPI()">上取</button>
-                <button id="getBookName" onclick = "getBookName()">書名</button>
-                <button id="getAPIKey" onclick = "getAPIKey()">API密鑰</button>
             </div>
 
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
@@ -1118,7 +1111,7 @@ async function saveToAPI() {
     if (res.status === "success") {
         updateStatus(`已上傳 ${keyName}`, 'success');
         // 改變顏色，示文字已存檔
-        document.getElementById('saveDBBtn2').style.color = "black";
+        document.getElementById('saveDBBtn2').style.color = "white";
         updateStatus(`已上傳，Key: ${keyName}`, 'success');
     } else {
         updateStatus(`API 上傳失敗: ${res.message}`, 'error');
@@ -1157,7 +1150,7 @@ async function getFromAPI() {
             //console.log("解密成功，內容已載入至筆記分頁");   
             //console.log("解密 API 讀取內容的結果:", ret);
             // 改變顏色，示文字已存檔
-            document.getElementById('getDBBtn2').style.color = "black";
+            document.getElementById('getDBBtn2').style.color = "white";
             updateStatus(`已讀取 Key: ${keyName}`, 'success');
         }
     } else {
