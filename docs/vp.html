@@ -343,9 +343,9 @@
     <div class="main-container">
         <div class="tabs">
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
-            <button class="tab-button" onclick="openTab(event, 'TabA')">密</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
+            <button class="tab-button" onclick="openTab(event, 'TabA')">密</button>
         </div>
 
         <div id="TabA" class="tab-content">
@@ -780,9 +780,13 @@ function saveDBBtnHandler() {
 
 document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
 
+
+// 編輯區鍵盤事件 - Ctrl+S 儲存
 //document.getElementById('TabB').addEventListener('keydown', function(e) {
 subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
+
+    // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
         e.preventDefault();
         //saveDBBtnHandler();
@@ -790,9 +794,17 @@ subTabContentContainer.addEventListener('keydown', function(e) {
         //console.log("Ctrl+S 偵測到，已觸發存檔功能");
         return;
     }
+
+    // 有修改過內容後，按任意鍵都會讓存檔按鈕變色提示需要儲存
     if (document.getElementById('saveDBBtn2').style.color === "black") {
         document.getElementById('saveDBBtn2').style.color = "white";  
+
     }
+    if(document.getElementById('getDBBtn2').style.color === "black"){
+        document.getElementById('getDBBtn2').style.color = "white";  
+    }    
+
+    // --- Tab 鍵插入 Tab 字元邏輯 ---
     if (e.key === 'Tab') {
         const activeDiv = document.querySelector('.sub-tab-content.active');
         if (!activeDiv) {
@@ -1095,7 +1107,7 @@ async function TestAllApi() {
 
 //上存
 async function saveToAPI() {
-    document.getElementById('saveDBBtn2').style.color = "red";
+    
     if(!bookData.APIKey) {
         getAPIKey();
     }
@@ -1104,36 +1116,49 @@ async function saveToAPI() {
         getAESKey();
     }   
 
-    if(!encData()) return;
-    const content = encryptedContentArea.value;
+    let res = null;
+    document.getElementById('saveDBBtn2').style.color = "red";
+    TabB.style.display = "none";
 
-    if (!content.trim()) { updateStatus("筆記無內容可上傳", 'error'); return; }
-    const keyName = getDynamicKeyName();
-    let res=await doSave(keyName+bookData.Name, content);
-    if (res.status === "success") {
-        updateStatus(`已上傳 ${keyName}`, 'success');
-        // 改變顏色，示文字已存檔
-        await saveBookToDB();
-        document.getElementById('saveDBBtn2').style.color = "white";
-        updateStatus(`已上傳，Key: ${keyName}`, 'success');
-    } else {
-        updateStatus(`API 上傳失敗: ${res.message}`, 'error');
-        cleankeyData();
+    if(!encData()) {
+        cleanAESKey();
+        updateStatus(`加密失敗，請確認 AES 密鑰是否正確`, 'error');
+        res = { status: "error", message: "加密失敗" };
+    }else{
+        //console.log("加密成功，準備上傳 API");
+
+        const content = encryptedContentArea.value;
+
+        if (!content.trim()) { updateStatus("筆記無內容可上傳", 'error'); return; }
+        const keyName = getDynamicKeyName();
+        let res=await doSave(keyName+bookData.Name, content);
+        if (res.status === "success") {
+            updateStatus(`已上傳 ${keyName}`, 'success');
+            // 改變顏色，示文字已存檔
+            await saveBookToDB();        
+            updateStatus(`已上傳，Key: ${keyName}`, 'success');
+        } else {
+            updateStatus(`API 上傳失敗: ${res.message}`, 'error');
+            cleanAPIKey();
+        }
     }
+    TabB.style.display = "flex";
+    document.getElementById('saveDBBtn2').style.color = "black";
     return res;
 
 }
 
 //上取
 async function getFromAPI() {
-    document.getElementById('getDBBtn2').style.color = "red";
+    
     if(!bookData.APIKey) {
         getAPIKey();
     } 
     if(!bookData.aesKey) {
         getAESKey();
     }   
-
+    document.getElementById('getDBBtn2').style.color = "red";
+    TabB.style.display = "none";
 
     const keyName = getDynamicKeyName();
     let res = await doGet(keyName+bookData.Name);
@@ -1149,20 +1174,28 @@ async function getFromAPI() {
             updateStatus(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
             res.status = "error";
             res.message = "解密失敗";
+            cleanAESKey();
         }else{
             //console.log("解密成功，內容已載入至筆記分頁");   
             //console.log("解密 API 讀取內容的結果:", ret);
             // 改變顏色，示文字已存檔
-            document.getElementById('getDBBtn2').style.color = "white";
-            await saveBookToDB();            
-            updateStatus(`已讀取 Key: ${keyName}`, 'success');
+            
+            const ret = await saveBookToDB();      
+            if(!ret) {
+                updateStatus(`儲存到本地 DB 失敗`, 'error');
+            }else{
+                updateStatus(`已讀取 Key: ${keyName}`, 'success');
+            }
         }
     } else {
         updateStatus(`API 讀取失敗: ${res.message}`, 'error');
     }
     if (res.status !== "success") {
-        cleankeyData();
+        cleanAPIKey();
     }
+
+    TabB.style.display = "flex";
+    document.getElementById('getDBBtn2').style.color = "black";
     return res;
 }
 
@@ -1189,21 +1222,39 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 };
 
 // Get API Key  
-function getAPIKey() {
+async function getAPIKey() {
     const apiKey = prompt("請輸入 API 密鑰:");
     if (apiKey) {
         bookData.APIKey = apiKey;
         updateStatus("API 密鑰已更新", 'success');
+        const B = saveBookToDB();
+        B.then((data) => {
+        // 這裡對應 resolve
+            console.log("收到資料:", data);
+        })
+        .catch((error) => {
+        // 這裡對應 reject
+            console.error("抓到錯誤:", error);
+        });
     } else {
         updateStatus("API 密鑰未更改", 'info');
     }
 };
 
-function getAESKey() {
+async function getAESKey() {
     const aesKey = prompt("請輸入 AES 密鑰:");
     if (aesKey) {
         bookData.aesKey = aesKey;
         updateStatus("AES 密鑰已更新", 'success');
+        const B = saveBookToDB();
+        B.then((data) => {
+        // 這裡對應 resolve
+            console.log("收到資料:", data);
+        })
+        .catch((error) => {
+        // 這裡對應 reject
+            console.error("抓到錯誤:", error);
+        });
     } else {
         updateStatus("AES 密鑰未更改", 'info');
         bookData.aesKey = bookData.APIKey;
@@ -1223,6 +1274,18 @@ function cleankeyData() {
     bookData.aesKey = "";
     updateStatus("密鑰已清除，請重新設定", 'info');
 }
+
+// clean aesKey
+function cleanAESKey() {
+    bookData.aesKey = "";
+    updateStatus("AES 密鑰已清除，請重新設定", 'info');
+}
+
+// clean APIKey 
+function cleanAPIKey() {
+    bookData.APIKey = "";
+    updateStatus("API 密鑰已清除，請重新設定", 'info');
+}   
 
 keyInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
@@ -1289,7 +1352,7 @@ async function saveBookToDB() {
         const store = transaction.objectStore(BOOKDBNAME);
         const keyName = bookData.Name || "book_Default";
         //console.log("準備存入 DB 的內容:", { APIKey: bookData.APIKey, aesKey: bookData.aesKey });
-        const contentStr = CryptoJS.AES.encrypt(JSON.stringify({ APIKey: bookData.APIKey, aesKey: bookData.aesKey }), DBKEY).toString();
+        const contentStr = CryptoJS.AES.encrypt(JSON.stringify(bookData), DBKEY).toString();
         //console.log("要存入 DB 的加密內容:", contentStr);
         const request = store.put({ id: keyName, content: contentStr, timestamp: new Date() });
         request.onsuccess = () => updateStatus(`已存入 bookData ${keyName}`, 'success');
@@ -1298,11 +1361,15 @@ async function saveBookToDB() {
 }
 
 async function readBookFromDB() {
+    if(!bookData.Name) {
+        updateStatus("沒有指定冊名，無法讀取", 'error');
+        return null;
+    }
     try {
         const db = await initBookDB();
         const transaction = db.transaction([BOOKDBNAME], "readonly");
         const store = transaction.objectStore(BOOKDBNAME);
-        const keyName = bookData.Name || "book_Default";
+        const keyName = bookData.Name ;
         const request = store.get(keyName);
         // --- 核心修改：回傳並等待一個 Promise ---
         return new Promise((resolve, reject) => {
@@ -1313,12 +1380,15 @@ async function readBookFromDB() {
                     const retV = JSON.parse(decryptedContent);
                     bookData.APIKey = retV.APIKey;
                     bookData.aesKey = retV.aesKey;
+                    bookData.info = retV.info;
+                    bookData.Name = keyName;
                     updateStatus(`已讀取 bookData ${keyName}`, 'success');
                     //console.log("讀取內容:", encryptedContentArea.value);
                     resolve(result.content); // 成功讀取，通知外部已完成
                 } else {
                     updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
-                    resolve(null); // 找不到資料也算完成任務，但結果為 null
+                    const errorMsg = "讀取失敗: " + `找不到 [${keyName}] 的資料`;
+                    reject(errorMsg); // 找不到資料，但結果為 null
                 }
             };
 
@@ -1342,19 +1412,33 @@ async function readBookFromDB() {
 document.addEventListener('DOMContentLoaded', async () => {
 
     const result = window.location.search.slice(1);
+    var res = {status: "error", message: "未指定冊名"};
     if(!result){
         getBookName();
         return;
     }else{
         bookData.Name = result;
-        await readBookFromDB();
+        try {
+            await readBookFromDB(); // 嘗試讀取 DB 內容，如果成功會更新 bookData 的 APIKey 和 aesKey
+            res = await getFromAPI();
+        } catch (error) {
+            console.error("讀取 DB 發生錯誤:", error);
+            await getAPIKey();
+            await getAESKey();
+            await saveBookToDB();
+        }
     }
     // console.log("當前 Key 名稱:", bookData.Name);
-    let res = await getFromAPI();
+
+    // --- 初始化時，先將存取按鈕設為需要儲存狀態（白色） ---
+    document.getElementById('saveDBBtn2').style.color = "white";
+    document.getElementById('getDBBtn2').style.color = "white"; 
+    // --- 下載資料 ---
+
 
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
     if(res.status !== "success") {
-        addEditableBlock("封面", "在此輸入筆記...");
+        addEditableBlock("封面", "");
     }
     //initDB();
     
@@ -1376,9 +1460,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     setInterval(() => {
         saveDBBtnHandler();
     }, 5 * 60 * 1000);  */
-
-    
 });
+
+// 離開提醒
+window.addEventListener('beforeunload', (e) => {
+    if (document.getElementById('saveDBBtn2').style.color === "white") {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
 
     </script>
 </body>
