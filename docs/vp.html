@@ -343,10 +343,9 @@
     <div class="main-container">
         <div class="tabs">
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
-            <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
+            <button class="tab-button" onclick="openTab(event, 'TabA')">密</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
-            <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
         </div>
 
         <div id="TabA" class="tab-content">
@@ -371,6 +370,8 @@
                 <button id="listBtn" onclick = "listKeyNames()">列</button>
                 <button id="delBtn" onclick = "deleteKeyName()">刪</button>
                 <input type="text" id="delNameDef" value="" placeholder="刪冊名稱">
+
+                <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
 
             </div>
 
