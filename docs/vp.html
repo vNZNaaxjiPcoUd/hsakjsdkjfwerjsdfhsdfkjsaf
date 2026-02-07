@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="manifest" href="https://h.jwint.net/manifest.note.json">
+    <link rel="manifest" href="https://h.jwint.net/manifest.vp.json">
     <title>Note</title>
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
 
 <style>
     html, body {
@@ -349,6 +349,7 @@
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" onclick="getFromAPI()">取</button>
+            <button class="tab-button" onclick="window.location.href='https://h.jwint.net/vp'">新</button>
         </div>
 
         <div id="TabA" class="tab-content">
@@ -1111,9 +1112,18 @@ async function saveToAPI() {
 
     if (!content.trim()) { updateStatus("筆記無內容可上傳", 'error'); return; }
     const keyName = getDynamicKeyName();
-    await doSave(keyName+bookData.Name, content);
-    document.getElementById('saveDBBtn2').style.color = "black";
-    updateStatus(`已上傳，Key: ${keyName}`, 'success');
+    let res=await doSave(keyName+bookData.Name, content);
+    if (res.status === "success") {
+        updateStatus(`已上傳 ${keyName}`, 'success');
+        // 改變顏色，示文字已存檔
+        document.getElementById('saveDBBtn2').style.color = "black";
+        updateStatus(`已上傳，Key: ${keyName}`, 'success');
+    } else {
+        updateStatus(`API 上傳失敗: ${res.message}`, 'error');
+        cleankeyData();
+    }
+    return res;
+
 }
 
 //上取
@@ -1128,7 +1138,7 @@ async function getFromAPI() {
 
 
     const keyName = getDynamicKeyName();
-    const res = await doGet(keyName+bookData.Name);
+    let res = await doGet(keyName+bookData.Name);
     //console.log("API 讀取結果:", res);
     if (res.status === "success" && res.value) {
         //setContentToTabB(res.data);
@@ -1137,13 +1147,24 @@ async function getFromAPI() {
         //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
         updateStatus(`已讀取 ${keyName}`, 'success');
         let ret = decData();  
-        //console.log("解密 API 讀取內容的結果:", ret);
-        // 改變顏色，示文字已存檔
-        document.getElementById('saveDBBtn2').style.color = "black";
-        updateStatus(`已讀取 Key: ${keyName}`, 'success');
+        if(!ret){
+            updateStatus(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
+            res.status = "error";
+            res.message = "解密失敗";
+        }else{
+            //console.log("解密成功，內容已載入至筆記分頁");   
+            //console.log("解密 API 讀取內容的結果:", ret);
+            // 改變顏色，示文字已存檔
+            document.getElementById('saveDBBtn2').style.color = "black";
+            updateStatus(`已讀取 Key: ${keyName}`, 'success');
+        }
     } else {
         updateStatus(`API 讀取失敗: ${res.message}`, 'error');
     }
+    if (res.status !== "success") {
+        cleankeyData();
+    }
+    return res;
 }
 
 
@@ -1196,8 +1217,15 @@ let bookData = {
     aesKey: "",
     info: "這是一些額外的資訊"
 }
+
+function cleankeyData() {
+    bookData.APIKey = "";
+    bookData.aesKey = "";
+    updateStatus("密鑰已清除，請重新設定", 'info');
+}
+
 // --- 初始化 ---
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
 
     const result = window.location.search.slice(1);
     if(!result){
@@ -1207,9 +1235,12 @@ document.addEventListener('DOMContentLoaded', () => {
         bookData.Name = result;
     }
     // console.log("當前 Key 名稱:", bookData.Name);
+    let res = await getFromAPI();
 
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
-    addEditableBlock();
+    if(res.status !== "success") {
+        addEditableBlock("封面", "在此輸入筆記...");
+    }
     //initDB();
     
     // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
@@ -1222,7 +1253,9 @@ document.addEventListener('DOMContentLoaded', () => {
     //readDBBtnHandler();
 
     // 從上取
-    getFromAPI();
+    //document.getElementById('TabB').style.display = "none";
+
+    //document.getElementById('TabB').style.display = "block";
 
     /*// 定時存入 DB（每 5 分鐘）
     setInterval(() => {
