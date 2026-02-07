@@ -1112,6 +1112,7 @@ async function saveToAPI() {
     if (res.status === "success") {
         updateStatus(`已上傳 ${keyName}`, 'success');
         // 改變顏色，示文字已存檔
+        await saveBookToDB();
         document.getElementById('saveDBBtn2').style.color = "white";
         updateStatus(`已上傳，Key: ${keyName}`, 'success');
     } else {
@@ -1152,6 +1153,7 @@ async function getFromAPI() {
             //console.log("解密 API 讀取內容的結果:", ret);
             // 改變顏色，示文字已存檔
             document.getElementById('getDBBtn2').style.color = "white";
+            await saveBookToDB();            
             updateStatus(`已讀取 Key: ${keyName}`, 'success');
         }
     } else {
@@ -1221,6 +1223,90 @@ function cleankeyData() {
     updateStatus("密鑰已清除，請重新設定", 'info');
 }
 
+const BOOKDBNAME = "BOOKDATAINFO";
+const DBKEY = "Sy8ai12PJDfwDD4EEsdeX9DmHWabqZRCMJEInt1pQh";
+const DB_NAME2 = "BOOKDATAINFODB";
+
+function initBookDB() {
+    return new Promise((resolve, reject) => {
+        if (dbInstance) {
+            resolve(dbInstance);
+            return;
+        }
+        const request = indexedDB.open(DB_NAME2, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(BOOKDBNAME)) {
+                db.createObjectStore(BOOKDBNAME, { keyPath: "id" });
+            }
+        };
+        request.onsuccess = (event) => {
+            dbInstance = event.target.result;
+            resolve(dbInstance);
+        };
+        request.onerror = (event) => {
+            console.error("IndexedDB error:", event.target.errorCode);
+            reject("資料庫開啟失敗");
+        };
+    });
+}
+
+async function saveBookToDB() {
+    try {
+        const db = await initBookDB();
+        const transaction = db.transaction([BOOKDBNAME], "readwrite");
+        const store = transaction.objectStore(BOOKDBNAME);
+        const keyName = bookData.Name || "book_Default";
+        //console.log("準備存入 DB 的內容:", { APIKey: bookData.APIKey, aesKey: bookData.aesKey });
+        const contentStr = CryptoJS.AES.encrypt(JSON.stringify({ APIKey: bookData.APIKey, aesKey: bookData.aesKey }), DBKEY).toString();
+        //console.log("要存入 DB 的加密內容:", contentStr);
+        const request = store.put({ id: keyName, content: contentStr, timestamp: new Date() });
+        request.onsuccess = () => updateStatus(`已存入 ${keyName}`, 'success');
+        request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}
+
+async function readBookFromDB() {
+    try {
+        const db = await initBookDB();
+        const transaction = db.transaction([BOOKDBNAME], "readonly");
+        const store = transaction.objectStore(BOOKDBNAME);
+        const keyName = bookData.Name || "book_Default";
+        const request = store.get(keyName);
+        // --- 核心修改：回傳並等待一個 Promise ---
+        return new Promise((resolve, reject) => {
+            request.onsuccess = (event) => {
+                const result = event.target.result;
+                if (result && result.content) {
+                    const decryptedContent = CryptoJS.AES.decrypt(result.content, DBKEY).toString(CryptoJS.enc.Utf8);
+                    const retV = JSON.parse(decryptedContent);
+                    bookData.APIKey = retV.APIKey;
+                    bookData.aesKey = retV.aesKey;
+                    updateStatus(`已讀取 ${keyName}`, 'success');
+                    //console.log("讀取內容:", encryptedContentArea.value);
+                    resolve(result.content); // 成功讀取，通知外部已完成
+                } else {
+                    updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
+                    resolve(null); // 找不到資料也算完成任務，但結果為 null
+                }
+            };
+
+            request.onerror = (e) => {
+                const errorMsg = "讀取失敗: " + e.target.error;
+                updateStatus(errorMsg, 'error');
+                reject(errorMsg); // 發生錯誤，通知外部失敗
+            };
+        });
+        // ---------------------------------------
+
+    } catch (err) {
+        updateStatus("DB 錯誤: " + err, 'error');
+        throw err; // 丟出錯誤讓外部 catch
+    }
+}
+
+
+
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -1230,6 +1316,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }else{
         bookData.Name = result;
+        await readBookFromDB();
     }
     // console.log("當前 Key 名稱:", bookData.Name);
     let res = await getFromAPI();
