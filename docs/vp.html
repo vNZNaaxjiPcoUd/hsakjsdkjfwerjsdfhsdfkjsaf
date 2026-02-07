@@ -18,8 +18,8 @@
         background-color: #f4f4f9;
     }
     button {
-        background-color: darkkhaki;
-        color: black;
+        background-color: blue;
+        color: white;
     }
 
     .main-container {
@@ -348,8 +348,8 @@
         <div class="tabs">
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
-            <button class="tab-button" onclick="getFromAPI()">取</button>
-            <button class="tab-button" onclick="window.location.href='./vp.html'">新</button>
+            <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
+            <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
         </div>
 
         <div id="TabA" class="tab-content">
@@ -790,7 +790,8 @@ subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
         e.preventDefault();
-        saveDBBtnHandler();
+        //saveDBBtnHandler();
+        saveToAPI();
         //console.log("Ctrl+S 偵測到，已觸發存檔功能");
         return;
     }
@@ -1099,6 +1100,7 @@ async function TestAllApi() {
 
 //上存
 async function saveToAPI() {
+    document.getElementById('saveDBBtn2').style.color = "red";
     if(!bookData.APIKey) {
         getAPIKey();
     }
@@ -1128,7 +1130,7 @@ async function saveToAPI() {
 
 //上取
 async function getFromAPI() {
-    
+    document.getElementById('getDBBtn2').style.color = "red";
     if(!bookData.APIKey) {
         getAPIKey();
     } 
@@ -1155,7 +1157,7 @@ async function getFromAPI() {
             //console.log("解密成功，內容已載入至筆記分頁");   
             //console.log("解密 API 讀取內容的結果:", ret);
             // 改變顏色，示文字已存檔
-            document.getElementById('saveDBBtn2').style.color = "black";
+            document.getElementById('getDBBtn2').style.color = "black";
             updateStatus(`已讀取 Key: ${keyName}`, 'success');
         }
     } else {
@@ -1207,6 +1209,7 @@ function getAESKey() {
         updateStatus("AES 密鑰已更新", 'success');
     } else {
         updateStatus("AES 密鑰未更改", 'info');
+        bookData.aesKey = bookData.APIKey;
     }
 };
 
