@@ -350,7 +350,8 @@
 
         <div id="TabA" class="tab-content">
             <div class="control-row">
-                <input type="password" id="aesKey" value="OK GO!!" placeholder="輸入 AES 密鑰">
+                <input type="password" id="apiKey" value="" placeholder="輸入 雲 密鑰">
+                <input type="password" id="aesKey" value="" placeholder="輸入 文件 密鑰">
             </div>
             
             <div class="control-row">
@@ -1223,6 +1224,36 @@ function cleankeyData() {
     updateStatus("密鑰已清除，請重新設定", 'info');
 }
 
+keyInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            bookData.aesKey = this.value.trim();
+            if(bookData.aesKey === "") {
+                updateStatus("AES 密鑰不可為空，請重新輸入", 'error');
+                return; 
+            }else{
+                updateStatus("AES 密鑰已更新", 'success');
+                saveBookToDB();
+            }
+            this.value = "";
+        }
+    });
+
+document.getElementById("apiKey").addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            bookData.APIKey = this.value.trim();
+            if(bookData.APIKey === "") {
+                updateStatus("API 密鑰不可為空，請重新輸入", 'error');
+                return; 
+            }else{
+                updateStatus("API 密鑰已更新", 'success');
+                saveBookToDB();
+            }
+            this.value = "";
+        }
+    });
+
 const BOOKDBNAME = "BOOKDATAINFO";
 const DBKEY = "Sy8ai12PJDfwDD4EEsdeX9DmHWabqZRCMJEInt1pQh";
 const DB_NAME2 = "BOOKDATAINFODB";
@@ -1261,7 +1292,7 @@ async function saveBookToDB() {
         const contentStr = CryptoJS.AES.encrypt(JSON.stringify({ APIKey: bookData.APIKey, aesKey: bookData.aesKey }), DBKEY).toString();
         //console.log("要存入 DB 的加密內容:", contentStr);
         const request = store.put({ id: keyName, content: contentStr, timestamp: new Date() });
-        request.onsuccess = () => updateStatus(`已存入 ${keyName}`, 'success');
+        request.onsuccess = () => updateStatus(`已存入 bookData ${keyName}`, 'success');
         request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
     } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }
@@ -1282,7 +1313,7 @@ async function readBookFromDB() {
                     const retV = JSON.parse(decryptedContent);
                     bookData.APIKey = retV.APIKey;
                     bookData.aesKey = retV.aesKey;
-                    updateStatus(`已讀取 ${keyName}`, 'success');
+                    updateStatus(`已讀取 bookData ${keyName}`, 'success');
                     //console.log("讀取內容:", encryptedContentArea.value);
                     resolve(result.content); // 成功讀取，通知外部已完成
                 } else {
