@@ -1392,7 +1392,6 @@ function initBookDB() {
 }
 
 async function saveBookToDB() {
-    return;
     try {
         const db = await initBookDB();
         const transaction = db.transaction([BOOKDBNAME], "readwrite");
@@ -1408,7 +1407,6 @@ async function saveBookToDB() {
 }
 
 async function readBookFromDB() {
-    return;
     if(!bookData.Name) {
         updateStatus("沒有指定冊名，無法讀取", 'error');
         return null;
@@ -1502,7 +1500,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
         //const currentKey = getDynamicKeyName();
         document.title = bookData.Name; 
-        document.getElementById("apiKey").sytle.display = "none";
         //updateStatus(`使用 ID: ${currentKey}`, 'info');
         
         //開始時，讀取 DB 內容（如果有的話）
