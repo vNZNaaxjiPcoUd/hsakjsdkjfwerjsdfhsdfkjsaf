@@ -384,7 +384,7 @@
             <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
-            <button class="tab-button" id="noshow" >OK THIS IS NO SHOW AND HIDE</button>
+            <!--button class="tab-button" id="noshow" >OK THIS IS NO SHOW AND HIDE</button-->
             <button class="tab-button" id="tabAbtn"onclick="openTab(event, 'TabA')">密</button>
         </div>
 
@@ -586,6 +586,8 @@ function openTab(evt, tabName) {
     }else{
         keyInput.style.display = "none";
     }
+
+    document.getElementById("apiKey").style.display = "none";
 }
 
 // --- 子分頁切換與編輯邏輯 ---
@@ -1276,11 +1278,11 @@ async function getAPIKey() {
         const B = saveBookToDB();
         B.then((data) => {
         // 這裡對應 resolve
-            console.log("收到資料:", data);
+            //console.log("收到資料:", data);
         })
         .catch((error) => {
         // 這裡對應 reject
-            console.error("抓到錯誤:", error);
+            //console.error("抓到錯誤:", error);
         });
     } else {
         updateStatus("雲密碼未更改", 'info');
@@ -1295,11 +1297,11 @@ async function getAESKey() {
         const B = saveBookToDB();
         B.then((data) => {
         // 這裡對應 resolve
-            console.log("收到資料:", data);
+            //console.log("收到資料:", data);
         })
         .catch((error) => {
         // 這裡對應 reject
-            console.error("抓到錯誤:", error);
+            //console.error("抓到錯誤:", error);
         });
     } else {
         updateStatus("書本密碼未更改", 'info');
@@ -1348,6 +1350,7 @@ keyInput.addEventListener('keydown', function(e) {
         }
     });
 
+    
 document.getElementById("apiKey").addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -1502,7 +1505,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
         //const currentKey = getDynamicKeyName();
         document.title = bookData.Name; 
-        document.getElementById("apiKey").sytle.display = "none";
+        document.getElementById("apiKey").style.display = "none";
         //updateStatus(`使用 ID: ${currentKey}`, 'info');
         
         //開始時，讀取 DB 內容（如果有的話）
