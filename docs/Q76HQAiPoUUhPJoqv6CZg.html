@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+</head>
+<body>
+  <h3>上傳檔案到雲端</h3>
+  <input type="file" id="fileInput" accept="*/*">
+  <button onclick="uploadFile()">開始上傳</button>
+  <p id="status"></p>
+  <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+  <script>
+
+// scriptTest.client.2.html
+
+let APIKey = "";
+const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
+
+function generateToken(key) {
+    while (!APIKey) {
+        APIKey = prompt("請輸入 API Key:", "");
+    }
+    const kNow = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const rawString = APIKey + SALT + kNow + key;
+    return CryptoJS.SHA512(CryptoJS.enc.Utf8.parse(rawString)).toString();
+}
+
+
+function uploadFile() {
+    const fileInput = document.getElementById('fileInput');
+    const status = document.getElementById('status');
+    
+    if (fileInput.files.length === 0) {
+    alert("請先選擇一個檔案");
+    return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+    status.innerText = "讀取檔案中...";
+
+    reader.onload = function(e) {
+    const base64Data = e.target.result;
+    
+    const token = generateToken(file.name);
+
+    const payload = {
+        base64: base64Data,
+        mimeType: file.type,
+        fileName: file.name,
+        token: token
+    };
+
+    status.innerText = "上傳中，請稍候...";
+
+    const scriptURL = "https://script.google.com/macros/s/AKfycbxtRO4WJfBDxizZM7JvBYr-nKC8PI3fFVKxC3HUcHwKL0jRjPrg7Lge2lbcq6AbwNXrPQ/exec";
+    fetch(scriptURL, {
+        method: "POST", 
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.result === "success") {
+        status.innerHTML = `上傳成功！<br><a href="${data.fileUrl}" target="_blank">查看檔案</a>`;
+        } else {
+        status.innerText = "上傳失敗: " + data.message;
+        }
+    })
+    .catch(error => {
+        status.innerText = "錯誤: " + error;
+    });
+    };
+
+    reader.readAsDataURL(file); 
+}
+
+
+
+  </script></body></html>
