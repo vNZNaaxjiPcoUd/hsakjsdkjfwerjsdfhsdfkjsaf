@@ -195,7 +195,7 @@
     .sub-tabs {
         display: flex;
         flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 */
-        flex-grow: 1;
+        /*flex-grow: 1;*/ /* 打開可以讓分頁按鈕區域撐滿剩餘空間，確保按鈕靠左 */
         margin-bottom: -1px; /* 為了配合 border */
     }
 
@@ -381,18 +381,20 @@
 
     <div class="main-container">
         <div class="tabs">
-            <button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">書本</button>
+            <!--button class="tab-button" id="bookTabBtn" onclick="openTab(event, 'TabB')">書本</button-->
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <!--button class="tab-button" id="noshow" >OK THIS IS NO SHOW AND HIDE</button-->
-            <!--button class="tab-button" id="tabAbtn"onclick="openTab(event, 'TabA')">密</button-->
-            <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
+            <button class="tab-button" id="getDBBtn2" onclick="newPassword()">密</button>
+            <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
+            <!--button class="tab-button" id="tabAbtn"onclick="openTab(event, 'TabA')">密文</button-->
+            <!--button class="tab-button" id="newPageBtn" onclick="gotoNewBook()">新</button-->
         </div>
 
         <div id="TabA" class="tab-content">
             <div class="control-row">
                 <input type="password" id="apiKey" value="" placeholder="輸入雲密碼">
-                <input type="password" id="aesKey" value="" placeholder="輸入書本密碼">
+                <input type="password" id="aesKeyBtn" value="" placeholder="輸入書本密碼">
             </div>
             
             <div class="control-row">
@@ -413,7 +415,7 @@
                 <button id="delBtn" onclick = "deleteKeyName()">刪</button>
                 <input type="text" id="delNameDef" value="" placeholder="刪冊名稱">
 
-                <button class="tab-button" id="newPageBtn" onclick="window.location.href='./vp.html'">新</button>
+                <button class="tab-button" id="newPageBtn" onclick="gotoNewBook()">新</button>
 
             </div>
 
@@ -440,7 +442,7 @@
     <script>
 
 // --- 全局變數 ---
-const keyInput = document.getElementById('aesKey');
+const keyInput = document.getElementById('aesKeyBtn');
 const encryptedContentArea = document.getElementById('encryptedContent');
 const subTabNav = document.getElementById('subTabNav'); 
 const subTabContentContainer = document.getElementById('subTabContentContainer');
@@ -830,7 +832,7 @@ function decData(){
         } catch (e) {
             updateStatus("解密發生錯誤。", 'error');
             const r = getAESKey();
-            console.log(r);
+            //console.log(r);
             if(r === false) {
                 //console.log("解密錯誤，已觸發重新輸入密鑰流程C");
                 ret = false;
@@ -1342,6 +1344,52 @@ async function getAPIKey() {
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
+function newPassword() {
+    let aesKey =""; 
+    aesKey = prompt("輸入書本新密碼");
+    if (!aesKey) {
+        updateStatus("書本密碼未更改", 'info');
+        return false;
+    }
+    let confirmKey = prompt("請再次輸入書本新密碼以確認");
+    if (confirmKey !== aesKey) {
+        updateStatus("兩次輸入的密碼不一致，請重新設定", 'error');
+        return false;
+    }
+    if (aesKey.trim() === "") {
+        updateStatus("書本密碼不可為空，請重新設定", 'error');
+        return false;
+    }
+
+
+    bookData.aesKey = aesKey;
+
+    let B = saveBookToDB();
+    B.then((data) => {
+    // 這裡對應 resolve
+        //console.log("收到資料:", data);
+    })
+    .catch((error) => {
+    // 這裡對應 reject
+        console.error("saveBookToDB 抓到錯誤:", error);
+        updateStatus("鍵值無法保存", 'error');
+        return false;
+    });
+    B = saveToAPI();
+    B.then((data) => {
+    // 這裡對應 resolve
+        //console.log("收到資料:", data);
+    })
+    .catch((error) => { 
+        console.error("API 儲存錯誤:", error);
+        updateStatus("保存失敗", 'error');
+        return false;
+    });
+    updateStatus("書本密碼已更新", 'success');
+    return true;
+}
+
+
 function getAESKey() {
     let aesKey =""; 
         aesKey = prompt("請輸入書本密碼:");
@@ -1358,7 +1406,7 @@ function getAESKey() {
                 console.error("抓到錯誤:", error);
             });
         } else if(aesKey === "") {
-                updateStatus("書本密碼未更改", 'info');
+                updateStatus("書本密碼清除", 'info');
                 bookData.aesKey = "";
             }else { //aseKey 為 null，使用者按了取消
                 bookData.aesKey = "";
@@ -1517,13 +1565,19 @@ async function readBookFromDB() {
     }
 }
 
-
+// goto new book
+function gotoNewBook() {
+    window.location.href = './vp.html';
+}   
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', async () => {
 
     const result = window.location.search.slice(1);
-
+    tabs = document.querySelectorAll('tabs');
+    tabs.forEach(tab => {
+        tab.style.display = "none";
+    });
     let res = { status: "error",
         message: "尚未指定冊名"
     };  
@@ -1566,6 +1620,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         //const currentKey = getDynamicKeyName();
         document.title = bookData.Name; 
         document.getElementById("apiKey").style.display = "none";
+        tabs = document.querySelectorAll('tabs');
+        tabs.forEach(tab => {
+            tab.style.display = "block";
+        });
         //updateStatus(`使用 ID: ${currentKey}`, 'info');
         
         //開始時，讀取 DB 內容（如果有的話）
