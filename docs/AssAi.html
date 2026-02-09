@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+	<link rel="manifest" href="/manifest.assai.json">
+    <title>聊天</title>
+    
+    <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* CSS 優化與精簡 */
+        :root {
+            --bg-color: #f2f2f7;
+            --user-msg-bg: #007aff;
+            --user-msg-text: #ffffff;
+            --ai-msg-bg: #ffffff;
+            --ai-msg-text: #000000;
+            --input-area-bg: #f9f9f9;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            height: 97dvh; 
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        #chat-container {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            padding-bottom: 20px;
+            display: flex;
+            flex-direction: column; 
+            /*justify-content: flex-end; */
+            scroll-behavior: smooth;
+        }
+        /*
+        #chat-container > :first-child {
+            margin-top: auto;
+        }*/
+
+        .message {
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 18px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            font-size: 15px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        .user-message {
+            background-color: var(--user-msg-bg);
+            color: var(--user-msg-text);
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: var(--ai-msg-bg);
+            color: var(--ai-msg-text);
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+        }
+        
+        .ai-message.info {
+            background-color: #ffe066;
+            color: #4a4a4a;
+            font-size: 13px;
+            padding: 8px 12px;
+            align-self: center; 
+            border-radius: 12px;
+            max-width: 95%;
+            font-family: monospace; /* 讓列表更整齊 */
+        }
+
+        #input-area {
+            background-color: var(--input-area-bg);
+            border-top: 1px solid #ddd;
+            padding: 8px 10px;
+            display: flex;
+            align-items: flex-end; 
+            gap: 8px;
+            width: 100%;
+            box-sizing: border-box;
+            padding-bottom: env(safe-area-inset-bottom, 10px); 
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            resize: none;
+            font-size: 16px; 
+            min-height: 24px; 
+            max-height: 100px;
+            line-height: 1.4;
+            outline: none;
+            background: #fff;
+        }
+
+        .input-btn {
+            background-color: transparent;
+            color: #007aff;
+            border: none;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+            flex-shrink: 0;
+        }
+
+        .input-btn:hover {
+            background-color: rgba(0,0,0,0.05);
+        }
+        
+        .input-btn:disabled {
+            color: #aaa;
+        }
+
+        .recording {
+            color: #ff3b30;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-container"></div>
+
+    <div id="input-area">
+        <button id="voice-btn" class="input-btn" disabled>🎤</button>
+        <textarea id="user-input" placeholder="訊息..." rows="1"></textarea>
+        <button id="send-btn" class="input-btn">➤</button>
+    </div>
+
+    <script>
+        // --- 設定與全域變數 ---
+        const ENCRYPTED_KEY_HOLDER = "U2FsdGVkX195q7/pYnCceTQn6dFe7ggkz6n74wX1DVwzOmb7itC1BTQ6Y7hvu8dSvXdPLNH6Gd5FvajTUJjWW/lV3YH+lN+ppGMYFYG+HpO11sq1UBX8dXw0ykeB5tW3Ni+4KlBfsS0cPDEeL4U+eJspQEPlwQxccXLc0yc37bs9cYER9SpPccW91ByDCIX73fvb7VmaRMpuMBNIWbooMcZCeWco+NmIfXv/7AB7iK4lrlY6BTsMPHZAhmoPtSHXgs3ETC99uTIgQHq1OVER8nS7MDdSbkisxVu6yAH7jYbmBgF0tEKaVNGYg2GNUl9o0GKM3DkynP8c/9ZTgoO8FSlst4+ZnHplDyvACEpVhyCf/6zwv1fpSuPyVuxgFBa+hzNZf7DS66s1nRcQDf2sdzrHjioeUaQx5Dim2DUrUf6r0kLq4voOjL4oukY1F/06/ZxQ6rdxq6X8JTVOLWEuLaqXhUAC8vvDLgvXpC70ycDeubzINMt51hVuTuRb2GUONqbWXK7c8YFDbsxZLqx4ka192qArVt2gXnmfnCxslVJGr3YmDBexhVwwuLbZVQYkH+cegorC0qKpcWrj5oFL/z9LR7SpMUhk76K/uER1tr2dZ0n65UtXm6IF+dJjUHzYPIhbpwmOw2cQMvj1rFbxHj0dFn1diCXp/y3eTIR6ILPf0HCWgEteDxNXmyb2QIlytCSrL3oEAwPnC99ErGjNuoQCZ76i2AHf9VS8xkHut9Ign4X5d2JAnjmXphNWB1FBCHpt0adIhp/9Liwqrsir8DEcWX1UZVT7DNFuJMQZJxJp7h3iDEWxf1qLrjVsk1hhHh1TrJmlZCjCrmF/nbE1y13uZ5rs4Ei0ibJCBeSkdFfD8j5RGTFLQoIDYIov5ej506jwRXMLuWIHQVtTGbl5SLa80HEkXpC/3YHOuKerYAoYL9GwfeSug5iP7IgKtI2puMRDoLtkb/Fi73JNQYOcHh8DjsxT8YHYoPGD6EeKc9gDcIhd8RVL2NXRSwxFwv14FpXWM3r3qDt6jxDEGG4Ymu+PZ9+h/CCXQX2ZAmapbQsJBeRgATYLbujDsUsYAGcHVQ9cedDoayp89oSi4E00udM0kfaJHxOxDeEVEkK8lw3BhU0VuY7espPAknHbvYonURk7rNdE56JcyeO9Ha+fo5h0sJDwo+ca8HWxrnLNzFgSQAh7p5k/PnFZCkKWWxOXXZXxKuI6fGb99SmQlYScsefaQXtr5oA8lEHYIgKSF0OQq85GLtxfVjjNJAHnuTW1GARgRxz0D7JrkL3Fef8O+X/zH4yeV1T/WwckQzB3kGoPL7ziZWi7w+oTtiJSomioSEUHTwwyiENNq3FHQAJq+TAOvgV2EOO6OHlaTd6QS5cq8DFP7ppHbDLwtDq5ZJ7B/GODX2ZWW5gFWIR9WwMbwe+Ub3lWPLd56xC/641QbmL63JSX80+RXVfTcWqzin4KXlSY7/GFWE2LiBNVlLA4Y1jLcPQ7Ulm8iRX/a+KNaktAezW/Ww2IYHWJhqMeaciLpF6XIq3z/LBkJF+LfVfZ4FcE9VG5Un2iNJLCfKYnO/cw/N3ppsDQqKFMcwDDrOn0sb4FzF9LGpeix+CObIlFjwaaqmqVM5Kr7gJGrlOCpaIroFg9flMu092OlNyncccDjE4g4LpD8Mnyq5nAEzbP7HdttWV7+8pRVoQcyCBJUtBcOmzI4LlibZq0/9CyYCEdKB9VOYgwI2MBo2WYaJ3Amulzi8kJyjXEFaQIwy0zs4jtP9+x9YVcg7Zvd+Zl0clAaV57XMka/fgmqmjOes/DfTdHv6i5zZ3jgc7+f+0XIFA=";
+        const INIT_KEY = "月落";
+        let API_KEY = null; 
+        let API_URL = null; 
+        let SYSTEM_PROMPT = "你是一個有禮貌且樂於助人的助理。用繁體中文回答。盡量加上emoji。盡量用markdown標示。盡量提供網址。盡量回答在200個token以內。";
+        let MODEL = "gemini-2.5-flash-lite";
+        let HISTMAX = 12; // 最大歷史記錄數量
+        let lastAiMessage = "";
+        let hist = [];
+        let dateA = "";
+        let LOCT = "美國佛羅里達州坦帕市 (Tampa, Florida, USA)。";
+
+        // --- IndexedDB 設定 ---
+        const DB_NAME = "ChatHistoryDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "histories";
+        let  KEYA = "GVkX18O2PMYNSlYBMU3+YBbuyUWUSZteTjL63+63l30jZ86";
+
+        // --- DOM 元素 ---
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+
+        // --- 語音變數 ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isRecording = false;
+        let silenceTimeout; 
+        const SILENCE_THRESHOLD = 6000;
+        let shouldRestartVoice = false; 
+
+        // ==========================================
+        // 1. IndexedDB 功能
+        // ==========================================
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: "name" });
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject("DB Open Error");
+            });
+        }
+
+        async function encryptData(data, keyA) {
+            if (keyA === "") return null;
+            // 將資料物件轉換為 JSON 字串，以便加密
+            const jsonData = JSON.stringify(data);
+            const encrypted = CryptoJS.AES.encrypt(jsonData, keyA).toString();
+            return encrypted;
+        }
+
+        async function decryptData(encryptedString, keyA) {
+            if (keyA === "") return null;
+            const decrypted = CryptoJS.AES.decrypt(encryptedString, keyA);
+            // 將解密後的 WordArray 轉換為 UTF-8 字串，再解析為 JSON 物件
+            const originalJson = decrypted.toString(CryptoJS.enc.Utf8);
+            return JSON.parse(originalJson);
+        }
+
+        async function dbSave(name, historyData) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            const saveName = name || "道"; 
+            //store.put({ name: saveName, data: historyData, timestamp: new Date() });
+            const encryptedData = await encryptData(historyData, KEYA);
+            store.put({ name: saveName, data: encryptedData, timestamp: new Date() });
+            return `已儲存為: ${saveName}`;
+        }
+
+        async function dbLoad(name) {
+                    const db = await openDB();
+                    const tx = db.transaction(STORE_NAME, "readonly");
+                    const store = tx.objectStore(STORE_NAME);
+                    return new Promise((resolve, reject) => {
+                        const request = store.get(name);
+                        request.onsuccess = async () => {
+                            if (request.result) {
+                                //resolve(request.result.data);
+                                const decryptedData = await decryptData(request.result.data, KEYA);
+                                resolve(decryptedData);
+                            }
+                            else resolve(null);
+                        };
+                        request.onerror = () => reject("Load Error");
+                    });
+                }
+
+        async function dbList() {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            return new Promise((resolve, reject) => {
+                const request = store.getAllKeys();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject("List Error");
+            });
+        }
+
+        async function dbDel(name) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            store.delete(name);
+            return `已刪除: ${name}`;
+        }
+
+        async function dbDelAll() {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            store.clear();
+            return "已清除所有存檔";
+        }
+
+        // ==========================================
+        // 2. 核心邏輯
+        // ==========================================
+
+        function decryptApiKey(encKey, inKey) {
+            try {
+                const hashKey = CryptoJS.SHA512(inKey).toString(); 
+                const bytes = CryptoJS.AES.decrypt(encKey, hashKey);
+                //const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+                data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                const decryptedText = data.API || "";
+
+                // get other values
+                KEYA = data.KEYA || "";
+
+                return decryptedText.length > 0 ? decryptedText : null;
+            } catch (error) {
+                //displayMessage("JSON.parse 錯誤。", 'ai', true);
+                return null;
+            }
+        }
+        
+        function displayMessage(text, sender, isInfo = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            //messageDiv.textContent = text;
+            messageDiv.innerHTML = text;
+            
+            lastAiMessage = sender === 'user' ? text : lastAiMessage;
+
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('ai-message');
+                if (isInfo) messageDiv.classList.add('info');
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function scrollToBottom() {
+            setTimeout(() => {
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 50);
+        }
+
+        function renderHistory() {
+            chatContainer.innerHTML = ""; 
+            if (!API_KEY) displayMessage("🔒 服務鎖定中。", 'ai', true);
+            else displayMessage("♻️ 畫面已刷新", 'ai', true);
+
+            hist.forEach(item => {
+                const text = item.parts[0].text;
+                const role = item.role === 'model' ? 'ai' : 'user';
+                displayMessage(text, role);
+                lastAiMessage = role === 'user' ? text : lastAiMessage;
+            });
+        }
+
+        function getSpecificHistory(inH) {
+            const A = [];
+            let lastModelMessage = null;
+
+            // 1. 收集所有 role 為 "user" 的訊息
+            for (const message of inH) {
+                if (message.role === "user") {
+                    A.push(message);
+                }
+            }
+
+            // 2. 找出最後一個 role 為 "model" 的訊息
+            // 從後往前遍歷，找到第一個 role 為 "model" 的訊息即為最後一個
+            for (let i = inH.length - 1; i >= 0; i--) {
+                if (inH[i].role === "model") {
+                    lastModelMessage = inH[i];
+                    break; // 找到後即停止
+                }
+            }
+
+            // 3. 如果找到了最後一個 model 訊息，則加入 A 陣列
+            if (lastModelMessage) {
+                A.push(lastModelMessage);
+            }
+            
+            console.log("歷史記錄:", A);
+            return A;
+        }
+
+        async function checkDbPwd(){
+                const data = await dbLoad("VkX18O2PM");
+                let endProm = "";
+                if (! data) { 
+                    return false; 
+                }
+                else { 
+                    hist = data; 
+                    hist.forEach(item => {
+                        const text = item.parts[0].text;
+                        const role = item.role === 'model' ? 'ai' : 'user';
+                        endProm = role === 'ai' ? text : endProm;
+                    });
+                    hist = [];
+                    if(endProm === "" || endProm === "月落") return false;
+
+                    userInput.value = endProm;
+                    //displayMessage(cmd , 'user'); 
+                    await sendMessage();
+                    return true;
+                }
+        }
+
+        async function getGeminiResponse(prompt) {
+            if (!API_KEY) {
+                displayMessage(prompt, 'user');
+                displayMessage("🚨", 'ai', true);
+                shouldRestartVoice = false;
+                return;
+            }
+            
+            displayMessage(prompt, 'user');
+            
+            const loadingId = 'loading-' + Date.now();
+            const loadingMessage = document.createElement('div');
+            loadingMessage.id = loadingId;
+            loadingMessage.classList.add('message', 'ai-message');
+            loadingMessage.textContent = '...';
+            chatContainer.appendChild(loadingMessage);
+            scrollToBottom();
+
+            dateA = new Date().toLocaleString('zh-TW', { hour12: false });
+            SYMP = SYSTEM_PROMPT+`沒有說地點日期時，預設地點是${LOCT}，日期是${dateA}。`;
+            const systemInstruction = { parts: [{ text: SYMP }] };
+            const tools = [{ googleSearch: {} }];
+            const tmphist = getSpecificHistory(hist);
+            //const pp = `地點是${LOCT}，日期是${dateA}。`+prompt;
+            const pp = prompt;
+            //displayMessage(pp, 'ai');
+            const contents = [...hist, { role: "user", parts: [{ text: pp }] }];
+            const requestBody = {
+                    // 注意：REST API 規範中是 systemInstruction system_instruction
+                    system_instruction: { 
+                        parts: [{ text: SYMP }] 
+                    },
+                    contents: [
+                        ...hist, 
+                        { role: "user", parts: [{ text: prompt }] }
+                    ],
+                    generationConfig: {
+                        temperature: 0.3,
+                        maxOutputTokens: 4096,
+                        "thinkingConfig": {
+                            "thinkingBudget": 0
+                        }
+                    },
+                    tools: [{ googleSearch: {} }]
+                };
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    //body: JSON.stringify({ systemInstruction, tools, contents }),
+                    body: JSON.stringify(requestBody),
+                });
+
+                if (!response.ok) throw new Error(`API: ${response.status}`);
+
+                const data = await response.json();
+                
+                const loadingElem = document.getElementById(loadingId);
+                if(loadingElem) chatContainer.removeChild(loadingElem);
+
+                //const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || "無回應";
+
+                const parts = data.candidates?.[0]?.content?.parts;
+                let aiText = "無回應";
+                if (parts && Array.isArray(parts)) {
+                    // 2. 將所有包含 text 的部分組合起來
+                    aiText = parts
+                        .map(part => part.text || "") // 提取每個 part 的 text
+                        .join("")                     // 將所有字串合併（如果需要換行可改用 .join("\n")）
+                        .trim();                      // 去除前後多餘空白
+                    if (aiText === "") aiText = "無回應";
+                }
+
+                //displayMessage(marked.parse(aiText), 'ai');
+                displayMessage(aiText, 'ai');
+
+                hist.push({ role: "user", parts: [{ text: prompt }] });
+                hist.push({ role: "model", parts: [{ text: aiText }] });
+                if (hist.length > HISTMAX) hist.splice(0, 2);
+
+            } catch (error) {
+                const loadingElem = document.getElementById(loadingId);
+                if(loadingElem) chatContainer.removeChild(loadingElem);
+                displayMessage(`錯誤: ${error.message}`, 'ai', true);
+            } finally {
+                if (shouldRestartVoice) setTimeout(startVoiceRecognition, 500);
+                shouldRestartVoice = false;
+            }
+        }
+
+        // ==========================================
+        // 3. 指令處理 (包含新增的 help, show, copy, paste)
+        // ==========================================
+
+        async function handleCommand(input) {
+            const lowerInput = input.trim();
+            const parts = lowerInput.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const arg = parts.slice(1).join(" "); 
+
+            //displayMessage(`>> ${input}`, 'ai', true);
+
+            // --- 新增: HELP 指令 ---
+            if (cmd === '幫幫我' || cmd === '幫我' || cmd === 'help' || cmd === '指令') {
+                const helpText = `🛠️ 指令說明：
+1. 存 談話 : 儲存當下對話
+2. 取 談話 : 載入指定對話
+3. 列 : 列出所有保存對話
+4. 刪 談話 : 刪除指定對話
+5. 清空所有保存談話 : 清除所有對話
+6. 看 談話 : 顯示對話內容
+7. 複製 : 複製當前對話
+8. 貼 : 貼上對話
+9. 清 : 清空對話
+11. 重來 : 重整網頁
+12. ver : 顯示版本
+13. 記 內容 : 備註
+14. 退 : 最後說的不算
+15. 尾 : 再講一次
+16. 密語 小聲說: 嗯。。。秘密話
+17. 開 : 聽聽密語小聲怎麼說
+18. 鑰匙 型號 : 給我看看鑰匙長怎樣
+19. 長 幾分鐘 : 要聊多久呀
+20. 你是 誰 : 我是誰 我來自哪裡 我要去向何方 我為什麼是我  
+`;
+
+                displayMessage(helpText, 'ai', true);
+                return true;
+            }
+
+            // --- 新增: SHOW 指令 ---
+            if (cmd === '看') {
+                let targetHist = hist;
+                let title = "當前對話";
+                
+                if (arg) {
+                    const data = await dbLoad(arg);
+                    if (!data) {
+                        displayMessage(`❌ 找不到存檔: ${arg}`, 'ai', true);
+                        return true;
+                    }
+                    targetHist = data;
+                    title = `存檔: ${arg}`;
+                }
+
+                if (targetHist.length === 0) {
+                    displayMessage(`📂 [${title}] 是空的`, 'ai', true);
+                    return true;
+                }
+
+                let text = `📄 [${title}] 內容預覽:\n----------------\n`;
+                targetHist.forEach(h => {
+                    const role = h.role === 'model' ? '🤖 AI' : '👤 You';
+                    text += `${role}: ${h.parts[0].text}\n\n`;
+                });
+                text += "----------------";
+                displayMessage(text, 'ai', true);
+                return true;
+            }
+
+            // --- 新增: COPY 指令 ---
+            if (cmd === '複製'|| cmd === '複') {
+                if (hist.length === 0) {
+                    displayMessage("⚠️ 目前沒有內容可複製", 'ai', true);
+                    return true;
+                }
+                try {
+                    await navigator.clipboard.writeText(JSON.stringify(hist));
+                    displayMessage("✅ 已複製對話 (JSON) 到剪貼簿", 'ai', true);
+                } catch (err) {
+                    displayMessage("❌ 複製失敗: " + err, 'ai', true);
+                }
+                return true;
+            }
+
+            // --- 新增: PASTE 指令 ---
+            if (cmd === '貼') {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (!text) {
+                        displayMessage("⚠️ 剪貼簿是空的", 'ai', true);
+                        return true;
+                    }
+                    const parsed = JSON.parse(text);
+                    if (Array.isArray(parsed)) {
+                        hist = [...hist, ...parsed]; // Append to current
+                        renderHistory(); // Refresh view
+                        displayMessage(`✅ 已貼上並合併 ${parsed.length} 筆記錄`, 'ai', true);
+                    } else {
+                        displayMessage("❌ 格式錯誤: 剪貼簿內容不是陣列", 'ai', true);
+                    }
+                } catch (err) {
+                    displayMessage("❌ 貼上失敗: " + err + "\n(請確認是有效的JSON)", 'ai', true);
+                }
+                return true;
+            }
+
+            // --- 原有指令 ---
+            if (cmd === '存') {
+                const res = await dbSave(arg, hist);
+                displayMessage(`💾 ${res}`, 'ai', true);
+                return true;
+            }
+            if (cmd === '取') {
+                //if (!arg) { displayMessage("❌ 請指定名稱", 'ai', true); return true; }
+                file = arg || "道"; 
+                const data = await dbLoad(file);
+                if (data) { hist = data; renderHistory(); }
+                else { displayMessage(`❌ 找不到: ${arg}`, 'ai', true); }
+                return true;
+            }
+            if (cmd === '列') {
+                const keys = await dbList();
+                displayMessage(keys.length ? `📂 存檔:\n${keys.filter(key => !key.includes("VkX18O2PM")).join('\n')}` : "📂 無存檔", 'ai', true);
+                return true;
+            }
+            if (cmd === '刪') {
+                if (!arg) { displayMessage("❌ 請指定名稱", 'ai', true); return true; }
+                const res = await dbDel(arg);
+                displayMessage(`🗑️ ${res}`, 'ai', true);
+                return true;
+            }
+            if (cmd === '清空所有保存談話') {
+                const res = await dbDelAll();
+                displayMessage(`🔥 ${res}`, 'ai', true);
+                return true;
+            }
+            if (cmd === '清') {
+                hist = [];
+                chatContainer.innerHTML = '';
+                for (let i = 39; i >0 ; i--) {
+                    let ii = i < 28 ? i : 28;
+                    displayMessage(A.repeat(ii), 'ai', true);
+                }
+                displayMessage("🧹 已清除，我回來了！", 'ai', true);
+                userInput.focus();
+                
+                return true;
+            }
+            if (cmd === 'modela') {
+                MODEL = "gemini-2.5-flash";
+                if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                displayMessage(`🤖 模型: Flash`, 'ai', true);
+                return true;
+            }
+            if (cmd === 'modelb') {
+                MODEL = "gemini-2.5-flash-lite";
+                if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                displayMessage(`🤖 模型: Lite`, 'ai', true);
+                return true;
+            }
+            if (cmd === '重來' || cmd === '新' || cmd === '重' || cmd === 'reload') {
+                window.location.reload();
+                return true;
+            }
+            if (cmd === 'ver') {
+                displayMessage(`🤖 1.1`, 'ai', true); 
+                return true;
+            }
+            if (cmd === '記') {
+                if (!arg) { displayMessage("❌ 請輸入備註內容", 'ai', true); return true; }
+                displayMessage(`🔖 ${arg}`, 'ai', true); 
+                hist.push({ role: "user", parts: [{ text: cmd }] });
+                hist.push({ role: "model", parts: [{ text: arg }] });
+                if (hist.length > HISTMAX) hist.splice(0, 2);
+                return true;
+            }
+            if (cmd === 'ddd' || cmd === '退') {
+                displayMessage(`🧹 清除最後一筆`, 'ai', true); 
+                //hist.splice(0, 2);
+                hist.pop(); // 移除最後一筆 model
+                hist.pop(); // 移除最後一筆 user
+                return true;
+            }
+            if (cmd === '尾') {
+                userInput.value = lastAiMessage;
+                //displayMessage(lastAiMessage, 'user');
+                await sendMessage(); 
+                return true;
+            }
+            if (cmd === '保存密語' || cmd === '密語' || cmd === '密碼') {
+                let k = "";
+                if (!arg.startsWith(INIT_KEY)) { k = "月落"; }
+                else { k = arg; }
+                let sDB = [];
+                sDB.push({ role: "user", parts: [{ text: cmd }] });
+                sDB.push({ role: "model", parts: [{ text: k }] });    
+                const res = await dbSave("VkX18O2PM", sDB);
+                displayMessage(`悄悄話收到了！`, 'ai', true);
+                return true;
+            }
+            if (cmd === '開' || cmd === '開始'){
+                let ret = await checkDbPwd();
+                if (!ret) {
+                    displayMessage("❌ 找不到檔案", 'ai', true);
+                }else
+                    return true;
+            }
+            if (cmd === 'key' || cmd === '鑰匙') {
+                API_KEY = arg;
+                displayMessage("鑰匙來了", 'user');
+                displayMessage("門開人來了", 'ai', true);
+                API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                voiceBtn.disabled = false;
+                return true;
+            }
+            if (cmd === '長') {
+                displayMessage(`聊久一點`, 'user', true);
+                displayMessage(`好呀`, 'ai', true);
+                if(arg !==""){
+                    displayMessage(`好呀`, 'ai', true);
+                    HISTMAX = parseInt(arg, 10);
+                } else{
+                    displayMessage(`不行，短短的就好。`, 'ai', true);
+                }
+                return true;
+            }
+            if (cmd === '你是') {
+                displayMessage(`你是。。。`, 'user', true);
+                
+                if(arg !==""){
+                    displayMessage(`嗯，好的，換個腦袋`, 'ai', true);
+                    SYSTEM_PROMPT = "你是" + arg;
+                }else{
+                    displayMessage(`我是個聰明人呀 ！ :)`, 'ai', true);
+                }
+                return true;
+            }
+            if (cmd === '你是誰?' || cmd === '你是誰') {
+                displayMessage(`你是誰？`, 'user', true);
+                
+                displayMessage(`${SYSTEM_PROMPT.replace(/你/g, "我")}`, 'ai', true);
+                return true;
+            }
+            
+ 
+            return false;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            ///displayMessage("get." + text, 'ai', true); // 顯示輸入中狀態
+            userInput.value = '';
+            resetInputHeight();
+            
+            if (text.startsWith(INIT_KEY)) {
+                //displayMessage("🔑............", 'user');
+                const inKey = text.substring(INIT_KEY.length).trim();
+                const decryptedKey = decryptApiKey(ENCRYPTED_KEY_HOLDER, inKey);
+                ///displayMessage("ddddddd", 'ai', true);
+                if (decryptedKey) {
+                    API_KEY = decryptedKey;
+                    API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                    voiceBtn.disabled = false;
+                    //displayMessage("日出東方迎新錦", 'ai', true);
+                    displayMessage("輕舟已過萬重山來到你眼前，你好！", 'ai', true);
+                    //displayMessage("漁歌唱晚泛輕舟", 'ai', true);
+                } else {
+                    displayMessage("❌", 'ai', true);
+                }
+                return;
+            }
+
+            try {
+                // 1. 強制等待 handleCommand 完成
+                const isCmd = await handleCommand(text);
+                
+                // 2. 嚴格檢查：如果是 true，就真的是指令，直接結束函式
+                if (isCmd === true) {
+                    return;
+                }
+            } catch (err) {
+                console.error("指令處理發生錯誤:", err);
+                // 發生錯誤時，保險起見也當作指令處理失敗，不要傳給 AI，或者您希望傳給 AI 就移除這行
+                displayMessage("⚠️ 指令執行發生異常", 'ai', true);
+                return; 
+            }
+
+            getGeminiResponse(text);
+        }
+
+        // ==========================================
+        // 4. 語音辨識與介面初始化
+        // ==========================================
+        
+        function initVoiceRecognition() {
+            if (!SpeechRecognition) {
+                voiceBtn.style.display = 'none';
+                //displayMessage("不支持語音辨識", 'ai', true);
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'zh-Hant';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                userInput.placeholder = "聆聽中...";
+                clearTimeout(silenceTimeout);
+                silenceTimeout = setTimeout(handleSilenceTimeout, SILENCE_THRESHOLD);
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimeout);
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                }
+                if (finalTranscript) {
+                    userInput.value = finalTranscript;
+                    autoResizeInput();
+                }
+                silenceTimeout = setTimeout(handleSilenceTimeout, SILENCE_THRESHOLD);
+            };
+
+            recognition.onend = () => {
+                clearTimeout(silenceTimeout);
+                isRecording = false;
+                voiceBtn.classList.remove('recording');
+                userInput.placeholder = "訊息...";
+                if (userInput.value.trim() && shouldRestartVoice) sendMessage();
+                else shouldRestartVoice = false;
+            };
+            
+            recognition.onerror = () => {
+                isRecording = false; 
+                voiceBtn.classList.remove('recording');
+                shouldRestartVoice = false;
+            };
+        }
+
+        function startVoiceRecognition() {
+            if (recognition && !isRecording) {
+                userInput.value = '';
+                shouldRestartVoice = true;
+                try { recognition.start(); } catch(e){}
+            }
+        }
+        
+        function handleSilenceTimeout() {
+            if (isRecording) recognition.stop();
+        }
+
+        function autoResizeInput() {
+            userInput.style.height = 'auto';
+            userInput.style.height = (userInput.scrollHeight) + 'px';
+        }
+
+        function resetInputHeight() {
+            userInput.style.height = '24px';
+        }
+
+        voiceBtn.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                shouldRestartVoice = false;
+            } else {
+                startVoiceRecognition();
+            }
+        });
+
+        sendBtn.addEventListener('click', () => {
+            shouldRestartVoice = false;
+            sendMessage();
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                shouldRestartVoice = false;
+                sendMessage();
+            }
+        });
+
+        userInput.addEventListener('input', autoResizeInput);
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            
+            initVoiceRecognition();
+            console.log("Hello World!");
+            A = ".";
+            for (let i = 39; i >0 ; i--) {
+                let ii = i < 28 ? i : 28;
+                displayMessage(A.repeat(ii), 'ai', true);
+            }
+
+            let ret = await checkDbPwd();
+            if (!ret) {
+                displayMessage("🔒 很高興見到你！", 'ai', true);
+            }else{
+                displayMessage("歡迎回來 ！", 'ai', true);
+            }
+            userInput.focus();
+        });
+    </script>
+</body>
+</html>
