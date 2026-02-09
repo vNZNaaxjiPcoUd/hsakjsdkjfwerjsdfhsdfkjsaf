@@ -1116,7 +1116,10 @@ const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
 function generateToken() {
     // 取得當下的 UTC 年月日 (如 20260206)
     const kNow = new Date().toISOString().slice(0, 10).replace(/-/g, '');
-    const rawString = bookData.APIKey + SALT + kNow;
+    const keyName = getDynamicKeyName();
+    const name=keyName+bookData.Name;
+    const rawString = bookData.APIKey + SALT + kNow + name;
+    console.log("生成 Token 的原始字串:", rawString, name);   
     
     // 使用 CryptoJS 產生 SHA512 雜湊字串
     return CryptoJS.SHA512(rawString).toString();
