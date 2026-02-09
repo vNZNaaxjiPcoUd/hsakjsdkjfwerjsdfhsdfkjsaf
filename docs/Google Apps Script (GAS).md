@@ -1,4 +1,4 @@
-Google Apps Script (GAS)
+.S Google Apps Script (GAS)
 ================
 
 在 Google Apps Script (GAS) 中，`doGet()` 的確是**內定函數（Reserved Function Names）**，主要用於處理網頁應用程式（Web App）的 HTTP GET 請求。
