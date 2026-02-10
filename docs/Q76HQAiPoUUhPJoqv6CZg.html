@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>美化上傳介面</title>
+    <title>上傳</title>
     <style>
         /* 基礎樣式重置 */
         body {
@@ -97,8 +97,7 @@
 <body>
 
 <div class="upload-card">
-    <h3>上傳檔案</h3>
-    
+ 
     <!-- 使用 Label 綁定 input，這樣點擊 Label 就等於點擊 input -->
     <label for="fileInput" class="file-label" id="dropArea">
         <span id="labelTexts">點擊此處選擇檔案</span>
@@ -107,7 +106,7 @@
     
     <input type="file" id="fileInput" accept="*/*">
     
-    <button class="btn-start" onclick="uploadFile()">開始上傳</button>
+    <button class="btn-start" onclick="uploadFile()">開始</button>
     
     <p id="status"></p>
 </div>
@@ -189,10 +188,12 @@ function uploadFile() {
           status.innerHTML =  `上傳成功！<a href="${data.fileUrl}" target="_blank">查看檔案</a>`;
           } else {
           status.textContent =  "上傳失敗: " + data.message;
+          APIKey = ""; // 清除密碼，讓使用者下次上傳時需要重新輸入
           }
       })
       .catch(error => {
           status.textContent = "錯誤: " + error;
+          APIKey = ""; // 清除密碼，讓使用者下次上傳時需要重新輸入
       });
     };
 
