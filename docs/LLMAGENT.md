@@ -2,7 +2,6 @@
 title: LLM AGENT RAG
 layout: empty
 ---
-<!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
