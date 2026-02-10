@@ -1,5 +1,5 @@
 ---
-title:
+title: LLM AGENT RAG
 layout: empty
 ---
 <!DOCTYPE html>
@@ -7,14 +7,13 @@ layout: empty
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的 PDF 文件</title>
+    <title>LLM AGENT RAG</title>
     <style>
         body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
         iframe { width: 100%; height: 100vh; border: none; }
     </style>
 </head>
 <body>
-    <!-- 將你的 PDF 檔案與此 HTML 放在同一個目錄下，並改名為 document.pdf -->
-    <iframe src="/LLM RAG AGENT.pdf"></iframe>
+    <iframe src="/static/LLM_RAG_AGENT.pdf"></iframe>
 </body>
 </html>
