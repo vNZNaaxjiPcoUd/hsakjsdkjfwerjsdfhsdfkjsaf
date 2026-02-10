@@ -471,8 +471,8 @@
                     if (aiText === "") aiText = "無回應";
                 }
 
-                //displayMessage(marked.parse(aiText), 'ai');
-                displayMessage(aiText, 'ai');
+                displayMessage(marked.parse(aiText), 'ai');
+                //displayMessage(aiText, 'ai');
 
                 hist.push({ role: "user", parts: [{ text: prompt }] });
                 hist.push({ role: "model", parts: [{ text: aiText }] });
