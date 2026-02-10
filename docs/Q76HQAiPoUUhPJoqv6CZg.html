@@ -2,11 +2,13 @@
 <html>
 <head>
   <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>上傳</title>
 </head>
 <body>
-  <h3>上傳檔案到雲端</h3>
+  <h3>上傳</h3>
   <input type="file" id="fileInput" accept="*/*">
-  <button onclick="uploadFile()">開始上傳</button>
+  <button onclick="uploadFile()">開始</button>
   <p id="status"></p>
   <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
   <script>
@@ -18,7 +20,7 @@ const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
 
 function generateToken(key) {
     while (!APIKey) {
-        APIKey = prompt("請輸入 API Key:", "");
+        APIKey = prompt("請輸入密碼:", "");
     }
     const kNow = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const rawString = APIKey + SALT + kNow + key;
