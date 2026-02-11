@@ -95,15 +95,15 @@
     }
 
     .tabs button {
-        background-color: #8cfa32;
+        background-color: #ccc;
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 2px 10px;
+        padding: 10px 20px;
         transition: 0.3s;
-        margin-right: 1px;
+        margin-right: 5px;
         border-radius: 5px 5px 0 0;
-        font-size: 12px;
+        font-size: 14px;
     }
 
     .tabs button:hover {
@@ -118,9 +118,9 @@
     /* --- 分頁內容容器 --- */
     .tab-content {
         display: none;
-        padding: 0px;
-        /*order: 1px solid #ccc;*/
-        /*border-top: none;*/
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-top: none;
         background-color: white;
         flex-grow: 1;
         overflow: hidden;
@@ -198,10 +198,10 @@
         flex-wrap: wrap; /* 允許整個頭部換行，確保按鈕不跑版 */
         align-items: flex-end;
         border-bottom: 1px solid #ccc;
-        background-color: #f4f4f9;
-        padding-top: 1px;
+        background-color: #f9f9f9;
+        padding-top: 5px;
         flex-shrink: 0;
-        min-height: 20px;
+        min-height: 35px;
     }
 
     .sub-tabs {
@@ -213,16 +213,16 @@
 
     .sub-tab-button {
         background-color: #e7e7e7;
-        border: 0px solid #ccc;
+        border: 1px solid #ccc;
         border-bottom: 1px solid #ccc; /* 預設有底線 */
         outline: none;
         cursor: pointer;
-        padding: 1px 5px;
+        padding: 8px 12px;
         transition: 0.3s;
         border-radius: 5px 5px 0 0;
-        margin-right: 2px;
-        font-size: 12px;
-        margin-bottom: 0px; /* 換行時增加上下間距 */
+        margin-right: 3px;
+        font-size: 13px;
+        margin-bottom: 2px; /* 換行時增加上下間距 */
         display: flex;
         align-items: center;
         white-space: nowrap; /* 防止按鈕內文字換行 */
@@ -235,7 +235,7 @@
         border-bottom: 1px solid #ffffff; /* 蓋過底線 */
         font-weight: bold;
         z-index: 10;
-        margin-bottom: 0px; /* 讓 active 的按鈕貼齊底部 */
+        margin-bottom: -1px; /* 讓 active 的按鈕貼齊底部 */
         position: relative;
     }
 
@@ -255,7 +255,7 @@
         flex-grow: 1;
         position: relative;
         overflow: hidden;
-        margin-top: 1px;
+        margin-top: 10px;
     }
 
     .sub-tab-content {
@@ -291,21 +291,21 @@
         box-sizing: border-box;
     }
 
-    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 
+    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 */
     #addSubPageBtn {
         position: static;
-        margin: 0px;
-        padding: 1px 1px;
+        margin: 5px;
+        padding: 6px 12px;
         background-color: #008CBA;
         color: white;
         border: none;
         border-radius: 4px;
         cursor: pointer;
-        font-size: 10px;
+        font-size: 12px;
         flex-shrink: 0;
         height: fit-content;
-        align-self: center;
-    }*/
+        align-self: center; /* 讓按鈕在該行置中或靠下 */
+    }
 
     #keyNameDef {
         padding: 8px; 
@@ -398,7 +398,6 @@
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <!--button class="tab-button" id="noshow" >OK THIS IS NO SHOW AND HIDE</button-->
             <button class="tab-button" id="getDBBtn2" onclick="newPassword()">密</button>
-            <button class="tab-button" id="addSubPageBtn">增</button>
             <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
             <!--button class="tab-button" id="tabAbtn"onclick="openTab(event, 'TabA')">密文</button-->
             <!--button class="tab-button" id="newPageBtn" onclick="gotoNewBook()">新</button-->
@@ -439,6 +438,7 @@
             <!-- 修改結構：移除 inline style，改用 class -->
             <div class="sub-tabs-header">
                 <div id="subTabNav" class="sub-tabs"></div>
+                <button id="addSubPageBtn">增</button>
             </div>
             
             <div id="subTabContentContainer" class="sub-tab-content-container"></div>
