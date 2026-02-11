@@ -104,6 +104,7 @@
         margin-right: 1px;
         border-radius: 5px 5px 0 0;
         font-size: 12px;
+        color: white;
     }
 
     .tabs button:hover {
@@ -1656,7 +1657,15 @@ async function readBookFromDB() {
 
 // goto new book
 function gotoNewBook() {
-    window.location.href = './vp.html';
+
+    let result = confirm("確定到要其他書本嗎？記得保存喔！");
+
+    if (result) {
+        console.log("使用者點擊了：確定");
+        window.location.href = './vp.html';
+    } else {
+        console.log("使用者點擊了：取消");
+    }
 }   
 
 // --- 初始化 ---
@@ -1729,6 +1738,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 5 * 60 * 1000);  */
     }
 });
+
 
 // 離開提醒
 window.addEventListener('beforeunload', (e) => {
