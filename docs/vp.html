@@ -831,6 +831,7 @@ function decData(){
                 updateStatus("解密失敗：密鑰或內容錯誤", 'error');
                 //console.log("解密錯誤，已觸發重新輸入密鑰流程A");
                 const r = getAESKey();
+                sleep(3000);
                 if(r === false) {
                     //console.log("解密錯誤，已觸發重新輸入密鑰流程B");
                     ret = false;
@@ -838,12 +839,17 @@ function decData(){
                 }else{
                     // 讓迴圈繼續，重新嘗試解密
                     //console.log("解密錯誤，重新嘗試解密流程");
+                    if (bookData.aesKey === "stopthisloop") {
+                        ret = false; // 直接停止迴圈，避免無限嘗試
+                        break;
+                    }
                 }
             }
             
         } catch (e) {
             updateStatus("解密發生錯誤。", 'error');
             const r = getAESKey();
+            sleep(3000);
             //console.log(r);
             if(r === false) {
                 //console.log("解密錯誤，已觸發重新輸入密鑰流程C");
@@ -1131,7 +1137,7 @@ function generateToken() {
     const keyName = getDynamicKeyName();
     const name=keyName+bookData.Name;
     const rawString = bookData.APIKey + SALT + kNow + name;
-    console.log("生成 Token 的原始字串:", rawString, name);   
+    //console.log("生成 Token 的原始字串:", rawString, name);   
     
     // 使用 CryptoJS 產生 SHA512 雜湊字串
     return CryptoJS.SHA512(rawString).toString();
@@ -1154,9 +1160,12 @@ async function callApi(params) {
     try {
         const response = await fetch(finalUrl);
         const result = await response.json();
+        //console.log("API 請求結果:");
+        //console.log(result);
         return result;
     } catch (error) {
-        console.error("API 請求失敗:", error);
+        console.error("API 請求失敗:");
+        console.log(error);
         return { status: "error", message: "網路請求失敗" };
     }
 }
@@ -1171,20 +1180,23 @@ async function callApiPost(params) {
       })
       .then(res => res.json())
       .then(data => {
-            console.log(data);
+            //console.log(data);
             ret = data;
           if(data.status === "success") {
-          console.log(`上傳成功！`);
+            //console.log(`上傳成功！`);
           } else {
-          console.log( "上傳失敗: " + data.status+" "+data.message);
+            console.log( "上傳失敗: ");
+            console.log(data);
           }
       })
       .catch(error => {
-          console.log("錯誤: " + error);
+          console.log("錯誤: ");
+          console.log(error);
           ret = { status: "error", message: "網路請求失敗" };
       });
-      console.log("API POST 請求已發出，等待回應...");
-      console.log(ret);
+      //console.log("API POST 請求已發出，等待回應...");
+      //console.log(ret);
+      //console.log("API POST 請求已發出，等待回應...",ret);
       return ret;
 
 /*
@@ -1224,7 +1236,7 @@ async function doSave(key, value) {
         key: key,
         value: value
     });
-    console.log("Save 結果:", res);
+    //console.log("Save 結果:", res);
     return res;
 }
 
@@ -1234,7 +1246,8 @@ async function doGet(key) {
         action: "get",
         key: key
     });
-    //console.log("Get 結果:", res);
+    //console.log("doGet 結果:");
+    //console.log(res);
     return res;
 }
 
@@ -1411,7 +1424,13 @@ async function getAPIKey() {
     }
 };
 
-const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms) => {
+    //return new Promise(resolve => setTimeout(resolve, ms));
+    const end = Date.now() + ms;
+    while (Date.now() < end) {
+        // 什麼都不做，純粹消耗 CPU 循環
+    }
+};
 
 function newPassword() {
     let aesKey =""; 
