@@ -17,7 +17,7 @@
                 "theme_color": "#2196F3",
                 "background_color": "#F0F0F0",
                 "start_url": window.location.href, // 關鍵：使用當下網址
-                "scope": "/",
+                "scope": "https://h.jwint.net/",
                 "icons": [
                     { "src": "https://h.jwint.net/favicon192.png", "sizes": "192x192", "type": "image/png" },
                     { "src": "https://h.jwint.net/favicon512.png", "sizes": "512x512", "type": "image/png" }
@@ -25,6 +25,7 @@
                 "orientation": "portrait"
             };
 
+            /*
             // 2. 執行 Base64 轉換
             const jsonString = JSON.stringify(myManifest);
             const base64Manifest = btoa(unescape(encodeURIComponent(jsonString)));
@@ -34,8 +35,19 @@
             linkTag.rel = 'manifest';
             linkTag.href = 'data:application/json;base64,' + base64Manifest;
             
-            document.head.appendChild(linkTag);
-            
+            document.head.appendChild(linkTag);*/
+
+
+            /// 不做 Base64 轉換的版本（直接使用 data URI）：
+            const jsonString = JSON.stringify(myManifest);
+            // 使用 encodeURIComponent 確保特殊字元正常處理
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'manifest';
+            linkTag.href = 'data:application/json,' + encodeURIComponent(jsonString);
+            document.head.appendChild(linkTag);        
+
+
+
             //console.log("動態 Manifest 已載入，啟動網址為：" + myManifest.start_url);
         })();
     </script>
@@ -1123,7 +1135,7 @@ function generateToken() {
     
     // 使用 CryptoJS 產生 SHA512 雜湊字串
     return CryptoJS.SHA512(rawString).toString();
-}
+} 
 
 /**
  * API 請求封裝
@@ -1149,16 +1161,70 @@ async function callApi(params) {
     }
 }
 
+async function callApiPost(params) {
+    const token = generateToken();
+    var ret = null;
+      await fetch(API_URL, {
+          method: "POST", 
+          redirect: 'follow', 
+          body: JSON.stringify({ ...params, token })
+      })
+      .then(res => res.json())
+      .then(data => {
+            console.log(data);
+            ret = data;
+          if(data.status === "success") {
+          console.log(`上傳成功！`);
+          } else {
+          console.log( "上傳失敗: " + data.status+" "+data.message);
+          }
+      })
+      .catch(error => {
+          console.log("錯誤: " + error);
+          ret = { status: "error", message: "網路請求失敗" };
+      });
+      console.log("API POST 請求已發出，等待回應...");
+      console.log(ret);
+      return ret;
+
+/*
+    const payload = {
+            method: 'POST',
+            //mode: 'cors',
+            //redirect: 'follow', // 極度重要：GAS 必須跳轉網址
+            //headers: { 'Content-Type': 'text/plain;charset=utf-8'  },
+            body: JSON.stringify({ ...params, token })
+        };
+    console.log("API POST 請求的 Payload:", payload);
+
+    try {
+        const response = await fetch(API_URL, payload);
+        console.log("API POST 原始回應:");
+        console.log(response);
+        const result = await response.json();
+        console.log("API POST 解析後的結果:");
+        console.log(result);
+        console.log(result.message);
+        return result;
+    } catch (error) {
+        console.log("error");
+        console.log(error);
+        console.error("API POST 請求失敗:", error);
+        return { status: "error", message: "網路請求失敗" };
+    }
+    */
+}
+
 // --- 使用範例 ---
 
 // 1. 儲存資料 (Save)
 async function doSave(key, value) {
-    const res = await callApi({
+    const res = await callApiPost({
         action: "save",
         key: key,
         value: value
     });
-    //console.log("Save 結果:", res);
+    console.log("Save 結果:", res);
     return res;
 }
 
