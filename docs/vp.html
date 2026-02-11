@@ -67,8 +67,8 @@
     .main-container {
         display: flex;
         flex-direction: column;
-        height: calc(100% - 30px);
-        padding: 10px;
+        height: calc(100% - 19px);
+        padding: 3px;
         box-sizing: border-box;
     }
 
@@ -78,7 +78,7 @@
         bottom: 0;
         left: 0;
         width: 100%;
-        padding: 5px 10px;
+        padding: 3px 10px;
         text-align: center;
         font-size: 12px;
         font-weight: bold;
@@ -95,7 +95,7 @@
     }
 
     .tabs button {
-        background-color: #8cfa32;
+        background-color: lch(55.03% 93.77 326.08);
         border: none;
         outline: none;
         cursor: pointer;
@@ -111,7 +111,7 @@
     }
 
     .tabs button.active {
-        background-color: #2196F3;
+        /*background-color: #2196F3;*/
         color: white;
     }
 
@@ -170,9 +170,9 @@
 
     /* 按鈕顏色分類 */
     #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
-    #saveDBBtn, #readDBBtn{ background-color: #9c27b0; }
+    #saveDBBtn, #readDBBtn{ /*background-color: #9c27b0;*/ }
     #exportBtn, #importBtnTrigger { background-color: #FF5722; }
-    #saveDBBtn2, #getDBBtn2, #newPageBtn{ background-color: #9c27b0; color: white;}
+    #saveDBBtn2, #getDBBtn2, #newPageBtn{ /*background-color: #9c27b0;*/  color: white;}
     
     .external-link-btn { background-color: #607d8b; }
 
@@ -232,9 +232,9 @@
     .sub-tab-button:hover { background-color: #ddd; }
     
     .sub-tab-button.active {
-        background-color: #ffffff;
+        background-color: #fdfdb0;
         border-bottom: 1px solid #ffffff; /* 蓋過底線 */
-        font-weight: bold;
+        /*font-weight: bold;*/
         z-index: 10;
         margin-bottom: 0px; /* 讓 active 的按鈕貼齊底部 */
         position: relative;
@@ -283,10 +283,10 @@
     .editable-text {
         width: 100%;
         flex-grow: 1;
-        padding: 15px;
+        padding: 3px;
         border: 1px solid #aaa;
         border-radius: 4px;
-        font-size: 16px;
+        font-size: 14px;
         line-height: 1.6;
         resize: none;
         box-sizing: border-box;
