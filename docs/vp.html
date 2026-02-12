@@ -1156,6 +1156,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const paramsFromURL = new URLSearchParams(window.location.search);
     const entries = Object.fromEntries(paramsFromURL.entries());
     console.log(result, entries); 
+    const firstEntry = paramsFromURL.entries().next().value; 
+    if (firstEntry) {
+    const [key, value] = firstEntry;
+    //console.log("第一個參數名稱:", key);   // "id"
+    //console.log("第一個參數數值:", value); // "123"
+    }    
     const firstKey = paramsFromURL.keys().next().value;
     //console.log(firstKey); // "id"
     const firstValue = paramsFromURL.get(firstKey);
