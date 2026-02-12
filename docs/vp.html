@@ -47,15 +47,15 @@
     }
 
     .tabs button {
-        background-color: lch(55.03% 93.77 326.08);
+        background-color: rgb(187, 93, 250);
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 2px 10px;
+        padding: 3px 15px;
         transition: 0.3s;
-        margin-right: 1px;
+        margin-right: 13px;
         border-radius: 5px 5px 0 0;
-        font-size: 12px;
+        font-size: 16px;
         color: white;
     }
 
@@ -160,8 +160,8 @@
         display: flex;
         flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 */
         /*flex-grow: 1;*/ /* 打開可以讓分頁按鈕區域撐滿剩餘空間，確保按鈕靠左 */
-        margin-bottom: -1px; /* 為了配合 border */
-        margin-top: 1px; /* 為了配合 border */
+        margin-bottom: -2px; /* 為了配合 border */
+        margin-top: 3px; /* 為了配合 border */
     }
 
     .sub-tab-button {
@@ -174,7 +174,7 @@
         transition: 0.3s;
         border-radius: 5px 5px 0 0;
         margin-right: 2px;
-        font-size: 13px;
+        font-size: 16px;
         margin-bottom: 0px; /* 換行時增加上下間距 */
         display: flex;
         align-items: center;
@@ -184,7 +184,7 @@
     .sub-tab-button:hover { background-color: #ddd; }
     
     .sub-tab-button.active {
-        background-color: #fdfdb0;
+        background-color: #b0fdbc;
         border-bottom: 1px solid #ffffff; /* 蓋過底線 */
         /*font-weight: bold;*/
         z-index: 10;
@@ -235,13 +235,24 @@
     .editable-text {
         width: 100%;
         flex-grow: 1;
-        padding: 3px;
+        padding: 5px;
         border: 1px solid #aaa;
-        border-radius: 4px;
-        font-size: 14px;
+        border-radius: 5px;
+        font-size: 20px;
         line-height: 1.6;
         resize: none;
         box-sizing: border-box;
+        font-family: 
+            ui-monospace, 
+            'Cascadia Code', 
+            'Cascadia Mono', 
+            'Segoe UI Mono',
+            Consolas, 
+            Menlo, 
+            Monaco, 
+            'Liberation Mono', 
+            'DejaVu Sans Mono',
+            monospace;
     }
 
     /* 修改新增按鈕樣式：移除 absolute，加入流式排版 
@@ -399,7 +410,7 @@ function getDynamicKeyName() {
         return param || "A";
     }
     return "A";
-}
+} 
 
 // --- 狀態訊息顯示函式 ---
 let statusTimer = null;
@@ -420,6 +431,7 @@ function updateStatus(message, type = 'info') {
     if (type === 'info') {
         if (statusTimer) {
             clearTimeout(statusTimer);
+            statusTimer = null;
         }
         statusTimer = setTimeout(() => {
             statusMessage.textContent = "待...";
