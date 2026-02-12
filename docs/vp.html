@@ -603,13 +603,13 @@ function encData(){
     encryptedContentArea.value = "";
     const content = getContentFromTabB();
     if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
-    if (!content.trim()) { updateStatus("筆記無內容", 'error'); return false; }
+    if (!content.trim()) { console.log("筆記無內容", 'error'); return false; }
     try {
         const keyHash = CryptoJS.SHA512(key).toString();
         const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
         encryptedContentArea.value = encrypted;
-        updateStatus("加密成功！", 'success');
-    } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); return false;}
+        console.log("加密成功！", 'success');
+    } catch (e) { console.log("加密失敗: " + e.message, 'error'); return false;}
     return true;
 }
 
@@ -621,14 +621,14 @@ function getKey(){
 function decData(){
     let originalText = "";
     let ret = true;
-    while (originalText === "") {
+    //while (originalText === "") {
         const key = getKey();
         //console.log("取得密鑰...", key);
         const encryptedText = encryptedContentArea.value;
         //console.log("取得密文內容...",encryptedText,encryptedContentArea.value);
         if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
         //console.log("開始解密...",encryptedText);
-        if (!encryptedText) { updateStatus("無密文內容", 'error'); return false; }
+        if (!encryptedText) { console.log("無密文內容", 'error'); return false; }
 
         try {
             const keyHash = CryptoJS.SHA512(key).toString();
@@ -638,13 +638,15 @@ function decData(){
                 //console.log("解密成功，載入內容至筆記分頁...");
                 setContentToTabB(originalText);
                 openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
-                updateStatus("解密成功！", 'success');
+                console.log("解密成功！", 'success');
                 //console.log("解密內容已載入至筆記分頁");
             } else {
-                updateStatus("解密失敗：密鑰或內容錯誤", 'error');
-                //console.log("解密錯誤，已觸發重新輸入密鑰流程A");
+                //updateStatus("解密失敗：密鑰或內容錯誤", 'error');
+                console.log("解密錯誤，流程A");
+                ret = false; // 直接返回 false，停止解密流程
+                /*
                 const r = getAESKey();
-                sleep(3000);
+
                 if(r === false) {
                     //console.log("解密錯誤，已觸發重新輸入密鑰流程B");
                     ret = false;
@@ -652,15 +654,19 @@ function decData(){
                 }else{
                     // 讓迴圈繼續，重新嘗試解密
                     //console.log("解密錯誤，重新嘗試解密流程");
+
                     if (bookData.aesKey === "stopthisloop") {
                         ret = false; // 直接停止迴圈，避免無限嘗試
                         break;
                     }
-                }
+                    sleep(3000);
+                }*/
             }
             
         } catch (e) {
-            updateStatus("解密發生錯誤。", 'error');
+            console.log("解密發生錯誤。B", e);
+            ret = false; // 直接返回 false，停止解密流程
+            /*
             const r = getAESKey();
             sleep(3000);
             //console.log(r);
@@ -672,8 +678,9 @@ function decData(){
                 // 讓迴圈繼續，重新嘗試解密
                 //console.log("解密錯誤，重新嘗試解密流程D");
             }
+                */
         }
-    }
+    //}
     return ret;
 }
 
@@ -753,6 +760,7 @@ function generateToken() {
     const name=bookData.Name;
     const rawString = bookData.APIKey + SALT + kNow + name;
     //console.log("生成 Token 的原始字串:", rawString, name);   
+    console.log("生成 Token 的原始字串:", bookData.APIKey,name);
     
     // 使用 CryptoJS 產生 SHA512 雜湊字串
     return CryptoJS.SHA512(rawString).toString();
@@ -762,6 +770,7 @@ function generateToken() {
  * API 請求封裝
  */
 async function callApi(params) {
+    console.log("準備呼叫 API，參數:", params);
     const token = generateToken();
     
     // 組合 URL 參數
@@ -769,18 +778,19 @@ async function callApi(params) {
         ...params,
         token: token
     }).toString();
-
+    console.log("生成的 URL 參數:", queryString);
     const finalUrl = `${API_URL}?${queryString}`;
-
+    console.log("最終 API URL:", finalUrl);
     try {
         const response = await fetch(finalUrl);
+        console.log("API 請求結果:",response);
         const result = await response.json();
-        //console.log("API 請求結果:");
-        //console.log(result);
+        console.log("API 回應解析後的結果:", result);
         return result;
     } catch (error) {
         console.error("API 請求失敗:");
         console.log(error);
+        confirm("網路請求失敗，是否重試？");
         return { status: "error", message: "網路請求失敗" };
     }
 }
@@ -876,29 +886,34 @@ async function saveToAPI() {
         getAPIKey();
     }
 
-    if(!bookData.aesKey) {
-        getAESKey();
-    }   
-
     let res = null;
     document.getElementById('saveDBBtn2').style.color = "red";
     TabB.style.display = "none";
 
+    while(!bookData.aesKey) {
+        let ret = await getAESKey();
+        if (!ret) {
+            console.log("使用者取消輸入密鑰");
+            return {status: "error", message: "使用者取消輸入密鑰" };
+        }
+    }     
+
     if(!encData()) {
         cleanAESKey();
-        updateStatus(`加密失敗，請確認 AES 密鑰是否正確`, 'error');
+        console.log(`加密失敗，請確認 AES 密鑰是否正確`, 'error');
         res = { status: "error", message: "加密失敗" };
     }else{
         //console.log("加密成功，準備上傳 API");
         const content = encryptedContentArea.value;
-        if (!content.trim()) { updateStatus("筆記無內容可上傳", 'error'); return { status: "error", message: "no content" }; 
+        if (!content.trim()) { 
+            console.log("筆記無內容可上傳", 'error'); 
+            res = { status: "error", message: "沒有內容" }; 
         }else{
-            //console.log("有內容可上傳，內容長度:", content.length);
             res=await doSave(bookData.Name, content);
             if (res.status === "success") {
-                updateStatus(`已上傳 ${bookData.Name}`, 'success');
+                console.log(`已上傳 ${bookData.Name}`, 'success');
             } else {
-                updateStatus(`上傳失敗: ${res.message}`, 'error');
+                console.log(`上傳失敗: ${res.message}`, 'error');
                 cleanAPIKey();
             }
         }
@@ -908,9 +923,11 @@ async function saveToAPI() {
     if (res.status === "success") {
         //console.log("API 上傳成功");
         buttonShowSaved();
+        updateStatus("儲存成功", 'success');
+    }else{
+        updateStatus("儲存失敗: " + res.message, 'error');
     }
     return res;
-
 }
 
 async function getFromAPI() {
@@ -918,40 +935,47 @@ async function getFromAPI() {
     if(!bookData.APIKey) {
         getAPIKey();
     } 
-    if(!bookData.aesKey) {
-        getAESKey();
-    }   
+
     document.getElementById('getDBBtn2').style.color = "red";
     TabB.style.display = "none";
-
+    console.log("bookData:", bookData);
     //const keyName = getDynamicKeyName();
     let res = await doGet(bookData.Name);
-    //console.log("API 讀取結果:", res);
+    console.log("API 讀取結果:", res);
     if (res.status === "success" && res.value) {
         //setContentToTabB(res.data);
         //openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
         encryptedContentArea.value = res.value;
         //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
-        updateStatus(`已讀取 ${bookData.Name}`, 'success');
-        let ret = decData();  
-        if(!ret){
-            updateStatus(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
-            res.status = "error";
-            res.message = "解密失敗";
-            cleanAESKey();
-        }else{
-            //console.log("解密成功，內容已載入至筆記分頁");   
-            //console.log("解密 API 讀取內容的結果:", ret);
-            // 改變顏色，示文字已存檔
-             updateStatus(`解密成功，內容已載入`, 'success');
+        console.log(`已讀取 ${bookData.Name}`, 'success');
+        let ret = false;
+        while(!ret) {
+            ret = decData();
+            if (!ret) {
+                console.log(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
+                cleanAESKey();
+                while(!bookData.aesKey) {
+                    let ret = await getAESKey();
+                    if (!ret) {
+                        console.log("使用者取消輸入密鑰");
+                        return {status: "error", message: "使用者取消輸入密鑰" };
+                    }
+                }       
+                sleep(1000);    
+            }else{
+                console.log(`解密成功，內容已載入`, 'success');
+            }
         }
     } else {
-        updateStatus(`API 讀取失敗: ${res.message}`, 'error');
+        console.log(`API 讀取失敗: ${res.message}`, 'error');
         cleanAPIKey();
     }
     if (res.status === "success") {
         //console.log("API 讀取成功，已載入內容");
         buttonShowSaved();
+        updateStatus("讀取成功", 'success');
+    }else{
+        updateStatus("讀取失敗: " + res.message, 'error');
     }
 
     TabB.style.display = "flex";
@@ -1003,6 +1027,7 @@ async function getAPIKey() {
 const sleep = (ms) => {
     //return new Promise(resolve => setTimeout(resolve, ms));
     const end = Date.now() + ms;
+    console.log(`開始睡眠 ${ms} 毫秒...`);
     while (Date.now() < end) {
         // 什麼都不做，純粹消耗 CPU 循環
     }
@@ -1012,7 +1037,7 @@ function newPassword() {
     let aesKey =""; 
     aesKey = prompt("輸入書本新密碼");
     if (!aesKey) {
-        updateStatus("書本密碼未更改", 'info');
+        updateStatus("書本密碼未更改", 'error');
         return false;
     }
     let confirmKey = prompt("請再次輸入書本新密碼以確認");
@@ -1027,12 +1052,18 @@ function newPassword() {
     bookData.aesKey = aesKey;
     let B = saveToAPI();
     B.then((data) => {
-    // 這裡對應 resolve
-        //console.log("收到資料:", data);
+        // 這裡對應 resolve
+        if (data.status === "success") {
+            console.log("書本密碼已更新並保存成功");
+        } else {
+            console.log("書本密碼更新失敗，API 返回錯誤:", data.message);
+            updateStatus("書本用新密碼保存失敗 " + data.message, 'error');
+            return false;
+        }
     })
     .catch((error) => { 
         console.error("API 儲存錯誤:", error);
-        updateStatus("保存失敗", 'error');
+        updateStatus("用新密碼上傳失敗: " + error.message, 'error');
         return false;
     });
     updateStatus("書本密碼已更新", 'success');
@@ -1040,19 +1071,21 @@ function newPassword() {
 }
 
 
-function getAESKey() {
+async function getAESKey() {
     let aesKey =""; 
         aesKey = prompt("請輸入書本密碼:");
         if (aesKey) {
             bookData.aesKey = aesKey;
-            updateStatus("書本密碼已更新", 'success');
+            console.log("書本密碼已更新", 'success');
         } else if(aesKey === "") {
-                updateStatus("書本密碼清除", 'info');
+                console.log("書本密碼清除", 'info');
                 bookData.aesKey = "";
             }else { //aseKey 為 null，使用者按了取消
                 bookData.aesKey = "";
-                window.location.href = './vp.html';
-                updateStatus("使用者按了取消，已重新載入頁面", 'info');
+                console.log("使用者按了取消，已重新載入頁面", 'info');
+                //while(!await gotoNewBook()){//window.location.href = './vp.html';
+                //    console.log("使用者按了取消到新頁面", 'info');
+                //};
                 return false;
             }
     return true;
@@ -1069,19 +1102,19 @@ let bookData = {
 function cleankeyData() {
     bookData.APIKey = "";
     bookData.aesKey = "";
-    updateStatus("密鑰已清除，請重新設定", 'info');
+    console.log("密鑰已清除，請重新設定", 'info');
 }
 
 // clean aesKey
 function cleanAESKey() {
     bookData.aesKey = "";
-    updateStatus("AES 密鑰已清除，請重新設定", 'info');
+    console.log("AES 密鑰已清除，請重新設定", 'info');
 }
 
 // clean APIKey 
 function cleanAPIKey() {
     bookData.APIKey = "";
-    updateStatus("API 密鑰已清除，請重新設定", 'info');
+    console.log("API 密鑰已清除，請重新設定", 'info');
 }   
 
 
@@ -1093,8 +1126,10 @@ function gotoNewBook() {
     if (result) {
         console.log("使用者點擊了：確定");
         window.location.href = './vp.html';
+        return true;
     } else {
         console.log("使用者點擊了：取消");
+        return false;
     }
 }   
 
@@ -1106,40 +1141,44 @@ document.getElementById('addSubPageBtn').addEventListener('click', () => {
 document.addEventListener('DOMContentLoaded', async () => {
 
     const result = window.location.search.slice(1);
-    /*
-    tabs = document.querySelectorAll('tabs');
-    tabs.forEach(tab => {
-        tab.style.display = "none";
-    });
-    let res = { status: "error",
-        message: "尚未指定冊名"
-    };  
-    */
-   console.log("URL 參數（書本名稱）:", result);
+    let res = null;
+
     if(!result){
         getBookName();
         return;
     }else{
         bookData.Name = result;
-        try {
+        try { 
             res = await getFromAPI();
-            console.log("初始載入 API 結果:", res);
+            //console.log("初始載入 API 結果:", res);
             if(res.status !== "success"){
-                throw new Error("API 讀取失敗");
+                console.log("初始載入 API 結果:", res);
+                throw new Error("getFromAPI 初始載入失敗");
             }
         } catch (error) {
-            console.log("getFromAPI 發生錯誤:", error);
-            let ret = confirm("是新書嗎？");
-            if (ret) {
-                res = { status: "error", value: "" };
-                console.log("ret=",ret);
-            } else {
-                updateStatus("再次輸入書名", 'error');
-                //getBookName();
-                //return;
+            console.log("getFromAPI 發生錯誤:", error.message);
+            if(res.message === "Key not found") {
+                let ret = confirm("是新書嗎？");
+                console.log("使用者對新書確認的回應:", ret);
+                if (ret) {
+                    res = { status: "error", value: "" };
+                    console.log("ret=",ret);
+                    updateStatus("新書已建立，記得要保存喔！", 'success');
+                } else {
+                    console.log("使用者取消新書建立，將重新輸入書名");
+                    alert("再次輸入書名");
+                    getBookName();
+                    return;
+                }
+            }else{
+                console.log("其他錯誤，無法載入書本:", res.message);
+                alert("再次輸入書名");
+                getBookName();            
+                return false;
             }
+            
         }
-
+        //confirm("是否要載入上次的內容？按取消將建立新書");
         openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
         if(res.status !== "success") {
             addEditableBlock("封面", "");
@@ -1150,7 +1189,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             tab.style.display = "block";
         });
 
+        //confirm("last");
+
     }
+    //confirm("last2");
 });
 
 
