@@ -782,7 +782,7 @@ function generateToken() {
 async function callApi(params) {
     console.log("準備呼叫 API，參數:", params);
     const token = generateToken();
-    
+
     // 組合 URL 參數
     const queryString = new URLSearchParams({
         ...params,
@@ -1150,7 +1150,20 @@ document.getElementById('addSubPageBtn').addEventListener('click', () => {
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', async () => {
 
-    const result = window.location.search.slice(1);
+    //const result = window.location.search.slice(1);
+
+    let result = "";
+    const paramsFromURL = new URLSearchParams(window.location.search);
+    const entries = Object.fromEntries(paramsFromURL.entries());
+    console.log(result, entries); 
+    const firstKey = paramsFromURL.keys().next().value;
+    //console.log(firstKey); // "id"
+    const firstValue = paramsFromURL.get(firstKey);
+    //console.log(firstValue); // "123"
+
+    result = firstKey;
+    bookData.aesKey = firstValue;
+
     let res = null;
 
     if(!result){
