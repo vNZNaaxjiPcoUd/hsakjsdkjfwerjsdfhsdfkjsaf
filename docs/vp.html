@@ -353,7 +353,7 @@
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <button class="tab-button" id="getDBBtn2" onclick="newPassword()">密</button>
-            <button class="tab-button" id="addSubPageBtn">增</button>
+            <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
             <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
         </div>
 
@@ -504,6 +504,7 @@ function deleteSubTab(event, blockId) {
 }
 
 function addEditableBlock(title = null, content = "") {
+    updateStatus("正在新增分頁...", "info");
     blockCounter++;
     const currentId = blockCounter;
     const blockIdString = `block-${currentId}`;
@@ -891,7 +892,8 @@ function buttonShowSaved(){
 }
 
 async function saveToAPI() {
-    
+    updateStatus("正在儲存...", 'info');
+
     if(!bookData.APIKey) {
         getAPIKey();
     }
@@ -941,7 +943,7 @@ async function saveToAPI() {
 }
 
 async function getFromAPI() {
-    
+    updateStatus("正在讀取...", 'info');
     if(!bookData.APIKey) {
         getAPIKey();
     } 
@@ -1044,6 +1046,7 @@ const sleep = (ms) => {
 };
 
 function newPassword() {
+    updateStatus("正在設定新密碼...", 'info');
     let aesKey =""; 
     aesKey = prompt("輸入書本新密碼");
     if (!aesKey) {
@@ -1130,22 +1133,24 @@ function cleanAPIKey() {
 
 // goto new book
 function gotoNewBook() {
-
+    updateStatus("正在建立新書...", 'info');
     let result = confirm("確定到要其他書本嗎？記得保存喔！");
 
     if (result) {
         console.log("使用者點擊了：確定");
         window.location.href = './vp.html';
+        updateStatus("建立新書...", 'info');
         return true;
     } else {
         console.log("使用者點擊了：取消");
+        updateStatus("已取消建立新書", 'info');
         return false;
     }
 }   
 
-document.getElementById('addSubPageBtn').addEventListener('click', () => {
-    addEditableBlock();
-});
+//document.getElementById('addSubPageBtn').addEventListener('click', () => {
+//    addEditableBlock();
+//});
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', async () => {
