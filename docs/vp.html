@@ -402,6 +402,7 @@ function getDynamicKeyName() {
 }
 
 // --- 狀態訊息顯示函式 ---
+let statusTimer = null;
 function updateStatus(message, type = 'info') {
     statusMessage.textContent = message;
     
@@ -417,7 +418,10 @@ function updateStatus(message, type = 'info') {
     }
 
     if (type === 'info') {
-        setTimeout(() => {
+        if (statusTimer) {
+            clearTimeout(statusTimer);
+        }
+        statusTimer = setTimeout(() => {
             statusMessage.textContent = "待...";
             statusMessage.style.backgroundColor = '#eee';
             statusMessage.style.color = '#333';
