@@ -950,17 +950,17 @@ async function getFromAPI() {
         console.log(`已讀取 ${bookData.Name}`, 'success');
         let ret = false;
         while(!ret) {
+            while(!bookData.aesKey) {
+                let ret = await getAESKey();
+                if (!ret) {
+                    console.log("使用者取消輸入密鑰");
+                    return {status: "error", message: "使用者取消輸入密鑰" };
+                }
+            }                
             ret = decData();
             if (!ret) {
                 console.log(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
                 cleanAESKey();
-                while(!bookData.aesKey) {
-                    let ret = await getAESKey();
-                    if (!ret) {
-                        console.log("使用者取消輸入密鑰");
-                        return {status: "error", message: "使用者取消輸入密鑰" };
-                    }
-                }       
                 sleep(1000);    
             }else{
                 console.log(`解密成功，內容已載入`, 'success');
