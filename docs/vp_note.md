@@ -1,8 +1,8 @@
-vp 使用方式
+vp 隨身記事本使用方式
 =========
 打開網頁，輸入書本名稱，輸入密碼，即可以打開書本。
 
-[https://h.jwint.net/vp](https://h.jwint.net/vp)
+[https://note.jwint.net/](https://note.jwint.net/)
 
 在瀏覽器上，可以保存到主畫面，方便使用，像APP一樣。
 
