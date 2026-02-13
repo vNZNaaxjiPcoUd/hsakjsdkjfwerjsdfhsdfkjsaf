@@ -725,7 +725,7 @@ function decData(){
 // 編輯區鍵盤事件 - Ctrl+S 儲存
 subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
-
+    doTextChange();
     // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
         e.preventDefault();
@@ -933,9 +933,12 @@ async function TestAllApi() {
     await doDelete("user_001");
 }
 
+let textChanged = false;
+
 function buttonShowSaved(){
     document.getElementById('saveDBBtn2').style.color = "black";  
     document.getElementById('getDBBtn2').style.color = "black";  
+    textChanged = false;
 }
 
 function setTag(T){
@@ -945,6 +948,14 @@ function setTag(T){
 function getTag(){
     console.log("Current tag:", bookData.tag);
     return bookData.tag;
+}
+
+function isTextChanged(){
+    return textChanged;
+}
+
+function doTextChange(){
+    textChanged = true;
 }
 
 async function saveToAPI() {
@@ -1000,6 +1011,15 @@ async function saveToAPI() {
 }
 
 async function getFromAPI() {
+
+    if(isTextChanged() === true) {
+        let ret = confirm("內容已修改，是否重新載入？");
+        if(!ret) {
+            updateStatus("讀取已取消", 'info');
+            return {status: "error", message: "使用者取消讀取" };
+        }
+    }    
+
     updateStatus("正在讀取...", 'info');
     if(!bookData.APIKey) {
         getAPIKey();
