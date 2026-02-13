@@ -5,7 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" , interactive-widget=resizes-content">
     <title>VP</title>
     <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
-
+    <script>
+        (function() {
+            const bookname = window.location.search.slice(1);
+            window.title = "VP";
+            const myManifest = {
+                "name": "VP",
+                "short_name": "VP",
+                "description": "VP",
+                "display": "standalone",
+                "theme_color": "#2196F3",
+                "background_color": "#F0F0F0",
+                "start_url": window.location.href, // 關鍵：使用當下網址
+                "scope": "https://h.jwint.net/",
+                "icons": [
+                    { "src": "https://h.jwint.net/favicon192.png", "sizes": "192x192", "type": "image/png" },
+                    { "src": "https://h.jwint.net/favicon512.png", "sizes": "512x512", "type": "image/png" }
+                ],
+                "orientation": "portrait"
+            };
+            const jsonString = JSON.stringify(myManifest);
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'manifest';
+            linkTag.href = 'data:application/json,' + encodeURIComponent(jsonString);
+            document.head.appendChild(linkTag);        
+        })();
+    </script>
 <style>
     html, body {
         height: 100%;
@@ -52,10 +77,10 @@
         border: none;
         outline: none;
         cursor: pointer;
-        padding: 3px 15px;
+        padding: 4px 16px;
         transition: 0.3s;
-        margin-right: 13px;
-        border-radius: 5px 5px 0 0;
+        margin-right: 11px;
+        border-radius: 10px;
         font-size: 16px;
         color: white;
     }
@@ -350,11 +375,11 @@
 
     <div class="main-container">
         <div class="tabs">
-            <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <button class="tab-button" id="getDBBtn2" onclick="newPassword()">密</button>
-            <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
             <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
+            <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
+            <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
         </div>
 
         <div id="TabA" class="tab-content">
@@ -847,10 +872,10 @@ async function doSave(key, inV, tag ) {
         value: inV,
         tag: tag
     };
-    const res = await callApi(newV);
+    const res = await callApiPost(newV);
     let newRes = null;
     if(res.status === "success"){
-        console.log(`File "${key}" saved successfully!`, res);
+        console.log(`File "${res.key}" doSave successfully!`, res);
         newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
     } else {
         console.log(`Error saving file: ${res.message}`);
@@ -868,15 +893,18 @@ async function doGet(key) {
         tag:"AAAAAA"
     });
     console.log("doGet 結果:", res);
-    let newRes = { status: res.status, message: res.message, value: res.value, tag: res.tag };
-    if (res.status === "success" && res.value) {
-
-    }else{
+    let newRes = null;
+    if(res.status === "success"){
+        console.log(`File "${res.key}" doGet successfully!`, res);
+        newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
+    } else {
         console.log("讀取資料失敗:", res.message);
+        newRes = { status: res.status, message: res.message, key: null, value: null, tag: null };
     }
 
     return newRes;
 }
+
 
 // 3. 讀取全部資料 (Get All)
 async function doGetAll() {
