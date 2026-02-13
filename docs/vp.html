@@ -511,11 +511,14 @@ function handleSubTabClick(blockId) {
 
 function deleteSubTab(event, blockId) {
     event.stopPropagation();
-    if (!confirm("確定要刪除這個分頁嗎？")) return;
 
     const btn = document.getElementById(`sub-btn-${blockId}`);
     const content = document.getElementById(`sub-content-${blockId}`);
     const wasActive = btn.classList.contains('active');
+
+    console.log(`Attempting to delete block ${blockId}, wasActive: ${wasActive}`,`name of block: ${btn.querySelector('.btn-text').textContent}`);
+
+    if (!confirm(`確定要刪除 [${btn.querySelector('.btn-text').textContent}] 這個分頁嗎？`)) return;
 
     btn.remove();
     content.remove();
