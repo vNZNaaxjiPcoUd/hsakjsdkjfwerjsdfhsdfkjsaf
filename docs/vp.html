@@ -376,7 +376,7 @@
     <div class="main-container">
         <div class="tabs">
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
-            <button class="tab-button" id="getDBBtn2" onclick="newPassword()">密</button>
+            <button class="tab-button" id="setPW" onclick="newPassword()">密</button>
             <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
             <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
@@ -1234,6 +1234,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     result = firstKey;
     bookData.aesKey = firstValue;
+    if(bookData.aesKey) {
+        console.log("從 URL 參數取得 AES 密鑰:");
+        document.getElementById('setPW').style.display = "none";
+    }
 
     let res = null;
 
