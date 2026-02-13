@@ -422,6 +422,7 @@ function updateStatus(message, type = 'info') {
     }
 
     if (type === 'info') {
+        /*
         if (statusTimer) {
             clearTimeout(statusTimer);
             statusTimer = null;
@@ -431,6 +432,7 @@ function updateStatus(message, type = 'info') {
             statusMessage.style.backgroundColor = '#eee';
             statusMessage.style.color = '#333';
         }, 6000);
+        */
     }
 }
 
@@ -838,25 +840,42 @@ async function callApiPost(params) {
 }
 
 // 1. 儲存資料 (Save)
-async function doSave(key, value) {
-    const res = await callApiPost({
+async function doSave(key, inV, tag ) {
+    const newV = {
         action: "save",
         key: key,
-        value: value
-    });
-    //console.log("Save 結果:", res);
-    return res;
+        value: inV,
+        tag: tag
+    };
+    const res = await callApi(newV);
+    let newRes = null;
+    if(res.status === "success"){
+        console.log(`File "${key}" saved successfully!`, res);
+        newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
+    } else {
+        console.log(`Error saving file: ${res.message}`);
+        newRes = { status: res.status, message: res.message, key: null, value: null, tag: null };
+    }   
+    return newRes;
 }
 
 // 2. 讀取單一資料 (Get)
 async function doGet(key) {
     const res = await callApi({
         action: "get",
-        key: key
+        key: key,
+        value: "123456",
+        tag:"AAAAAA"
     });
-    //console.log("doGet 結果:");
-    //console.log(res);
-    return res;
+    console.log("doGet 結果:", res);
+    let newRes = { status: res.status, message: res.message, value: res.value, tag: res.tag };
+    if (res.status === "success" && res.value) {
+
+    }else{
+        console.log("讀取資料失敗:", res.message);
+    }
+
+    return newRes;
 }
 
 // 3. 讀取全部資料 (Get All)
@@ -891,6 +910,15 @@ function buttonShowSaved(){
     document.getElementById('getDBBtn2').style.color = "black";  
 }
 
+function setTag(T){
+    bookData.tag = T;
+    console.log("Tag updated to:", bookData.tag);
+}
+function getTag(){
+    console.log("Current tag:", bookData.tag);
+    return bookData.tag;
+}
+
 async function saveToAPI() {
     updateStatus("正在儲存...", 'info');
 
@@ -921,9 +949,10 @@ async function saveToAPI() {
             console.log("筆記無內容可上傳", 'error'); 
             res = { status: "error", message: "沒有內容" }; 
         }else{
-            res=await doSave(bookData.Name, content);
+            res=await doSave(bookData.Name, content, getTag());
             if (res.status === "success") {
                 console.log(`已上傳 ${bookData.Name}`, 'success');
+                setTag(res.tag);
             } else {
                 console.log(`上傳失敗: ${res.message}`, 'error');
                 cleanAPIKey();
@@ -955,11 +984,13 @@ async function getFromAPI() {
     let res = await doGet(bookData.Name);
     console.log("API 讀取結果:", res);
     if (res.status === "success" && res.value) {
+        setTag(res.tag );
         //setContentToTabB(res.data);
         //openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
         encryptedContentArea.value = res.value;
         //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
         console.log(`已讀取 ${bookData.Name}`, 'success');
+        bookData.tag = res.tag || "";
         let ret = false;
         while(!ret) {
             while(!bookData.aesKey) {
@@ -1109,7 +1140,8 @@ let bookData = {
     Name: "",
     APIKey: "",
     aesKey: "",
-    info: "這是一些額外的資訊"
+    info: "這是一些額外的資訊",
+    tag:"9999"
 }
 
 function cleankeyData() {
