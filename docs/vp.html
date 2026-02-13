@@ -602,7 +602,9 @@ function getContentFromTabB() {
         const textarea = block.querySelector('.editable-text');
         const title = nameInput.value || "未命名";
         const text = textarea.value || "";
-        const struct = `<<<<BLOCK_START>>>>\n${title}\n<<<<TITLE_END>>>>\n${text}\n<<<<BLOCK_END>>>>`;
+        const safeTitle = btoa(unescape(encodeURIComponent(title))); 
+        const safeText = btoa(unescape(encodeURIComponent(text)));
+        const struct = `<<<<BLOCK_START_v2>>>>\n${safeTitle}\n<<<<TITLE_END>>>>\n${safeText}\n<<<<BLOCK_END>>>>`;
         contents.push(struct);
     });
     return contents.join('\n');
@@ -613,18 +615,34 @@ function setContentToTabB(fullContent) {
     subTabContentContainer.innerHTML = '';
     blockCounter = 0;
 
-    const blockStrings = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
-    if (blockStrings.length === 0) {
-        addEditableBlock("解密內容", fullContent);
-        return;
+    let parseType = "v2";
+    let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
+    //console.log("使用新版解析方式...",blockStrings);
+    //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
+
+    if (blockStrings.length === 0 || blockStrings.length === 1 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {    
+        console.log("使用舊版解析方式...");
+        const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
+        console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
+        if (blockStrings2.length === 0) {
+            console.log("解密內容", fullContent);
+            return;
+        }
+        parseType = "v1";
+        blockStrings = blockStrings2;
     }
+
+
+    //console.log(`parseType: ${parseType}, blocks to process: ${blockStrings.length}`);
 
     blockStrings.forEach(blockStr => {
         const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
         const match = blockStr.match(regex);
         if (match) {
-            const title = match[1].trim();
-            const text = match[2].trim();
+            const safeTitle = match[1].trim();
+            const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
+            const safeText = match[2].trim();
+            const text = parseType === "v2" ? decodeURIComponent(escape(atob(safeText))) : safeText;
             addEditableBlock(title, text);
         } else {
             addEditableBlock("解析錯誤", blockStr);
@@ -676,10 +694,10 @@ function decData(){
             const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
             originalText = bytes.toString(CryptoJS.enc.Utf8);
             if (originalText) {
-                //console.log("解密成功，載入內容至筆記分頁...");
+                console.log("解密成功，載入內容至筆記分頁...");
                 setContentToTabB(originalText);
                 openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
-                console.log("解密成功！", 'success');
+                console.log("載入內容！", 'success');
                 //console.log("解密內容已載入至筆記分頁");
             } else {
                 //updateStatus("解密失敗：密鑰或內容錯誤", 'error');
@@ -811,7 +829,7 @@ function generateToken() {
  * API 請求封裝
  */
 async function callApi(params) {
-    console.log("準備呼叫 API，參數:", params);
+    //console.log("準備呼叫 API，參數:", params);
     const token = generateToken();
 
     // 組合 URL 參數
@@ -824,7 +842,7 @@ async function callApi(params) {
     //console.log("最終 API URL:", finalUrl);
     try {
         const response = await fetch(finalUrl);
-        console.log("API 請求結果:",response);
+        //console.log("API 請求結果:",response);
         const result = await response.json();
         //console.log("API 回應解析後的結果:", result);
         return result;
@@ -878,7 +896,7 @@ async function doSave(key, inV, tag ) {
     const res = await callApiPost(newV);
     let newRes = null;
     if(res.status === "success"){
-        console.log(`File "${res.key}" doSave successfully!`, res);
+        //console.log(`File "${res.key}" doSave successfully!`, res);
         newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
     } else {
         console.log(`Error saving file: ${res.message}`);
@@ -895,10 +913,10 @@ async function doGet(key) {
         value: "123456",
         tag:"AAAAAA"
     });
-    console.log("doGet 結果:", res);
+    //console.log("doGet 結果:", res);
     let newRes = null;
     if(res.status === "success"){
-        console.log(`File "${res.key}" doGet successfully!`, res);
+        //console.log(`File "${res.key}" doGet successfully!`, res);
         newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
     } else {
         console.log("讀取資料失敗:", res.message);
@@ -946,10 +964,10 @@ function buttonShowSaved(){
 
 function setTag(T){
     bookData.tag = T;
-    console.log("Tag updated to:", bookData.tag);
+    //console.log("Tag updated to:", bookData.tag);
 }
 function getTag(){
-    console.log("Current tag:", bookData.tag);
+    //console.log("Current tag:", bookData.tag);
     return bookData.tag;
 }
 
@@ -972,7 +990,7 @@ async function saveToAPI() {
     document.getElementById('saveDBBtn2').style.color = "red";
     //TabB.style.display = "none";
     disableEditor();
-    
+
     while(!bookData.aesKey) {
         let ret = await getAESKey();
         if (!ret) {
@@ -1042,17 +1060,17 @@ async function getFromAPI() {
     document.getElementById('getDBBtn2').style.color = "red";
     //TabB.style.display = "none";
     disableEditor();
-    console.log("bookData:", bookData);
+    //console.log("bookData:", bookData);
     //const keyName = getDynamicKeyName();
     let res = await doGet(bookData.Name);
-    console.log("API 讀取結果:", res);
+    //console.log("API 讀取結果:", res);
     if (res.status === "success" && res.value) {
         setTag(res.tag );
         //setContentToTabB(res.data);
         //openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
         encryptedContentArea.value = res.value;
         //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
-        console.log(`已讀取 ${bookData.Name}`, 'success');
+        //console.log(`已讀取 ${bookData.Name}`, 'success');
         bookData.tag = res.tag || "";
         let ret = false;
         while(!ret) {
@@ -1077,18 +1095,18 @@ async function getFromAPI() {
         cleanAPIKey();
     }
     if (res.status === "success") {
-        console.log("API 讀取成功，已載入內容");
+        //console.log("API 讀取成功，已載入內容");
         buttonShowSaved();
-        updateStatus("讀取成功", 'success');
+        //updateStatus("讀取成功", 'success');
     }else{
         console.log("API 讀取失敗:", res.message);
         updateStatus("讀取失敗: " + res.message, 'error');
     }
 
-    console.log("TABB =: ", TabB);
+    //console.log("TABB =: ", TabB);
     enableEditor();
     //if (TabB.style.display) TabB.style.display = "flex";
-    console.log("已顯示 TabB", TabB.style.display);
+    //console.log("已顯示 TabB", TabB.style.display);
     return res;
 }
 
@@ -1187,7 +1205,7 @@ async function getAESKey() {
         aesKey = prompt("請輸入書本密碼:");
         if (aesKey) {
             bookData.aesKey = aesKey;
-            console.log("書本密碼已更新", 'success');
+            console.log("書本密碼已更新 A", 'success');
         } else if(aesKey === "") {
                 console.log("書本密碼清除", 'info');
                 bookData.aesKey = "";
@@ -1259,7 +1277,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let result = "";
     const paramsFromURL = new URLSearchParams(window.location.search);
     const entries = Object.fromEntries(paramsFromURL.entries());
-    console.log(result, entries); 
+    //console.log(result, entries); 
     const firstEntry = paramsFromURL.entries().next().value; 
     if (firstEntry) {
     const [key, value] = firstEntry;
