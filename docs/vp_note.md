@@ -4,7 +4,6 @@ vp 隨身記事本使用方式
 
 [https://note.jwint.net/](https://note.jwint.net/)
 
-在瀏覽器上，可以保存到主畫面，方便使用，像APP一樣。
 
 #### 功能如下：
 - 存：保存目前文件，按下ctrl+s 也可以存。
@@ -25,6 +24,8 @@ vp 隨身記事本使用方式
 - 書本可以隨意創建多個，按下「新」即可有新書本，或開另一本已存放的書。記下書本名字，就可以隨時取用
 - 可以直接打開書本，即網址直接輸入 [https://h.jwint.net/vp?bookname](hhttps://h.jwint.net/vp?bookname)
 - 可以直接打開書本，不用輸入密碼，即網址直接輸入 [https://h.jwint.net/vp?bookname=password](https://h.jwint.net/vp?bookname=password)
+- 在手機上時，可以保存到主畫面，方便使用，像APP一樣。 按下 分享/ 加入主畫面/ 輸入名稱/ 加入，就可以在主畫面看到你的書本
+
 
 #### 保密性
 - 資料保存上，是以加密的放在雲上，加密的密碼是使用者保存的，雲上沒有密碼，也不知道如何解開來，所以是安全的。
