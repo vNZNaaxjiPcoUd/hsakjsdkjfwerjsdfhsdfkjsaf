@@ -182,14 +182,40 @@
         min-height: 20px;
     }
 
+/* 分頁太長時會開水平滾動 */
+.sub-tabs {
+    display: flex;
+    flex-wrap: nowrap;       /* 1. 強制不換行 */
+    overflow-x: auto;        /* 2. 當內容溢出時，開啟水平滾動 */
+    overflow-y: hidden;      /* 3. 隱藏垂直方向的溢出，避免出現奇怪的抖動 */
+    
+    /* 讓滑動更流暢（iOS 設備建議加上） */
+    -webkit-overflow-scrolling: touch; 
+    
+    margin-bottom: -2px; 
+    margin-top: 3px;
+
+    /* 確保容器寬度固定，不會被內容撐爆外部版面 */
+    width: 100%; 
+}
+
+/* 4. 關鍵：確保內層的按鈕（Tab）不會因為空間不夠而被擠壓變形 */
+.sub-tabs > button, 
+.sub-tabs > div { 
+    flex-shrink: 0; 
+}
+
+
+
+/* 分頁全都列出來
     .sub-tabs {
         display: flex;
-        flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 */
-        /*flex-grow: 1;*/ /* 打開可以讓分頁按鈕區域撐滿剩餘空間，確保按鈕靠左 */
-        margin-bottom: -2px; /* 為了配合 border */
-        margin-top: 3px; /* 為了配合 border */
+        flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 /
+        /*flex-grow: 1;*/ /* 打開可以讓分頁按鈕區域撐滿剩餘空間，確保按鈕靠左 /
+        margin-bottom: -2px; /* 為了配合 border /
+        margin-top: 3px; /* 為了配合 border /
     }
-
+*/
     .sub-tab-button {
         background-color: #e7e7e7;
         border: 0px solid #ccc;
