@@ -801,7 +801,7 @@ function generateToken() {
     const name=bookData.Name;
     const rawString = bookData.APIKey + SALT + kNow + name;
     //console.log("生成 Token 的原始字串:", rawString, name);   
-    console.log("生成 Token 的原始字串:", bookData.APIKey,name);
+    //console.log("生成 Token 的原始字串:", bookData.APIKey,name);
     
     // 使用 CryptoJS 產生 SHA512 雜湊字串
     return CryptoJS.SHA512(rawString).toString();
@@ -819,14 +819,14 @@ async function callApi(params) {
         ...params,
         token: token
     }).toString();
-    console.log("生成的 URL 參數:", queryString);
+    //console.log("生成的 URL 參數:", queryString);
     const finalUrl = `${API_URL}?${queryString}`;
-    console.log("最終 API URL:", finalUrl);
+    //console.log("最終 API URL:", finalUrl);
     try {
         const response = await fetch(finalUrl);
         console.log("API 請求結果:",response);
         const result = await response.json();
-        console.log("API 回應解析後的結果:", result);
+        //console.log("API 回應解析後的結果:", result);
         return result;
     } catch (error) {
         console.error("API 請求失敗:");
@@ -970,8 +970,9 @@ async function saveToAPI() {
 
     let res = null;
     document.getElementById('saveDBBtn2').style.color = "red";
-    TabB.style.display = "none";
-
+    //TabB.style.display = "none";
+    disableEditor();
+    
     while(!bookData.aesKey) {
         let ret = await getAESKey();
         if (!ret) {
@@ -1001,7 +1002,7 @@ async function saveToAPI() {
             }
         }
     }
-    TabB.style.display = "flex";
+    enableEditor(); //TAB.style.display = "flex";
     //console.log("API 上傳結果:", res);
     if (res.status === "success") {
         //console.log("API 上傳成功");
@@ -1012,6 +1013,16 @@ async function saveToAPI() {
     }
     return res;
 }
+
+function disableEditor() {
+    const textareas = document.querySelectorAll('.editable-text');
+    textareas.forEach(ta => ta.setAttribute('disabled', 'disabled'));
+}   
+
+function enableEditor() {
+    const textareas = document.querySelectorAll('.editable-text');
+    textareas.forEach(ta => ta.removeAttribute('disabled'));
+}   
 
 async function getFromAPI() {
 
@@ -1029,7 +1040,8 @@ async function getFromAPI() {
     } 
 
     document.getElementById('getDBBtn2').style.color = "red";
-    TabB.style.display = "none";
+    //TabB.style.display = "none";
+    disableEditor();
     console.log("bookData:", bookData);
     //const keyName = getDynamicKeyName();
     let res = await doGet(bookData.Name);
@@ -1051,7 +1063,7 @@ async function getFromAPI() {
                     return {status: "error", message: "使用者取消輸入密鑰" };
                 }
             }                
-            ret = decData();
+            ret = await decData();
             if (!ret) {
                 console.log(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
                 cleanAESKey();
@@ -1065,14 +1077,18 @@ async function getFromAPI() {
         cleanAPIKey();
     }
     if (res.status === "success") {
-        //console.log("API 讀取成功，已載入內容");
+        console.log("API 讀取成功，已載入內容");
         buttonShowSaved();
         updateStatus("讀取成功", 'success');
     }else{
+        console.log("API 讀取失敗:", res.message);
         updateStatus("讀取失敗: " + res.message, 'error');
     }
 
-    TabB.style.display = "flex";
+    console.log("TABB =: ", TabB);
+    enableEditor();
+    //if (TabB.style.display) TabB.style.display = "flex";
+    console.log("已顯示 TabB", TabB.style.display);
     return res;
 }
 
