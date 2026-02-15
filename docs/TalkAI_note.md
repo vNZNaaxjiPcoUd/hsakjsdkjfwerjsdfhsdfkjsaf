@@ -1,8 +1,8 @@
-AssAi 使用方式
+TalkAI 使用方式
 =============
  AI 智庫
 
-[https://h.jwint.net/AssAi](https://h.jwint.net/AssAi)
+## [https://h.jwint.net/TalkAI](https://h.jwint.net/TalkAI)
 
 打開此網頁，即可使用AI。要先輸入密碼，才可以使用。若是已存放密碼，那打開即可使用。在看到「輕舟已過萬重山來到你眼前」表示可以向AI發問了！
 
