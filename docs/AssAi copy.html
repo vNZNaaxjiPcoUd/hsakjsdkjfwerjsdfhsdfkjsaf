@@ -4,279 +4,172 @@
     <meta charset="UTF-8">
     <base target="_blank">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-	<!--link rel="manifest" href="/manifest.assai.json"-->
+	<link rel="manifest" href="/manifest.assai.json">
     <title>聊天</title>
     
     <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <style>
-        /* 定義淡綠色系變數 */
+        /* CSS 優化與精簡 */
         :root {
-            --bg-color: #F1F8E9;           /* 極淺綠色背景 */
-            --user-msg-bg: #4CAF50;        /* 使用者：森林綠 */
+            --bg-color: #f2f2f7;
+            --user-msg-bg: #007aff;
             --user-msg-text: #ffffff;
-            --ai-msg-bg: #ffffff;          /* AI：純白 */
-            --ai-msg-text: #1B5E20;        /* 深綠色文字 */
-            --input-area-bg: rgba(255, 255, 255, 0.9);
-            --accent-green: #81C784;       /* 點綴綠 */
-            --system-info-bg: #DCEDC8;     /* 系統資訊背景 */
+            --ai-msg-bg: #ffffff;
+            --ai-msg-text: #000000;
+            --input-area-bg: #f9f9f9;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Microsoft JhengHei", sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background-color: var(--bg-color);
-            height: 100dvh; 
+            height: 97dvh; 
             display: flex;
             flex-direction: column;
-            align-items: center; /* 電腦端居中 */
             overflow: hidden;
         }
 
-        /* 頂部導覽列 (讓它更像 APP) */
-        .app-header {
-            width: 100%;
-            max-width: 800px;
-            padding: 15px 20px;
-            background: var(--bg-color);
-            text-align: center;
-            font-weight: 700;
-            font-size: 18px;
-            color: #2E7D32;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            flex-shrink: 0;
-        }
-
-        /* 聊天主容器 - 限制最大寬度防止電腦端過寬 */
         #chat-container {
-            width: 100%;
-            max-width: 800px; /* 電腦端舒適寬度 */
             flex-grow: 1;
             overflow-y: auto;
-            padding: 20px 15px;
+            padding: 10px;
+            padding-bottom: 20px;
             display: flex;
             flex-direction: column; 
-            gap: 12px;
+            /*justify-content: flex-end; */
             scroll-behavior: smooth;
-            box-sizing: border-box;
         }
+        /*
+        #chat-container > :first-child {
+            margin-top: auto;
+        }*/
 
-        /* 訊息氣泡通用樣式 */
         .message {
-            position: relative;
-            padding: 12px 16px;
-            border-radius: 22px;
+            margin-bottom: 8px;
+            padding: 8px 12px;
+            border-radius: 18px;
             max-width: 85%;
             word-wrap: break-word;
-            line-height: 1.6;
-            font-size: 17px; /* 增大字體，易於閱讀 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-            transition: transform 0.1s;
+            line-height: 1.5;
+            white-space: pre-wrap;
+            font-size: 15px;
+            position: relative;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
 
-        .message:active {
-            transform: scale(0.99); /* 點擊回饋 */
-        }
-
-        /* 使用者訊息 - 右側 */
         .user-message {
             background-color: var(--user-msg-bg);
             color: var(--user-msg-text);
             align-self: flex-end; 
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
         }
 
-        /* AI 訊息 - 左側 */
         .ai-message {
             background-color: var(--ai-msg-bg);
             color: var(--ai-msg-text);
             align-self: flex-start; 
             border-bottom-left-radius: 4px;
-            border: 1px solid rgba(0,0,0,0.03);
         }
         
-        /* 系統/資訊訊息 - 居中 */
         .ai-message.info {
-            background-color: var(--system-info-bg);
-            color: #33691E;
-            font-size: 14px;
-            padding: 6px 15px;
+            background-color: #ffe066;
+            color: #4a4a4a;
+            font-size: 13px;
+            padding: 8px 12px;
             align-self: center; 
             border-radius: 12px;
-            max-width: 90%;
-            box-shadow: none;
-            border: none;
-            font-family: "SF Mono", "Cascadia Code", monospace;
-        }
-
-        /* 輸入區域樣式 - 膠囊懸浮感 */
-        #input-wrapper {
-            width: 100%;
-            max-width: 800px;
-            padding: 10px 15px;
-            box-sizing: border-box;
-            background: transparent;
-            padding-bottom: env(safe-area-inset-bottom, 15px);
+            max-width: 95%;
+            font-family: monospace; /* 讓列表更整齊 */
         }
 
         #input-area {
             background-color: var(--input-area-bg);
-            backdrop-filter: blur(10px); /* 玻璃擬態 */
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 30px;
-            padding: 5px 8px 5px 15px;
+            border-top: 1px solid #ddd;
+            padding: 8px 10px;
             display: flex;
             align-items: flex-end; 
             gap: 8px;
-            box-shadow: 0 -2px 15px rgba(0,0,0,0.03);
+            width: 100%;
+            box-sizing: border-box;
+            padding-bottom: env(safe-area-inset-bottom, 10px); 
         }
 
         #user-input {
             flex-grow: 1;
-            padding: 10px 0;
-            border: none;
-            background: transparent;
-            font-size: 17px; 
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            resize: none;
+            font-size: 16px; 
             min-height: 24px; 
-            max-height: 150px;
+            max-height: 100px;
             line-height: 1.4;
             outline: none;
-            color: #1b5e20;
+            background: #fff;
         }
 
-        /* 按鈕優化 */
         .input-btn {
             background-color: transparent;
-            color: var(--user-msg-bg);
+            color: #007aff;
             border: none;
-            width: 40px;
-            height: 40px;
-            font-size: 22px;
+            width: 36px;
+            height: 36px;
+            font-size: 20px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 50%;
-            transition: all 0.2s;
+            transition: background 0.2s;
             flex-shrink: 0;
-            margin-bottom: 2px;
         }
 
         .input-btn:hover {
-            background-color: rgba(76, 175, 80, 0.1);
+            background-color: rgba(0,0,0,0.05);
         }
         
-        #send-btn {
-            background-color: var(--user-msg-bg);
-            color: white;
-            width: 34px;
-            height: 34px;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
         .input-btn:disabled {
-            color: #ccc;
-            background-color: transparent;
+            color: #aaa;
         }
 
-        /* 滾動條美化 */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #C8E6C9;
-            border-radius: 10px;
-        }
-
-        /* 錄音狀態動畫 */
         .recording {
-            color: #ff3b30 !important;
-            background-color: rgba(255, 59, 48, 0.1) !important;
-            animation: pulse 1.2s infinite;
+            color: #ff3b30;
+            animation: pulse 1s infinite;
         }
 
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
         }
 
-        /* 電腦端滑鼠懸停效果 */
-        @media (min-width: 768px) {
-            .message:hover {
-                filter: brightness(0.98);
-            }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
         }
     </style>
 </head>
 <body>
-    <header class="app-header">生活助理</header>
+    <div id="chat-container"></div>
 
-    <div id="chat-container">
-        <!-- 範例訊息 -->
-        <div class="message ai-message info">..</div>
-        <div class="message ai-message">...</div>
-        <div class="message user-message">...</div>
+    <div id="input-area">
+        <button id="voice-btn" class="input-btn" disabled>🎤</button>
+        <textarea id="user-input" placeholder="訊息..." rows="1"></textarea>
+        <button id="send-btn" class="input-btn">➤</button>
     </div>
 
-    <div id="input-wrapper">
-        <div id="input-area">
-            <button id="voice-btn" class="input-btn">🎤</button>
-            <textarea id="user-input" placeholder="說點什麼..." rows="1"></textarea>
-            <button id="send-btn" class="input-btn">➤</button>
-        </div>
-    </div>
-
-    <script>
-        // 自動調整 textarea 高度
-        const textarea = document.getElementById('user-input');
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-    </script>
-</body>
-</html>
     <script>
         // --- 設定與全域變數 ---
         const ENCRYPTED_KEY_HOLDER = "U2FsdGVkX195q7/pYnCceTQn6dFe7ggkz6n74wX1DVwzOmb7itC1BTQ6Y7hvu8dSvXdPLNH6Gd5FvajTUJjWW/lV3YH+lN+ppGMYFYG+HpO11sq1UBX8dXw0ykeB5tW3Ni+4KlBfsS0cPDEeL4U+eJspQEPlwQxccXLc0yc37bs9cYER9SpPccW91ByDCIX73fvb7VmaRMpuMBNIWbooMcZCeWco+NmIfXv/7AB7iK4lrlY6BTsMPHZAhmoPtSHXgs3ETC99uTIgQHq1OVER8nS7MDdSbkisxVu6yAH7jYbmBgF0tEKaVNGYg2GNUl9o0GKM3DkynP8c/9ZTgoO8FSlst4+ZnHplDyvACEpVhyCf/6zwv1fpSuPyVuxgFBa+hzNZf7DS66s1nRcQDf2sdzrHjioeUaQx5Dim2DUrUf6r0kLq4voOjL4oukY1F/06/ZxQ6rdxq6X8JTVOLWEuLaqXhUAC8vvDLgvXpC70ycDeubzINMt51hVuTuRb2GUONqbWXK7c8YFDbsxZLqx4ka192qArVt2gXnmfnCxslVJGr3YmDBexhVwwuLbZVQYkH+cegorC0qKpcWrj5oFL/z9LR7SpMUhk76K/uER1tr2dZ0n65UtXm6IF+dJjUHzYPIhbpwmOw2cQMvj1rFbxHj0dFn1diCXp/y3eTIR6ILPf0HCWgEteDxNXmyb2QIlytCSrL3oEAwPnC99ErGjNuoQCZ76i2AHf9VS8xkHut9Ign4X5d2JAnjmXphNWB1FBCHpt0adIhp/9Liwqrsir8DEcWX1UZVT7DNFuJMQZJxJp7h3iDEWxf1qLrjVsk1hhHh1TrJmlZCjCrmF/nbE1y13uZ5rs4Ei0ibJCBeSkdFfD8j5RGTFLQoIDYIov5ej506jwRXMLuWIHQVtTGbl5SLa80HEkXpC/3YHOuKerYAoYL9GwfeSug5iP7IgKtI2puMRDoLtkb/Fi73JNQYOcHh8DjsxT8YHYoPGD6EeKc9gDcIhd8RVL2NXRSwxFwv14FpXWM3r3qDt6jxDEGG4Ymu+PZ9+h/CCXQX2ZAmapbQsJBeRgATYLbujDsUsYAGcHVQ9cedDoayp89oSi4E00udM0kfaJHxOxDeEVEkK8lw3BhU0VuY7espPAknHbvYonURk7rNdE56JcyeO9Ha+fo5h0sJDwo+ca8HWxrnLNzFgSQAh7p5k/PnFZCkKWWxOXXZXxKuI6fGb99SmQlYScsefaQXtr5oA8lEHYIgKSF0OQq85GLtxfVjjNJAHnuTW1GARgRxz0D7JrkL3Fef8O+X/zH4yeV1T/WwckQzB3kGoPL7ziZWi7w+oTtiJSomioSEUHTwwyiENNq3FHQAJq+TAOvgV2EOO6OHlaTd6QS5cq8DFP7ppHbDLwtDq5ZJ7B/GODX2ZWW5gFWIR9WwMbwe+Ub3lWPLd56xC/641QbmL63JSX80+RXVfTcWqzin4KXlSY7/GFWE2LiBNVlLA4Y1jLcPQ7Ulm8iRX/a+KNaktAezW/Ww2IYHWJhqMeaciLpF6XIq3z/LBkJF+LfVfZ4FcE9VG5Un2iNJLCfKYnO/cw/N3ppsDQqKFMcwDDrOn0sb4FzF9LGpeix+CObIlFjwaaqmqVM5Kr7gJGrlOCpaIroFg9flMu092OlNyncccDjE4g4LpD8Mnyq5nAEzbP7HdttWV7+8pRVoQcyCBJUtBcOmzI4LlibZq0/9CyYCEdKB9VOYgwI2MBo2WYaJ3Amulzi8kJyjXEFaQIwy0zs4jtP9+x9YVcg7Zvd+Zl0clAaV57XMka/fgmqmjOes/DfTdHv6i5zZ3jgc7+f+0XIFA=";
         const INIT_KEY = "月落";
         let API_KEY = null; 
         let API_URL = null; 
-        //let SYSTEM_PROMPT = "你是一個有禮貌且樂於助人的助理。用繁體中文回答。盡量加上emoji。盡量用markdown標示。盡量提供網址。盡量回答在200個token以內。";
-        let SYSTEM_PROMPT = `角色扮演： 「請你扮演一位 [專業角色，例如：生活顧問、科學家、歷史學家、有禮貌且樂於助人的專家]，針對 [主題] 進行詳細分析。」
-        目標設定： 「我的目標是 [全人類知識]，請你提供一份 [具體行動] 的步驟指南，並分析其中的優缺點。」
-        環境設定：  美國佛羅里達州坦帕市 (Tampa, Florida, USA)。
-        情境描述： 「我目前面臨 [具體情境]，請你從 [不同角度，例如：經濟、心理、實際操作] 進行分析，並提供解決方案。」
-        問題拆解： 「請將 [複雜問題] 拆解成幾個小步驟，並逐一進行說明與分析。」
-
-        具體範例如下：
-
-        生活規劃類：
-        「請你扮演一位時間管理專家，我希望在接下來的三個月內，能夠有效提升工作效率並學習一項新技能（例如：程式設計）。請為我制定一份詳細的週計畫，包含每日的具體任務、預計花費時間，並分析執行過程中可能遇到的挑戰及應對策略。」
-        學習分析類：
-        「我正在學習 [某個學科或概念]，但對於 [特定部分] 感到困惑。請你以一位資深教授的身份，從基礎概念開始，逐步深入解釋 [特定部分]，並提供幾個實際應用案例來幫助我理解。請確保解釋清晰、有邏輯，並包含關鍵術語的定義。」
-        決策輔助類：
-        「我正在考慮是否要 [做出某項決定，例如：換工作、購買某項產品]。請你從 [列出您關心的面向，例如：財務、職業發展、個人幸福感] 等多個角度進行深入分析，並列出支持與反對此決定的論點，最後給出一個綜合性的建議。」
-        問題解決類：
-        「我家中的 [某個物品] 出現了 [某個問題，例如：漏水、無法開機]。請你提供一份詳細的故障排除指南，從最簡單的檢查步驟開始，逐步深入，並說明每個步驟的目的。如果問題無法解決，請建議我下一步該怎麼做。」
-        提示詞的關鍵要素：
-
-        明確的角色： 讓 AI 知道它應該以什麼樣的身份來回答。
-        具體的情境： 提供越詳細的背景資訊，AI 的回答就越貼切。
-        清晰的目標： 讓 AI 知道您希望從回答中獲得什麼。
-        要求的格式： 指明您希望回答是有條理、有步驟、分析性的。用繁體中文回答。盡量加上emoji。盡量用markdown標示。
-        限制與範圍： 如果有特定的限制或希望 AI 關注的方面，請一併說明。
-        相關的資料： 在每一個細部回應中，提供相關的三個網址。 `;
-        
+        let SYSTEM_PROMPT = "你是一個有禮貌且樂於助人的助理。用繁體中文回答。盡量加上emoji。盡量用markdown標示。盡量提供網址。盡量回答在200個token以內。";
         let MODEL = "gemini-2.5-flash-lite";
         let HISTMAX = 12; // 最大歷史記錄數量
         let lastAiMessage = "";
