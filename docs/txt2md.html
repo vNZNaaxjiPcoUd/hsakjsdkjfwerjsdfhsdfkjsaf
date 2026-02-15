@@ -6,182 +6,317 @@ title: 1.MDfromTXT
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>純文字轉 Markdown 工具</title>
-    <!-- 引入 Tailwind CSS 進行快速排版 -->
+    <title>純文字轉 Markdown (URL與換行修正版)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        textarea { resize: none; }
+        textarea { 
+            resize: none; 
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+            line-height: 1.6; 
+        }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 h-screen flex flex-col">
+<body class="bg-slate-100 text-slate-800 h-screen flex flex-col overflow-hidden">
 
-    <!-- 標題區 -->
-    <header class="bg-blue-600 text-white p-4 shadow-md">
-        <div class="container mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">📄 純文字轉 Markdown 格式化工具</h1>
-            <span class="text-sm opacity-80">貼上文章 -> 自動格式化</span>
+    <!-- 標題列 -->
+    <header class="bg-blue-900 text-white p-4 shadow-lg flex justify-between items-center shrink-0">
+        <div>
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                Markdown 轉換器 (URL + 換行修正)
+            </h1>
+        </div>
+        <div class="text-xs text-blue-200">
+            自動轉換：[URL](URL) • 表格 • 段落
         </div>
     </header>
 
-    <!-- 主要內容區 -->
-    <main class="flex-grow container mx-auto p-4 flex flex-col md:flex-row gap-4 h-full">
+    <!-- 主畫面 -->
+    <main class="flex-grow flex flex-col md:flex-row h-full overflow-hidden p-3 gap-3">
         
         <!-- 左側：輸入區 -->
-        <div class="flex-1 flex flex-col bg-white rounded-lg shadow-md overflow-hidden">
-            <div class="bg-gray-200 p-3 border-b border-gray-300 flex justify-between items-center">
-                <label class="font-bold text-gray-700">1. 輸入原始文章 (貼上純文字)</label>
-                <button onclick="clearInput()" class="text-xs text-red-600 hover:text-red-800">清空</button>
+        <div class="flex-1 flex flex-col bg-white rounded-lg shadow border border-slate-300 min-w-0">
+            <div class="bg-slate-50 p-3 border-b border-slate-200 flex justify-between items-center rounded-t-lg">
+                <label class="font-bold text-slate-700">1. 輸入純文字 (Raw Text)</label>
+                <button onclick="clearInput()" class="text-xs text-red-500 hover:text-red-700 px-2 py-1 hover:bg-red-50 rounded">清空內容</button>
             </div>
-            <textarea id="inputText" class="flex-grow p-4 focus:outline-none w-full h-full font-mono text-sm" 
-                placeholder="請在此貼上您的長篇文章...&#10;例如：&#10;這是第一段。&#10;這是第二段，中間有一個換行。"></textarea>
+            <textarea id="inputText" class="flex-grow p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 w-full h-full text-sm text-slate-800" 
+                placeholder="請貼上您的文章...&#10;&#10;測試範例：&#10;這是一個段落。&#10;這是網址 https://google.com 會自動變連結。&#10;&#10;Excel 表格：&#10;姓名	電話&#10;王大明	0912345678"></textarea>
         </div>
 
-        <!-- 中間：設定與轉換按鈕 (手機版時會變橫向) -->
-        <div class="flex flex-col gap-4 justify-center md:w-48 shrink-0">
-            
-            <div class="bg-white p-4 rounded-lg shadow-md">
-                <h3 class="font-bold text-gray-700 mb-2 text-sm">換行處理模式</h3>
-                <select id="newlineMode" class="w-full p-2 border rounded text-sm mb-2">
-                    <option value="paragraph">單次換行 = 新段落 (\n\n)</option>
-                    <option value="break">單次換行 = 強制換行 (  \n)</option>
-                    <option value="merge">合併斷行 (PDF修復用)</option>
-                    <option value="keep">保持原樣 (不處理)</option>
-                </select>
-                <p class="text-xs text-gray-500 mb-4" id="modeDesc">Markdown 標準中，兩個換行才是新段落。此選項將把您輸入的單個換行轉換為兩個換行。</p>
+        <!-- 中間：設定與按鈕 -->
+        <div class="flex flex-col gap-3 justify-center md:w-56 shrink-0">
+            <div class="bg-white p-4 rounded-lg shadow border border-slate-200 text-sm">
+                <h3 class="font-bold text-slate-700 mb-3 border-b pb-2">功能設定</h3>
+                
+                <!-- 換行設定 -->
+                <div class="mb-3">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                        <input type="checkbox" id="optParagraph" checked class="text-blue-600 rounded">
+                        <div>
+                            <span class="font-semibold block">智慧分段 (\n\n)</span>
+                            <span class="text-xs text-slate-500">將單換行轉為 Markdown 段落</span>
+                        </div>
+                    </label>
+                </div>
 
-                <div class="flex items-center gap-2 mb-2">
-                    <input type="checkbox" id="convertBullets" checked class="rounded text-blue-600">
-                    <label for="convertBullets" class="text-sm select-none">自動修復列表 (• -> -)</label>
+                <!-- URL 設定 -->
+                <div class="mb-3">
+                    <label class="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 rounded">
+                        <input type="checkbox" id="optUrl" checked class="text-blue-600 rounded">
+                        <div>
+                            <span class="font-semibold block">連結轉換</span>
+                            <span class="text-xs text-slate-500">http://... &rarr; [url](url)</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- 其他設定 -->
+                <div class="space-y-2">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="optTable" checked class="text-blue-600 rounded">
+                        <span>Excel 表格識別</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" id="optList" checked class="text-blue-600 rounded">
+                        <span>清單列表識別</span>
+                    </label>
                 </div>
             </div>
 
-            <button onclick="convertText()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded shadow transition transform active:scale-95 flex items-center justify-center gap-2">
-                <span>轉換為 Markdown</span>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+            <button onclick="convert()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-lg transition transform active:scale-95 flex items-center justify-center gap-2">
+                <span>開始轉換</span>
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
             </button>
         </div>
 
         <!-- 右側：輸出區 -->
-        <div class="flex-1 flex flex-col bg-white rounded-lg shadow-md overflow-hidden border-2 border-dashed border-gray-300" id="outputContainer">
-            <div class="bg-gray-50 p-3 border-b border-gray-200 flex justify-between items-center">
-                <label class="font-bold text-gray-700">2. Markdown 結果</label>
-                <button onclick="copyToClipboard()" id="copyBtn" class="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded transition">
-                    複製結果
+        <div class="flex-1 flex flex-col bg-slate-900 rounded-lg shadow border border-slate-700 min-w-0">
+            <div class="bg-slate-800 p-3 border-b border-slate-700 flex justify-between items-center rounded-t-lg">
+                <label class="font-bold text-slate-200">2. Markdown 結果</label>
+                <button onclick="copyResult()" id="copyBtn" class="bg-green-600 hover:bg-green-500 text-white text-xs px-3 py-1 rounded transition border border-green-700 font-mono">
+                    COPY
                 </button>
             </div>
-            <textarea id="outputText" readonly class="flex-grow p-4 focus:outline-none w-full h-full font-mono text-sm bg-gray-50 text-gray-700"></textarea>
+            <textarea id="outputText" readonly class="flex-grow p-4 focus:outline-none w-full h-full bg-slate-900 text-green-400 text-sm selection:bg-slate-700"></textarea>
         </div>
 
     </main>
 
     <script>
-        const inputText = document.getElementById('inputText');
-        const outputText = document.getElementById('outputText');
-        const newlineMode = document.getElementById('newlineMode');
-        const modeDesc = document.getElementById('modeDesc');
-        const convertBullets = document.getElementById('convertBullets');
-
-        // 更新模式說明文字
-        newlineMode.addEventListener('change', function() {
-            const descs = {
-                'paragraph': '將輸入中的「單個 Enter」轉換為 Markdown 的「兩個 Enter」，確保在預覽時會分段。',
-                'break': '在每行結尾加入兩個空白，Markdown 會將其渲染為 `<br>` (強制換行但不斷落)。',
-                'merge': '將單個換行刪除並補上空白。適用於修復從 PDF 複製下來的斷裂文字。',
-                'keep': '不做任何額外的換行處理，僅轉換特殊符號。'
-            };
-            modeDesc.textContent = descs[this.value];
-        });
-
-        function convertText() {
-            let text = inputText.value;
+        function convert() {
+            const raw = document.getElementById('inputText').value;
+            // 統一換行符號，避免 Windows/Mac 差異
+            const lines = raw.replace(/\r\n/g, '\n').split('\n');
             
-            // 0. 基本清理：統一換行符號
-            text = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+            // 讀取設定
+            const optParagraph = document.getElementById('optParagraph').checked;
+            const optUrl = document.getElementById('optUrl').checked;
+            const optTable = document.getElementById('optTable').checked;
+            const optList = document.getElementById('optList').checked;
 
-            // 1. 處理列表符號 (如果勾選)
-            if (convertBullets.checked) {
-                // 將 •, ■, ⁃ 等常見符號轉為 Markdown 的 - 
-                text = text.replace(/^[ \t]*[•■⁃][ \t]*/gm, "- ");
-                // 處理數字列表 (例如 "1. " 保持不變，但確保格式)
+            let outputLines = [];
+            let inTable = false;
+            let inCodeBlock = false;
+            let tableBuffer = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i]; // 保留原始縮排
+                let trimmed = line.trim();
+
+                // --------------------------
+                // 1. 程式碼區塊偵測 (```)
+                // --------------------------
+                // 簡易判斷：如果該行是 ``` 開頭
+                if (trimmed.startsWith('```')) {
+                    inCodeBlock = !inCodeBlock;
+                    outputLines.push(line);
+                    continue; 
+                }
+                
+                // 如果在程式碼區塊內，直接輸出，不做任何 URL 或 換行處理
+                if (inCodeBlock) {
+                    outputLines.push(line);
+                    continue;
+                }
+
+                // --------------------------
+                // 2. 表格偵測 (Tab 或 |)
+                // --------------------------
+                if (optTable) {
+                    const hasTab = line.includes('\t');
+                    const hasPipe = (line.match(/\|/g) || []).length > 1;
+
+                    // 條件：包含 Tab 或多個 Pipe，且不是空行
+                    if ((hasTab || hasPipe) && trimmed.length > 0) {
+                        if (!inTable) inTable = true;
+
+                        // 處理表格內容：將 Tab 轉為 |
+                        let tableRow = line;
+                        if (hasTab) {
+                            tableRow = "| " + line.split('\t').map(c => c.trim()).join(" | ") + " |";
+                        }
+                        
+                        // 表格內的 URL 還是需要處理
+                        if (optUrl) tableRow = processUrl(tableRow);
+
+                        tableBuffer.push(tableRow);
+                        continue; // 暫存表格，跳過後續
+                    } else {
+                        // 表格結束，輸出暫存區
+                        if (inTable) {
+                            outputLines = outputLines.concat(buildTable(tableBuffer));
+                            tableBuffer = [];
+                            inTable = false;
+                        }
+                    }
+                }
+
+                // --------------------------
+                // 3. 網址轉換 (核心需求)
+                // --------------------------
+                // 只在非代碼區塊執行
+                if (optUrl) {
+                    line = processUrl(line);
+                }
+
+                // --------------------------
+                // 4. 清單偵測
+                // --------------------------
+                let isList = false;
+                if (optList) {
+                    // 符號清單 (•, -, *)
+                    if (/^\s*[•\*\-]\s+/.test(line)) {
+                        line = line.replace(/^\s*[•\*\-]\s+/, "- ");
+                        isList = true;
+                    }
+                    // 數字清單 (1., 1))
+                    else if (/^\s*\d+[\.\)]\s+/.test(line)) {
+                        line = line.replace(/^\s*(\d+)[\.\)]\s+/, "$1. ");
+                        isList = true;
+                    }
+                }
+
+                // --------------------------
+                // 5. 標題偵測 (Heuristic)
+                // --------------------------
+                let isHeading = false;
+                // 規則：短行，非清單，非標點結尾
+                if (trimmed.length > 0 && trimmed.length < 50 && !isList && !/[.,;!?。，]$/.test(trimmed)) {
+                    // 檢查上一行是否為空 (判斷是否獨立成段)
+                    let prevEmpty = (outputLines.length === 0 || outputLines[outputLines.length-1] === "");
+                    let nextEmpty = (i === lines.length - 1 || lines[i+1].trim() === "");
+
+                    if (prevEmpty && nextEmpty) {
+                        line = "## " + trimmed;
+                        isHeading = true;
+                    }
+                }
+
+                // --------------------------
+                // 6. 換行與段落處理 (核心修正)
+                // --------------------------
+                
+                // 情況 A：空行 -> 直接保留
+                if (trimmed === "") {
+                    outputLines.push("");
+                    continue;
+                }
+
+                // 情況 B：清單或標題 -> 直接輸出 (不需要額外加空行，Markdown 允許緊湊)
+                if (isList || isHeading) {
+                    outputLines.push(line);
+                    continue;
+                }
+
+                // 情況 C：普通文字段落
+                if (optParagraph) {
+                    outputLines.push(line);
+                    
+                    // 邏輯：如果"下一行"也是有內容的文字，我們必須插入一個空行，讓 Markdown 斷段
+                    // 除非下一行已經是空行了
+                    let nextLine = (i < lines.length - 1) ? lines[i+1].trim() : "";
+                    
+                    if (nextLine !== "") {
+                        // 這裡強制插入一個空字串，最終 join 時會變成 \n\n
+                        outputLines.push("");
+                    }
+                } else {
+                    // 不強制分段，但為了不斷行，行尾加兩個空白
+                    outputLines.push(line + "  ");
+                }
             }
 
-            // 2. 根據模式處理換行
-            const mode = newlineMode.value;
-
-            if (mode === 'paragraph') {
-                // 邏輯：
-                // 如果已經有連續兩個換行 (\n\n)，保留它。
-                // 如果只有單個換行 (\n)，把它變成 (\n\n)。
-                
-                // 先把所有多重換行縮減為特殊標記，避免重複處理
-                // 但簡單的做法是：先分割段落，再過濾
-                
-                // 簡易且有效的策略：
-                // 1. 把所有連續空白行 (\n\s*\n) 視為真正的段落分隔
-                // 2. 其餘單獨的 \n 視為使用者想分段但只按了一次
-                
-                // 實作：將所有換行都變成雙換行，然後把 3 個以上的換行縮減回 2 個
-                text = text.replace(/\n/g, "\n\n"); 
-                text = text.replace(/\n{3,}/g, "\n\n"); 
-
-            } else if (mode === 'break') {
-                // 在每個換行前加兩個空白 (Markdown 的 Line Break)
-                // 忽略已經是空行的地方
-                const lines = text.split('\n');
-                const newLines = lines.map(line => {
-                    if (line.trim() === '') return ''; // 空行保持空
-                    return line + "  "; // 行尾加兩空白
-                });
-                text = newLines.join('\n');
-
-            } else if (mode === 'merge') {
-                // PDF 修復模式：
-                // 如果遇到 \n\n (空行)，保留為段落。
-                // 如果遇到單個 \n，替換為空白 (接續上一行)。
-                
-                // 1. 先把真正的段落 (\n\n) 保護起來 (用個特殊字串 placeholder)
-                text = text.replace(/\n\s*\n/g, "||PARAGRAPH||");
-                
-                // 2. 把剩餘的單個換行變空白
-                text = text.replace(/\n/g, " ");
-                
-                // 3. 把 placeholder 變回標準 Markdown 段落
-                text = text.replace(/\|\|PARAGRAPH\|\|/g, "\n\n");
+            // 迴圈結束後，檢查是否有遺留的表格
+            if (inTable && tableBuffer.length > 0) {
+                outputLines = outputLines.concat(buildTable(tableBuffer));
             }
 
-            // 3. 處理標題 (簡單啟發式，可選)
-            // 如果一行很短且原本沒有標點，或許是標題？(這裡先不自動做，避免誤判)
-
-            outputText.value = text;
-            
-            // 視覺回饋
-            document.getElementById('outputContainer').classList.remove('border-dashed', 'border-gray-300');
-            document.getElementById('outputContainer').classList.add('border-solid', 'border-blue-500');
+            // 輸出
+            document.getElementById('outputText').value = outputLines.join('\n');
         }
 
-        function copyToClipboard() {
-            const copyText = document.getElementById("outputText");
-            copyText.select();
-            copyText.setSelectionRange(0, 99999); /* 手機版兼容 */
+        // --- 輔助函式：URL 處理 ---
+        function processUrl(text) {
+            // Regex 解釋：
+            // (https?:\/\/[^\s\u4e00-\u9fa5]+) -> 抓取 http/https 開頭，非空白且非中文的連續字串
+            // 我們假設 URL 不會包含中文字元，這樣可以避免誤判中文句子結尾
+            const urlRegex = /(https?:\/\/[^\s\u4e00-\u9fa5<>"]+)/g;
             
-            navigator.clipboard.writeText(copyText.value).then(() => {
-                const btn = document.getElementById('copyBtn');
-                const originalText = btn.textContent;
-                btn.textContent = "已複製！";
-                btn.classList.replace('bg-green-500', 'bg-gray-700');
+            return text.replace(urlRegex, function(url) {
+                // 處理標點符號：如果網址最後面是句號或逗號，通常是句子結束，不屬於網址
+                // 例如：Go to https://google.com. -> url is "https://google.com."
+                let cleanUrl = url;
+                let suffix = "";
                 
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.classList.replace('bg-gray-700', 'bg-green-500');
-                }, 2000);
+                if (/[.,;!?\)]$/.test(cleanUrl)) {
+                    suffix = cleanUrl.slice(-1); // 把標點拿出來
+                    cleanUrl = cleanUrl.slice(0, -1);
+                }
+                
+                // 返回 [URL](URL) + 原本的標點
+                return `[${cleanUrl}](${cleanUrl})${suffix}`;
             });
         }
 
+        // --- 輔助函式：表格建構 ---
+        function buildTable(buffer) {
+            if (buffer.length === 0) return [];
+            let res = [];
+            // 標題
+            res.push(buffer[0]);
+            // 分隔線
+            const pipeCount = (buffer[0].match(/\|/g) || []).length;
+            const cols = pipeCount > 1 ? pipeCount - 1 : 1;
+            let sep = "|";
+            for(let k=0; k<cols; k++) sep += "---|";
+            res.push(sep);
+            // 內容
+            for(let j=1; j<buffer.length; j++) res.push(buffer[j]);
+            // 表格後加空行
+            res.push(""); 
+            return res;
+        }
+
+        function copyResult() {
+            const el = document.getElementById("outputText");
+            el.select();
+            navigator.clipboard.writeText(el.value);
+            const btn = document.getElementById("copyBtn");
+            const original = btn.innerText;
+            btn.innerText = "OK!";
+            btn.classList.add("bg-green-800");
+            setTimeout(() => {
+                btn.innerText = original;
+                btn.classList.remove("bg-green-800");
+            }, 1000);
+        }
+
         function clearInput() {
-            inputText.value = '';
-            outputText.value = '';
-            inputText.focus();
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('inputText').focus();
         }
     </script>
 </body>
