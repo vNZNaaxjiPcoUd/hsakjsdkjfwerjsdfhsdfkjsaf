@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <base target="_blank">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 	<!--link rel="manifest" href="/manifest.assai.json"-->
     <title>聊天</title>
     
@@ -15,223 +15,202 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <style>
-        /* 定義淡綠色系變數 */
         :root {
-            --bg-color: #F1F8E9;           /* 極淺綠色背景 */
-            --user-msg-bg: #4CAF50;        /* 使用者：森林綠 */
-            --user-msg-text: #ffffff;
-            --ai-msg-bg: #ffffff;          /* AI：純白 */
-            --ai-msg-text: #1B5E20;        /* 深綠色文字 */
-            --input-area-bg: rgba(255, 255, 255, 0.9);
-            --accent-green: #81C784;       /* 點綴綠 */
-            --system-info-bg: #DCEDC8;     /* 系統資訊背景 */
+            --bg-color: #F1F8E9;           /* 背景：極淺綠 */
+            --primary-green: #4CAF50;      /* 主色：森林綠 */
+            --dark-green: #1B5E20;         /* 文字：深綠 */
+            --ai-bubble: #FFFFFF;          /* AI 氣泡 */
+            --user-bubble: #4CAF50;        /* 用戶氣泡 */
+            --system-info: #DCEDC8;        /* 系統標籤 */
+            --input-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        /* 核心布局：防止 iOS 背景捲動並適應高度 */
+        html, body {
+            height: 100%;
+            height: -webkit-fill-available;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Microsoft JhengHei", sans-serif;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Microsoft JhengHei", sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: var(--bg-color);
-            height: 100dvh; 
             display: flex;
             flex-direction: column;
-            align-items: center; /* 電腦端居中 */
-            overflow: hidden;
+            align-items: center;
+            position: fixed; /* 關鍵：防止鍵盤彈出時 body 被推上去產生空白 */
+            width: 100%;
         }
 
-        /* 頂部導覽列 (讓它更像 APP) */
+        /* 頂部導覽列 */
         .app-header {
             width: 100%;
             max-width: 800px;
-            padding: 15px 20px;
+            padding: 12px 20px;
             background: var(--bg-color);
             text-align: center;
             font-weight: 700;
             font-size: 18px;
-            color: #2E7D32;
+            color: var(--dark-green);
             border-bottom: 1px solid rgba(0,0,0,0.05);
             flex-shrink: 0;
+            z-index: 10;
         }
 
-        /* 聊天主容器 - 限制最大寬度防止電腦端過寬 */
+        /* 聊天主容器 */
         #chat-container {
             width: 100%;
-            max-width: 800px; /* 電腦端舒適寬度 */
+            max-width: 800px;
             flex-grow: 1;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch; /* 讓 iOS 捲動平滑 */
             padding: 20px 15px;
             display: flex;
             flex-direction: column; 
             gap: 12px;
-            scroll-behavior: smooth;
             box-sizing: border-box;
         }
 
-        /* 訊息氣泡通用樣式 */
+        /* 訊息氣泡設計 */
         .message {
             position: relative;
-            padding: 12px 16px;
+            padding: 12px 18px;
             border-radius: 22px;
             max-width: 85%;
             word-wrap: break-word;
             line-height: 1.6;
-            font-size: 17px; /* 增大字體，易於閱讀 */
-            box-shadow: 0 2px 5px rgba(0,0,0,0.04);
-            transition: transform 0.1s;
+            font-size: 17px; /* 手機端清晰大字體 */
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease;
         }
 
-        .message:active {
-            transform: scale(0.99); /* 點擊回饋 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 使用者訊息 - 右側 */
         .user-message {
-            background-color: var(--user-msg-bg);
-            color: var(--user-msg-text);
+            background-color: var(--user-bubble);
+            color: #ffffff;
             align-self: flex-end; 
             border-bottom-right-radius: 4px;
-            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
         }
 
-        /* AI 訊息 - 左側 */
         .ai-message {
-            background-color: var(--ai-msg-bg);
-            color: var(--ai-msg-text);
+            background-color: var(--ai-bubble);
+            color: var(--dark-green);
             align-self: flex-start; 
             border-bottom-left-radius: 4px;
-            border: 1px solid rgba(0,0,0,0.03);
         }
         
-        /* 系統/資訊訊息 - 居中 */
-        .ai-message.info {
-            background-color: var(--system-info-bg);
+        .info-message {
+            background-color: var(--system-info);
             color: #33691E;
-            font-size: 14px;
-            padding: 6px 15px;
+            font-size: 13px;
+            padding: 5px 12px;
             align-self: center; 
-            border-radius: 12px;
-            max-width: 90%;
+            border-radius: 10px;
             box-shadow: none;
-            border: none;
-            font-family: "SF Mono", "Cascadia Code", monospace;
         }
 
-        /* 輸入區域樣式 - 膠囊懸浮感 */
+        /* 輸入區域：膠囊式設計 */
         #input-wrapper {
             width: 100%;
             max-width: 800px;
             padding: 10px 15px;
             box-sizing: border-box;
-            background: transparent;
-            padding-bottom: env(safe-area-inset-bottom, 15px);
+            background: var(--bg-color);
+            /* 適應 iPhone 底部安全區 (Home Indicator) */
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+            flex-shrink: 0;
         }
 
         #input-area {
-            background-color: var(--input-area-bg);
-            backdrop-filter: blur(10px); /* 玻璃擬態 */
-            border: 1px solid rgba(0,0,0,0.08);
-            border-radius: 30px;
-            padding: 5px 8px 5px 15px;
+            background-color: var(--input-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 28px;
+            padding: 6px 8px 6px 16px;
             display: flex;
             align-items: flex-end; 
             gap: 8px;
-            box-shadow: 0 -2px 15px rgba(0,0,0,0.03);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
         }
 
         #user-input {
             flex-grow: 1;
-            padding: 10px 0;
+            padding: 8px 0;
             border: none;
             background: transparent;
             font-size: 17px; 
             min-height: 24px; 
-            max-height: 150px;
+            max-height: 120px;
             line-height: 1.4;
             outline: none;
-            color: #1b5e20;
+            color: #000;
+            caret-color: var(--primary-green);
         }
 
-        /* 按鈕優化 */
-        .input-btn {
+        /* 按鈕設計 */
+        .btn {
             background-color: transparent;
-            color: var(--user-msg-bg);
+            color: var(--primary-green);
             border: none;
-            width: 40px;
-            height: 40px;
+            width: 38px;
+            height: 38px;
             font-size: 22px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             border-radius: 50%;
-            transition: all 0.2s;
+            transition: 0.2s;
             flex-shrink: 0;
+        }
+
+        .btn:active {
+            background-color: rgba(0,0,0,0.05);
+            transform: scale(0.9);
+        }
+
+        #send-btn {
+            background-color: var(--primary-green);
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            font-size: 18px;
             margin-bottom: 2px;
         }
 
-        .input-btn:hover {
-            background-color: rgba(76, 175, 80, 0.1);
-        }
-        
-        #send-btn {
-            background-color: var(--user-msg-bg);
-            color: white;
-            width: 34px;
-            height: 34px;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
+        /* 滾動條 */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #C8E6C9; border-radius: 10px; }
 
-        .input-btn:disabled {
-            color: #ccc;
-            background-color: transparent;
-        }
-
-        /* 滾動條美化 */
-        ::-webkit-scrollbar {
-            width: 5px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #C8E6C9;
-            border-radius: 10px;
-        }
-
-        /* 錄音狀態動畫 */
-        .recording {
-            color: #ff3b30 !important;
-            background-color: rgba(255, 59, 48, 0.1) !important;
-            animation: pulse 1.2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        /* 電腦端滑鼠懸停效果 */
+        /* 電腦端 hover 效果 */
         @media (min-width: 768px) {
-            .message:hover {
-                filter: brightness(0.98);
-            }
+            #chat-container { padding: 40px 20px; }
+            .message:hover { filter: brightness(0.98); }
         }
     </style>
 </head>
 <body>
+
     <header class="app-header">生活助理</header>
 
     <div id="chat-container">
-        <!-- 範例訊息 -->
-        <div class="message ai-message info">..</div>
-        <div class="message ai-message">...</div>
-        <div class="message user-message">...</div>
+        <div class="message info-message">今天 10:30</div>
+        <div class="message ai-message">您好！這是一個為您優化的對話介面。嘗試在手機上點擊輸入框，輸入框會精準地出現在鍵盤上方。</div>
+        <div class="message user-message">這綠色看起來真的很舒服，字體大小也很剛好。</div>
     </div>
 
     <div id="input-wrapper">
         <div id="input-area">
-            <button id="voice-btn" class="input-btn">🎤</button>
-            <textarea id="user-input" placeholder="說點什麼..." rows="1"></textarea>
-            <button id="send-btn" class="input-btn">➤</button>
+            <button id="voice-btn" class="btn">🎤</button>
+            <textarea id="user-input" placeholder="訊息..." rows="1"></textarea>
+            <button id="send-btn" class="btn">➤</button>
         </div>
     </div>
 
@@ -243,8 +222,7 @@
             this.style.height = (this.scrollHeight) + 'px';
         });
     </script>
-</body>
-</html>
+
     <script>
         // --- 設定與全域變數 ---
         const ENCRYPTED_KEY_HOLDER = "U2FsdGVkX195q7/pYnCceTQn6dFe7ggkz6n74wX1DVwzOmb7itC1BTQ6Y7hvu8dSvXdPLNH6Gd5FvajTUJjWW/lV3YH+lN+ppGMYFYG+HpO11sq1UBX8dXw0ykeB5tW3Ni+4KlBfsS0cPDEeL4U+eJspQEPlwQxccXLc0yc37bs9cYER9SpPccW91ByDCIX73fvb7VmaRMpuMBNIWbooMcZCeWco+NmIfXv/7AB7iK4lrlY6BTsMPHZAhmoPtSHXgs3ETC99uTIgQHq1OVER8nS7MDdSbkisxVu6yAH7jYbmBgF0tEKaVNGYg2GNUl9o0GKM3DkynP8c/9ZTgoO8FSlst4+ZnHplDyvACEpVhyCf/6zwv1fpSuPyVuxgFBa+hzNZf7DS66s1nRcQDf2sdzrHjioeUaQx5Dim2DUrUf6r0kLq4voOjL4oukY1F/06/ZxQ6rdxq6X8JTVOLWEuLaqXhUAC8vvDLgvXpC70ycDeubzINMt51hVuTuRb2GUONqbWXK7c8YFDbsxZLqx4ka192qArVt2gXnmfnCxslVJGr3YmDBexhVwwuLbZVQYkH+cegorC0qKpcWrj5oFL/z9LR7SpMUhk76K/uER1tr2dZ0n65UtXm6IF+dJjUHzYPIhbpwmOw2cQMvj1rFbxHj0dFn1diCXp/y3eTIR6ILPf0HCWgEteDxNXmyb2QIlytCSrL3oEAwPnC99ErGjNuoQCZ76i2AHf9VS8xkHut9Ign4X5d2JAnjmXphNWB1FBCHpt0adIhp/9Liwqrsir8DEcWX1UZVT7DNFuJMQZJxJp7h3iDEWxf1qLrjVsk1hhHh1TrJmlZCjCrmF/nbE1y13uZ5rs4Ei0ibJCBeSkdFfD8j5RGTFLQoIDYIov5ej506jwRXMLuWIHQVtTGbl5SLa80HEkXpC/3YHOuKerYAoYL9GwfeSug5iP7IgKtI2puMRDoLtkb/Fi73JNQYOcHh8DjsxT8YHYoPGD6EeKc9gDcIhd8RVL2NXRSwxFwv14FpXWM3r3qDt6jxDEGG4Ymu+PZ9+h/CCXQX2ZAmapbQsJBeRgATYLbujDsUsYAGcHVQ9cedDoayp89oSi4E00udM0kfaJHxOxDeEVEkK8lw3BhU0VuY7espPAknHbvYonURk7rNdE56JcyeO9Ha+fo5h0sJDwo+ca8HWxrnLNzFgSQAh7p5k/PnFZCkKWWxOXXZXxKuI6fGb99SmQlYScsefaQXtr5oA8lEHYIgKSF0OQq85GLtxfVjjNJAHnuTW1GARgRxz0D7JrkL3Fef8O+X/zH4yeV1T/WwckQzB3kGoPL7ziZWi7w+oTtiJSomioSEUHTwwyiENNq3FHQAJq+TAOvgV2EOO6OHlaTd6QS5cq8DFP7ppHbDLwtDq5ZJ7B/GODX2ZWW5gFWIR9WwMbwe+Ub3lWPLd56xC/641QbmL63JSX80+RXVfTcWqzin4KXlSY7/GFWE2LiBNVlLA4Y1jLcPQ7Ulm8iRX/a+KNaktAezW/Ww2IYHWJhqMeaciLpF6XIq3z/LBkJF+LfVfZ4FcE9VG5Un2iNJLCfKYnO/cw/N3ppsDQqKFMcwDDrOn0sb4FzF9LGpeix+CObIlFjwaaqmqVM5Kr7gJGrlOCpaIroFg9flMu092OlNyncccDjE4g4LpD8Mnyq5nAEzbP7HdttWV7+8pRVoQcyCBJUtBcOmzI4LlibZq0/9CyYCEdKB9VOYgwI2MBo2WYaJ3Amulzi8kJyjXEFaQIwy0zs4jtP9+x9YVcg7Zvd+Zl0clAaV57XMka/fgmqmjOes/DfTdHv6i5zZ3jgc7+f+0XIFA=";
@@ -252,11 +230,12 @@
         let API_KEY = null; 
         let API_URL = null; 
         //let SYSTEM_PROMPT = "你是一個有禮貌且樂於助人的助理。用繁體中文回答。盡量加上emoji。盡量用markdown標示。盡量提供網址。盡量回答在200個token以內。";
-        let SYSTEM_PROMPT = `角色扮演： 「請你扮演一位 [專業角色，例如：生活顧問、科學家、歷史學家、有禮貌且樂於助人的專家]，針對 [主題] 進行詳細分析。」
+        let SYSTEM_PROMPT = `角色扮演： 「請你扮演一位 [專業角色，例如：生活顧問、科學家、歷史學家、程式設計的專家]，針對 [主題] 進行詳細分析。」
         目標設定： 「我的目標是 [全人類知識]，請你提供一份 [具體行動] 的步驟指南，並分析其中的優缺點。」
         環境設定：  美國佛羅里達州坦帕市 (Tampa, Florida, USA)。
         情境描述： 「我目前面臨 [具體情境]，請你從 [不同角度，例如：經濟、心理、實際操作] 進行分析，並提供解決方案。」
         問題拆解： 「請將 [複雜問題] 拆解成幾個小步驟，並逐一進行說明與分析。」
+        回應態度： 「請你以溫柔，平和、幽默的語氣來回答，並確保內容具有創意、實用性、深度。」
 
         具體範例如下：
 
@@ -432,7 +411,7 @@
             }
             
             chatContainer.appendChild(messageDiv);
-            scrollToBottom();
+            //scrollToBottom(); ///vvp
         }
 
         function scrollToBottom() {
@@ -589,6 +568,7 @@
             } catch (error) {
                 const loadingElem = document.getElementById(loadingId);
                 if(loadingElem) chatContainer.removeChild(loadingElem);
+                console.log("API 錯誤:", error);
                 displayMessage(`錯誤: ${error.message}`, 'ai', true);
             } finally {
                 if (shouldRestartVoice) setTimeout(startVoiceRecognition, 500);
@@ -982,6 +962,7 @@
                 shouldRestartVoice = false;
                 sendMessage();
             }
+            userInput.focus();
         });
 
         userInput.addEventListener('input', autoResizeInput);
@@ -1002,6 +983,7 @@
             }else{
                 displayMessage("歡迎回來 ！", 'ai', true);
             }
+            scrollToBottom();
             userInput.focus();
         });
     </script>
