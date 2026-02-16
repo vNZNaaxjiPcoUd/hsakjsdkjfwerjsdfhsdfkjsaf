@@ -1281,7 +1281,8 @@ function gotoNewBook() {
 
     if (result) {
         console.log("使用者點擊了：確定");
-        window.location.href = './vp.html';
+        //window.location.href = './vp.html';
+        window.open('./vp.html', '_blank');
         updateStatus("建立新書...", 'info');
         return true;
     } else {
