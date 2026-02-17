@@ -1,0 +1,16 @@
+# myTools
+
+- [Web enc](https://v.jwint.net/enc)
+- [Web dec](https://v.jwint.net/dec)
+- [TalkAI](https://h.jwint.net/TalkAI_note.html)
+- [VP note](https://h.jwint.net/vp_note)
+- [Upload and link](https://h.jwint.net/Q76HQAiPoUUhPJoqv6CZg)
+- [html to markdown](https://h.jwint.net/html2md)
+- [markdown to html](https://h.jwint.net/md2html)
+- [md5](https://j.jwint.net/md5.html)
+- [AES](https://j.jwint.net/aes)
+- [Code Beauty](https://codebeautify.org/real-time-html-editor)
+- [HTML Editor](https://onlinehtmleditor.dev/)
+- [Laverna](https://j.jwint.net/laverna)
+- [Markdown editor mdxeditor](https://mdxeditor.dev/editor/demo)
+- [QR code generator](https://enc.jwint.net/online-tools/qr-code/generator/)
