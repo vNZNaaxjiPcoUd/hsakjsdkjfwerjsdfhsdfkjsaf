@@ -939,8 +939,10 @@ async function doSave(key, inV, tag ) {
 
 // 2. 讀取單一資料 (Get)
 async function doGet(key) {
-    //return { status:"success", message:"讀取成功", key: key, value: `{{ content }}`, tag: "AAAAAA" };
-    return { status:"success", message:"讀取成功", key: key, value: `U2FsdGVkX183dYNYeOXU0SiyzSxqM2zL8hETQ/mRxthViIaEUIxHajnOn9F/gnIZkAqPuS9XMr7cBVfKtZnFVSJQL68Pmc3hVyWno4mn4AirSYFg8wonphHNxLmxw8xr`, tag: "AAAAAA" };
+    let encV = `{{ content }}`;
+    let nV = encV.replace(/<\/?p>/g, "").trim();
+    console.log("Encrypted value:", nV);
+    return { status:"success", message:"讀取成功", key: key, value: nV, tag: "AAAAAA" };
 
     /*
     const res = await callApi({
