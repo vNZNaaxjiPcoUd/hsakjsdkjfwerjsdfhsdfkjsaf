@@ -2,7 +2,7 @@ vp 隨身記事本使用方式
 =========
 打開網頁，輸入記事本名稱，輸入密碼，即可以打開記事本。
 
-[https://note.jwint.net/](https://note.jwint.net/)
+[https://n.jwint.net/](https://n.jwint.net/)
 
 
 #### 功能如下：
@@ -22,8 +22,8 @@ vp 隨身記事本使用方式
 - 隨手記下事情，想法，待回電腦時，再好好的消化。
 - 只要有網址，即可使用，所以在外面公共的地方，也可以方便記下些文字。
 - 記事本可以隨意創建多個，按下「新」即可有新記事本，或開另一本已存放的記事本。記下記事本名字，就可以隨時取用
-- 可以直接打開記事本，即網址直接輸入 [https://h.jwint.net/vp?bookname](hhttps://h.jwint.net/vp?bookname)
-- 可以直接打開記事本，不用輸入密碼，即網址直接輸入 [https://h.jwint.net/vp?bookname=password](https://h.jwint.net/vp?bookname=password)
+- 可以直接打開記事本，即網址直接輸入 [https://n.jwint.net/bookname](hhttps://h.jwint.net/bookname)
+- 可以直接打開記事本，不用輸入密碼，即網址直接輸入 [https://n.jwint.net/bookname=password](https://n.jwint.net/bookname=password)
 - 在手機上時，可以保存到主畫面，方便使用，像APP一樣。 在瀏覽器上按下 分享/ 加入主畫面/ 輸入名稱/ 加入，就可以在主畫面看到你的記事本
 
 
