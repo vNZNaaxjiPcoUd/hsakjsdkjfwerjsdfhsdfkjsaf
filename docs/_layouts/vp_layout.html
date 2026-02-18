@@ -943,12 +943,13 @@ async function doGet(key) {
     console.log("從 API 讀取到的加密內容:", encV);
     let nV = encV.replace(/<\/?p>/g, "").trim();
     console.log("去除 <p> 標籤後的內容:", nV);
+        /*
     let jV = JSON.parse(nV);
     console.log("解析後的 JSON 物件:", jV);
     let resV = jV.content;
     console.log("從 JSON 物件中提取的 content:", resV);
-    console.log("Encrypted value:", resV);
-    return { status:"success", message:"讀取成功", key: key, value: resV, tag: "AAAAAA" };
+    console.log("Encrypted value:", resV);*/
+    return { status:"success", message:"讀取成功", key: key, value: nV, tag: "AAAAAA" };
 
     /*
     const res = await callApi({
