@@ -1349,6 +1349,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     res = { status: "error", value: "" };
                     console.log("ret=",ret);
                     updateStatus("新書已建立，記得要保存喔！", 'success');
+                    buttonShowSaved();
                 } else {
                     console.log("使用者取消新書建立，將重新輸入書名");
                     alert("再次輸入書名");
