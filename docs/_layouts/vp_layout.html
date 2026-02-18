@@ -940,6 +940,7 @@ async function doSave(key, inV, tag ) {
 // 2. 讀取單一資料 (Get)
 async function doGet(key) {
     let encV = `{{ content }}`;
+    console.log("從 API 讀取到的加密內容:", encV);
     let nV = encV.replace(/<\/?p>/g, "").trim();
     let jV = JSON.parse(nV);
     let resV = jV.content;
