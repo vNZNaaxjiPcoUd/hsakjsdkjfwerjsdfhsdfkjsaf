@@ -941,8 +941,10 @@ async function doSave(key, inV, tag ) {
 async function doGet(key) {
     let encV = `{{ content }}`;
     let nV = encV.replace(/<\/?p>/g, "").trim();
-    console.log("Encrypted value:", nV);
-    return { status:"success", message:"讀取成功", key: key, value: nV, tag: "AAAAAA" };
+    let jV = JSON.parse(nV);
+    let resV = jV.content;
+    console.log("Encrypted value:", resV);
+    return { status:"success", message:"讀取成功", key: key, value: resV, tag: "AAAAAA" };
 
     /*
     const res = await callApi({
