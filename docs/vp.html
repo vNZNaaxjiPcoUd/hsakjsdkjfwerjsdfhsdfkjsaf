@@ -626,7 +626,7 @@ function getContentFromTabB() {
     blocks.forEach(block => {
         const nameInput = block.querySelector('.block-name');
         const textarea = block.querySelector('.editable-text');
-        const title = nameInput.value || "未命名";
+        const title = nameInput.value || "_";
         const text = textarea.value || "";
         const safeTitle = btoa(unescape(encodeURIComponent(title))); 
         const safeText = btoa(unescape(encodeURIComponent(text)));
@@ -646,9 +646,9 @@ function setContentToTabB(fullContent) {
     let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
     //console.log("使用新版解析方式...",blockStrings);
     //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
+    //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 999999)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>'): ${blockStrings.length > 0 ? blockStrings[0].indexOf('<<<<TITLE_END>>>>') : 'N/A'}`); 
 
     if (blockStrings.length === 0 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {   
-        //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 100)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>')`); 
         console.log("使用舊版解析方式...");
         const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
         console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
@@ -693,7 +693,7 @@ function encData(){
     if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
     if (!content.trim()) { console.log("筆記無內容", 'error'); return false; }
     try {
-        const keyHash = CryptoJS.SHA512(key).toString();
+        const keyHash = key;
         const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
         encryptedContentArea.value = encrypted;
         console.log("加密成功！", 'success');
@@ -702,7 +702,7 @@ function encData(){
 }
 
 function getKey(){
-    return bookData.aesKey+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+    return CryptoJS.SHA512(bookData.aesKey+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh").toString();
 }
 
 // 按鈕事件 - 解密
@@ -719,7 +719,7 @@ function decData(){
         if (!encryptedText) { console.log("無密文內容", 'error'); return false; }
 
         try {
-            const keyHash = CryptoJS.SHA512(key).toString();
+            const keyHash = key;
             const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
             originalText = bytes.toString(CryptoJS.enc.Utf8);
             if (originalText) {
@@ -1044,7 +1044,14 @@ async function saveToAPI() {
                 console.log(`已上傳 ${bookData.Name}`, 'success');
                 setTag(res.tag);
             } else {
+                const regex = new RegExp(`Tag mismatch!`, 's');
+                const match = res.message.match(regex);
+                if(match) {
+                    console.log(`上傳失敗: 目前資料不匹配，可能是因為在其他裝置或分頁修改了內容。請重新載入後再試一次。`, 'error');
+                    res = { status: "error", message: "目前資料和雲端不匹配，可能是因為在其他裝置或分頁修改了內容。請保存當前資料，重新載入後再試一次。" };
+                } else {
                 console.log(`上傳失敗: ${res.message}`, 'error');
+                }
                 cleanAPIKey();
             }
         }
@@ -1322,7 +1329,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     result = firstKey;
     bookData.aesKey = firstValue;
     if(bookData.aesKey) {
-        console.log("從 URL 參數取得 AES 密鑰:");
+        //console.log("從 URL 參數取得 AES 密鑰:");
         document.getElementById('setPW').style.display = "none";
     }
 
