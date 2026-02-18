@@ -1,0 +1,1421 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" , interactive-widget=resizes-content">
+    <title>VP</title>
+    <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+    <script>
+        (function() {
+            const bookname = window.location.search.slice(1);
+            window.title = "VP";
+            const myManifest = {
+                "name": "VP",
+                "short_name": "VP",
+                "description": "VP",
+                "display": "standalone",
+                "theme_color": "#2196F3",
+                "background_color": "#F0F0F0",
+                "start_url": window.location.href, // 關鍵：使用當下網址
+                "scope": "https://h.jwint.net/",
+                "icons": [
+                    { "src": "https://h.jwint.net/favicon192.png", "sizes": "192x192", "type": "image/png" },
+                    { "src": "https://h.jwint.net/favicon512.png", "sizes": "512x512", "type": "image/png" }
+                ],
+                "orientation": "portrait"
+            };
+            const jsonString = JSON.stringify(myManifest);
+            const linkTag = document.createElement('link');
+            linkTag.rel = 'manifest';
+            linkTag.href = 'data:application/json,' + encodeURIComponent(jsonString);
+            document.head.appendChild(linkTag);        
+        })();
+    </script>
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+        background-color: #f4f4f9;
+        font-size: 16px; 
+    }
+
+    .main-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 19px);
+        padding: 3px;
+        box-sizing: border-box;
+    }
+
+    /* --- 狀態訊息樣式 --- */
+    .status-info {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        padding: 3px 10px;
+        text-align: center;
+        font-size: 12px;
+        font-weight: bold;
+        background-color: #eee;
+        border-top: 1px solid #ccc;
+        z-index: 1000;
+        box-sizing: border-box;
+    }
+
+    /* --- 主分頁按鈕樣式 --- */
+    .tabs {
+        flex-shrink: 0;
+        margin-bottom: 0;
+    }
+
+    .tabs button {
+        background-color: rgb(187, 93, 250);
+        border: none;
+        outline: none;
+        cursor: pointer;
+        padding: 4px 16px;
+        transition: 0.3s;
+        margin-right: 11px;
+        border-radius: 10px;
+        font-size: 16px;
+        color: white;
+    }
+
+    .tabs button:hover {
+        background-color: #ddd;
+    }
+
+    .tabs button.active {
+        /*background-color: #2196F3;*/
+        color: white;
+    }
+
+    /* --- 分頁內容容器 --- */
+    .tab-content {
+        display: none;
+        padding: 0px;
+        /*order: 1px solid #ccc;*/
+        /*border-top: none;*/
+        background-color: white;
+        flex-grow: 1;
+        overflow: hidden;
+        box-sizing: border-box;
+        height: 100%;
+    }
+
+    .tab-content.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* --- 分頁 A (加密/解密) 樣式 --- */
+    #TabA {
+        display: none;
+    }
+    #TabA.active {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .control-row {
+        margin-bottom: 10px;
+        flex-shrink: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px; /* 按鈕間距 */
+    }
+
+    #TabA input[type="password"] { 
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        width: 100%; 
+        box-sizing: border-box;
+        margin-bottom: 5px;
+    }
+
+    #TabA button { 
+        padding: 8px 12px; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 16px;
+    }
+
+    /* 按鈕顏色分類 */
+    #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
+    #exportBtn, #importBtnTrigger { background-color: #FF5722; }
+    #saveDBBtn2, #getDBBtn2, #newPageBtn{ /*background-color: #9c27b0;*/  color: white;}
+    
+    .external-link-btn { background-color: #607d8b; }
+
+    #TabA button:hover { opacity: 0.9; }
+
+    #encryptedContent {
+        width: 100%;
+        flex-grow: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+        resize: none;
+        font-family: monospace;
+    }
+
+    /* --- 分頁 B (筆記) 樣式 - 修改版 --- */
+
+
+    /* 子分頁容器：使用 Flex 並允許換行 */
+    .sub-tabs-header {
+        display: flex;
+        flex-wrap: wrap; /* 允許整個頭部換行，確保按鈕不跑版 */
+        align-items: flex-end;
+        border-bottom: 1px solid #ccc;
+        background-color: #f4f4f9;
+        padding-top: 1px;
+        flex-shrink: 0;
+        min-height: 20px;
+    }
+
+/* 分頁太長時會開水平滾動 */
+.sub-tabs {
+    display: flex;
+    flex-wrap: nowrap;       /* 1. 強制不換行 */
+    overflow-x: auto;        /* 2. 當內容溢出時，開啟水平滾動 */
+    overflow-y: hidden;      /* 3. 隱藏垂直方向的溢出，避免出現奇怪的抖動 */
+    
+    /* 讓滑動更流暢（iOS 設備建議加上） */
+    -webkit-overflow-scrolling: touch; 
+    
+    margin-bottom: -2px; 
+    margin-top: 3px;
+
+    /* 確保容器寬度固定，不會被內容撐爆外部版面 */
+    width: 100%; 
+}
+
+/* 4. 關鍵：確保內層的按鈕（Tab）不會因為空間不夠而被擠壓變形 */
+.sub-tabs > button, 
+.sub-tabs > div { 
+    flex-shrink: 0; 
+}
+
+
+
+/* 分頁全都列出來
+    .sub-tabs {
+        display: flex;
+        flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 /
+        /*flex-grow: 1;*/ /* 打開可以讓分頁按鈕區域撐滿剩餘空間，確保按鈕靠左 /
+        margin-bottom: -2px; /* 為了配合 border /
+        margin-top: 3px; /* 為了配合 border /
+    }
+*/
+    .sub-tab-button {
+        background-color: #e7e7e7;
+        border: 0px solid #ccc;
+        border-bottom: 1px solid #ccc; /* 預設有底線 */
+        outline: none;
+        cursor: pointer;
+        padding: 1px 5px;
+        transition: 0.3s;
+        border-radius: 5px 5px 0 0;
+        margin-right: 2px;
+        font-size: 16px;
+        margin-bottom: 0px; /* 換行時增加上下間距 */
+        display: flex;
+        align-items: center;
+        white-space: nowrap; /* 防止按鈕內文字換行 */
+    }
+
+    .sub-tab-button:hover { background-color: #ddd; }
+    
+    .sub-tab-button.active {
+        background-color: #b0fdbc;
+        border-bottom: 1px solid #ffffff; /* 蓋過底線 */
+        /*font-weight: bold;*/
+        z-index: 10;
+        margin-bottom: 0px; /* 讓 active 的按鈕貼齊底部 */
+        position: relative;
+    }
+
+    .delete-sub-btn {
+        margin-left: 8px;
+        color: #999;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 1;
+        padding: 0 2px;
+    }
+    .delete-sub-btn:hover {
+        color: #ff0000;
+    }
+
+    .sub-tab-content-container {
+        flex-grow: 1;
+        position: relative;
+        overflow: hidden;
+        margin-top: 1px;
+        height: 100dvh;
+    }
+
+    .sub-tab-content {
+        display: none;
+        height: 100%;
+        flex-direction: column;
+    }
+
+    .sub-tab-content.active {
+        display: flex;
+    }
+
+    .block-name {
+        display: none;
+        width: 100%;
+        padding: 5px;
+        margin-bottom: 5px;
+        border: 2px solid #2196F3;
+        border-radius: 4px;
+        font-size: 16px;
+        box-sizing: border-box;
+    }
+
+    .editable-text {
+        width: 100%;
+        flex-grow: 1;
+        padding: 5px;
+        border: 1px solid #aaa;
+        border-radius: 5px;
+        font-size: 18px;
+        line-height: 1.6;
+        resize: none;
+        box-sizing: border-box;
+        font-family: ui-monospace, 'Cascadia Code', 'Cascadia Mono', 'Segoe UI Mono',Consolas, Menlo, Monaco, 'Liberation Mono', 'DejaVu Sans Mono',monospace;
+        scroll-margin-bottom: 100px;
+    }
+
+    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 
+    #addSubPageBtn {
+        position: static;
+        margin: 0px;
+        padding: 1px 1px;
+        background-color: #008CBA;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 10px;
+        flex-shrink: 0;
+        height: fit-content;
+        align-self: center;
+    }*/
+
+    #keyNameDef {
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        width: 120px; 
+        box-sizing: border-box;
+        display: none;
+    }
+
+    #listBtn {
+        padding: 8px 12px; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 16px;
+    }
+
+    #nameBtn, #listBtn , #delBtn {
+        background-color: #3f51b5;
+    }   
+
+    #listBtn:hover, #nameBtn:hover {
+        opacity: 0.9;
+    }   
+
+    #delBtn {
+        padding: 8px 12px; 
+        color: white; 
+        border: none; 
+        border-radius: 4px; 
+        cursor: pointer; 
+        font-size: 13px;
+    }
+
+    #delNameDef {
+        padding: 8px; 
+        border: 1px solid #ccc; 
+        border-radius: 4px; 
+        width: 120px; 
+        box-sizing: border-box;
+    }
+
+    /* 密碼輸入燈箱 */
+    #passwordOverlay {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background: rgba(0,0,0,0.95);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        z-index: 999;
+    }
+    #passwordInput {
+        font-size: 28px;
+        padding: 15px 20px;
+        width: 300px;
+        text-align: center;
+        border: none;
+        border-bottom: 3px solid #00ff88;
+        background: transparent;
+        color: #fff;
+        outline: none;
+    }
+    #passwordInput:focus {
+        border-bottom-color: #00ff88;
+    }
+    .tip {
+        margin-top: 20px;
+        color: #888;
+        font-size: 16px;
+    }
+
+    #tabAbtn ,#noshow{
+        background-color: #f4f4f9;
+        color: #f4f4f9;
+        border: none;
+    }
+
+</style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="tabs">
+            <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
+            <button class="tab-button" id="setPW" onclick="newPassword()">密</button>
+            <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
+            <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
+            <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
+        </div>
+
+        <div id="TabA" class="tab-content">
+            <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
+        </div>
+
+        <div id="TabB" class="tab-content">
+            <div class="sub-tabs-header">
+                <div id="subTabNav" class="sub-tabs"></div>
+            </div>
+            <div id="subTabContentContainer" class="sub-tab-content-container"></div>
+        </div>
+    </div>
+    <div id="statusMessage" class="status-info">待...</div>
+	<div id="passwordOverlay">
+		<input type="text" id="passwordInput" placeholder="訊息內容" autocomplete="off">
+	</div>
+
+
+
+    <script>
+
+// --- 全局變數 ---
+const keyInput = document.getElementById('aesKeyBtn');
+const encryptedContentArea = document.getElementById('encryptedContent');
+const subTabNav = document.getElementById('subTabNav'); 
+const subTabContentContainer = document.getElementById('subTabContentContainer');
+const statusMessage = document.getElementById('statusMessage');
+let blockCounter = 0;
+
+// --- IndexedDB 配置 ---
+const DB_NAME = "hDB";
+const DB_VERSION = 1;
+const STORE_NAME = "notes";
+let dbInstance = null;
+let gKeyName = "";
+
+// --- 取得 URL 參數 (作為 Key) ---
+function getDynamicKeyName() {
+    const search = window.location.search;
+    if( gKeyName !== ""){
+        return gKeyName;
+    }
+    if (search && search.length > 1) {
+        const param = search.substring(1).split('=')[0];
+        return param || "A";
+    }
+    return "A";
+} 
+
+// --- 狀態訊息顯示函式 ---
+let statusTimer = null;
+function updateStatus(message, type = 'info') {
+    statusMessage.textContent = message;
+    
+    statusMessage.style.backgroundColor = '#eee';
+    statusMessage.style.color = '#333';
+
+    if (type === 'success') {
+        statusMessage.style.backgroundColor = '#d4edda';
+        statusMessage.style.color = '#155724';
+    } else if (type === 'error') {
+        statusMessage.style.backgroundColor = '#f8d7da';
+        statusMessage.style.color = '#721c24';
+    }
+
+    if (type === 'info') {
+        /*
+        if (statusTimer) {
+            clearTimeout(statusTimer);
+            statusTimer = null;
+        }
+        statusTimer = setTimeout(() => {
+            statusMessage.textContent = "待...";
+            statusMessage.style.backgroundColor = '#eee';
+            statusMessage.style.color = '#333';
+        }, 6000);
+        */
+    }
+}
+
+
+// --- 主分頁切換邏輯 ---
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    tablinks = document.getElementsByClassName("tab-button");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(tabName).classList.add("active");
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.className += " active";
+    }
+
+}
+
+// --- 子分頁切換與編輯邏輯 ---
+function switchSubTab(blockId, enterEditMode = false) {
+    document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.getElementById('sub-btn-' + blockId);
+    if (targetBtn) targetBtn.classList.add('active');
+
+    document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+    const targetContent = document.getElementById('sub-content-' + blockId);
+    if (targetContent) {
+        targetContent.classList.add('active');
+        const nameInput = targetContent.querySelector('.block-name');
+        if (enterEditMode) {
+            nameInput.style.display = 'block';
+            nameInput.focus();
+        } else {
+            nameInput.style.display = 'none';
+        }
+    }
+}
+
+function handleSubTabClick(blockId) {
+    const btn = document.getElementById('sub-btn-' + blockId);
+    if (btn && btn.classList.contains('active')) {
+        switchSubTab(blockId, true);
+    } else {
+        switchSubTab(blockId, false);
+    }
+}
+
+function deleteSubTab(event, blockId) {
+    event.stopPropagation();
+
+    const btn = document.getElementById(`sub-btn-${blockId}`);
+    const content = document.getElementById(`sub-content-${blockId}`);
+    const wasActive = btn.classList.contains('active');
+
+    console.log(`Attempting to delete block ${blockId}, wasActive: ${wasActive}`,`name of block: ${btn.querySelector('.btn-text').textContent}`);
+
+    if (!confirm(`確定要刪除 [${btn.querySelector('.btn-text').textContent}] 這個分頁嗎？`)) return;
+
+    btn.remove();
+    content.remove();
+
+    if (wasActive) {
+        const remainingBtns = document.querySelectorAll('.sub-tab-button');
+        if (remainingBtns.length > 0) {
+            const lastBtnId = remainingBtns[remainingBtns.length - 1].id.replace('sub-btn-', '');
+            switchSubTab(lastBtnId);
+        }
+    }
+    updateStatus("分頁已刪除", "success");
+}
+
+function addEditableBlock(title = null, content = "") {
+    updateStatus("正在新增分頁...", "info");
+    blockCounter++;
+    const currentId = blockCounter;
+    const blockIdString = `block-${currentId}`;
+    const displayTitle = title || (currentId === 1 ? "封面" : `${currentId}`);
+
+    const newBtn = document.createElement('button');
+    newBtn.id = `sub-btn-${blockIdString}`;
+    newBtn.className = 'sub-tab-button';
+    newBtn.innerHTML = `
+        <span class="btn-text">${displayTitle}</span>
+        <span class="delete-sub-btn" title="刪除分頁">×</span>
+    `;
+    newBtn.onclick = () => handleSubTabClick(blockIdString);
+    
+    const delBtn = newBtn.querySelector('.delete-sub-btn');
+    delBtn.onclick = (e) => deleteSubTab(e, blockIdString);
+    
+    subTabNav.appendChild(newBtn);
+
+    const newContentDiv = document.createElement('div');
+    newContentDiv.id = `sub-content-${blockIdString}`;
+    newContentDiv.className = 'sub-tab-content';
+    newContentDiv.innerHTML = `
+        <input type="text" class="block-name" value="${displayTitle}" data-target-btn="sub-btn-${blockIdString}">
+        <textarea class="editable-text" placeholder="在此輸入筆記...">${content}</textarea>
+    `;
+    subTabContentContainer.appendChild(newContentDiv);
+
+    const nameInput = newContentDiv.querySelector('.block-name');
+    nameInput.addEventListener('input', function() {
+        const btnId = this.getAttribute('data-target-btn');
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) textSpan.textContent = this.value;
+        }
+    });
+
+    nameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.blur();
+        }
+    });
+
+    nameInput.addEventListener('blur', function() {
+        this.style.display = 'none';
+        const parent = this.closest('.sub-tab-content');
+        if (parent) {
+             const area = parent.querySelector('.editable-text');
+             if(area) area.focus();
+        }
+    });
+
+    switchSubTab(blockIdString, false);
+    updateStatus("分頁已新增", "success");
+}
+
+// --- 加密/解密 核心邏輯 (SHA512 + AES) ---
+function getContentFromTabB() {
+
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const nameInput = block.querySelector('.block-name');
+        const textarea = block.querySelector('.editable-text');
+        const title = nameInput.value || "_";
+        const text = textarea.value || "";
+        const safeTitle = btoa(unescape(encodeURIComponent(title))); 
+        const safeText = btoa(unescape(encodeURIComponent(text)));
+        const struct = `<<<<BLOCK_START_v2>>>>\n${safeTitle}\n<<<<TITLE_END>>>>\n${safeText}\n<<<<BLOCK_END>>>>`;
+        contents.push(struct);
+    });
+    //console.log(`從分頁 B 取得內容，總長度: ${contents.join('\n').length}, 區塊數: ${contents.length}, 預覽: ${contents.join('\n').substring(0, 100)}`);
+    return contents.join('\n');
+
+    return contents;
+}
+
+function setContentToTabB(fullContent) {
+    subTabNav.innerHTML = '';
+    subTabContentContainer.innerHTML = '';
+    blockCounter = 0;
+
+    let parseType = "v2";
+    let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
+    //console.log("使用新版解析方式...",blockStrings);
+    //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
+    //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 999999)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>'): ${blockStrings.length > 0 ? blockStrings[0].indexOf('<<<<TITLE_END>>>>') : 'N/A'}`); 
+
+    if (blockStrings.length === 0 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {   
+        console.log("使用舊版解析方式...");
+        const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
+        console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
+        if (blockStrings2.length === 0) {
+            console.log("解密內容", fullContent);
+            return;
+        }
+        parseType = "v1";
+        blockStrings = blockStrings2;
+    }
+
+
+    //console.log(`parseType: ${parseType}, blocks to process: ${blockStrings.length}`);
+
+    blockStrings.forEach(blockStr => {
+        const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
+        const match = blockStr.match(regex);
+        console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
+        if (match) {
+            const safeTitle = match[1].trim();
+            const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
+            const safeText = match[2].trim();
+            const text = parseType === "v2" ? decodeURIComponent(escape(atob(safeText))) : safeText;
+            addEditableBlock(title, text);
+        } else {
+            addEditableBlock("解析錯誤", blockStr);
+        }
+    });
+
+    if (blockCounter > 0) {
+        const firstId = document.querySelector('.sub-tab-button').id.replace('sub-btn-', '');
+        switchSubTab(firstId, false);
+    }
+}
+
+
+// 按鈕事件 - 加密
+function encData(){
+    const key = getKey();
+    encryptedContentArea.value = "";
+    const content = getContentFromTabB();
+    if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
+    if (!content.trim()) { console.log("筆記無內容", 'error'); return false; }
+    try {
+        const keyHash = key;
+        const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
+        encryptedContentArea.value = encrypted;
+        console.log("加密成功！", 'success');
+    } catch (e) { console.log("加密失敗: " + e.message, 'error'); return false;}
+    return true;
+}
+
+function getKey(){
+    return CryptoJS.SHA512(bookData.aesKey+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh").toString();
+}
+
+// 按鈕事件 - 解密
+function decData(){
+    let originalText = "";
+    let ret = true;
+    //while (originalText === "") {
+        const key = getKey();
+        //console.log("取得密鑰...", key);
+        const encryptedText = encryptedContentArea.value;
+        //console.log("取得密文內容...",encryptedText,encryptedContentArea.value);
+        if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
+        //console.log("開始解密...",encryptedText);
+        if (!encryptedText) { console.log("無密文內容", 'error'); return false; }
+
+        try {
+            const keyHash = key;
+            const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
+            originalText = bytes.toString(CryptoJS.enc.Utf8);
+            if (originalText) {
+                console.log("解密成功，載入內容至筆記分頁...");
+                setContentToTabB(originalText);
+                openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
+                console.log("載入內容！", 'success');
+                //console.log("解密內容已載入至筆記分頁");
+            } else {
+                //updateStatus("解密失敗：密鑰或內容錯誤", 'error');
+                console.log("解密錯誤，流程A");
+                ret = false; // 直接返回 false，停止解密流程
+                /*
+                const r = getAESKey();
+
+                if(r === false) {
+                    //console.log("解密錯誤，已觸發重新輸入密鑰流程B");
+                    ret = false;
+                    break; // 如果 getAESKey 返回 false，則停止解密流程
+                }else{
+                    // 讓迴圈繼續，重新嘗試解密
+                    //console.log("解密錯誤，重新嘗試解密流程");
+
+                    if (bookData.aesKey === "stopthisloop") {
+                        ret = false; // 直接停止迴圈，避免無限嘗試
+                        break;
+                    }
+                    sleep(3000);
+                }*/
+            }
+            
+        } catch (e) {
+            console.log("解密發生錯誤。B", e);
+            ret = false; // 直接返回 false，停止解密流程
+            /*
+            const r = getAESKey();
+            sleep(3000);
+            //console.log(r);
+            if(r === false) {
+                //console.log("解密錯誤，已觸發重新輸入密鑰流程C");
+                ret = false;
+                break; // 如果 getAESKey 返回 false，則停止解密流程
+            }else{
+                // 讓迴圈繼續，重新嘗試解密
+                //console.log("解密錯誤，重新嘗試解密流程D");
+            }
+                */
+        }
+    //}
+    return ret;
+}
+
+// 編輯區鍵盤事件 - Ctrl+S 儲存
+subTabContentContainer.addEventListener('keydown', function(e) {
+    //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
+    doTextChange();
+    // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
+        e.preventDefault();
+        saveToAPI();
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+
+    // 有修改過內容後，按任意鍵都會讓存檔按鈕變色提示需要儲存
+        document.getElementById('saveDBBtn2').style.color = "white";  
+        document.getElementById('getDBBtn2').style.color = "white";  
+  
+
+    // --- Tab 鍵插入 Tab 字元邏輯 ---
+    if (e.key === 'Tab') {
+        const activeDiv = document.querySelector('.sub-tab-content.active');
+        if (!activeDiv) {
+            console.log('沒有找到 active 的 .sub-tab-content');
+            return;
+        }
+        const activeContent = activeDiv.querySelector('textarea.editable-text');
+
+        if (activeContent) {
+            //console.log('找到了：', activeContent);
+            // 可以在這裡對該元素進行操作
+            // 1. 阻止瀏覽器預設的切換欄位行為
+            e.preventDefault();
+
+            // 2. 獲取當前游標的位置
+            const start = activeContent.selectionStart;
+            const end = activeContent.selectionEnd;
+            //console.log("游標位置：", start, end);
+
+            // 3. 設定要插入的字元（可以改為兩個或四個空格 "  "）
+            const tabChar = "\t"; 
+
+            // 4. 更新文字框內容：前半段 + Tab + 後半段
+            nowContent = activeContent.value;
+            if(nowContent === undefined) {
+                nowContent = "";
+                console.log("內容為 undefined，已設為空字串");  
+            }
+
+            //console.log("原內容：", nowContent);
+            activeContent.value = nowContent.substring(0, start) + 
+                        tabChar + 
+                        nowContent.substring(end);
+
+            // 5. 將游標移動到插入的 Tab 之後（否則游標會跳到最後面）
+            activeContent.selectionStart = activeContent.selectionEnd = start + tabChar.length;       
+            //console.log("更新後內容：", activeContent.value);                          
+        } else {
+            console.log('目前沒有 active 的項目');
+        }
+
+    }
+});
+
+// Handle API
+// --- 設定區 ---
+const API_URL = "https://script.google.com/macros/s/AKfycbzIAuTrBD3eI7uusVneoYF6P-f2RtqVLT2yrpHbWpghCTsfhGh6JdcMgKx2b6a3K7HX/exec"; 
+const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
+
+/**
+ * 核心功能：生成當前 UTC 日期的 SHA-512 Token
+ */
+function generateToken() {
+    // 取得當下的 UTC 年月日 (如 20260206)
+    const kNow = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+    const name=bookData.Name;
+    const rawString = bookData.APIKey + SALT + kNow + name;
+    //console.log("生成 Token 的原始字串:", rawString, name);   
+    //console.log("生成 Token 的原始字串:", bookData.APIKey,name);
+    
+    // 使用 CryptoJS 產生 SHA512 雜湊字串
+    return CryptoJS.SHA512(rawString).toString();
+} 
+
+/**
+ * API 請求封裝
+ */
+async function callApi(params) {
+    //console.log("準備呼叫 API，參數:", params);
+    const token = generateToken();
+
+    // 組合 URL 參數
+    const queryString = new URLSearchParams({
+        ...params,
+        token: token
+    }).toString();
+    //console.log("生成的 URL 參數:", queryString);
+    const finalUrl = `${API_URL}?${queryString}`;
+    //console.log("最終 API URL:", finalUrl);
+    try {
+        const response = await fetch(finalUrl);
+        //console.log("API 請求結果:",response);
+        const result = await response.json();
+        //console.log("API 回應解析後的結果:", result);
+        return result;
+    } catch (error) {
+        console.error("API 請求失敗:");
+        console.log(error);
+        confirm("網路請求失敗，是否重試？");
+        return { status: "error", message: "網路請求失敗" };
+    }
+}
+
+async function callApiPost(params) {
+    const token = generateToken();
+    var ret = null;
+      await fetch(API_URL, {
+          method: "POST", 
+          redirect: 'follow', 
+          body: JSON.stringify({ ...params, token })
+      })
+      .then(res => res.json())
+      .then(data => {
+            //console.log(data);
+            ret = data;
+          if(data.status === "success") {
+            //console.log(`上傳成功！`);
+          } else {
+            console.log( "上傳失敗: ");
+            console.log(data);
+          }
+      })
+      .catch(error => {
+          console.log("錯誤: ");
+          console.log(error);
+          ret = { status: "error", message: "網路請求失敗" };
+      });
+      //console.log("API POST 請求已發出，等待回應...");
+      //console.log(ret);
+      //console.log("API POST 請求已發出，等待回應...",ret);
+      return ret;
+
+}
+
+// 1. 儲存資料 (Save)
+async function doSave(key, inV, tag ) {
+    const newV = {
+        action: "save",
+        key: key,
+        value: inV,
+        tag: tag
+    };
+    const res = await callApiPost(newV);
+    let newRes = null;
+    if(res.status === "success"){
+        //console.log(`File "${res.key}" doSave successfully!`, res);
+        newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
+    } else {
+        console.log(`Error saving file: ${res.message}`);
+        newRes = { status: res.status, message: res.message, key: null, value: null, tag: null };
+    }   
+    return newRes;
+}
+
+// 2. 讀取單一資料 (Get)
+async function doGet(key) {
+    //return { status:"success", message:"讀取成功", key: key, value: `{{ content }}`, tag: "AAAAAA" };
+    return { status:"success", message:"讀取成功", key: key, value: `U2FsdGVkX183dYNYeOXU0SiyzSxqM2zL8hETQ/mRxthViIaEUIxHajnOn9F/gnIZkAqPuS9XMr7cBVfKtZnFVSJQL68Pmc3hVyWno4mn4AirSYFg8wonphHNxLmxw8xr`, tag: "AAAAAA" };
+
+    /*
+    const res = await callApi({
+        action: "get",
+        key: key,
+        value: "123456",
+        tag:"AAAAAA"
+    });
+    //console.log("doGet 結果:", res);
+    let newRes = null;
+    if(res.status === "success"){
+        //console.log(`File "${res.key}" doGet successfully!`, res);
+        newRes = { status: res.status, message: res.message, key: res.key, value: res.value, tag: res.tag };
+    } else {
+        console.log("讀取資料失敗:", res.message);
+        newRes = { status: res.status, message: res.message, key: null, value: null, tag: null };
+    }
+
+    return newRes;*/
+}
+
+
+// 3. 讀取全部資料 (Get All)
+async function doGetAll() {
+    const res = await callApi({
+        action: "getall",
+        key: "alldataintableandgetmemore"
+    });
+    console.log("全部資料:", res.data);
+    return res.data;
+}
+
+// 4. 刪除資料 (Delete)
+async function doDelete(key) {
+    const res = await callApi({
+        action: "delete",
+        key: key
+    });
+    console.log("Delete 結果:", res);
+    return res;
+}
+
+async function TestAllApi() {
+    await doSave("user_001", "這是我的測試內容" + new Date().toLocaleString());
+    await doGet("user_001");
+    await doGetAll();
+    await doDelete("user_001");
+}
+
+let textChanged = false;
+
+function buttonShowSaved(){
+    document.getElementById('saveDBBtn2').style.color = "black";  
+    document.getElementById('getDBBtn2').style.color = "black";  
+    textChanged = false;
+}
+
+function setTag(T){
+    bookData.tag = T;
+    //console.log("Tag updated to:", bookData.tag);
+}
+function getTag(){
+    //console.log("Current tag:", bookData.tag);
+    return bookData.tag;
+}
+
+function isTextChanged(){
+    return textChanged;
+}
+
+function doTextChange(){
+    textChanged = true;
+}
+
+async function saveToAPI() {
+    updateStatus("正在儲存...", 'info');
+
+    if(!bookData.APIKey) {
+        getAPIKey();
+    }
+
+    let res = null;
+    document.getElementById('saveDBBtn2').style.color = "red";
+    //TabB.style.display = "none";
+    disableEditor();
+
+    while(!bookData.aesKey) {
+        let ret = await getAESKey();
+        if (!ret) {
+            console.log("使用者取消輸入密鑰");
+            return {status: "error", message: "使用者取消輸入密鑰" };
+        }
+    }     
+
+    if(!encData()) {
+        cleanAESKey();
+        console.log(`加密失敗，請確認 AES 密鑰是否正確`, 'error');
+        res = { status: "error", message: "加密失敗" };
+    }else{
+        //console.log("加密成功，準備上傳 API");
+        const content = encryptedContentArea.value;
+        if (!content.trim()) { 
+            console.log("筆記無內容可上傳", 'error'); 
+            res = { status: "error", message: "沒有內容" }; 
+        }else{
+            res=await doSave(bookData.Name, content, getTag());
+            if (res.status === "success") {
+                console.log(`已上傳 ${bookData.Name}`, 'success');
+                setTag(res.tag);
+            } else {
+                const regex = new RegExp(`Tag mismatch!`, 's');
+                const match = res.message.match(regex);
+                if(match) {
+                    console.log(`上傳失敗: 目前資料不匹配，可能是因為在其他裝置或分頁修改了內容。請重新載入後再試一次。`, 'error');
+                    res = { status: "error", message: "目前資料和雲端不匹配，可能是因為在其他裝置或分頁修改了內容。請保存當前資料，重新載入後再試一次。" };
+                } else {
+                console.log(`上傳失敗: ${res.message}`, 'error');
+                }
+                cleanAPIKey();
+            }
+        }
+    }
+    enableEditor(); //TAB.style.display = "flex";
+    //console.log("API 上傳結果:", res);
+    if (res.status === "success") {
+        //console.log("API 上傳成功");
+        buttonShowSaved();
+        updateStatus("儲存成功", 'success');
+    }else{
+        updateStatus("儲存失敗: " + res.message, 'error');
+    }
+    return res;
+}
+
+function disableEditor() {
+    const textareas = document.querySelectorAll('.editable-text');
+    textareas.forEach(ta => ta.setAttribute('disabled', 'disabled'));
+}   
+
+function enableEditor() {
+    const textareas = document.querySelectorAll('.editable-text');
+    textareas.forEach(ta => ta.removeAttribute('disabled'));
+}   
+
+async function getFromAPI() {
+
+    if(isTextChanged() === true) {
+        let ret = confirm("內容已修改，是否重新載入？");
+        if(!ret) {
+            updateStatus("讀取已取消", 'info');
+            return {status: "error", message: "使用者取消讀取" };
+        }
+    }    
+
+    updateStatus("正在讀取...", 'info');
+    if(!bookData.APIKey) {
+        getAPIKey();
+    } 
+
+    document.getElementById('getDBBtn2').style.color = "red";
+    //TabB.style.display = "none";
+    disableEditor();
+    //console.log("bookData:", bookData);
+    //const keyName = getDynamicKeyName();
+    let res = await doGet(bookData.Name);
+    //console.log("API 讀取結果:", res);
+    if (res.status === "success" && res.value) {
+        setTag(res.tag );
+        //setContentToTabB(res.data);
+        //openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
+        encryptedContentArea.value = res.value;
+        //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
+        //console.log(`已讀取 ${bookData.Name}`, 'success');
+        bookData.tag = res.tag || "";
+        let ret = false;
+        while(!ret) {
+            while(!bookData.aesKey) {
+                let ret = await getAESKey();
+                if (!ret) {
+                    console.log("使用者取消輸入密鑰");
+                    return {status: "error", message: "使用者取消輸入密鑰" };
+                }
+            }                
+            ret = await decData();
+            if (!ret) {
+                console.log(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
+                cleanAESKey();
+                sleep(1000);    
+            }else{
+                console.log(`解密成功，內容已載入`, 'success');
+            }
+        }
+    } else {
+        console.log(`API 讀取失敗: ${res.message}`, 'error');
+        cleanAPIKey();
+    }
+    if (res.status === "success") {
+        //console.log("API 讀取成功，已載入內容");
+        buttonShowSaved();
+        //updateStatus("讀取成功", 'success');
+    }else{
+        console.log("API 讀取失敗:", res.message);
+        updateStatus("讀取失敗: " + res.message, 'error');
+    }
+
+    //console.log("TABB =: ", TabB);
+    enableEditor();
+    //if (TabB.style.display) TabB.style.display = "flex";
+    //console.log("已顯示 TabB", TabB.style.display);
+    return res;
+}
+
+function getBookName() {
+	document.getElementById("passwordOverlay").style.display = "flex";
+    document.getElementById("passwordInput").focus();
+    document.getElementById("passwordInput").value = "";
+    document.getElementById("passwordInput").placeholder = "輸入書本名稱";
+};
+
+
+document.getElementById("passwordInput").onkeydown = async function(e) {
+    if (e.key === "Enter") {
+        console.log("輸入的內容:", this.value);
+        bookData.Name = this.value;
+        this.value = "";
+        this.placeholder = "訊息已送出！";
+        this.display = "none";
+        document.getElementById("passwordOverlay").style.display = "none";  
+        window.location.href = `?${bookData.Name}`;
+    }
+};
+
+// Get API Key  
+async function getAPIKey() {
+    bookData.APIKey = "3d46431496b772599fcf959885ccdea155508431ed67819db3e41079fa2d8a3cd547f596ec7c9d0b5621d6c39549297ae90ba14c663d738ec07194ad9ddeab82"
+    return;
+    const apiKey = prompt("請輸入雲密碼:");
+    if (apiKey) {
+        bookData.APIKey = apiKey;
+        updateStatus("雲密碼已更新", 'success');
+        const B = saveBookToDB();
+        B.then((data) => {
+        // 這裡對應 resolve
+            //console.log("收到資料:", data);
+        })
+        .catch((error) => {
+        // 這裡對應 reject
+            //console.error("抓到錯誤:", error);
+        });
+    } else {
+        updateStatus("雲密碼未更改", 'info');
+    }
+};
+
+const sleep = (ms) => {
+    //return new Promise(resolve => setTimeout(resolve, ms));
+    const end = Date.now() + ms;
+    console.log(`開始睡眠 ${ms} 毫秒...`);
+    while (Date.now() < end) {
+        // 什麼都不做，純粹消耗 CPU 循環
+    }
+};
+
+function newPassword() {
+    updateStatus("正在設定新密碼...", 'info');
+    let aesKey =""; 
+    aesKey = prompt("輸入書本新密碼");
+    if (!aesKey) {
+        updateStatus("書本密碼未更改", 'error');
+        return false;
+    }
+    let confirmKey = prompt("請再次輸入書本新密碼以確認");
+    if (confirmKey !== aesKey) {
+        updateStatus("兩次輸入的密碼不一致，請重新設定", 'error');
+        return false;
+    }
+    if (aesKey.trim() === "") {
+        updateStatus("書本密碼不可為空，請重新設定", 'error');
+        return false;
+    }
+    bookData.aesKey = aesKey;
+    let B = saveToAPI();
+    B.then((data) => {
+        // 這裡對應 resolve
+        if (data.status === "success") {
+            console.log("書本密碼已更新並保存成功");
+        } else {
+            console.log("書本密碼更新失敗，API 返回錯誤:", data.message);
+            updateStatus("書本用新密碼保存失敗 " + data.message, 'error');
+            return false;
+        }
+    })
+    .catch((error) => { 
+        console.error("API 儲存錯誤:", error);
+        updateStatus("用新密碼上傳失敗: " + error.message, 'error');
+        return false;
+    });
+    updateStatus("書本密碼已更新", 'success');
+    return true;
+}
+
+
+async function getAESKey() {
+    let aesKey =""; 
+        aesKey = prompt("請輸入書本密碼:");
+        if (aesKey) {
+            bookData.aesKey = aesKey;
+            console.log("書本密碼已更新 A", 'success');
+        } else if(aesKey === "") {
+                console.log("書本密碼清除", 'info');
+                bookData.aesKey = "";
+            }else { //aseKey 為 null，使用者按了取消
+                bookData.aesKey = "";
+                console.log("使用者按了取消，已重新載入頁面", 'info');
+                //while(!await gotoNewBook()){//window.location.href = './vp.html';
+                //    console.log("使用者按了取消到新頁面", 'info');
+                //};
+                return false;
+            }
+    return true;
+}
+
+
+let bookData = {
+    Name: "",
+    APIKey: "",
+    aesKey: "",
+    info: "這是一些額外的資訊",
+    tag:"9999"
+}
+
+function cleankeyData() {
+    bookData.APIKey = "";
+    bookData.aesKey = "";
+    console.log("密鑰已清除，請重新設定", 'info');
+}
+
+// clean aesKey
+function cleanAESKey() {
+    bookData.aesKey = "";
+    console.log("AES 密鑰已清除，請重新設定", 'info');
+}
+
+// clean APIKey 
+function cleanAPIKey() {
+    bookData.APIKey = "";
+    console.log("API 密鑰已清除，請重新設定", 'info');
+}   
+
+
+// goto new book
+function gotoNewBook() {
+    updateStatus("正在建立新書...", 'info');
+    let result = confirm("確定到要其他書本嗎？記得保存喔！");
+
+    if (result) {
+        console.log("使用者點擊了：確定");
+        //window.location.href = './vp.html';
+        window.open('./vp.html', '_blank');
+        updateStatus("建立新書...", 'info');
+        return true;
+    } else {
+        console.log("使用者點擊了：取消");
+        updateStatus("已取消建立新書", 'info');
+        return false;
+    }
+}   
+
+
+function offShowFunctionButton() {
+    document.getElementById('addSubPageBtn').style.display = "none";
+    document.getElementById('saveDBBtn2').style.display = "none";
+    document.getElementById('getDBBtn2').style.display = "none";
+    document.getElementById('setPW').style.display = "none";
+    document.getElementById('bookTabBtn').style.display = "none";
+}
+
+//document.getElementById('addSubPageBtn').addEventListener('click', () => {
+//    addEditableBlock();
+//});
+
+// --- 初始化 ---
+document.addEventListener('DOMContentLoaded', async () => {
+
+    //const result = window.location.search.slice(1);
+
+    let result = "";
+    const paramsFromURL = new URLSearchParams(window.location.search);
+    const entries = Object.fromEntries(paramsFromURL.entries());
+    //console.log(result, entries); 
+    const firstEntry = paramsFromURL.entries().next().value; 
+    if (firstEntry) {
+    const [key, value] = firstEntry;
+    //console.log("第一個參數名稱:", key);   // "id"
+    //console.log("第一個參數數值:", value); // "123"
+    }    
+    const firstKey = paramsFromURL.keys().next().value;
+    //console.log(firstKey); // "id"
+    const firstValue = paramsFromURL.get(firstKey);
+    //console.log(firstValue); // "123"
+
+    result = firstKey;
+    bookData.aesKey = firstValue;
+    if(bookData.aesKey) {
+        //console.log("從 URL 參數取得 AES 密鑰:");
+        document.getElementById('setPW').style.display = "none";
+    }
+
+    let res = null;
+    result = "HelloWorld";
+    if(!result){
+        getBookName();
+        return;
+    }else{
+        bookData.Name = result;
+        try { 
+            res = await getFromAPI();
+            //console.log("初始載入 API 結果:", res);
+            if(res.status !== "success"){
+                console.log("初始載入 API 結果:", res);
+                throw new Error("getFromAPI 初始載入失敗");
+            }
+        } catch (error) {
+            console.log("getFromAPI 發生錯誤:", error.message);
+            if(res.message === "Key not found") {
+                let ret = confirm("是新書嗎？");
+                console.log("使用者對新書確認的回應:", ret);
+                if (ret) {
+                    res = { status: "error", value: "" };
+                    console.log("ret=",ret);
+                    updateStatus("新書已建立，記得要保存喔！", 'success');
+                    buttonShowSaved();
+                } else {
+                    console.log("使用者取消新書建立，將重新輸入書名");
+                    alert("再次輸入書名");
+                    getBookName();
+                    return;
+                }
+            }else{
+                console.log("其他錯誤，無法載入書本:", res.message);
+                alert("再次輸入書名");
+                getBookName();            
+                return false;
+            }
+            
+        }
+        //confirm("是否要載入上次的內容？按取消將建立新書");
+        openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
+        if(res.status !== "success") {
+            addEditableBlock("封面", "");
+        }
+        document.title = bookData.Name;    
+        tabs = document.querySelectorAll('tabs');
+        tabs.forEach(tab => {
+            tab.style.display = "block";
+        });
+
+        disableEditor();
+        offShowFunctionButton();
+        //confirm("last");
+
+    }
+    //confirm("last2");
+});
+
+
+// 離開提醒
+window.addEventListener('beforeunload', (e) => {
+    if (document.getElementById('saveDBBtn2').style.color === "white") {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
+
+
+    </script>
+</body>
+</html>
