@@ -633,6 +633,7 @@ function getContentFromTabB() {
         const struct = `<<<<BLOCK_START_v2>>>>\n${safeTitle}\n<<<<TITLE_END>>>>\n${safeText}\n<<<<BLOCK_END>>>>`;
         contents.push(struct);
     });
+    //console.log(`從分頁 B 取得內容，總長度: ${contents.join('\n').length}, 區塊數: ${contents.length}, 預覽: ${contents.join('\n').substring(0, 100)}`);
     return contents.join('\n');
 }
 
@@ -646,7 +647,8 @@ function setContentToTabB(fullContent) {
     //console.log("使用新版解析方式...",blockStrings);
     //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
 
-    if (blockStrings.length === 0 || blockStrings.length === 1 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {    
+    if (blockStrings.length === 0 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {   
+        //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 100)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>')`); 
         console.log("使用舊版解析方式...");
         const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
         console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
@@ -664,6 +666,7 @@ function setContentToTabB(fullContent) {
     blockStrings.forEach(blockStr => {
         const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
         const match = blockStr.match(regex);
+        console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
         if (match) {
             const safeTitle = match[1].trim();
             const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
