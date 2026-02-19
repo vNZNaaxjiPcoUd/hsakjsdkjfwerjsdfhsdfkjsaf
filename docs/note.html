@@ -315,6 +315,13 @@
         box-sizing: border-box;
         margin: 5px;
     }
+
+    #markdownView {
+        height: auto;        /* 設定一個固定高度或最大高度 */
+        overflow-y: auto;     /* 內容超過高度時自動顯示垂直捲軸 */
+        -webkit-overflow-scrolling: touch; 
+        word-break: break-all;
+    }
 </style>
 </head>
 <body>
