@@ -126,7 +126,7 @@
     #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
     #saveDBBtn, #readDBBtn{ background-color: #9c27b0; }
     #exportBtn, #importBtnTrigger { background-color: #FF5722; }
-    #saveDBBtn2{ background-color: #9c27b0; color: white;}
+    /*#saveDBBtn2{ background-color: #9c27b0; color: white;}*/
     
     .external-link-btn { background-color: #607d8b; }
 
@@ -144,7 +144,7 @@
     }
 
     /* --- 分頁 B (筆記) 樣式 - 修改版 --- */
-    #TabB {display: none; }
+    #TabB { display: flex; }
 
     /* 子分頁容器：使用 Flex 並允許換行 */
     .sub-tabs-header {
@@ -162,7 +162,7 @@
         display: flex;
         flex-wrap: wrap; /* 關鍵：讓分頁按鈕可以換行 */
         flex-grow: 1;
-        margin-bottom: -1px; /* 為了配合 border */
+        margin-bottom: 0px; /* 為了配合 border */
     }
 
     .sub-tab-button {
@@ -176,7 +176,7 @@
         border-radius: 5px 5px 0 0;
         margin-right: 3px;
         font-size: 13px;
-        margin-bottom: 2px; /* 換行時增加上下間距 */
+        margin-bottom: 0px; /* 換行時增加上下間距 */
         display: flex;
         align-items: center;
         white-space: nowrap; /* 防止按鈕內文字換行 */
@@ -209,7 +209,7 @@
         flex-grow: 1;
         position: relative;
         overflow: hidden;
-        margin-top: 10px;
+        margin-top: 0px;
     }
 
     .sub-tab-content {
@@ -245,7 +245,7 @@
         box-sizing: border-box;
     }
 
-    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 */
+    /* 修改新增按鈕樣式：移除 absolute，加入流式排版 
     #addSubPageBtn {
         position: static;
         margin: 5px;
@@ -258,8 +258,8 @@
         font-size: 12px;
         flex-shrink: 0;
         height: fit-content;
-        align-self: center; /* 讓按鈕在該行置中或靠下 */
-    }
+        align-self: center;  /* 讓按鈕在該行置中或靠下 
+    }*/
 
     #keyNameDef {
         padding: 8px; 
@@ -312,6 +312,7 @@
         <div class="tabs">
             <button class="tab-button" title="切換到筆記分頁" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" title="切換到密文分頁" onclick="openTab(event, 'TabA')">密文</button>
+            <button class="tab-button" id="addSubPageBtn" title="新增子頁面">增</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存筆記" onclick="saveDBBtnHandler()">存</button>
             <input type="password" id="aesKey" title="密碼" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
         </div>
@@ -350,7 +351,7 @@
             <!-- 修改結構：移除 inline style，改用 class -->
             <div class="sub-tabs-header">
                 <div id="subTabNav" class="sub-tabs"></div>
-                <button id="addSubPageBtn">增</button>
+                <!--button id="addSubPageBtn">增</button-->
             </div>
             
             <div id="subTabContentContainer" class="sub-tab-content-container"></div>
