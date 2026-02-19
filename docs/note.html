@@ -144,7 +144,7 @@
     }
 
     /* --- 分頁 B (筆記) 樣式 - 修改版 --- */
-    #TabB { display: flex; }
+    #TabB { }
 
     /* 子分頁容器：使用 Flex 並允許換行 */
     .sub-tabs-header {
@@ -311,7 +311,7 @@
     <div class="main-container">
         <div class="tabs">
             <button class="tab-button" title="切換到筆記分頁" onclick="openTab(event, 'TabB')">筆記</button>
-            <button class="tab-button" title="切換到密文分頁" onclick="openTab(event, 'TabA')">密文</button>
+            <button class="tab-button" title="切換到密文分頁" onclick="openTab(event, 'TabA')">指令</button>
             <button class="tab-button" id="addSubPageBtn" title="新增子頁面">增</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存筆記" onclick="saveDBBtnHandler()">存</button>
             <input type="password" id="aesKey" title="密碼" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
@@ -534,15 +534,19 @@ function openTab(evt, tabName) {
     tabcontent = document.getElementsByClassName("tab-content");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
+        console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
     }
     tablinks = document.getElementsByClassName("tab-button");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
+        console.log(`重置分頁按鈕狀態: ${tablinks[i].textContent}`);
     }
     document.getElementById(tabName).classList.add("active");
     if (evt && evt.currentTarget) {
         evt.currentTarget.className += " active";
+        console.log(`切換到分頁: ${tabName}, 按鈕: ${evt.currentTarget.textContent}`);
     }
+    
     if(tabName === 'TabA'){
         keyInput.style.display = "block";
     }else{
