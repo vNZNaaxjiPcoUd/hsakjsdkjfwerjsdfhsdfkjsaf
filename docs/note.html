@@ -310,10 +310,10 @@
 
     <div class="main-container">
         <div class="tabs">
-            <button class="tab-button" onclick="openTab(event, 'TabB')">筆記</button>
-            <button class="tab-button" onclick="openTab(event, 'TabA')">密文</button>
-            <button class="tab-button" id="saveDBBtn2" onclick="saveDBBtnHandler()">存</button>
-            <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰">
+            <button class="tab-button" title="切換到筆記分頁" onclick="openTab(event, 'TabB')">筆記</button>
+            <button class="tab-button" title="切換到密文分頁" onclick="openTab(event, 'TabA')">密文</button>
+            <button class="tab-button" id="saveDBBtn2" title="儲存筆記" onclick="saveDBBtnHandler()">存</button>
+            <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
         </div>
 
         <div id="TabA" class="tab-content">
@@ -322,25 +322,25 @@
             </div>
             
             <div class="control-row">
-                <button id="saveDBBtn">存</button>
-                <button id="readDBBtn">讀</button>
+                <button id="saveDBBtn" title="儲存筆記">存</button>
+                <button id="readDBBtn" title="讀取筆記">讀</button>
 
-                <button id="encryptBtn">密</button>
-                <button id="decryptBtn">解</button>
-                <button id="copyBtn">複</button>
+                <button id="encryptBtn" title="加密內容">密</button>
+                <button id="decryptBtn" title="解密內容">解</button>
+                <button id="copyBtn" title="複製加密內容">複</button>
                 
                 <button id="exportBtn" title="下載檔案">出</button>
                 <button id="importBtnTrigger" title="從檔案載入">入</button>
                 <input type="file" id="importFile" accept=".txt" style="display: none;">
 
-                <button id="nameBtn" onclick = "changeKeyName()">名</button>
-                <input type="text" id="keyNameDef" value="SSS" placeholder="本冊命名">
-                <button id="listBtn" onclick = "listKeyNames()">列</button>
-                <button id="delBtn" onclick = "deleteKeyName()">刪</button>
-                <input type="text" id="delNameDef" value="" placeholder="刪冊名稱">
+                <button id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
+                <input type="text" id="keyNameDef" value="SSS" placeholder="本冊名稱">
+                <button id="listBtn" title="列出所有書本名稱" onclick = "listKeyNames()">列</button>
+                <button id="delBtn" title="刪除書本" onclick = "deleteKeyName()">刪</button>
+                <input type="text" id="delNameDef" value="" placeholder="欲刪書本名稱">
 
-                <button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
-                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button>
+                <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
+                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
             </div>
 
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
@@ -963,6 +963,67 @@ async function listKeyNames(){
     } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
 }   
 
+
+// 編輯區鍵盤事件 - Ctrl+S 儲存
+subTabContentContainer.addEventListener('keydown', function(e) {
+    //console.log("Key pressed in TabB:", e);
+    //doTextChange();
+    // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸' || e.altKey && e.key === 's' || e.altKey && e.key === 'ß' || e.altKey && e.key === '尸' || e.metaKey && e.key === 's' || e.metaKey && e.key === 'S' || e.metaKey && e.key === '尸') {
+        e.preventDefault();
+        saveDBBtnHandler()
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+
+  
+
+    // --- Tab 鍵插入 Tab 字元邏輯 ---
+    if (e.key === 'Tab') {
+        const activeDiv = document.querySelector('.sub-tab-content.active');
+        if (!activeDiv) {
+            console.log('沒有找到 active 的 .sub-tab-content');
+            return;
+        }
+        const activeContent = activeDiv.querySelector('textarea.editable-text');
+
+        if (activeContent) {
+            //console.log('找到了：', activeContent);
+            // 可以在這裡對該元素進行操作
+            // 1. 阻止瀏覽器預設的切換欄位行為
+            e.preventDefault();
+
+            // 2. 獲取當前游標的位置
+            const start = activeContent.selectionStart;
+            const end = activeContent.selectionEnd;
+            //console.log("游標位置：", start, end);
+
+            // 3. 設定要插入的字元（可以改為兩個或四個空格 "  "）
+            const tabChar = "\t"; 
+
+            // 4. 更新文字框內容：前半段 + Tab + 後半段
+            nowContent = activeContent.value;
+            if(nowContent === undefined) {
+                nowContent = "";
+                console.log("內容為 undefined，已設為空字串");  
+            }
+
+            //console.log("原內容：", nowContent);
+            activeContent.value = nowContent.substring(0, start) + 
+                        tabChar + 
+                        nowContent.substring(end);
+
+            // 5. 將游標移動到插入的 Tab 之後（否則游標會跳到最後面）
+            activeContent.selectionStart = activeContent.selectionEnd = start + tabChar.length;       
+            //console.log("更新後內容：", activeContent.value);                          
+        } else {
+            console.log('目前沒有 active 的項目');
+        }
+
+    }
+});
+
+
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
     openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
@@ -977,10 +1038,10 @@ document.addEventListener('DOMContentLoaded', () => {
     //開始時，讀取 DB 內容（如果有的話）
     readDBBtnHandler();
 
-    /*// 定時存入 DB（每 5 分鐘）
+    // 定時存入 DB（每 5 分鐘）
     setInterval(() => {
         saveDBBtnHandler();
-    }, 5 * 60 * 1000);  */
+    }, 5 * 60 * 1000);  
 
     // 文字已存檔
     document.getElementById('saveDBBtn2').style.color = "black";
