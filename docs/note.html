@@ -333,21 +333,23 @@
             
             <div class="control-row">
                 <button id="saveDBBtn" title="儲存筆記">存</button>
-                <button id="readDBBtn" title="取出筆記">取</button>
+                <button id="readDBBtn" title="取出筆記">提</button>
 
-                <button id="encryptBtn" title="加密文本">密</button>
+                <button id="encryptBtn" title="加密文本">封</button>
                 <button id="decryptBtn" title="解密文本">解</button>
-                <button id="copyBtn" title="複製加密結果">複</button>
+                <button id="copyBtn" title="複製加密結果">謄</button>
                 
-                <button id="exportBtn" title="下載檔案">出</button>
-                <button id="importBtnTrigger" title="從檔案載入">入</button>
-                <input type="file" id="importFile" title="載入檔案名稱" placeholder="載入檔案名稱.txt" accept=".txt" style="display: none;">
-
                 <button id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
                 <input type="text" id="keyNameDef" title="本冊名稱"value="SSS" placeholder="本冊名稱">
                 <button id="listBtn" title="列出所有書本名稱" onclick = "listKeyNames()">列</button>
                 <button id="delBtn" title="刪除書本" onclick = "deleteKeyName()">刪</button>
                 <input type="text" id="delNameDef" title="欲刪除書本名稱" value="" placeholder="欲刪書本名稱">
+
+                <button id="exportBtn" title="下載檔案">出</button>
+                <button id="importBtnTrigger" title="從檔案載入">入</button>
+                <input type="file" id="importFile" title="載入檔案名稱" placeholder="載入檔案名稱.txt" accept=".txt" style="display: none;">
+
+                <button id="aesKeyBtn" title="修改密碼" onclick = "changeAesKey()">密</button>
                 <input type="password" id="aesKey" title="密碼" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
 
                 <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
@@ -558,9 +560,9 @@ function openTab(evt, tabName) {
     }
     
     if(tabName === 'TabA'){
-        keyInput.style.display = "block";
+        //keyInput.style.display = "block";
     }else{
-        keyInput.style.display = "none";
+        //keyInput.style.display = "none";
     }
 }
 
@@ -1092,6 +1094,32 @@ async function listKeyNames(){
 }   
 
 
+// change AES Key function
+function changeAesKey() {
+    const newKey = prompt("請輸入新的 AES 密鑰:", "");
+
+    if (newKey !== null) {
+        const confirmKey = prompt("請再次輸入新的 AES 密鑰以確認:", "");
+        if (confirmKey === null) {
+            updateStatus("密鑰更新取消", 'info');
+            return;
+        }else{
+            if (newKey === confirmKey) {
+                keyInput.value = newKey;
+                updateStatus("AES 密鑰已更新", 'success');
+                return;
+            } else {
+                updateStatus("兩次輸入的密鑰不一致，請重新輸入。", 'error');
+                return;
+            }
+        }
+    }else {
+        updateStatus("密鑰更新取消", 'info');
+        return;
+    }
+}
+
+
 // 編輯區鍵盤事件 - Ctrl+S 儲存
 subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e);
@@ -1173,6 +1201,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 文字已存檔
     document.getElementById('saveDBBtn2').style.color = "black";
+    keyInput.style.display = "none"
 });
 
     </script>
