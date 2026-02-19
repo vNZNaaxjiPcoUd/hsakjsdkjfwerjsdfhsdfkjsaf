@@ -127,7 +127,7 @@
     /* 按鈕顏色分類 */
     #encryptBtn, #decryptBtn, #copyBtn  { background-color: #4CAF50; }
     #saveDBBtn, #readDBBtn{ background-color: #9c27b0; }
-    #exportBtn, #importBtnTrigger { background-color: #FF5722; }
+    #exportBtn, #importBtnTrigger, #markdownViewBtn { background-color: #FF5722; }
     /*#saveDBBtn2{ background-color: #9c27b0; color: white;}*/
     
     .external-link-btn { background-color: #607d8b; }
@@ -357,15 +357,16 @@
                 <button id="importBtnTrigger" title="從檔案載入">入</button>
                 <input type="file" id="importFile" title="載入檔案名稱" placeholder="載入檔案名稱.txt" accept=".txt" style="display: none;">
 
+                <button class="tab-button" id="markdownViewBtn" title="切換到密文分頁" onclick="showMarkdownView()">拓</button>
+
                 <button id="aesKeyBtn" title="修改密碼" onclick = "changeAesKey()">密</button>
                 <input type="password" id="aesKey" title="密碼" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
 
-                <button class="tab-button" title="切換到密文分頁" onclick="showMarkdownView()">MD</button>
 
                 <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
                 <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
             </div>
-
+            <div id="markdownView"></div>
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
         </div>
 
@@ -380,7 +381,7 @@
         </div>
         
         <div id="TabC" class="tab-content">
-            <div id="markdownView"></div>
+            <!--div id="markdownView"></div-->
         </div>
     </div>
 
@@ -1205,6 +1206,7 @@ function getTextFromTabB() {
     return contents.join('\n');
 }
 // show markdown in TabC
+
 function showMarkdownView() {
     const content = getTextFromTabB();
     const mdArea = document.getElementById('markdownView');
@@ -1212,8 +1214,13 @@ function showMarkdownView() {
         mdArea.value = "沒有內容可顯示";
         return;
     }
-    mdArea.innerHTML = marked.parse(content);
-    openTab(null, 'TabC');
+    if(mdArea.innerHTML === ""){
+        mdArea.innerHTML = marked.parse(content);
+    }else{
+        mdArea.innerHTML = "";
+    }
+
+    //openTab(null, 'TabC');
 }   
 
 // --- 初始化 ---
