@@ -313,7 +313,7 @@
             <button class="tab-button" title="切換到筆記分頁" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" title="切換到密文分頁" onclick="openTab(event, 'TabA')">密文</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存筆記" onclick="saveDBBtnHandler()">存</button>
-            <input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
+            <input type="password" id="aesKey" title="密碼" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入密鑰">
         </div>
 
         <div id="TabA" class="tab-content">
@@ -323,21 +323,21 @@
             
             <div class="control-row">
                 <button id="saveDBBtn" title="儲存筆記">存</button>
-                <button id="readDBBtn" title="讀取筆記">讀</button>
+                <button id="readDBBtn" title="取出筆記">取</button>
 
-                <button id="encryptBtn" title="加密內容">密</button>
-                <button id="decryptBtn" title="解密內容">解</button>
-                <button id="copyBtn" title="複製加密內容">複</button>
+                <button id="encryptBtn" title="加密文本">密</button>
+                <button id="decryptBtn" title="解密文本">解</button>
+                <button id="copyBtn" title="複製加密結果">複</button>
                 
                 <button id="exportBtn" title="下載檔案">出</button>
                 <button id="importBtnTrigger" title="從檔案載入">入</button>
-                <input type="file" id="importFile" accept=".txt" style="display: none;">
+                <input type="file" id="importFile" title="載入檔案名稱" placeholder="載入檔案名稱.txt" accept=".txt" style="display: none;">
 
                 <button id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
-                <input type="text" id="keyNameDef" value="SSS" placeholder="本冊名稱">
+                <input type="text" id="keyNameDef" title="本冊名稱"value="SSS" placeholder="本冊名稱">
                 <button id="listBtn" title="列出所有書本名稱" onclick = "listKeyNames()">列</button>
                 <button id="delBtn" title="刪除書本" onclick = "deleteKeyName()">刪</button>
-                <input type="text" id="delNameDef" value="" placeholder="欲刪書本名稱">
+                <input type="text" id="delNameDef" title="欲刪除書本名稱" value="" placeholder="欲刪書本名稱">
 
                 <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
                 <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
@@ -375,6 +375,7 @@ const DB_VERSION = 1;
 const STORE_NAME = "notes";
 let dbInstance = null;
 let gKeyName = "";
+const defaultAesKey = "YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!";
 
 // --- 取得 URL 參數 (作為 Key) ---
 function getDynamicKeyName() {
@@ -382,11 +383,46 @@ function getDynamicKeyName() {
     if( gKeyName !== ""){
         return gKeyName;
     }
+    /*
     if (search && search.length > 1) {
         const param = search.substring(1).split('=')[0];
         return param || "A";
+    }*/
+
+    // getDynamicKeyName 的新版本：更完整的 URL 參數解析，並保留第一個參數的 key 和 value
+    // ex: https://url.com/?id=123&foo=bar -> key: id, value: 123
+    let firstKey = "";
+    let firstValue = "";
+    const paramsFromURL = new URLSearchParams(window.location.search);
+    //const entries = Object.fromEntries(paramsFromURL.entries());
+    //console.log(result, entries); 
+    const firstEntry = paramsFromURL.entries().next().value; 
+    if (firstEntry) {
+        const [key, value] = firstEntry;
+        //console.log("第一個參數名稱:", key);   // "id"
+        //console.log("第一個參數數值:", value); // "123"
+        firstKey = key;
+        firstValue = value;
+        if(firstKey) {
+            gKeyName = firstKey;
+        } else {
+            gKeyName = "A";
+        }
+        if(firstValue) {
+            keyInput.value = firstValue;
+        } else {
+            keyInput.value = "";
+        }
+    }else {
+        firstKey = "A";
+        gKeyName = "A";
+        keyInput.value = defaultAesKey;
     }
-    return "A";
+    //const firstKey = paramsFromURL.keys().next().value;
+    //console.log(firstKey); // "id"
+    //const firstValue = paramsFromURL.get(firstKey);
+    //console.log(firstValue); // "123"
+    return firstKey;
 }
 
 // --- 狀態訊息顯示函式 ---
@@ -404,11 +440,13 @@ function updateStatus(message, type = 'info') {
         statusMessage.style.color = '#721c24';
     }
 
+    // 取消自動重置計時器 
+    /*
     setTimeout(() => {
         statusMessage.textContent = "待...";
         statusMessage.style.backgroundColor = '#eee';
         statusMessage.style.color = '#333';
-    }, 5000);
+    }, 5000);*/ 
 }
 
 // --- IndexedDB 操作邏輯 ---
@@ -620,6 +658,74 @@ function addEditableBlock(title = null, content = "") {
 }
 
 // --- 加密/解密 核心邏輯 (SHA512 + AES) ---
+// new one to fit with vp, support multiple blocks with structure
+function getContentFromTabB() {
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const nameInput = block.querySelector('.block-name');
+        const textarea = block.querySelector('.editable-text');
+        const title = nameInput.value || "_";
+        const text = textarea.value || "";
+        const safeTitle = btoa(unescape(encodeURIComponent(title))); 
+        const safeText = btoa(unescape(encodeURIComponent(text)));
+        const struct = `<<<<BLOCK_START_v2>>>>\n${safeTitle}\n<<<<TITLE_END>>>>\n${safeText}\n<<<<BLOCK_END>>>>`;
+        contents.push(struct);
+    });
+    //console.log(`從分頁 B 取得內容，總長度: ${contents.join('\n').length}, 區塊數: ${contents.length}, 預覽: ${contents.join('\n').substring(0, 100)}`);
+    return contents.join('\n');
+}
+
+function setContentToTabB(fullContent) {
+    subTabNav.innerHTML = '';
+    subTabContentContainer.innerHTML = '';
+    blockCounter = 0;
+
+    let parseType = "v2";
+    let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
+    //console.log("使用新版解析方式...",blockStrings);
+    //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
+    //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 999999)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>'): ${blockStrings.length > 0 ? blockStrings[0].indexOf('<<<<TITLE_END>>>>') : 'N/A'}`); 
+
+    if (blockStrings.length === 0 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {   
+        console.log("使用舊版解析方式...");
+        const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
+        console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
+        if (blockStrings2.length === 0) {
+            console.log("解密內容", fullContent);
+            return;
+        }
+        parseType = "v1";
+        blockStrings = blockStrings2;
+    }
+
+
+    //console.log(`parseType: ${parseType}, blocks to process: ${blockStrings.length}`);
+
+    blockStrings.forEach(blockStr => {
+        const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
+        const match = blockStr.match(regex);
+        console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
+        if (match) {
+            const safeTitle = match[1].trim();
+            const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
+            const safeText = match[2].trim();
+            const text = parseType === "v2" ? decodeURIComponent(escape(atob(safeText))) : safeText;
+            addEditableBlock(title, text);
+        } else {
+            addEditableBlock("解析錯誤", blockStr);
+        }
+    });
+
+    if (blockCounter > 0) {
+        const firstId = document.querySelector('.sub-tab-button').id.replace('sub-btn-', '');
+        switchSubTab(firstId, false);
+    }
+}
+
+
+
+/* old one
 function getContentFromTabB() {
     const contents = [];
     const blocks = document.querySelectorAll('.sub-tab-content');
@@ -662,6 +768,7 @@ function setContentToTabB(fullContent) {
         switchSubTab(firstId, false);
     }
 }
+*/
 
 
 // 按鈕事件 - 加密
@@ -686,7 +793,12 @@ document.getElementById('encryptBtn').addEventListener('click', encData);
 
 
 function getKey(){
-    return keyInput.value+getDynamicKeyName()+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+    // passwd+bookname+salt
+    //return keyInput.value+getDynamicKeyName()+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+
+    // fit with vp
+    // passwd+salt
+    return keyInput.value+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
 }
 
 // 按鈕事件 - 解密
@@ -708,7 +820,7 @@ function decData(){
             openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
             updateStatus("解密成功！", 'success');
             //console.log("解密內容已載入至筆記分頁");
-        } else { updateStatus("解密失敗：密鑰或內容錯誤", 'error'); return false}
+        } else { updateStatus("解密失敗：確認密碼正確", 'error'); /*updateStatus("解密失敗：密鑰或內容錯誤", 'error'); */return false;}
     } catch (e) { updateStatus("解密發生錯誤", 'error'); return false; }    
     return true;
 }
@@ -838,10 +950,11 @@ document.getElementById('exportBtn').addEventListener('click', () => {
     const min = String(now.getMinutes()).padStart(2, '0');
     const s = String(now.getSeconds()).padStart(2, '0');
     
-    const timeString = `${y}-${m}-${d}_${h}${min}${s}`;
+    //const timeString = `${y}-${m}-${d}_${h}${min}${s}`;
+    const timeString = `${y}${m}${d}${h}${min}${s}`;
     
     const keyName = getDynamicKeyName();
-    a.download = `CipherNote_${keyName}_${timeString}.txt`;
+    a.download = `cNote_${keyName}_${timeString}.txt`;
     
     document.body.appendChild(a);
     a.click();
