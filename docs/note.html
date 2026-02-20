@@ -1215,6 +1215,7 @@ function showMarkdownView() {
         return;
     }
     if(mdArea.innerHTML === ""){
+        console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
         mdArea.innerHTML = marked.parse(content);
     }else{
         mdArea.innerHTML = "";
