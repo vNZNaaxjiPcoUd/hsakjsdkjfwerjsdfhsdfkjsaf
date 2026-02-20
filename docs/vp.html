@@ -444,6 +444,17 @@
     }
 }
 
+#markdownViewBtn {
+    margin-top: 3px;
+    padding: 3px 10px;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
 </style>
 </head>
 <body>
@@ -457,7 +468,10 @@
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
         </div>
 
-        <div id="mdShowArea" style="display:none;">markdown</div>
+        <div id="mdShowArea" style="display:none;">
+            <button id="markdownViewBtn" onclick="toggleMarkdownView()">markdown view close</button>
+            <div id="mdText"></div>
+        </div>
         <div id="TabA" class="tab-content">
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
         </div>
@@ -1429,25 +1443,41 @@ function getTextFromTabB() {
     });
     return contents.join('\n--------------------------------\n');
 }
+// toggle markdown view
+function toggleMarkdownView() {
+    const mdShow = document.getElementById('mdShowArea');
+    console.log("切換 Markdown 預覽顯示狀態...", mdShow.style.display);
+    if (mdShow.style.display === "block") {        
+        mdShow.style.display = "none";
+        mdShownState = false;
+        updateStatus("Markdown已隱藏", 'info');
+    } else {
+        mdShow.style.display = "block";
+        mdShownState = true;
+        updateStatus("Markdown已顯示", 'success');
+    }
+}
+
 
 // Show markdown view
 let mdShownState = false;
 function showMarkdownView() {
     let mdShow = document.getElementById('mdShowArea');
+    let mdShowText = document.getElementById('mdText');
     if(mdShownState) {
         mdShow.style.display = "none";
         mdShownState = false;
-        mdShow.innerHTML = "";
+        mdShowText.innerHTML = "";
         updateStatus("Markdown已隱藏", 'info');
         return;
     }else{
         const content = getTextFromTabB();
         if (content.trim() === "") {
-            mdShow.innerHTML = "沒有內容可顯示";
+            mdShowText.innerHTML = "沒有內容可顯示";
             return;
         }
         console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
-        mdShow.innerHTML = marked.parse(content);
+        mdShowText.innerHTML = marked.parse(content);
         mdShow.style.display = "block";
         mdShownState = true;
         updateStatus("Markdown已顯示", 'success');
