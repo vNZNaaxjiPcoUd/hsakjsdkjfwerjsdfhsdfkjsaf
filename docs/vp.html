@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" , interactive-widget=resizes-content">
     <title>VP</title>
     <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+    <script src="https://h.jwint.net/static/marked.min.js"></script>
     <script>
         (function() {
             const bookname = window.location.search.slice(1);
@@ -17,7 +18,7 @@
                 "theme_color": "#2196F3",
                 "background_color": "#F0F0F0",
                 "start_url": window.location.href, // 關鍵：使用當下網址
-                "scope": "https://h.jwint.net/",
+                "scope": "/",
                 "icons": [
                     { "src": "https://h.jwint.net/favicon192.png", "sizes": "192x192", "type": "image/png" },
                     { "src": "https://h.jwint.net/favicon512.png", "sizes": "512x512", "type": "image/png" }
@@ -395,6 +396,18 @@
         border: none;
     }
 
+    #mdShowArea {
+        height: auto;        /* 設定一個固定高度或最大高度 */
+        overflow-y: auto;     /* 內容超過高度時自動顯示垂直捲軸 */
+        -webkit-overflow-scrolling: touch; 
+        word-break: break-all;
+        font-size: 12px;
+        a{
+            color: #2196F3;
+            text-decoration: none;
+        }
+    }
+
 </style>
 </head>
 <body>
@@ -408,6 +421,7 @@
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
         </div>
 
+        <div id="mdShowArea" style="display:none;">markdown</div>
         <div id="TabA" class="tab-content">
             <textarea id="encryptedContent" placeholder="在此貼上密文或查看加密結果..."></textarea>
         </div>
@@ -777,10 +791,18 @@ subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
     doTextChange();
     // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
-    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸' || e.metaKey && e.key === 's' || e.metaKey && e.key === 'S' || e.metaKey && e.key === '尸'  ) {
         e.preventDefault();
         saveToAPI();
         //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+
+    // --- 偵測 Ctrl+M (包含大小寫 S 和中文輸入法下的 S) ---
+    if (e.ctrlKey && e.key === 'm' || e.ctrlKey && e.key === 'M' || e.ctrlKey && e.key === '尸' || e.metaKey && e.key === 'm' || e.metaKey && e.key === 'M' || e.metaKey && e.key === '尸'  ) {
+        e.preventDefault();
+        showMarkdownView();
+        //console.log("Ctrl+M 偵測到，已觸發存檔功能");
         return;
     }
 
@@ -1305,6 +1327,41 @@ function gotoNewBook() {
 //document.getElementById('addSubPageBtn').addEventListener('click', () => {
 //    addEditableBlock();
 //});
+
+// --- 取得 TabB 內容，準備顯示在 TabC 的 Markdown 預覽 --- 
+function getTextFromTabB() {
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const textarea = block.querySelector('.editable-text');
+        const text = textarea.value || "";
+        contents.push(text);
+    });
+    return contents.join('\n--------------------------------\n');
+}
+
+// Show markdown view
+let mdShownState = false;
+function showMarkdownView() {
+    let mdShow = document.getElementById('mdShowArea');
+    if(mdShownState) {
+        mdShow.style.display = "none";
+        mdShownState = false;
+        mdShow.innerHTML = "";
+        return;
+    }else{
+        const content = getTextFromTabB();
+        if (content.trim() === "") {
+            mdShow.innerHTML = "沒有內容可顯示";
+            return;
+        }
+        console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
+        mdShow.innerHTML = marked.parse(content);
+        mdShow.style.display = "block";
+        mdShownState = true;
+    }
+
+}   
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', async () => {
