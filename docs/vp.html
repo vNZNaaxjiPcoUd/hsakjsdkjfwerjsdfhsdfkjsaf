@@ -397,17 +397,51 @@
         border: none;
     }
 
-    #mdShowArea {
-        height: auto;        /* 設定一個固定高度或最大高度 */
-        overflow-y: auto;     /* 內容超過高度時自動顯示垂直捲軸 */
-        -webkit-overflow-scrolling: touch; 
-        word-break: break-all;
-        font-size: 12px;
-        a{
-            color: #2196F3;
-            text-decoration: none;
-        }
+#mdShowArea {
+    width: 100%;
+    max-width: 100%;      /* 確保絕對不會超過父層 */
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;   /* 強制隱藏水平捲軸，防止意外溢出 */
+    -webkit-overflow-scrolling: touch; 
+    
+    /* 關鍵：讓 padding 不會增加寬度 */
+    box-sizing: border-box; 
+    
+    /* 文字折行強化 */
+    word-break: break-word; /* 比 break-all 更友善，會優先在空格處斷行 */
+    overflow-wrap: anywhere; /* 針對極長的連續網址非常有校 */
+    font-size: 12px;
+
+    /* 1. 限制圖片與影片 */
+    img, video, canvas {
+        max-width: 100% !important; /* 強制圖片最寬只能跟父層一樣 */
+        height: auto;               /* 保持比例，不會變形 */
+        display: block;             /* 避免下方出現奇怪的空白間隙 */
     }
+
+    /* 2. 處理程式碼區塊 (Markdown 常見問題) */
+    pre, code {
+        white-space: pre-wrap;      /* 讓長程式碼自動換行，而不是出現水平捲軸 */
+        word-wrap: break-word;
+        max-width: 100%;
+        overflow-x: auto;           /* 如果真的太長，讓 code 區塊內部自己捲動 */
+    }
+
+    /* 3. 處理表格 (Table 也是溢出常客) */
+    table {
+        display: block;             /* 讓表格在小螢幕上可以捲動 */
+        width: 100%;
+        overflow-x: auto;
+        border-collapse: collapse;
+    }
+
+    a {
+        color: #2196F3;
+        text-decoration: none;
+        word-break: break-all;      /* 防止超長網址撐開容器 */
+    }
+}
 
 </style>
 </head>
@@ -1403,6 +1437,7 @@ function showMarkdownView() {
         mdShow.style.display = "none";
         mdShownState = false;
         mdShow.innerHTML = "";
+        updateStatus("Markdown已隱藏", 'info');
         return;
     }else{
         const content = getTextFromTabB();
@@ -1414,6 +1449,7 @@ function showMarkdownView() {
         mdShow.innerHTML = marked.parse(content);
         mdShow.style.display = "block";
         mdShownState = true;
+        updateStatus("Markdown已顯示", 'success');
     }
 
 }   
