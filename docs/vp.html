@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
+    <!--This is the vp, online text editor  -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0" , interactive-widget=resizes-content">
     <title>VP</title>
@@ -737,10 +738,10 @@ function decData(){
             const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
             originalText = bytes.toString(CryptoJS.enc.Utf8);
             if (originalText) {
-                console.log("解密成功，載入內容至筆記分頁...");
+                //console.log("解密成功，載入內容至筆記分頁...");
                 setContentToTabB(originalText);
                 openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
-                console.log("載入內容！", 'success');
+                //console.log("載入內容！", 'success');
                 //console.log("解密內容已載入至筆記分頁");
             } else {
                 //updateStatus("解密失敗：密鑰或內容錯誤", 'error');
@@ -788,8 +789,8 @@ function decData(){
 
 // 編輯區鍵盤事件 - Ctrl+S 儲存
 subTabContentContainer.addEventListener('keydown', function(e) {
-    //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
-    doTextChange();
+    //console.log("Key pressed in TabB:", e);
+
     // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸' || e.metaKey && e.key === 's' || e.metaKey && e.key === 'S' || e.metaKey && e.key === '尸'  ) {
         e.preventDefault();
@@ -807,8 +808,20 @@ subTabContentContainer.addEventListener('keydown', function(e) {
     }
 
     // 有修改過內容後，按任意鍵都會讓存檔按鈕變色提示需要儲存
-        document.getElementById('saveDBBtn2').style.color = "white";  
-        document.getElementById('getDBBtn2').style.color = "white";  
+    if(!isTextChanged()) {
+        // 技巧：可輸入的字元（字母、數字、符號）長度皆為 1
+        // 排除組合鍵（如 Ctrl+C），需加上 !e.ctrlKey && !e.metaKey
+        if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+            //console.log('這是一個文字輸入：', e.key);
+            //console.log("內容已修改，提示需要儲存");
+            updateStatus("內容已修改，請儲存", "info");
+            doTextChange();
+        } else {
+            //console.log('這是控制鍵或組合鍵：', e.key);
+        }
+    }
+    
+
   
 
     // --- Tab 鍵插入 Tab 字元邏輯 ---
@@ -1028,6 +1041,8 @@ function isTextChanged(){
 
 function doTextChange(){
     textChanged = true;
+    document.getElementById('saveDBBtn2').style.color = "white";  
+    document.getElementById('getDBBtn2').style.color = "white";  
 }
 
 async function saveToAPI() {
@@ -1145,7 +1160,7 @@ async function getFromAPI() {
                 cleanAESKey();
                 sleep(1000);    
             }else{
-                console.log(`解密成功，內容已載入`, 'success');
+                //console.log(`解密成功，內容已載入`, 'success');
             }
         }
     } else {
@@ -1225,6 +1240,10 @@ function newPassword() {
     aesKey = prompt("輸入書本新密碼");
     if (!aesKey) {
         updateStatus("書本密碼未更改", 'error');
+        return false;
+    }
+    if(aesKey.trim() === "") {
+        updateStatus("書本密碼不可為空，請重新設定", 'error');
         return false;
     }
     let confirmKey = prompt("請再次輸入書本新密碼以確認");
@@ -1309,8 +1328,43 @@ function cleanAPIKey() {
 // goto new book
 function gotoNewBook() {
     updateStatus("正在建立新書...", 'info');
-    let result = confirm("確定到要其他書本嗎？記得保存喔！");
+    let result = true;
 
+    if (result) {
+        console.log("使用者點擊了：確定");
+        //window.location.href = './vp.html';
+        let bookName = prompt("請輸入新書名稱:");
+        if(bookName === "Md!") {
+            showMarkdownView();
+            return true;
+        }
+        if(bookName) {
+            const { pathname, search, hash } = window.location;
+            console.log("當前 URL 組件:", { pathname, search, hash });
+            updateStatus(`建立新書...${bookName}`, 'info');
+            result = confirm("確定到要其他書本嗎？記得保存喔！");
+            if(result) {
+                console.log("使用者點擊了：確定");
+                window.open(`${pathname}?${bookName}`, '_blank');
+                updateStatus("建立新書...", 'info');
+                return true;
+            }else{
+                console.log("使用者點擊了：取消");
+                updateStatus("已取消建立新書", 'info');
+                return false;
+            }
+        }else{
+            updateStatus("無法取得新書名稱", 'error');
+            return false;
+        }
+
+    } else {
+        console.log("使用者點擊了：取消");
+        updateStatus("已取消建立新書", 'info');
+        return false;
+    }
+    return false;
+/*
     if (result) {
         console.log("使用者點擊了：確定");
         //window.location.href = './vp.html';
@@ -1322,6 +1376,7 @@ function gotoNewBook() {
         updateStatus("已取消建立新書", 'info');
         return false;
     }
+*/
 }   
 
 //document.getElementById('addSubPageBtn').addEventListener('click', () => {
