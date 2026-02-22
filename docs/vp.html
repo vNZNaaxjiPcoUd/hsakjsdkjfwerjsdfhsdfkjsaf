@@ -412,7 +412,7 @@
     /* 文字折行強化 */
     word-break: break-word; /* 比 break-all 更友善，會優先在空格處斷行 */
     overflow-wrap: anywhere; /* 針對極長的連續網址非常有校 */
-    font-size: 12px;
+    font-size: 16px;
 
     /* 1. 限制圖片與影片 */
     img, video, canvas {
@@ -469,7 +469,7 @@
         </div>
 
         <div id="mdShowArea" style="display:none;">
-            <button id="markdownViewBtn" onclick="toggleMarkdownView()">markdown view close</button>
+            <button id="markdownViewBtn" onclick="showMarkdownView()">markdown view close</button>
             <div id="mdText"></div>
         </div>
         <div id="TabA" class="tab-content">
@@ -1438,24 +1438,28 @@ function getTextFromTabB() {
     const contents = [];
     const blocks = document.querySelectorAll('.sub-tab-content');
     blocks.forEach(block => {
+        const nameInput = block.querySelector('.block-name');
         const textarea = block.querySelector('.editable-text');
         const text = textarea.value || "";
         contents.push(text);
     });
-    return contents.join('\n--------------------------------\n');
+    return contents.join('\n\n--------------------------------\n\n');
 }
 // toggle markdown view
 function toggleMarkdownView() {
     const mdShow = document.getElementById('mdShowArea');
     console.log("切換 Markdown 預覽顯示狀態...", mdShow.style.display);
-    if (mdShow.style.display === "block") {        
+    if (mdShow.style.display === "block") {    
+        document.getElementById('TabB').style.display = "flex";    
         mdShow.style.display = "none";
         mdShownState = false;
         updateStatus("Markdown已隱藏", 'info');
     } else {
+        document.getElementById('TabB').style.display = "none";
         mdShow.style.display = "block";
         mdShownState = true;
         updateStatus("Markdown已顯示", 'success');
+        console.log("切換後 Markdown 預覽顯示狀態:", mdShow.style.display);
     }
 }
 
@@ -1470,6 +1474,7 @@ function showMarkdownView() {
         mdShownState = false;
         mdShowText.innerHTML = "";
         updateStatus("Markdown已隱藏", 'info');
+        document.getElementById('TabB').style.display = "flex";
         return;
     }else{
         const content = getTextFromTabB();
@@ -1482,6 +1487,8 @@ function showMarkdownView() {
         mdShow.style.display = "block";
         mdShownState = true;
         updateStatus("Markdown已顯示", 'success');
+        document.getElementById('TabB').style.display = "none";
+        return;
     }
 
 }   
