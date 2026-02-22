@@ -39,4 +39,4 @@ vp 隨身記事本使用方式
 - 直接打開筆記本： [https://n.jwint.net/?TestDemo](https://n.jwint.net/?TestDemo)
 - 打開筆記本，不有輸入密碼： [https://n.jwint.net/?TestDemo=hello](https://n.jwint.net/?TestDemo=hello)
 - 打開筆記本，不用密碼，直接顯示markdown： [https://n.jwint.net/?TestDemo=hello&v=md!](https://n.jwint.net/?TestDemo=hello&v=md!)
-- 打開筆記本，顯示markdown，但要輸入密碼： [https://n.jwint.net/?TestDemo&v=md!](https://n.jwint.net/?TestDemo&v=md!)
+- 打開筆記本，顯示markdown，但要輸入密碼： [https://n.jwint.net/?TestDemo&v=md!](https://n.jwint.net/?TestDemo=&v=md!)
