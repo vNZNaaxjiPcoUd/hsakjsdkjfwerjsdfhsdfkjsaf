@@ -40,3 +40,4 @@ vp 雲筆記本使用方式
 - 打開筆記本，不有輸入密碼： [https://n.jwint.net/?TestDemo=hello](https://n.jwint.net/?TestDemo=hello)
 - 打開筆記本，不用密碼，直接顯示markdown： [https://n.jwint.net/?TestDemo=hello&v=md!](https://n.jwint.net/?TestDemo=hello&v=md!)
 - 打開筆記本，顯示markdown，但要輸入密碼： [https://n.jwint.net/?TestDemo=&v=md!](https://n.jwint.net/?TestDemo=&v=md!)
+- 強制markdown view: [https://h.jwint.net/CxS7LMoFS7ycl?TestDemo=hello](https://h.jwint.net/CxS7LMoFS7ycl?TestDemo=hello)
