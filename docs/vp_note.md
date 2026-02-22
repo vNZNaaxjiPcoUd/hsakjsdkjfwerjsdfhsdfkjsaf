@@ -16,7 +16,7 @@ vp 雲筆記本使用方式
 - 增：增加新分頁
 - x ：刪除此分頁
 - 按下分頁名稱：修改分頁名稱
-- ctrl+M: 顯示markdown view
+- ctrl+M: 顯示markdown view，或在"新"/"Md!"
 - ctrl+S: 保存。
 
 #### 方便性
