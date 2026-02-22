@@ -458,7 +458,6 @@
 </style>
 </head>
 <body>
-
     <div class="main-container">
         <div class="tabs">
             <div id="topBnt">
@@ -840,7 +839,8 @@ function decData(){
 
 // 編輯區鍵盤事件 - Ctrl+S 儲存
 subTabContentContainer.addEventListener('keydown', function(e) {
-    //console.log("Key pressed in TabB:", e);
+//document.querySelector('.main-container').addEventListener('keydown', function(e) {
+    console.log("Key pressed in TabB:", e);
 
     // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
     if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸' || e.metaKey && e.key === 's' || e.metaKey && e.key === 'S' || e.metaKey && e.key === '尸'  ) {
@@ -1513,9 +1513,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         //console.log("第一個參數數值:", value); // "123"
     }*/
     const keys = paramsFromURL.keys();
+    // mdview CxS7LMoFS7ycl
     const firstKey = keys.next().value;
     //console.log("URL 參數第一個名稱:", firstKey);   // "id"
     const secKey = paramsFromURL.get("v");
+    if(secKey==="md!") {
+        // mdview CxS7LMoFS7ycl
+        //document.getElementById('topBnt').style.display = "none";
+        //document.getElementById('markdownViewBtn').style.display = "none";
+    }  
     //console.log("URL 參數第二個名稱:", secKey);   // "id
     //console.log(firstKey); // "id"
     const firstValue = paramsFromURL.get(firstKey);
@@ -1579,8 +1585,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if(secKey==="md!") {
             showMarkdownView();
-            document.getElementById('topBnt').style.display = "none";
-            document.getElementById('markdownViewBtn').style.display = "none";
+            // mdview CxS7LMoFS7ycl
+            //document.getElementById('topBnt').style.display = "none";
+            //document.getElementById('markdownViewBtn').style.display = "none";
         }   
         //confirm("last");
 
