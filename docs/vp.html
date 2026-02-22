@@ -1190,6 +1190,7 @@ async function getFromAPI() {
         setTag(res.tag );
         //setContentToTabB(res.data);
         //openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
+        console.log(`已讀取 ${bookData.Name}，準備解密內容...\n`,res.value);
         encryptedContentArea.value = res.value;
         //console.log("已將 API 讀取的內容放入密文區:", encryptedContentArea.value);
         //console.log(`已讀取 ${bookData.Name}`, 'success');
