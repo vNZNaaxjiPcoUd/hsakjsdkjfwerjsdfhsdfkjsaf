@@ -461,11 +461,13 @@
 
     <div class="main-container">
         <div class="tabs">
+            <div id="topBnt">
             <button class="tab-button" id="getDBBtn2" onclick="getFromAPI()">取</button>
             <button class="tab-button" id="setPW" onclick="newPassword()">密</button>
             <button class="tab-button" id="bookTabBtn" onclick="gotoNewBook()">新</button>
             <button class="tab-button" id="addSubPageBtn"onclick="addEditableBlock()">增</button>
             <button class="tab-button" id="saveDBBtn2" onclick="saveToAPI()">存</button>
+            </div>
         </div>
 
         <div id="mdShowArea" style="display:none;">
@@ -730,7 +732,7 @@ function setContentToTabB(fullContent) {
     blockStrings.forEach(blockStr => {
         const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
         const match = blockStr.match(regex);
-        console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
+        //console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
         if (match) {
             const safeTitle = match[1].trim();
             const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
@@ -1482,7 +1484,7 @@ function showMarkdownView() {
             mdShowText.innerHTML = "沒有內容可顯示";
             return;
         }
-        console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
+        //console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
         mdShowText.innerHTML = marked.parse(content);
         mdShow.style.display = "block";
         mdShownState = true;
@@ -1500,15 +1502,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     let result = "";
     const paramsFromURL = new URLSearchParams(window.location.search);
+    /*
     const entries = Object.fromEntries(paramsFromURL.entries());
     //console.log(result, entries); 
     const firstEntry = paramsFromURL.entries().next().value; 
+    console.log("URL 參數解析結果:", firstEntry);
     if (firstEntry) {
-    const [key, value] = firstEntry;
-    //console.log("第一個參數名稱:", key);   // "id"
-    //console.log("第一個參數數值:", value); // "123"
-    }    
-    const firstKey = paramsFromURL.keys().next().value;
+        const [key, value] = firstEntry;
+        //console.log("第一個參數名稱:", key);   // "id"
+        //console.log("第一個參數數值:", value); // "123"
+    }*/
+    const keys = paramsFromURL.keys();
+    const firstKey = keys.next().value;
+    //console.log("URL 參數第一個名稱:", firstKey);   // "id"
+    const secKey = paramsFromURL.get("v");
+    //console.log("URL 參數第二個名稱:", secKey);   // "id
     //console.log(firstKey); // "id"
     const firstValue = paramsFromURL.get(firstKey);
     //console.log(firstValue); // "123"
@@ -1569,6 +1577,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             tab.style.display = "block";
         });
 
+        if(secKey==="md!") {
+            showMarkdownView();
+            document.getElementById('topBnt').style.display = "none";
+            document.getElementById('markdownViewBtn').style.display = "none";
+        }   
         //confirm("last");
 
     }
