@@ -24,8 +24,6 @@ vp 隨身記事本使用方式
 - 隨手記下事情，想法，待回電腦時，再好好的消化。
 - 只要有網址，即可使用，所以在外面公共的地方，也可以方便記下些文字。
 - 記事本可以隨意創建多個，按下「新」即可有新記事本，或開另一本已存放的記事本。記下記事本名字，就可以隨時取用
-- 可以直接打開記事本，即網址直接輸入 [https://n.jwint.net/bookname](hhttps://h.jwint.net/bookname)
-- 可以直接打開記事本，不用輸入密碼，即網址直接輸入 [https://n.jwint.net/bookname=password](https://n.jwint.net/bookname=password)
 - 在手機上時，可以保存到主畫面，方便使用，像APP一樣。 在瀏覽器上按下 分享/ 加入主畫面/ 輸入名稱/ 加入，就可以在主畫面看到你的記事本
 
 
@@ -34,3 +32,11 @@ vp 隨身記事本使用方式
 - 密碼及文件內容，也沒有保存在瀏覽器內，只有在打開網頁時，使用者自己輸入，這樣可以確保密碼不存留在本地的電腦裡，在公共使用上，不會殘存資料在電腦上。
 - 在本機沒有被側錄（外掛或病毒等）的情況下，資料是安全的。
 - 因為雲端沒有使用者相關資料，只有亂碼，所以當使用者忘記記事本名稱或密碼時，也就找不回來記事本。
+
+
+#### 網址的運用
+- 打開工具： [https://n.jwint.net/](https://n.jwint.net/)
+- 直接打開筆記本： [https://n.jwint.net/?TestDemo](https://n.jwint.net/?TestDemo)
+- 打開筆記本，不有輸入密碼： [https://n.jwint.net/?TestDemo=hello](https://n.jwint.net/?TestDemo=hello)
+- 打開筆記本，不用密碼，直接顯示markdown： [https://n.jwint.net/?TestDemo=hello&v=md!](https://n.jwint.net/?TestDemo=hello&v=md!)
+- 打開筆記本，顯示markdown，但要輸入密碼： [https://n.jwint.net/?TestDemo&v=md!](https://n.jwint.net/?TestDemo&v=md!)
