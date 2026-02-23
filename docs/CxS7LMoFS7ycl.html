@@ -76,76 +76,16 @@
     <script>
 
 // --- 全局變數 ---
-const keyInput = document.getElementById('aesKeyBtn');
 const encryptedContentArea = document.getElementById('encryptedContent');
-const subTabNav = document.getElementById('subTabNav'); 
-const subTabContentContainer = document.getElementById('subTabContentContainer');
-const statusMessage = document.getElementById('statusMessage');
-let blockCounter = 0;
+const API_URL = "https://script.google.com/macros/s/AKfycbzIAuTrBD3eI7uusVneoYF6P-f2RtqVLT2yrpHbWpghCTsfhGh6JdcMgKx2b6a3K7HX/exec"; 
+const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
 
-// --- IndexedDB 配置 ---
-const DB_NAME = "hDB";
-const DB_VERSION = 1;
-const STORE_NAME = "notes";
-let dbInstance = null;
-let gKeyName = "";
-
-// --- 取得 URL 參數 (作為 Key) ---
-function getDynamicKeyName() {
-    const search = window.location.search;
-    if( gKeyName !== ""){
-        return gKeyName;
-    }
-    if (search && search.length > 1) {
-        const param = search.substring(1).split('=')[0];
-        return param || "A";
-    }
-    return "A";
-} 
-
-// --- 狀態訊息顯示函式 ---
-let statusTimer = null;
 function updateStatus(message, type = 'info') {
-    statusMessage.textContent = message;
-    
-    statusMessage.style.backgroundColor = '#eee';
-    statusMessage.style.color = '#333';
-
-    if (type === 'success') {
-        statusMessage.style.backgroundColor = '#d4edda';
-        statusMessage.style.color = '#155724';
-    } else if (type === 'error') {
-        statusMessage.style.backgroundColor = '#f8d7da';
-        statusMessage.style.color = '#721c24';
-    }
-
-    if (type === 'info') {
-    }
-}
-
-
-// --- 主分頁切換邏輯 ---
-function openTab(evt, tabName) {
-    var i, tabcontent, tablinks;
-    tabcontent = document.getElementsByClassName("tab-content");
-    for (i = 0; i < tabcontent.length; i++) {
-        tabcontent[i].classList.remove("active");
-    }
-    tablinks = document.getElementsByClassName("tab-button");
-    for (i = 0; i < tablinks.length; i++) {
-        tablinks[i].className = tablinks[i].className.replace(" active", "");
-    }
-    document.getElementById(tabName).classList.add("active");
-    if (evt && evt.currentTarget) {
-        evt.currentTarget.className += " active";
-    }
-
 }
 
 function getKey(){
     return CryptoJS.SHA512(bookData.aesKey+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh").toString();
 }
-
 
 function decData(){
     let originalText = "";
@@ -177,9 +117,6 @@ function decData(){
 }
 
 
-// --- 設定區 ---
-const API_URL = "https://script.google.com/macros/s/AKfycbzIAuTrBD3eI7uusVneoYF6P-f2RtqVLT2yrpHbWpghCTsfhGh6JdcMgKx2b6a3K7HX/exec"; 
-const SALT = "Nxk98ahIR50AtZBiLxowpmhaWXQCg8E";
 
 function generateToken() {
     const kNow = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -187,8 +124,6 @@ function generateToken() {
     const rawString = bookData.APIKey + SALT + kNow + name;
     return CryptoJS.SHA512(rawString).toString();
 } 
-
-//API 請求封裝
 
 async function callApi(params) {
     const token = generateToken();
@@ -211,32 +146,6 @@ async function callApi(params) {
     }
 }
 
-async function callApiPost(params) {
-    const token = generateToken();
-    var ret = null;
-      await fetch(API_URL, {
-          method: "POST", 
-          redirect: 'follow', 
-          body: JSON.stringify({ ...params, token })
-      })
-      .then(res => res.json())
-      .then(data => {
-            ret = data;
-          if(data.status === "success") {
-          } else {
-            console.log( "上傳失敗: ");
-            console.log(data);
-          }
-      })
-      .catch(error => {
-          console.log("錯誤: ");
-          console.log(error);
-          ret = { status: "error", message: "網路請求失敗" };
-      });
-      return ret;
-
-}
-
 async function doGet(key) {
     const res = await callApi({
         action: "get",
@@ -254,33 +163,6 @@ async function doGet(key) {
     return newRes;
 }
 
-
-let textChanged = false;
-
-function buttonShowSaved(){
-
-}
-
-function setTag(T){
-
-}
-function getTag(){
-
-}
-
-function isTextChanged(){
-
-}
-
-function doTextChange(){
-
-}
-
-async function saveToAPI() {
-
-}
-
-
 async function getFromAPI() {
 
     updateStatus("正在讀取...", 'info');
@@ -291,7 +173,7 @@ async function getFromAPI() {
     let res = await doGet(bookData.Name);
 
     if (res.status === "success" && res.value) {
-        setTag(res.tag );
+
         encryptedContentArea.value = res.value;
         bookData.tag = res.tag || "";
         let ret = false;
@@ -328,31 +210,17 @@ async function getAPIKey() {
     if (apiKey) {
         bookData.APIKey = apiKey;
         updateStatus("雲密碼已更新", 'success');
-        const B = saveBookToDB();
-        B.then((data) => {
-        // 這裡對應 resolve
-            //console.log("收到資料:", data);
-        })
-        .catch((error) => {
-        // 這裡對應 reject
-            //console.error("抓到錯誤:", error);
-        });
     } else {
         updateStatus("雲密碼未更改", 'info');
     }
 };
 
 const sleep = (ms) => {
-    //return new Promise(resolve => setTimeout(resolve, ms));
     const end = Date.now() + ms;
     console.log(`開始睡眠 ${ms} 毫秒...`);
     while (Date.now() < end) {
-        // 什麼都不做，純粹消耗 CPU 循環
     }
 };
-
-function newPassword() {
-}
 
 
 async function getAESKey() {
@@ -378,37 +246,22 @@ let bookData = {
     tag:"9999"
 }
 
-function cleankeyData() {
-    bookData.APIKey = "";
-    bookData.aesKey = "";
-    
-}
-
 // clean aesKey
 function cleanAESKey() {
     bookData.aesKey = "";
     
 }
-
-// clean APIKey 
-function cleanAPIKey() {
-    bookData.APIKey = "";
-    
-}   
-
-
-// goto new book
-function gotoNewBook() {
-}   
-
+let btitle = null;
 function addEditableBlock(title = "標題", text = "內容") {
     bookContent.push(text);
+    if (!btitle) {
+        btitle = title;
+        document.title = btitle;
+    }
 }
 
 function setContentToTabB(fullContent) {
-    subTabNav.innerHTML = '';
-    subTabContentContainer.innerHTML = '';
-    blockCounter = 0;
+
 
     let parseType = "v2";
     let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
@@ -481,7 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('setPW').style.display = "none";
 
     result = firstKey;
-    bookData.aesKey = firstValue || "U2FsdGVkX19fJ2VkMd" ;
+    bookData.aesKey = firstValue || "YfbMlmGq0j5WrC/ekCbqpn7tocCbNEbid0HCVjQB1x/LBSkU3GqjKBt++" ;
 
     let res = null;
 
@@ -491,6 +344,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }else{
         bookData.Name = result;
+        document.title = bookData.Name;  
         try { 
             res = await getFromAPI();
             //console.log("初始載入 API 結果:", res);
@@ -503,7 +357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateStatus("找不到文章", 'error');
             return false;   
         }
-        document.title = bookData.Name;    
+  
         {
             showMarkdownView();
             document.getElementById('topBnt').style.display = "none";
