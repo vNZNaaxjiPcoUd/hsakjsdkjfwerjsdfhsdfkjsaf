@@ -185,7 +185,7 @@ async function getFromAPI() {
             if (!ret) {
                 console.log(`解密失敗，請確認 AES 密鑰是否正確`, 'error');
                 cleanAESKey();
-                sleep(1000);    
+                await sleep(3000);    
             }else{
 
             }
@@ -215,13 +215,7 @@ async function getAPIKey() {
     }
 };
 
-const sleep = (ms) => {
-    const end = Date.now() + ms;
-    console.log(`開始睡眠 ${ms} 毫秒...`);
-    while (Date.now() < end) {
-    }
-};
-
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 async function getAESKey() {
     let aesKey =""; 
@@ -232,7 +226,8 @@ async function getAESKey() {
                 bookData.aesKey = "";
             }else { //aseKey 為 null，使用者按了取消
                 bookData.aesKey = "";
-                 return false;
+                await sleep(3000);
+                return false;
             }
     return true;
 }
