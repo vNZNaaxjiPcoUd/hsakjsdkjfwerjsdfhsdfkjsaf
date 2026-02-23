@@ -10,13 +10,19 @@
 </head>
 <body>
     <div class="container">
-        <h3>VP JUMP</h3>
+        <h3>JUMP</h3>
     </div>
     <button onclick="getName()">Your name</button>
+    <br>
+    <button onclick="closeWindow()">Close</button>
     <div id="result"></div>
 
 
 <script>
+    function closeWindow() {
+        console.log("關閉視窗...");
+        window.close();
+    }
     function getName(){
         //get a name
         let name = prompt("請輸入您的姓名：");
