@@ -162,7 +162,11 @@ async function doGet(key) {
     }
     return newRes;
 }
-
+function showError(){
+        bookContent = ["你好! \n\n新的世界在你的腳下，***走一步***吧！"];
+        showMarkdownView();
+        return;
+}
 async function getFromAPI() {
 
     updateStatus("正在讀取...", 'info');
@@ -192,11 +196,13 @@ async function getFromAPI() {
         }
     } else {
         console.log(`API 讀取失敗: ${res.message}`, 'error');
+        showError();
     }
     if (res.status === "success") {
         updateStatus("讀取成功", 'success');
     }else{
         updateStatus("讀取失敗: " + res.message, 'error');
+        showError();
     }
     return res;
 }
