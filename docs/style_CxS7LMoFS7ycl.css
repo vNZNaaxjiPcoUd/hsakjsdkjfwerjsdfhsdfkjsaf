@@ -6,6 +6,7 @@
         font-family: Arial, sans-serif;
         background-color: #f4f4f9;
         font-size: 16px; 
+		font-weight: 300;
     font-family: 'Inter', sans-serif;
     font-size: 16px; /* 基礎文字大小 */
     line-height: 1.7; /* 行距 */
@@ -387,6 +388,7 @@
     word-break: break-word; /* 比 break-all 更友善，會優先在空格處斷行 */
     overflow-wrap: anywhere; /* 針對極長的連續網址非常有校 */
     font-size: 16px;
+	font-weight: 300;
 
 
 
@@ -467,6 +469,7 @@ b, strong {
     font-weight: 700;
     color: #4a90e2; /* 淺藍 */
     transition: color 0.3s ease;
+	font-weight: 600;
 }
 
 b:hover, strong:hover {
@@ -477,6 +480,7 @@ b:hover, strong:hover {
 i, em {
     font-style: italic;
     color: #cccccc; /* 淺灰 */
+	font-weight: 400;
 }
 
 /* 粗體斜體字 */
@@ -485,6 +489,7 @@ b i, strong em, i b, em strong {
     font-weight: 700;
     color: #ff6666; /* 淡紅 */
     transition: transform 0.3s ease;
+	font-weight: 600;
 }
 
 b i:hover, strong em:hover, i b:hover, em strong:hover {
