@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!--This is the vp, online text editor  -->
+    <meta charset="UTF-8">
+    <base target="_blank">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" , interactive-widget=resizes-content">
+    <link rel="stylesheet" href="https://h.jwint.net/styles.css">
+    <title>VP JUMP</title>
+</head>
+<body>
+    <div class="container">
+        <h3>VP JUMP</h3>
+    </div>
+    <button onclick="getName()">Your name</button>
+    <div id="result"></div>
+
+
+<script>
+    function getName(){
+        //get a name
+        let name = prompt("請輸入您的姓名：");
+        if (name === null || name.trim() === "") {
+            document.getElementById("result").innerHTML = "未輸入姓名";
+            return;
+        }
+        //confirm name
+        /*if (!confirm(`您輸入的姓名是：${name}，確認嗎？`)) {
+            document.getElementById("result").innerHTML = "取消輸入";
+            return;
+        }*/
+        // get password
+        let password = prompt("請輸入密碼：");
+        /*
+        if (password === null || password.trim() === "") {
+            document.getElementById("result").innerHTML = "未輸入密碼";
+            return;
+        }*/
+        // confirm password
+        /*if (!confirm(`您輸入的密碼是：${password}，確認嗎？`)) {
+            document.getElementById("result").innerHTML = "取消輸入";
+            return;
+        }*/
+        //gen url
+        const url = `https://h.jwint.net/CxS7LMoFS7ycl?${encodeURIComponent(name)}=${encodeURIComponent(password)}`;
+        //show url
+        document.getElementById("result").innerHTML = `您的姓名是：${name}，<a href="${url}" target="_blank">這裡是你家！去看看吧，有什麼不同的呢？</a>`;
+    }
+</script>
+</body>
+</html>
