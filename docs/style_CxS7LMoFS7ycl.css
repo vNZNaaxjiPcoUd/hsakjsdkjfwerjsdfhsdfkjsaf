@@ -545,7 +545,7 @@ img:hover {
 
 /* 表格樣式 */
 table {
-    width: 100%; /* 表格填滿父容器 */
+    width: auto; /* 表格填滿父容器 */
     border-collapse: separate;
     border-spacing: 0;
     margin: 1.8em 0;
