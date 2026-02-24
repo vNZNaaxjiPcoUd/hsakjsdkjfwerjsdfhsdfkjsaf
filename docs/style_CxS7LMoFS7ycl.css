@@ -391,11 +391,34 @@
 	font-weight: 300;
 
 
-
 a,
 a.visited {
 	color: inherit;
 	text-decoration: none;
+}
+
+a {
+  display: inline-block; /* 關鍵：必須是 block 或 inline-block 才能觸發 ::first-letter */
+  text-decoration: none;
+  color: #cccccc;        /* 你的主文字色 */
+  transition: 0.3s;
+}
+
+/* 針對第一個字的強調 */
+a::first-letter {
+  font-size: 1.1em;      /* 放大 */
+  font-weight: bold;     /* 加粗 */
+  color: #bbbbbb;  
+  /* margin-right: 2px;     與後方文字保持微小間距 */
+}
+
+/* Hover 時讓整個 a 標籤與第一個字一起變化 */
+a:hover {
+  color: #ffffff;
+}
+
+a:hover::first-letter {
+  color: #58d68d;        /* Hover 時第一個字變亮 */
 }
 
 /* 標題樣式 */
