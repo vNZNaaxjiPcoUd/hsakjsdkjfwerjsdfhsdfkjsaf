@@ -5,7 +5,7 @@ body {
     font-family: 'Inter', sans-serif;
     font-size: 16px; /* 基礎文字大小 */
     line-height: 1.7; /* 行距 */
-    color: #f0f0f0; /* 淺灰文字，適應黑底 */
+    color: #cccccc; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
     width: 96%; /* 設置寬度為 92% */
     max-width: 2000px; /* 最大寬度限制 */
@@ -14,6 +14,8 @@ body {
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05); /* 淺色陰影 */
 	font-weight: 250; 
 }
+
+
 
 a,
 a.visited {
@@ -32,17 +34,17 @@ a {
 a::first-letter {
   font-size: 1.1em;      /* 放大 */
   font-weight: bold;     /* 加粗 */
-  color: #bbbbbb;  
+  color: #a0fc94;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
 
 /* Hover 時讓整個 a 標籤與第一個字一起變化 */
 a:hover {
-  color: #ffffff;
+  color: #ebebeb;
 }
 
 a:hover::first-letter {
-  color: #58d68d;        /* Hover 時第一個字變亮 */
+  color: #8bfe7b;        /* Hover 時第一個字變亮 */
 }
 
 /* 標題樣式 */
@@ -118,7 +120,7 @@ h4:hover {
 /* 粗體字 */
 b, strong {
     font-weight: 800;
-    color: #6b4aff; /* 淺藍 */
+    color: #acd09b; /* 淺藍 */
     transition: color 0.3s ease;
 }
 
@@ -127,7 +129,7 @@ b, strong {
 i, em {
     font-style: italic;
     font-weight: 500;
-    color: #6b4aff; /* 淺灰 */
+    color: #acd09b; /* 淺灰 */
     transition: transform 0.3s ease;
 }
 
@@ -135,13 +137,13 @@ i, em {
 b i, strong em, i b, em strong {
     font-style: italic;
     font-weight: 800;
-    color: #6b4aff; 
+    color: #acd09b; 
     transition: transform 0.3s ease;
 }
 
 b:hover, strong:hover, i:hover, em:hover, b i:hover, strong em:hover, i b:hover, em strong:hover {
     transform: scale(1.05); /* 懸停輕微放大 */
-    color: #66aaff;
+    color: #8bfe7b;
 }
 
 /* 段落樣式 */
@@ -647,5 +649,3 @@ body {
         background-color: #ffffff;
     }
 }
-
-
