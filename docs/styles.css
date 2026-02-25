@@ -33,8 +33,8 @@ a {
 /* 針對第一個字的強調 */
 a::first-letter {
   font-size: 1.1em;      /* 放大 */
-  font-weight: bold;     /* 加粗 */
-  color: #9ecb95;  
+  font-weight: 300;     /* 加粗 */
+  color: #99976d;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
 
@@ -44,7 +44,7 @@ a:hover {
 }
 
 a:hover::first-letter {
-  color: #8bfe7b;        /* Hover 時第一個字變亮 */
+  color: #e2dc6f;        /* Hover 時第一個字變亮 */
 }
 
 /* 標題樣式 */
@@ -119,8 +119,8 @@ h4:hover {
 }
 /* 粗體字 */
 b, strong {
-    font-weight: 800;
-    color: #acd09b; /* 淺藍 */
+    font-weight: 600;
+    color: #0eda03; /* 淺藍 */
     transition: color 0.3s ease;
 }
 
@@ -128,16 +128,16 @@ b, strong {
 /* 斜體字 */
 i, em {
     font-style: italic;
-    font-weight: 500;
-    color: #acd09b; /* 淺灰 */
+    font-weight: 300;
+    color: #0eda03; 
     transition: transform 0.3s ease;
 }
 
 /* 粗體斜體字 */
 b i, strong em, i b, em strong {
     font-style: italic;
-    font-weight: 800;
-    color: #acd09b; 
+    font-weight: 600;
+    color: #0eda03; 
     transition: transform 0.3s ease;
 }
 
