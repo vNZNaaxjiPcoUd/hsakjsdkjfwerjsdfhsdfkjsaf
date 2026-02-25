@@ -34,7 +34,7 @@ a {
 a::first-letter {
   font-size: 1.1em;      /* 放大 */
   font-weight: bold;     /* 加粗 */
-  color: #a0fc94;  
+  color: #9ecb95;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
 
