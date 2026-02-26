@@ -33,7 +33,7 @@ a {
 a::first-letter {
   font-size: 1.0em;      /* 放大 */
   font-weight: 300;     /* 加粗 */
-  letter-spacing: 0.01em;
+  letter-spacing: 0.02em;
   color: #99976d;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
