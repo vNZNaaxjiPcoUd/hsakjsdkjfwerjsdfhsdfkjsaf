@@ -1,9 +1,7 @@
-/* 全局樣式 */
-/*@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;900&family=Montserrat:wght@500;700&display=swap');
-*/
+
 body {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px; /* 基礎文字大小 */
+    font-family: 'Inter', "PingFang TC", "Apple LiGothic Medium", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-size: 32px; /* 基礎文字大小 */
     line-height: 1.7; /* 行距 */
     color: #cccccc; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
@@ -32,8 +30,9 @@ a {
 
 /* 針對第一個字的強調 */
 a::first-letter {
-  font-size: 1.1em;      /* 放大 */
+  font-size: 1.0em;      /* 放大 */
   font-weight: 300;     /* 加粗 */
+  letter-spacing: 0.01em;
   color: #99976d;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
@@ -254,6 +253,7 @@ footer {
 
 
 /* 響應式設計 */
+@media (width > 4096px) { .msg::before { content: "bigger more"; } }
 @media (max-width: 4096px) { .msg::before { content: "4096"; } }
 @media (max-width: 3120px) { .msg::before { content: "3120"; } }
 @media (max-width: 2200px) { .msg::before { content: "2200"; } }
@@ -264,11 +264,11 @@ footer {
 @media (max-width: 480px)  { .msg::before { content: "480"; } }
 
 
-body {
-	font-size: 26px;
-	padding: 35px 2px;
-	width: 90%;
-	margin: 0 auto;  /* center */
+@media (width > 4096px){ 
+    body{
+        font-size: 26px;
+        padding: 35px 2px;
+    }
 }
 
 .hugeS {
