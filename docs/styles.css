@@ -7,7 +7,7 @@ body {
     color: #cccccc; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
     width: 96%; /* 設置寬度為 92% */
-    max-width: 2000px; /* 最大寬度限制 */
+    max-width: 6000px; /* 最大寬度限制 */
     margin: 0 auto; /* 居中 */
     padding: 40px 20px;
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.05); /* 淺色陰影 */
