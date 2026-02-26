@@ -16,6 +16,7 @@ body {
 
 
 
+
 a,
 a.visited {
 	color: inherit;
@@ -291,6 +292,7 @@ footer {
 		
 
 @media (max-width: 4096px) {
+    font-size: 24px;
     body {
         font-size: 24px;
         padding: 35px 18px;
@@ -329,6 +331,7 @@ footer {
 
 }
 @media (max-width: 3120px) {
+    font-size: 22px;
     body {
         font-size: 22px;
         padding: 35px 18px;
@@ -366,6 +369,7 @@ footer {
 	}
 }
 @media (max-width: 2200px) {
+    font-size: 20px;
     body {
         font-size: 20px;
         padding: 35px 18px;
@@ -404,6 +408,7 @@ footer {
 }
 	
 @media (max-width: 1920px) {
+    font-size: 19px;
     body {
         font-size: 19px;
         padding: 35px 18px;
@@ -442,6 +447,7 @@ footer {
 }
 
 @media (max-width: 1440px) {
+    font-size: 18px;
     body {
         font-size: 18px;
         padding: 30px 15px;
@@ -485,6 +491,7 @@ footer {
 }
 	
 @media (max-width: 1024px) {
+    font-size: 17px;
     body {
         font-size: 17px;
         padding: 30px 15px;
@@ -528,6 +535,7 @@ footer {
 }
 
 @media (max-width: 768px) {
+    font-size: 16px;
     body {
         font-size: 16px;
         padding: 20px 10px;
@@ -574,6 +582,7 @@ footer {
 }
 
 @media (max-width: 480px) {
+    font-size: 16px;
     body {
         font-size: 16px;
         padding: 15px 8px;
@@ -655,3 +664,4 @@ footer {
         background-color: #ffffff;
     }
 }
+
