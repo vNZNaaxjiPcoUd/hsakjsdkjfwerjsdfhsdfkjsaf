@@ -166,7 +166,7 @@ img {
 }
 
 img:hover {
-    transform: scale(1.02); /* 懸停輕微放大 */
+    transform: scale(0.99); /* 懸停輕微放大 */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); /* 增強陰影 */
 }
 
