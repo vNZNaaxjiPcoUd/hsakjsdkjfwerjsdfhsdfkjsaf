@@ -4,28 +4,16 @@
         padding: 0;
         overflow: hidden;
         font-family: Arial, sans-serif;
-        background-color: #f4f4f9;
+        background-color: #f4f4f9a9;
         font-size: 16px; 
-		font-weight: 300;
-    font-family: 'Inter', sans-serif;
-    font-size: 16px; /* 基礎文字大小 */
-    line-height: 1.7; /* 行距 */
-    color: #f0f0f0; /* 淺灰文字，適應黑底 */
-    background-color: #000000; /* 純黑背景 */
-    width: 100%; 
-    max-width: 2000px; /* 最大寬度限制 */
-    margin: 0 0 0 4px; 
-    padding: 0;
-
     }
 
     .main-container {
         display: flex;
         flex-direction: column;
-        height: calc(100% - 5px);
+        height: calc(100% - 19px);
         padding: 3px;
         box-sizing: border-box;
-        width: calc(100% - 5px); 
     }
 
     /* --- 狀態訊息樣式 --- */
@@ -51,7 +39,7 @@
     }
 
     .tabs button {
-        background-color: rgb(187, 93, 250);
+        background-color: #20904fc5;
         border: none;
         outline: none;
         cursor: pointer;
@@ -339,7 +327,7 @@
     /* 密碼輸入燈箱 */
     #passwordOverlay {
         position: fixed;
-        /* top: 0; left: 0; right: 0; bottom: 0;*/
+        top: 0; left: 0; right: 0; bottom: 0;
         background: rgba(0,0,0,0.95);
         display: none;
         justify-content: center;
@@ -387,8 +375,25 @@
     /* 文字折行強化 */
     word-break: break-word; /* 比 break-all 更友善，會優先在空格處斷行 */
     overflow-wrap: anywhere; /* 針對極長的連續網址非常有校 */
-    font-size: 16px;
-	font-weight: 300;
+    
+    * {
+        line-height: 1.5; /* 行距 */
+        letter-spacing: 0.05em; /* 字母間距 */
+    }
+
+/*Special markdown syntax ----------------------------------------------------------------------------------------*/
+
+    font-family: 'Inter', "PingFang TC", "Apple LiGothic Medium", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    font-size: 18px; /* 基礎文字大小 */
+    line-height: 1.7; /* 行距 */
+    letter-spacing: 0.03em; /* 字母間距 */
+    color: #cccccc; /* 淺灰文字，適應黑底 */
+    background-color: #000000; /* 純黑背景 */
+    max-width: 6000px; /* 最大寬度限制 */
+    margin: 0 auto; /* 居中 */
+	font-weight: 250; 
+
+
 
 
 a,
@@ -406,19 +411,20 @@ a {
 
 /* 針對第一個字的強調 */
 a::first-letter {
-  font-size: 1.1em;      /* 放大 */
-  font-weight: bold;     /* 加粗 */
-  color: #bbbbbb;  
+  font-size: 1.0em;      /* 放大 */
+  font-weight: 300;     /* 加粗 */
+  letter-spacing: 0.02em;
+  color: #99976d;  
   /* margin-right: 2px;     與後方文字保持微小間距 */
 }
 
 /* Hover 時讓整個 a 標籤與第一個字一起變化 */
 a:hover {
-  color: #ffffff;
+  color: #ebebeb;
 }
 
 a:hover::first-letter {
-  color: #58d68d;        /* Hover 時第一個字變亮 */
+  color: #e2dc6f;        /* Hover 時第一個字變亮 */
 }
 
 /* 標題樣式 */
@@ -428,9 +434,9 @@ h1 {
     font-weight: 700; /* 粗體 */
     color: #2ecc71;
     letter-spacing: 0.05em; /* 字母間距 */
-    margin: 1.8em 0 0.6em;
+    margin: 1.8em 0 0.2em;
     border-bottom: 1px solid #4a90e2; /* 淺藍底線 */
-    padding-bottom: 0.3em;
+    padding-bottom: 0.1em;
     text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3); /* 深色陰影增強對比 */
     transition: color 0.3s ease;
 }
@@ -446,8 +452,8 @@ h2 {
     font-weight: 500; /* 中等粗體 */
     color: #a2d149; /* 金色 */
     letter-spacing: 0.03em;
-    margin: 1.5em 0 0.5em;
-    padding-bottom: 0.2em; /* 添加輕微底部間距，與h1一致 */
+    margin: 1.5em 0 0.2em;
+    padding-bottom: 0.1em; /* 添加輕微底部間距，與h1一致 */
     border-bottom: 1px solid rgba(212, 160, 23, 0.3); /* 淺金色底線，增加層次 */
     transition: color 0.3s ease, transform 0.3s ease; /* 添加transform動畫 */
 }
@@ -464,9 +470,9 @@ h3 {
     font-weight: 500; /* 中等粗體，與h2一致 */
     color: #f1c40f;
     letter-spacing: 0.02em;
-    margin: 1.2em 0 0.4em;
+    margin: 1.2em 0 0.2em;
     padding-bottom: 0.1em;
-    border-bottom: 1px solid rgba(204, 204, 204, 0.2); /* 淺灰底線，與主題協調 */
+    /*border-bottom: 1px solid rgba(204, 204, 204, 0.2); /* 淺灰底線，與主題協調 */
     transition: color 0.3s ease, transform 0.3s ease;
 }
 
@@ -482,7 +488,7 @@ h4 {
     font-weight: 400; /* 較輕的字重，區分層次 */
     color: #e67e22;
     letter-spacing: 0.01em;
-    margin: 1em 0 0.3em;
+    margin: 1em 0 0.2em;
     transition: color 0.3s ease, transform 0.3s ease;
 }
 
@@ -493,8 +499,8 @@ h4:hover {
 }
 /* 粗體字 */
 b, strong {
-    font-weight: 800;
-    color: #6b4aff; /* 淺藍 */
+    font-weight: 600;
+    color: #0eda03; /* 淺藍 */
     transition: color 0.3s ease;
 }
 
@@ -502,22 +508,22 @@ b, strong {
 /* 斜體字 */
 i, em {
     font-style: italic;
-    font-weight: 500;
-    color: #6b4aff; /* 淺灰 */
+    font-weight: 300;
+    color: #0eda03; 
     transition: transform 0.3s ease;
 }
 
 /* 粗體斜體字 */
 b i, strong em, i b, em strong {
     font-style: italic;
-    font-weight: 800;
-    color: #6b4aff; 
+    font-weight: 600;
+    color: #0eda03; 
     transition: transform 0.3s ease;
 }
 
 b:hover, strong:hover, i:hover, em:hover, b i:hover, strong em:hover, i b:hover, em strong:hover {
     transform: scale(1.05); /* 懸停輕微放大 */
-    color: #66aaff;
+    color: #8bfe7b;
 }
 
 /* 段落樣式 */
@@ -539,7 +545,7 @@ img {
 }
 
 img:hover {
-    transform: scale(1.02); /* 懸停輕微放大 */
+    transform: scale(0.99); /* 懸停輕微縮 */
     box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2); /* 增強陰影 */
 }
 
@@ -548,9 +554,9 @@ table {
     width: auto; /* 表格填滿父容器 */
     border-collapse: separate;
     border-spacing: 0;
-    margin: 1.8em 0;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
+    margin: 1em 0;
+    /*box-shadow: 0 2px 8px rgba(255, 255, 255, 0.08);*/
+    border-radius: 9px;
     overflow: hidden;
 }
 
@@ -626,12 +632,39 @@ footer {
     text-align: center;
 }
 
+
+/* 響應式設計 */
+@media (width > 4096px) { font-size: 26px;}
+@media (max-width: 4096px) { font-size: 24px; }
+@media (max-width: 3120px) { font-size: 22px; }
+@media (max-width: 2200px) { font-size: 20px; }
+@media (max-width: 1920px) { font-size: 19px;}
+@media (max-width: 1440px) { font-size: 18px; }
+@media (max-width: 1024px) { font-size: 17px; }
+@media (max-width: 768px)  { font-size: 16px; }
+@media (max-width: 480px)  { font-size: 16px; }
+
+
+/* end of special markdown syntax -----------------------------------------------------------------------------------*/
+
 }
 
 #markdownViewBtn {
-    margin-top: 3px;
-    padding: 3px 10px;
-    background-color: #2196F3;
+
+}
+
+.btn-container {
+    display: flex;       /* 啟用 Flexbox 佈局 */
+    width: 80%;          /* 容器佔滿父層的 80% */
+    margin: 0 auto;      /* 選擇性：讓這 80% 的容器在頁面置中 */
+    gap: 10px;           /* 兩個按鈕之間的間距 (可自行調整) */
+}
+
+.mdBtn {
+    flex: 1;             /* 關鍵：讓兩個按鈕平分剩餘空間 */
+    margin-top: 2px;
+    padding: 5px 25px;       /* 增加一點 padding 讓按鈕看起來比例較好  */
+    background-color: #00810d;
     color: white;
     border: none;
     border-radius: 4px;
