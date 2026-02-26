@@ -3,6 +3,7 @@ body {
     font-family: 'Inter', "PingFang TC", "Apple LiGothic Medium", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
     font-size: 32px; /* 基礎文字大小 */
     line-height: 1.7; /* 行距 */
+    letter-spacing: 0.05em; /* 字母間距 */
     color: #cccccc; /* 淺灰文字，適應黑底 */
     background-color: #000000; /* 純黑背景 */
     width: 96%; /* 設置寬度為 92% */
