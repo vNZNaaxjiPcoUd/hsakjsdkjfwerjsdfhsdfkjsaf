@@ -11,7 +11,7 @@
     .main-container {
         display: flex;
         flex-direction: column;
-        height: calc(100% - 19px);
+        height: calc(100%);
         padding: 3px;
         box-sizing: border-box;
         background-color: black;
