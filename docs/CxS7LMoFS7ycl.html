@@ -8,13 +8,15 @@
 <body>
     <script>
         function processAndRedirect() {
-            const baseUrl = "https://n.jwint.net/r";
+            const baseUrl = "https://n.jwint.net/r?";
             const lastPart = window.location.search.slice(1);
             const result = lastPart.replace(/\+/g, "%20");
+            console.log("Extracted and processed part:", result);
             const kk1 = `${baseUrl}${result}`;
             let okU = kk1.replace(/(?<!:)\/+/g, "/");
             const urlLocal = window.location;
             window.location.href = okU;
+            console.log("Redirecting to:", kk1,okU);
             }
         processAndRedirect();
     </script>
