@@ -11,10 +11,9 @@
     .main-container {
         display: flex;
         flex-direction: column;
-        height: calc(100%-19px);
+        height: calc(100% - 19px);
         padding: 3px;
         box-sizing: border-box;
-        background-color: black;
     }
 
     .main-container-readonly {
@@ -23,7 +22,6 @@
         height: 100%;
         padding: 3px;
         box-sizing: border-box;
-        background-color: black;
     }
 
     /* --- 狀態訊息樣式 --- */
@@ -46,6 +44,8 @@
     .tabs {
         flex-shrink: 0;
         margin-bottom: 0;
+        background-color: #f4f4f9;
+        padding: 0px 0px;
     }
 
     .tabs button {
@@ -680,4 +680,16 @@ footer {
     border-radius: 4px;
     cursor: pointer;
     font-size: 12px;
+}
+
+#mainTabs {
+    display: none;
+}
+
+#mdvBtn {
+    background-color: #f4f4f9;
+    color: #f4f4f9;
+    font-size: 16px;
+    padding: 0px;
+    margin: 0px;
 }
