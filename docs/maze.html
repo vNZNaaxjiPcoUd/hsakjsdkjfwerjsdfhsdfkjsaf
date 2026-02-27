@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>終極文字迷宮</title>
+<title>迷宮</title>
 
 <link rel="manifest" href="mazemanifest.json">
 <meta name="theme-color" content="#121212">
@@ -19,17 +19,11 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        
-        /* 解決 iOS 底部列遮擋與回彈問題 */
         height: 100dvh; 
         overscroll-behavior: none;
-        
-        /* 避開 iPhone 動態島與底部小白條 */
         padding-top: env(safe-area-inset-top);
         padding-bottom: env(safe-area-inset-bottom);
         box-sizing: border-box;
-
-        /* 徹底禁止 iOS 長按選取文字與放大鏡 */
         -webkit-user-select: none;
         user-select: none;
         -webkit-touch-callout: none;
@@ -38,11 +32,11 @@
 
     #header {
         text-align: center;
-        margin-bottom: 10px;
+        margin-bottom: 5px;
         width: 100%;
-        flex-shrink: 0; /* 防止被壓縮 */
+        flex-shrink: 0;
     }
-    h1 { margin: 10px 0; font-size: 22px; color: #ffffff; }
+    h1 { margin: 10px 0 5px 0; font-size: 22px; color: #ffffff; }
     
     .stats-container {
         display: flex;
@@ -67,6 +61,9 @@
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
         margin-bottom: 15px;
         flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     #maze-container {
@@ -83,6 +80,7 @@
         justify-content: center;
         font-size: 16px;
         font-weight: bold;
+        line-height: 1;
     }
 
     .wall { color: #2E7D32; } 
@@ -100,10 +98,9 @@
     }
     @keyframes blink { 50% { opacity: 0.4; } }
 
-    /* 下方控制按鈕 */
     #controls {
         display: grid;
-        grid-template-columns: repeat(3, 80px); /* 針對 iPhone 稍微加寬 */
+        grid-template-columns: repeat(3, 80px);
         grid-template-rows: repeat(3, 60px);
         gap: 10px;
         flex-shrink: 0;
@@ -119,8 +116,6 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        
-        /* 移除點擊時的半透明反白閃爍 (iOS 特性) */
         -webkit-tap-highlight-color: transparent;
         touch-action: manipulation;
     }
@@ -178,8 +173,9 @@
     let playerPos = { r: 1, c: 1 }, goalPos = { r: 1, c: 1 };
     let level = 1;
     let rows = 15, cols = 15;
+    const CELL_SIZE = 18; // 固定舒適的格子大小
 
-    // IndexedDB 存取邏輯
+    // IndexedDB 存檔邏輯
     const DB_NAME = 'MazeGameDB';
     const STORE_NAME = 'gameState';
     let db;
@@ -215,17 +211,14 @@
     }
 
     function calculateDimensions() {
-        const cellSize = 18;
-        // 針對 iOS 精確計算保留空間 (標題 80 + 按鈕區塊 220 + padding)
+        // 永遠將迷宮尺寸撐到畫面最大允許範圍，保持固定大小
         const reservedHeight = 320; 
         const reservedWidth = 40; 
-
-        // 使用 visualViewport 若存在，否則退回 innerWidth/Height
         const vW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
         const vH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
 
-        let c = Math.floor((vW - reservedWidth) / cellSize);
-        let r = Math.floor((vH - reservedHeight) / cellSize);
+        let c = Math.floor((vW - reservedWidth) / CELL_SIZE);
+        let r = Math.floor((vH - reservedHeight) / CELL_SIZE);
 
         if (c % 2 === 0) c--;
         if (r % 2 === 0) r--;
@@ -236,26 +229,48 @@
 
     function generateMaze() {
         maze = Array.from({ length: rows }, () => Array(cols).fill(1));
-        function carvePaths(r, c) {
-            maze[r][c] = 0;
-            const directions = [[0, 2], [2, 0], [0, -2], [-2, 0]].sort(() => Math.random() - 0.5);
+        
+        // --- 難度控制核心 ---
+        // 難度緩慢增加 (每關 +0.04)，並在達到 0.75 (相當程度的複雜路口) 後停止增加，避免變成無解地獄。
+        let branchProbability = Math.min(0.75, (level - 1) * 0.04);
+        
+        let activeCells = [{ r: 1, c: 1 }];
+        maze[1][1] = 0;
+
+        while (activeCells.length > 0) {
+            let index = (Math.random() < branchProbability) 
+                        ? Math.floor(Math.random() * activeCells.length) 
+                        : activeCells.length - 1;
+            
+            let cell = activeCells[index];
+            let neighbors = [];
+            
+            const directions = [[0, 2], [2, 0], [0, -2], [-2, 0]];
             for (let [dr, dc] of directions) {
-                let nr = r + dr, nc = c + dc;
+                let nr = cell.r + dr, nc = cell.c + dc;
                 if (nr > 0 && nr < rows - 1 && nc > 0 && nc < cols - 1 && maze[nr][nc] === 1) {
-                    maze[r + dr / 2][c + dc / 2] = 0;
-                    carvePaths(nr, nc);
+                    neighbors.push({ r: nr, c: nc, dr: dr, dc: dc });
                 }
             }
+
+            if (neighbors.length > 0) {
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                maze[cell.r + next.dr / 2][cell.c + next.dc / 2] = 0; 
+                maze[next.r][next.c] = 0; 
+                activeCells.push({ r: next.r, c: next.c });
+            } else {
+                activeCells.splice(index, 1);
+            }
         }
-        carvePaths(1, 1);
+        
         playerPos = { r: 1, c: 1 };
         goalPos = { r: rows - 2, c: cols - 2 };
         maze[goalPos.r][goalPos.c] = 0; 
     }
 
     function initGrid() {
-        mazeContainer.style.gridTemplateColumns = `repeat(${cols}, 18px)`;
-        mazeContainer.style.gridTemplateRows = `repeat(${rows}, 18px)`;
+        mazeContainer.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+        mazeContainer.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
         mazeContainer.innerHTML = '';
         gridCells = [];
 
@@ -263,6 +278,7 @@
             let rowCells = [];
             for (let c = 0; c < cols; c++) {
                 const cell = document.createElement('div');
+                cell.className = 'cell';
                 mazeContainer.appendChild(cell);
                 rowCells.push(cell);
             }
@@ -293,10 +309,37 @@
         clearedDisplay.textContent = level - 1;
     }
 
+    // 滑動直到路口或終點
     function movePlayer(dr, dc) {
-        let newR = playerPos.r + dr, newC = playerPos.c + dc;
-        if (maze[newR] && maze[newR][newC] === 0) {
-            playerPos.r = newR; playerPos.c = newC;
+        let moved = false;
+
+        while (true) {
+            let nextR = playerPos.r + dr;
+            let nextC = playerPos.c + dc;
+
+            if (!maze[nextR] || maze[nextR][nextC] !== 0) break;
+
+            playerPos.r = nextR;
+            playerPos.c = nextC;
+            moved = true;
+
+            if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) break;
+
+            let isIntersection = false;
+            if (dr !== 0) {
+                if (maze[playerPos.r][playerPos.c - 1] === 0 || maze[playerPos.r][playerPos.c + 1] === 0) {
+                    isIntersection = true;
+                }
+            } else if (dc !== 0) {
+                if (maze[playerPos.r - 1][playerPos.c] === 0 || maze[playerPos.r + 1][playerPos.c] === 0) {
+                    isIntersection = true;
+                }
+            }
+
+            if (isIntersection) break; 
+        }
+
+        if (moved) {
             drawMaze();
             checkWin();
         }
@@ -324,14 +367,11 @@
         }
     });
 
-    // 防止 iOS 預設的多點觸控手勢干擾
     document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
 
     function bindButton(id, action) {
         const btn = document.getElementById(id);
         if(!btn) return;
-        
-        // 使用 pointerdown 取代 touchstart，在 iOS 16+ 表現更穩定
         btn.addEventListener('pointerdown', (e) => {
             e.preventDefault(); 
             action();

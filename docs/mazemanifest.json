@@ -1,5 +1,5 @@
 {
-  "name": "終極文字迷宮",
+  "name": "迷宮",
   "short_name": "文字迷宮",
   "start_url": "./maze.html",
   "display": "standalone",
