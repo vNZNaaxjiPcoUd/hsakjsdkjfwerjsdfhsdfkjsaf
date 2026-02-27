@@ -22,6 +22,7 @@
         height: 100%;
         padding: 3px;
         box-sizing: border-box;
+        background-color: black;
     }
 
     /* --- 狀態訊息樣式 --- */
