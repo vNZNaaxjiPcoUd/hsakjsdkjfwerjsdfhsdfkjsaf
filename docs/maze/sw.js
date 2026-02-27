@@ -1,11 +1,11 @@
-const CACHE_NAME = 'maze-game-v4'; 
+const CACHE_NAME = 'maze-game-v5.0'; 
 
 const urlsToCache = [
   './',
   './maze.html',
-  './mazemanifest.json'
-  // './icon-192.png',
-  // './icon-512.png'
+  './mazemanifest.json',
+   './icon-192.png',
+   './icon-512.png'
 ];
 
 // 1. 安裝階段：下載新檔案並強制等待中的 Service Worker 立即啟動
