@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>清除迷宮進度</title>
+<style>
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+    }
+    .container {
+        text-align: center;
+        background-color: #1a1a1a;
+        padding: 30px;
+        border-radius: 12px;
+        border: 2px solid #333;
+        max-width: 90%;
+    }
+    h1 { margin-top: 0; color: #FF5722; }
+    p { color: #aaaaaa; line-height: 1.5; }
+    
+    button {
+        background-color: #d32f2f;
+        color: white;
+        border: none;
+        padding: 15px 30px;
+        font-size: 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: background-color 0.2s;
+    }
+    button:hover { background-color: #b71c1c; }
+    button:active { background-color: #f44336; }
+    button:disabled {
+        background-color: #555;
+        color: #888;
+        cursor: not-allowed;
+    }
+
+    #message {
+        margin-top: 20px;
+        font-size: 16px;
+        font-weight: bold;
+        min-height: 24px;
+    }
+    
+    .link-btn {
+        display: inline-block;
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #333;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 8px;
+        border: 1px solid #555;
+    }
+    .link-btn:active { background-color: #555; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>清除遊戲紀錄</h1>
+    <p>這將會刪除您在「終極文字迷宮」的所有通關進度，<br>下次開啟遊戲時，將會從第 1 關重新開始。</p>
+    
+    <button id="clear-btn">⚠ 確認清除進度</button>
+    <div id="message"></div>
+    
+    <a href="maze.html" class="link-btn">返回遊戲</a>
+</div>
+
+<script>
+    const clearBtn = document.getElementById('clear-btn');
+    const messageDiv = document.getElementById('message');
+    
+    // 必須與遊戲中使用的資料庫名稱與 Store 名稱完全相同
+    const DB_NAME = 'MazeGameDB';
+    const STORE_NAME = 'gameState';
+
+    clearBtn.addEventListener('click', () => {
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onerror = (event) => {
+            messageDiv.textContent = "讀取資料庫失敗：" + event.target.errorCode;
+            messageDiv.style.color = "#f44336";
+        };
+
+        request.onsuccess = (event) => {
+            const db = event.target.result;
+            
+            // 檢查是否已經有建立過這個 ObjectStore
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                messageDiv.textContent = "目前沒有找到任何遊戲進度。";
+                messageDiv.style.color = "#aaaaaa";
+                return;
+            }
+
+            // 開啟讀寫權限的交易
+            const transaction = db.transaction([STORE_NAME], 'readwrite');
+            const store = transaction.objectStore(STORE_NAME);
+            
+            // 刪除名為 'savedLevel' 的進度紀錄
+            const deleteRequest = store.delete('savedLevel');
+
+            deleteRequest.onsuccess = () => {
+                messageDiv.textContent = "✔ 進度已成功清除！";
+                messageDiv.style.color = "#4CAF50";
+                
+                // 清除成功後將按鈕反白，避免重複點擊
+                clearBtn.disabled = true;
+                clearBtn.textContent = "已清除";
+            };
+
+            deleteRequest.onerror = () => {
+                messageDiv.textContent = "清除失敗，請稍後再試。";
+                messageDiv.style.color = "#f44336";
+            };
+        };
+    });
+</script>
+</body>
+</html>
