@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>迷宮</title>
+
+<link rel="manifest" href="mazemanifest.json">
+<meta name="theme-color" content="#121212">
+<link rel="apple-touch-icon" href="icon-192.png">
+
+<style>
+    body {
+        background-color: #121212;
+        color: #e0e0e0;
+        font-family: "Courier New", Courier, monospace;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100dvh; 
+        overscroll-behavior: none;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: border-box;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        touch-action: none;
+    }
+
+    #header {
+        text-align: center;
+        margin-bottom: 5px;
+        width: 100%;
+        flex-shrink: 0;
+    }
+    h1 { margin: 10px 0 5px 0; font-size: 22px; color: #ffffff; }
+    
+    .stats-container {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    .stat-badge {
+        background-color: #333;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: bold;
+        color: #4CAF50;
+        border: 1px solid #4CAF50;
+    }
+
+    #maze-wrapper {
+        padding: 10px;
+        background-color: #1a1a1a;
+        border: 3px solid #4CAF50;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+        margin-bottom: 15px;
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #maze-container {
+        display: grid;
+        gap: 0; 
+        background-color: #000;
+    }
+    
+    .cell {
+        width: 18px; 
+        height: 18px; 
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: bold;
+        line-height: 1;
+    }
+
+    .wall { color: #2E7D32; } 
+    .path { color: transparent; }
+    .player { 
+        color: #FFFFFF; 
+        background-color: #FF5722; 
+        border-radius: 4px; 
+        box-shadow: 0 0 5px #FF5722;
+        z-index: 2;
+    }
+    .goal { 
+        color: #FFEB3B; 
+        animation: blink 1s infinite; 
+    }
+    @keyframes blink { 50% { opacity: 0.4; } }
+
+    #controls {
+        display: grid;
+        grid-template-columns: repeat(3, 80px);
+        grid-template-rows: repeat(3, 60px);
+        gap: 10px;
+        flex-shrink: 0;
+        margin-bottom: 10px;
+    }
+    .btn {
+        background-color: #2a2a2a;
+        color: #bbb;
+        border: 2px solid #444;
+        border-radius: 12px;
+        font-size: 24px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+    .btn:active { 
+        background-color: #4CAF50; 
+        color: white;
+        border-color: #4CAF50;
+    }
+    #btn-up { grid-column: 2; grid-row: 1; }
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-reset { 
+        grid-column: 2; grid-row: 2; 
+        font-size: 16px; 
+        background-color: #4a2c2c; 
+        border-color: #663333;
+        color: #ffcccc;
+    }
+    #btn-reset:active { background-color: #884444; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 3; }
+
+    @media (min-height: 800px) and (min-width: 600px) {
+        #controls { display: none; }
+    }
+</style>
+</head>
+<body>
+
+<div id="header">
+    <h1>終極文字迷宮</h1>
+    <div class="stats-container">
+        <div class="stat-badge">第 <span id="level-display">1</span> 關</div>
+        <div class="stat-badge">已過關: <span id="cleared-display">0</span></div>
+    </div>
+</div>
+
+<div id="maze-wrapper">
+    <div id="maze-container"></div>
+</div>
+
+<div id="controls">
+    <button class="btn" id="btn-up">▲</button>
+    <button class="btn" id="btn-left">◄</button>
+    <button class="btn" id="btn-reset">重置</button>
+    <button class="btn" id="btn-right">►</button>
+    <button class="btn" id="btn-down">▼</button>
+</div>
+
+<script>
+    const mazeContainer = document.getElementById('maze-container');
+    const levelDisplay = document.getElementById('level-display');
+    const clearedDisplay = document.getElementById('cleared-display');
+
+    let maze = [], gridCells = [];
+    let playerPos = { r: 1, c: 1 }, goalPos = { r: 1, c: 1 };
+    let level = 1;
+    let rows = 15, cols = 15;
+    const CELL_SIZE = 18; // 固定舒適的格子大小
+
+    // IndexedDB 存檔邏輯
+    const DB_NAME = 'MazeGameDB';
+    const STORE_NAME = 'gameState';
+    let db;
+
+    function initDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open(DB_NAME, 1);
+            request.onerror = event => reject("IndexedDB error: " + event.target.errorCode);
+            request.onsuccess = event => { db = event.target.result; resolve(db); };
+            request.onupgradeneeded = event => {
+                db = event.target.result;
+                db.createObjectStore(STORE_NAME);
+            };
+        });
+    }
+
+    function saveLevelData(currentLevel) {
+        if (!db) return;
+        const transaction = db.transaction([STORE_NAME], 'readwrite');
+        const store = transaction.objectStore(STORE_NAME);
+        store.put(currentLevel, 'savedLevel');
+    }
+
+    function loadLevelData() {
+        return new Promise(resolve => {
+            if (!db) return resolve(1);
+            const transaction = db.transaction([STORE_NAME], 'readonly');
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.get('savedLevel');
+            request.onsuccess = event => resolve(event.target.result || 1);
+            request.onerror = () => resolve(1);
+        });
+    }
+
+    function calculateDimensions() {
+        // 永遠將迷宮尺寸撐到畫面最大允許範圍，保持固定大小
+        const reservedHeight = 320; 
+        const reservedWidth = 40; 
+        const vW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const vH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+        let c = Math.floor((vW - reservedWidth) / CELL_SIZE);
+        let r = Math.floor((vH - reservedHeight) / CELL_SIZE);
+
+        if (c % 2 === 0) c--;
+        if (r % 2 === 0) r--;
+
+        cols = Math.max(11, c);
+        rows = Math.max(11, r);
+    }
+
+    function generateMaze() {
+        maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+        
+        // --- 難度控制核心 ---
+        // 難度緩慢增加 (每關 +0.04)，並在達到 0.75 (相當程度的複雜路口) 後停止增加，避免變成無解地獄。
+        let branchProbability = Math.min(0.75, (level - 1) * 0.04);
+        
+        let activeCells = [{ r: 1, c: 1 }];
+        maze[1][1] = 0;
+
+        while (activeCells.length > 0) {
+            let index = (Math.random() < branchProbability) 
+                        ? Math.floor(Math.random() * activeCells.length) 
+                        : activeCells.length - 1;
+            
+            let cell = activeCells[index];
+            let neighbors = [];
+            
+            const directions = [[0, 2], [2, 0], [0, -2], [-2, 0]];
+            for (let [dr, dc] of directions) {
+                let nr = cell.r + dr, nc = cell.c + dc;
+                if (nr > 0 && nr < rows - 1 && nc > 0 && nc < cols - 1 && maze[nr][nc] === 1) {
+                    neighbors.push({ r: nr, c: nc, dr: dr, dc: dc });
+                }
+            }
+
+            if (neighbors.length > 0) {
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                maze[cell.r + next.dr / 2][cell.c + next.dc / 2] = 0; 
+                maze[next.r][next.c] = 0; 
+                activeCells.push({ r: next.r, c: next.c });
+            } else {
+                activeCells.splice(index, 1);
+            }
+        }
+        
+        playerPos = { r: 1, c: 1 };
+        goalPos = { r: rows - 2, c: cols - 2 };
+        maze[goalPos.r][goalPos.c] = 0; 
+    }
+
+    function initGrid() {
+        mazeContainer.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+        mazeContainer.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+        mazeContainer.innerHTML = '';
+        gridCells = [];
+
+        for (let r = 0; r < rows; r++) {
+            let rowCells = [];
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                mazeContainer.appendChild(cell);
+                rowCells.push(cell);
+            }
+            gridCells.push(rowCells);
+        }
+    }
+
+    function drawMaze() {
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let cell = gridCells[r][c];
+                if (r === playerPos.r && c === playerPos.c) {
+                    cell.className = 'cell player';
+                    cell.textContent = '＠'; 
+                } else if (r === goalPos.r && c === goalPos.c) {
+                    cell.className = 'cell goal';
+                    cell.textContent = '★'; 
+                } else if (maze[r][c] === 1) {
+                    cell.className = 'cell wall';
+                    cell.textContent = '█';   
+                } else {
+                    cell.className = 'cell path';
+                    cell.textContent = ' ';
+                }
+            }
+        }
+        levelDisplay.textContent = level;
+        clearedDisplay.textContent = level - 1;
+    }
+
+    // 滑動直到路口或終點
+    function movePlayer(dr, dc) {
+        let moved = false;
+
+        while (true) {
+            let nextR = playerPos.r + dr;
+            let nextC = playerPos.c + dc;
+
+            if (!maze[nextR] || maze[nextR][nextC] !== 0) break;
+
+            playerPos.r = nextR;
+            playerPos.c = nextC;
+            moved = true;
+
+            if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) break;
+
+            let isIntersection = false;
+            if (dr !== 0) {
+                if (maze[playerPos.r][playerPos.c - 1] === 0 || maze[playerPos.r][playerPos.c + 1] === 0) {
+                    isIntersection = true;
+                }
+            } else if (dc !== 0) {
+                if (maze[playerPos.r - 1][playerPos.c] === 0 || maze[playerPos.r + 1][playerPos.c] === 0) {
+                    isIntersection = true;
+                }
+            }
+
+            if (isIntersection) break; 
+        }
+
+        if (moved) {
+            drawMaze();
+            checkWin();
+        }
+    }
+
+    function checkWin() {
+        if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) {
+            setTimeout(() => { 
+                level++; 
+                saveLevelData(level);
+                startNewLevel(); 
+            }, 150);
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        const code = e.code;
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight", "Space"].includes(code)) e.preventDefault();
+        switch (code) {
+            case 'ArrowUp': case 'KeyW': movePlayer(-1, 0); break;
+            case 'ArrowDown': case 'KeyS': movePlayer(1, 0); break;
+            case 'ArrowLeft': case 'KeyA': movePlayer(0, -1); break;
+            case 'ArrowRight': case 'KeyD': movePlayer(0, 1); break;
+            case 'KeyR': resetLevel(); break;
+        }
+    });
+
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+
+    function bindButton(id, action) {
+        const btn = document.getElementById(id);
+        if(!btn) return;
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); 
+            action();
+        });
+    }
+
+    bindButton('btn-up', () => movePlayer(-1, 0));
+    bindButton('btn-down', () => movePlayer(1, 0));
+    bindButton('btn-left', () => movePlayer(0, -1));
+    bindButton('btn-right', () => movePlayer(0, 1));
+    bindButton('btn-reset', resetLevel);
+
+    function resetLevel() {
+        playerPos = { r: 1, c: 1 };
+        drawMaze();
+    }
+
+    function startNewLevel() {
+        calculateDimensions(); 
+        generateMaze(); 
+        initGrid(); 
+        drawMaze();
+    }
+
+    async function initGame() {
+        try {
+            await initDB();
+            level = await loadLevelData();
+        } catch (err) {
+            console.error("無法載入進度:", err);
+            level = 1;
+        }
+        startNewLevel();
+    }
+    
+    initGame();
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+</script>
+</body>
+</html>
