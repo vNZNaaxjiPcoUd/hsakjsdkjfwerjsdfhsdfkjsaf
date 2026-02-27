@@ -1,28 +1,47 @@
-const CACHE_NAME = 'maze-game-v1';
+const CACHE_NAME = 'maze-game-v2'; 
+
 const urlsToCache = [
+  './',
   './maze.html',
-  './mazemanifest.json',
-  // 如果你有加入圖片，請取消下方註解並替換檔名
+  './mazemanifest.json'
   // './icon-192.png',
   // './icon-512.png'
 ];
 
-// 安裝時快取檔案
+// 1. 安裝階段：下載新檔案並強制等待中的 Service Worker 立即啟動
 self.addEventListener('install', event => {
+  self.skipWaiting(); // 強制跳過等待，立刻讓新版接管
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
+        console.log('已快取新版本:', CACHE_NAME);
         return cache.addAll(urlsToCache);
       })
   );
 });
 
-// 攔截請求，優先從快取讀取
+// 2. 啟動階段：清除舊版本的快取
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.map(cacheName => {
+          // 如果快取名稱跟目前的 CACHE_NAME 不同，就把它刪除
+          if (cacheName !== CACHE_NAME) {
+            console.log('刪除舊快取:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
+
+// 3. 攔截請求：優先讀取快取，沒有再抓網路
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        // 如果快取裡有，就回傳快取；沒有就透過網路發出請求
         return response || fetch(event.request);
       })
   );
