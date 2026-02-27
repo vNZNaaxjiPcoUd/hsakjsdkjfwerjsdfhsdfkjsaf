@@ -12,7 +12,7 @@
         display: flex;
         flex-direction: column;
         height: calc(100% - 19px);
-        padding: 3px;
+        padding: 0.25vw;
         box-sizing: border-box;
     }
 
