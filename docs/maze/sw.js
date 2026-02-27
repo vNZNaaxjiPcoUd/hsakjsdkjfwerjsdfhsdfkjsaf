@@ -1,4 +1,4 @@
-const CACHE_NAME = 'maze-game-v3'; 
+const CACHE_NAME = 'maze-game-v4'; 
 
 const urlsToCache = [
   './',
