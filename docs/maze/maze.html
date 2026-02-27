@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>迷宮</title>
+<title>終極文字迷宮</title>
 
 <link rel="manifest" href="mazemanifest.json">
 <meta name="theme-color" content="#121212">
@@ -83,6 +83,7 @@
         line-height: 1;
     }
 
+    /* 遊戲元素樣式 */
     .wall { color: #2E7D32; } 
     .path { color: transparent; }
     .player { 
@@ -96,6 +97,13 @@
         color: #FFEB3B; 
         animation: blink 1s infinite; 
     }
+    
+    /* 黑霧樣式 */
+    .fog {
+        background-color: #000000;
+        color: transparent;
+    }
+
     @keyframes blink { 50% { opacity: 0.4; } }
 
     #controls {
@@ -173,9 +181,8 @@
     let playerPos = { r: 1, c: 1 }, goalPos = { r: 1, c: 1 };
     let level = 1;
     let rows = 15, cols = 15;
-    const CELL_SIZE = 18; // 固定舒適的格子大小
+    const CELL_SIZE = 18; 
 
-    // IndexedDB 存檔邏輯
     const DB_NAME = 'MazeGameDB';
     const STORE_NAME = 'gameState';
     let db;
@@ -211,7 +218,6 @@
     }
 
     function calculateDimensions() {
-        // 永遠將迷宮尺寸撐到畫面最大允許範圍，保持固定大小
         const reservedHeight = 320; 
         const reservedWidth = 40; 
         const vW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
@@ -230,8 +236,8 @@
     function generateMaze() {
         maze = Array.from({ length: rows }, () => Array(cols).fill(1));
         
-        // --- 難度控制核心 ---
-        // 難度緩慢增加 (每關 +0.04)，並在達到 0.75 (相當程度的複雜路口) 後停止增加，避免變成無解地獄。
+        // 階段一：難度提升 (1~19關)
+        // 岔路機率每關增加 0.04，並在 0.75 封頂
         let branchProbability = Math.min(0.75, (level - 1) * 0.04);
         
         let activeCells = [{ r: 1, c: 1 }];
@@ -287,9 +293,31 @@
     }
 
     function drawMaze() {
+        // --- 階段二：動態極限盲走 (20關起) ---
+        let visibilityRadius = 999; // 1~19 關預設全圖可見
+
+        if (level >= 20) {
+            // 計算畫面「寬」或「高」比較小的那一邊，作為起始半徑基準
+            let startingRadius = Math.min(rows, cols);
+            
+            // 每過一關縮小 1 格，最小鎖定為 1 (上下左右各 1 格)
+            visibilityRadius = Math.max(1, startingRadius - (level - 20));
+        }
+
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < cols; c++) {
                 let cell = gridCells[r][c];
+                
+                let distR = Math.abs(r - playerPos.r);
+                let distC = Math.abs(c - playerPos.c);
+                
+                // 超過視野半徑的格子，蓋上黑霧
+                if (Math.max(distR, distC) > visibilityRadius) {
+                    cell.className = 'cell fog';
+                    cell.textContent = ' ';
+                    continue; 
+                }
+
                 if (r === playerPos.r && c === playerPos.c) {
                     cell.className = 'cell player';
                     cell.textContent = '＠'; 
@@ -309,7 +337,6 @@
         clearedDisplay.textContent = level - 1;
     }
 
-    // 滑動直到路口或終點
     function movePlayer(dr, dc) {
         let moved = false;
 
