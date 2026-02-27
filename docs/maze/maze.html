@@ -221,4 +221,229 @@
     }
 
     function calculateDimensions() {
-        // 動態判斷：如果觸控按鍵有顯示出來（手機、平板），預留 320
+        // 動態判斷：如果觸控按鍵有顯示出來（手機、平板），預留 320px
+        // 如果觸控按鍵被隱藏了（純電腦鍵盤），只預留 120px 給標題，讓迷宮更大
+        const isControlsVisible = window.getComputedStyle(controls).display !== 'none';
+        const reservedHeight = isControlsVisible ? 320 : 120; 
+        const reservedWidth = 40; 
+        
+        const vW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const vH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+        let c = Math.floor((vW - reservedWidth) / CELL_SIZE);
+        let r = Math.floor((vH - reservedHeight) / CELL_SIZE);
+
+        if (c % 2 === 0) c--;
+        if (r % 2 === 0) r--;
+
+        cols = Math.max(11, c);
+        rows = Math.max(11, r);
+    }
+
+    function generateMaze() {
+        maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+        
+        // 階段一：難度提升 (1~19關)
+        let branchProbability = Math.min(0.75, (level - 1) * 0.04);
+        
+        let activeCells = [{ r: 1, c: 1 }];
+        maze[1][1] = 0;
+
+        while (activeCells.length > 0) {
+            let index = (Math.random() < branchProbability) 
+                        ? Math.floor(Math.random() * activeCells.length) 
+                        : activeCells.length - 1;
+            
+            let cell = activeCells[index];
+            let neighbors = [];
+            
+            const directions = [[0, 2], [2, 0], [0, -2], [-2, 0]];
+            for (let [dr, dc] of directions) {
+                let nr = cell.r + dr, nc = cell.c + dc;
+                if (nr > 0 && nr < rows - 1 && nc > 0 && nc < cols - 1 && maze[nr][nc] === 1) {
+                    neighbors.push({ r: nr, c: nc, dr: dr, dc: dc });
+                }
+            }
+
+            if (neighbors.length > 0) {
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                maze[cell.r + next.dr / 2][cell.c + next.dc / 2] = 0; 
+                maze[next.r][next.c] = 0; 
+                activeCells.push({ r: next.r, c: next.c });
+            } else {
+                activeCells.splice(index, 1);
+            }
+        }
+        
+        playerPos = { r: 1, c: 1 };
+        goalPos = { r: rows - 2, c: cols - 2 };
+        maze[goalPos.r][goalPos.c] = 0; 
+    }
+
+    function initGrid() {
+        mazeContainer.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+        mazeContainer.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+        mazeContainer.innerHTML = '';
+        gridCells = [];
+
+        for (let r = 0; r < rows; r++) {
+            let rowCells = [];
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                mazeContainer.appendChild(cell);
+                rowCells.push(cell);
+            }
+            gridCells.push(rowCells);
+        }
+    }
+
+    function drawMaze() {
+        // --- 階段二：動態極限盲走 (20關起) ---
+        let visibilityRadius = 999;
+
+        if (level >= 20) {
+            let startingRadius = Math.min(rows, cols);
+            visibilityRadius = Math.max(1, startingRadius - (level - 20));
+        }
+
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let cell = gridCells[r][c];
+                
+                let distR = Math.abs(r - playerPos.r);
+                let distC = Math.abs(c - playerPos.c);
+                
+                // 超過視野半徑的格子，蓋上黑霧
+                if (Math.max(distR, distC) > visibilityRadius) {
+                    cell.className = 'cell fog';
+                    cell.textContent = ' ';
+                    continue; 
+                }
+
+                if (r === playerPos.r && c === playerPos.c) {
+                    cell.className = 'cell player';
+                    cell.textContent = '＠'; 
+                } else if (r === goalPos.r && c === goalPos.c) {
+                    cell.className = 'cell goal';
+                    cell.textContent = '★'; 
+                } else if (maze[r][c] === 1) {
+                    cell.className = 'cell wall';
+                    cell.textContent = '█';   
+                } else {
+                    cell.className = 'cell path';
+                    cell.textContent = ' ';
+                }
+            }
+        }
+        levelDisplay.textContent = level;
+        clearedDisplay.textContent = level - 1;
+    }
+
+    function movePlayer(dr, dc) {
+        let moved = false;
+
+        while (true) {
+            let nextR = playerPos.r + dr;
+            let nextC = playerPos.c + dc;
+
+            if (!maze[nextR] || maze[nextR][nextC] !== 0) break;
+
+            playerPos.r = nextR;
+            playerPos.c = nextC;
+            moved = true;
+
+            if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) break;
+
+            let isIntersection = false;
+            if (dr !== 0) {
+                if (maze[playerPos.r][playerPos.c - 1] === 0 || maze[playerPos.r][playerPos.c + 1] === 0) {
+                    isIntersection = true;
+                }
+            } else if (dc !== 0) {
+                if (maze[playerPos.r - 1][playerPos.c] === 0 || maze[playerPos.r + 1][playerPos.c] === 0) {
+                    isIntersection = true;
+                }
+            }
+
+            if (isIntersection) break; 
+        }
+
+        if (moved) {
+            drawMaze();
+            checkWin();
+        }
+    }
+
+    function checkWin() {
+        if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) {
+            setTimeout(() => { 
+                level++; 
+                saveLevelData(level);
+                startNewLevel(); 
+            }, 150);
+        }
+    }
+
+    window.addEventListener('keydown', (e) => {
+        const code = e.code;
+        if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight", "Space"].includes(code)) e.preventDefault();
+        switch (code) {
+            case 'ArrowUp': case 'KeyW': movePlayer(-1, 0); break;
+            case 'ArrowDown': case 'KeyS': movePlayer(1, 0); break;
+            case 'ArrowLeft': case 'KeyA': movePlayer(0, -1); break;
+            case 'ArrowRight': case 'KeyD': movePlayer(0, 1); break;
+            case 'KeyR': resetLevel(); break;
+        }
+    });
+
+    document.addEventListener('gesturestart', function(e) { e.preventDefault(); });
+
+    function bindButton(id, action) {
+        const btn = document.getElementById(id);
+        if(!btn) return;
+        btn.addEventListener('pointerdown', (e) => {
+            e.preventDefault(); 
+            action();
+        });
+    }
+
+    bindButton('btn-up', () => movePlayer(-1, 0));
+    bindButton('btn-down', () => movePlayer(1, 0));
+    bindButton('btn-left', () => movePlayer(0, -1));
+    bindButton('btn-right', () => movePlayer(0, 1));
+    bindButton('btn-reset', resetLevel);
+
+    function resetLevel() {
+        playerPos = { r: 1, c: 1 };
+        drawMaze();
+    }
+
+    function startNewLevel() {
+        calculateDimensions(); 
+        generateMaze(); 
+        initGrid(); 
+        drawMaze();
+    }
+
+    async function initGame() {
+        try {
+            await initDB();
+            level = await loadLevelData();
+        } catch (err) {
+            console.error("無法載入進度:", err);
+            level = 1;
+        }
+        startNewLevel();
+    }
+    
+    initGame();
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+</script>
+</body>
+</html>
