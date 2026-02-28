@@ -1,8 +1,8 @@
-const CACHE_NAME = 'maze-game-v5.3'; 
+const CACHE_NAME = 'maze-game-v5.5'; 
 
 const urlsToCache = [
   './',
-  './maze.html',
+  './index.html',
   './mazemanifest.json',
    './icon-192.png',
    './icon-512.png'

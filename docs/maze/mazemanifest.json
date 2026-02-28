@@ -1,7 +1,7 @@
 {
   "name": "迷宮",
   "short_name": "maze",
-  "start_url": "./maze.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
   "theme_color": "#121212",
