@@ -67,7 +67,8 @@
     const controls = document.getElementById('controls');
 
     let maze = [], gridCells = [], gems = [], playerPos = { r: 1, c: 1 }, goalPos = { r: 1, c: 1 };
-    let level = 1, totalGems = 0, rows = 15, cols = 15; const CELL_SIZE = 18;
+    let level = 1, totalGems = 0, rows = 15, cols = 15; const CELL_SIZE = 18; 
+    let resetClickCount = 0;
     
     // --- 資料庫邏輯：增加 totalGems 儲存 ---
     const DB_NAME = 'MazeGameDB', STORE_NAME = 'gameState'; let db;
@@ -169,6 +170,7 @@
     }
 
     function movePlayer(dr, dc) {
+        resetClickCount = 0; // 只要玩家有嘗試移動，連續點擊重置的次數就歸零
         let moved = false;
         while (true) {
             let nR = playerPos.r + dr, nC = playerPos.c + dc;
@@ -197,7 +199,31 @@
     window.addEventListener('keydown', e => { if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault(); switch(e.code){ case 'ArrowUp': case 'KeyW': movePlayer(-1,0); break; case 'ArrowDown': case 'KeyS': movePlayer(1,0); break; case 'ArrowLeft': case 'KeyA': movePlayer(0,-1); break; case 'ArrowRight': case 'KeyD': movePlayer(0,1); break; case 'KeyR': resetLevel(); break; } });
     function bindBtn(id, dr, dc) { document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); movePlayer(dr, dc); }); }
     bindBtn('btn-up', -1, 0); bindBtn('btn-down', 1, 0); bindBtn('btn-left', 0, -1); bindBtn('btn-right', 0, 1);
-    document.getElementById('btn-reset').addEventListener('pointerdown', e => { e.preventDefault(); resetLevel(); });
+    document.getElementById('btn-reset').addEventListener('pointerdown', e => { 
+        e.preventDefault(); 
+        
+        resetClickCount++; // 增加點擊次數
+
+        if (resetClickCount >= 5) {
+            // 觸發終極重置
+            if (confirm("確定要清除所有進度，從第 1 關重新開始嗎？")) {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear(); // 清除該 Store 所有資料 (包含關卡與累計星星)
+                
+                // 歸零變數並重新開始
+                level = 1;
+                totalGems = 0;
+                resetClickCount = 0;
+                startNewLevel();
+            } else {
+                resetClickCount = 0; // 如果點取消，也重置計數
+                resetLevel();
+            }
+        } else {
+            resetLevel(); // 一般的單次重置（只回起點，不刪關卡）
+        }
+    });
     
     function resetLevel() { playerPos = { r: 1, c: 1 }; drawMaze(); }
     function startNewLevel() { calculateDimensions(); generateMaze(); initGrid(); drawMaze(); }
