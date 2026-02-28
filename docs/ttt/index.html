@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Three Men's Morris</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#2c3e50">
+    <style>
+        :root {
+            --bg-color: #f4f4f9;
+            --board-color: #dcdde1;
+            --line-color: #2f3640;
+            --p1-color: #e84118;
+            --p2-color: #00a8ff;
+            --text-color: #2c3e50;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 20px;
+            touch-action: manipulation; /* 防止手機點擊放大 */
+        }
+        h1 { margin-bottom: 5px; }
+        .controls {
+            margin: 15px 0;
+            display: flex;
+            gap: 15px;
+        }
+        select, button {
+            padding: 8px 16px;
+            font-size: 16px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            background: white;
+            cursor: pointer;
+        }
+        button { background-color: var(--line-color); color: white; border: none; }
+        button:hover { background-color: #1e272e; }
+        #status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            height: 24px;
+        }
+        .board {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            background-color: var(--board-color);
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        /* 畫棋盤的線 */
+        .board::before {
+            content: '';
+            position: absolute;
+            top: 50%; left: 0; right: 0;
+            border-top: 2px solid var(--line-color);
+            z-index: 1;
+        }
+        .board::after {
+            content: '';
+            position: absolute;
+            left: 50%; top: 0; bottom: 0;
+            border-left: 2px solid var(--line-color);
+            z-index: 1;
+        }
+        .diagonal-1, .diagonal-2 {
+            position: absolute;
+            width: 141.4%;
+            height: 2px;
+            background-color: var(--line-color);
+            top: 50%; left: -20.7%;
+            z-index: 1;
+        }
+        .diagonal-1 { transform: rotate(45deg); }
+        .diagonal-2 { transform: rotate(-45deg); }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            width: 100%; height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+        .cell {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .piece {
+            width: 60px; height: 60px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+        }
+        .piece.X { background-color: var(--p1-color); }
+        .piece.O { background-color: var(--p2-color); }
+        .piece.selected {
+            transform: scale(1.15);
+            box-shadow: 0 0 15px #f1c40f;
+            border: 3px solid #f1c40f;
+        }
+        .install-btn {
+            display: none;
+            margin-top: 20px;
+            background-color: #4cd137;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>三子棋 (Three Men's Morris)</h1>
+    
+    <div class="controls">
+        <select id="mode">
+            <option value="pvc">單人 (對戰電腦)</option>
+            <option value="pvp">雙人 (本機對戰)</option>
+        </select>
+        <button onclick="resetGame()">重新開始</button>
+    </div>
+
+    <div id="status">玩家 X 請放置棋子</div>
+
+    <div class="board">
+        <div class="diagonal-1"></div>
+        <div class="diagonal-2"></div>
+        <div class="grid" id="grid">
+            </div>
+    </div>
+
+    <button id="installBtn" class="install-btn">安裝遊戲到桌面</button>
+
+<script>
+    // --- PWA Service Worker 註冊 ---
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(reg => console.log('SW registered!', reg))
+            .catch(err => console.log('SW failed', err));
+    }
+
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        installBtn.style.display = 'block';
+    });
+    installBtn.addEventListener('click', async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') installBtn.style.display = 'none';
+            deferredPrompt = null;
+        }
+    });
+
+    // --- 遊戲邏輯 ---
+    const WIN_LINES = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // 橫向
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // 縱向
+        [0, 4, 8], [2, 4, 6]             // 對角線
+    ];
+    // 定義每個位置相鄰的可移動點
+    const NEIGHBORS = {
+        0: [1, 3, 4], 1: [0, 2, 4], 2: [1, 5, 4],
+        3: [0, 6, 4], 4: [0, 1, 2, 3, 5, 6, 7, 8], 5: [2, 8, 4],
+        6: [3, 7, 4], 7: [6, 8, 4], 8: [5, 7, 4]
+    };
+
+    let board = Array(9).fill(null);
+    let currentPlayer = 'X'; // X 永遠先手
+    let phase = 'drop'; // 'drop' 放置階段, 'move' 移動階段
+    let dropCount = 0; // 最多 6 次 (每人 3 顆)
+    let selectedCell = null;
+    let gameOver = false;
+
+    const gridEl = document.getElementById('grid');
+    const statusEl = document.getElementById('status');
+    const modeSelect = document.getElementById('mode');
+
+    function initGrid() {
+        gridEl.innerHTML = '';
+        for (let i = 0; i < 9; i++) {
+            const cell = document.createElement('div');
+            cell.className = 'cell';
+            cell.dataset.index = i;
+            cell.addEventListener('click', () => handleCellClick(i));
+            gridEl.appendChild(cell);
+        }
+        updateBoard();
+    }
+
+    function resetGame() {
+        board = Array(9).fill(null);
+        currentPlayer = 'X';
+        phase = 'drop';
+        dropCount = 0;
+        selectedCell = null;
+        gameOver = false;
+        updateBoard();
+        updateStatus();
+    }
+
+    modeSelect.addEventListener('change', resetGame);
+
+    function updateBoard() {
+        for (let i = 0; i < 9; i++) {
+            const cell = gridEl.children[i];
+            cell.innerHTML = '';
+            if (board[i]) {
+                const piece = document.createElement('div');
+                piece.className = `piece ${board[i]}`;
+                if (i === selectedCell) piece.classList.add('selected');
+                cell.appendChild(piece);
+            }
+        }
+    }
+
+    function updateStatus() {
+        if (gameOver) return;
+        let action = phase === 'drop' ? '放置棋子' : '移動棋子';
+        statusEl.textContent = `玩家 ${currentPlayer} 請${action}`;
+    }
+
+    function handleCellClick(index) {
+        if (gameOver) return;
+        const mode = modeSelect.value;
+        if (mode === 'pvc' && currentPlayer === 'O') return; // 電腦回合禁止點擊
+
+        if (phase === 'drop') {
+            if (board[index] === null) {
+                board[index] = currentPlayer;
+                dropCount++;
+                if (dropCount === 6) phase = 'move';
+                finishTurn();
+            }
+        } else if (phase === 'move') {
+            if (board[index] === currentPlayer) {
+                // 選取自己的棋子
+                selectedCell = selectedCell === index ? null : index;
+                updateBoard();
+            } else if (board[index] === null && selectedCell !== null) {
+                // 移動到相鄰空格
+                if (NEIGHBORS[selectedCell].includes(index)) {
+                    board[index] = currentPlayer;
+                    board[selectedCell] = null;
+                    selectedCell = null;
+                    finishTurn();
+                }
+            }
+        }
+    }
+
+    function finishTurn() {
+        updateBoard();
+        if (checkWin(currentPlayer)) {
+            statusEl.textContent = `玩家 ${currentPlayer} 獲勝！🎉`;
+            gameOver = true;
+            return;
+        }
+        
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        updateStatus();
+
+        if (modeSelect.value === 'pvc' && currentPlayer === 'O' && !gameOver) {
+            setTimeout(cpuPlay, 500); // 稍微延遲讓感覺自然
+        }
+    }
+
+    function checkWin(player) {
+        return WIN_LINES.some(line => 
+            line.every(index => board[index] === player)
+        );
+    }
+
+    // --- 電腦 AI (簡單邏輯) ---
+    function cpuPlay() {
+        let moves = getValidMoves('O');
+        if (moves.length === 0) {
+            statusEl.textContent = "玩家 O 無法移動，玩家 X 獲勝！";
+            gameOver = true;
+            return;
+        }
+
+        let bestMove = null;
+
+        // 1. 檢查自己能不能贏
+        bestMove = findWinningMove('O', moves);
+        
+        // 2. 檢查需不需要阻擋玩家 X 贏
+        if (!bestMove) {
+            let xMoves = getValidMoves('X');
+            bestMove = findWinningMove('X', xMoves, true); 
+        }
+
+        // 3. 隨機選擇合法步
+        if (!bestMove) {
+            bestMove = moves[Math.floor(Math.random() * moves.length)];
+        }
+
+        // 執行動作
+        if (phase === 'drop') {
+            board[bestMove.to] = 'O';
+            dropCount++;
+            if (dropCount === 6) phase = 'move';
+        } else {
+            board[bestMove.to] = 'O';
+            board[bestMove.from] = null;
+        }
+        
+        finishTurn();
+    }
+
+    function getValidMoves(player) {
+        let moves = [];
+        if (phase === 'drop') {
+            for (let i = 0; i < 9; i++) if (board[i] === null) moves.push({to: i});
+        } else {
+            for (let i = 0; i < 9; i++) {
+                if (board[i] === player) {
+                    NEIGHBORS[i].forEach(n => {
+                        if (board[n] === null) moves.push({from: i, to: n});
+                    });
+                }
+            }
+        }
+        return moves;
+    }
+
+    function findWinningMove(player, moves, isBlocking = false) {
+        for (let move of moves) {
+            // 模擬移動
+            let tempFrom = null;
+            if (phase === 'move') {
+                tempFrom = board[move.from];
+                board[move.from] = null;
+            }
+            board[move.to] = player;
+            
+            let isWin = checkWin(player);
+            
+            // 復原棋盤
+            board[move.to] = null;
+            if (phase === 'move') board[move.from] = tempFrom;
+
+            if (isWin) {
+                // 如果是為了阻擋，且目前是移動階段，電腦需要確保自己有一顆棋子能走到目標位置 (這裡為了簡化，如果是阻擋，就只看能不能走到那個防守點)
+                if (isBlocking && phase === 'move') {
+                    // 電腦找出自己能走到 move.to 的棋子
+                    let defenseMove = getValidMoves('O').find(m => m.to === move.to);
+                    if (defenseMove) return defenseMove;
+                } else {
+                    return move;
+                }
+            }
+        }
+        return null;
+    }
+
+    // 初始化
+    initGrid();
+</script>
+</body>
+</html>
