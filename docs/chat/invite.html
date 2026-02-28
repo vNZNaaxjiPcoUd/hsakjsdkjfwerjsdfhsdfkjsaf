@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>邀請加入聊天室</title>
+    <title>邀請</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
@@ -51,7 +51,7 @@
 <body>
 
     <div class="container">
-        <h2>發送聊天室邀請</h2>
+        <h2>發送邀請</h2>
         
         <div class="form-group">
             <label for="invite-email">對方的 Email 網址</label>
@@ -69,14 +69,14 @@
         </div>
 
         <div class="form-group">
-            <label for="invite-pwd">管理員密碼 (發送權限)</label>
+            <label for="invite-pwd">發送密碼</label>
             <input type="password" id="invite-pwd" placeholder="請輸入密碼解密 API" required>
         </div>
 
         <button id="send-btn" onclick="sendInvite()">驗證並送出邀請</button>
         <div id="status"></div>
         
-        <a href="chat.html" class="back-link">返回聊天室</a>
+        <a href="index.html" class="back-link">返回聊天室</a>
     </div>
 
     <script>
@@ -88,7 +88,7 @@
             if (currentUrl.includes('invite.html')) {
                 return currentUrl.split('invite.html')[0] + 'chat.html';
             }
-            return currentUrl.replace(/\/$/, '') + '/chat.html'; 
+            return currentUrl.replace(/\/$/, '') + '/'; 
         }
 
         function updateMessagePreview() {
@@ -97,9 +97,9 @@
             const messageBox = document.getElementById('invite-message');
             
             if (roomName) {
-                messageBox.value = `嗨！邀請您加入我的專屬聊天室。\n\n請點擊以下連結直接進入房間：\n${baseUrl}?${roomName}\n\n期待與您連線！`;
+                messageBox.value = `嗨！邀請您加入專屬聊天室。\n\n請點擊以下連結直接進入房間：\n${baseUrl}?${roomName}\n\n期待與您連線！`;
             } else {
-                messageBox.value = `嗨！邀請您加入我的專屬聊天室。\n\n請點擊以下連結：\n${baseUrl}\n\n期待與您連線！`;
+                messageBox.value = `嗨！邀請您加入專屬聊天室。\n\n請點擊以下連結：\n${baseUrl}\n\n期待與您連線！`;
             }
         }
 
