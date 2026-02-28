@@ -5,9 +5,9 @@ const CACHE_NAME = `lite-chat-pwa-${CACHE_VERSION}`;
 // 定義需要快取的靜態資源 (確保離線或網路不穩時，仍能載入應用程式外殼)
 const urlsToCache = [
   './',
-  './chat.html',
-  './manifest.json'
-  // 若您之後有加入 icon.png，記得將檔名加進來，例如：'./icon-192.png'
+  './index.html',
+  './manifest.json',
+  './icon-192.png'
 ];
 
 // 1. 安裝階段 (Install)：下載並快取指定版本的靜態資源
