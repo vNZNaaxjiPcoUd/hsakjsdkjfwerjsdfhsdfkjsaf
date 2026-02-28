@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ttt-v2';
+const CACHE_NAME = 'ttt-v3';
 const ASSETS = [
   './',
   './index.html',
