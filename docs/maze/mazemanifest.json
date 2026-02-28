@@ -1,6 +1,6 @@
 {
   "name": "迷宮",
-  "short_name": "文字迷宮",
+  "short_name": "maze",
   "start_url": "./maze.html",
   "display": "standalone",
   "background_color": "#121212",
