@@ -1,4 +1,4 @@
-const CACHE_NAME = 'morris-game-v1';
+const CACHE_NAME = 'ttt-v1';
 const ASSETS = [
   './',
   './index.html',
