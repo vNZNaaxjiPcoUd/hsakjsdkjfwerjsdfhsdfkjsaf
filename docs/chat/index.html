@@ -102,8 +102,13 @@
         <button onclick="joinChat()">開始聊天</button>
     </div>
 
-    <div id="chat-screen">
-        <div class="header" id="room-title">Room</div>
+<div id="chat-screen">
+        <div class="header">
+            <div id="room-title">Room</div>
+            <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">
+                🟢 在線人數: <span id="online-count">1</span> 人
+            </div>
+        </div>
         <div id="messages"></div>
         <div id="input-area">
             <input type="text" id="msg-input" placeholder="輸入訊息..." autocomplete="off">
@@ -202,31 +207,32 @@
             try {
                 const res = await fetch(GAS_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ action: 'poll', room: roomName, lastTime: lastTime })
+                    // ★ 這裡加上 user: userName，當作心跳傳給後端
+                    body: JSON.stringify({ action: 'poll', room: roomName, lastTime: lastTime, user: userName })
                 });
                 const data = await res.json();
                 
+                // ★ 更新畫面上的在線人數
+                if (data.userCount !== undefined) {
+                    document.getElementById('online-count').innerText = data.userCount;
+                }
+
                 if (data.messages && data.messages.length > 0) {
                     data.messages.forEach(m => {
-                        // 檢查這個 ID 是否已經渲染過？(防重複關鍵)
                         if (!renderedMsgIds.has(m.msgId)) {
-                            renderedMsgIds.add(m.msgId); // 加入已讀清單
-                            
-                            // 渲染訊息。如果是自己發的(可能跨裝置同名)，樣式設為 self
+                            renderedMsgIds.add(m.msgId); 
                             const isSelf = (m.user === userName);
                             renderMessage(m.user, m.text, isSelf);
                         }
-                        // 更新最後讀取時間，確保下次只抓更新的
                         lastTime = Math.max(lastTime, m.time); 
                     });
                 }
             } catch (e) {
                 console.error("Poll error:", e);
             } finally {
-                // 安全輪詢：確保這次請求完全結束後，才預約 2.5 秒後的下一次請求
                 pollTimer = setTimeout(pollMessages, 2500);
             }
-        }
+        }        
 
         // 5. 渲染單筆訊息到畫面上
         function renderMessage(sender, text, isSelf) {
