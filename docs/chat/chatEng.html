@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>ChatRoom</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        /* 使用 100dvh 配合 JS 動態調整，解決手機瀏覽器高度與虛擬鍵盤閃動問題 */
+        :root { --app-height: 100dvh; }
+        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            height: var(--app-height); 
+            background-color: #f4f4f9; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            overflow: hidden; 
+        }
+        
+        #setup-screen, #chat-screen { 
+            width: 100%; 
+            max-width: 600px; 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            background: #fff; 
+            box-shadow: 0 0 10px rgba(0,0,0,0.1); 
+        }
+        #chat-screen { display: none; }
+        
+        .header { 
+            background: #007bff; 
+            color: white; 
+            padding: 15px; 
+            text-align: center; 
+            flex: 0 0 auto; 
+            font-weight: bold;
+        }
+        
+        /* 訊息區自動延展，且可捲動 */
+        #messages { 
+            flex: 1 1 auto; 
+            overflow-y: auto; 
+            padding: 15px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        .msg { 
+            padding: 10px; 
+            border-radius: 8px; 
+            max-width: 80%; 
+            line-height: 1.4; 
+            word-wrap: break-word; 
+        }
+        .msg.self { align-self: flex-end; background: #007bff; color: white; }
+        .msg.other { align-self: flex-start; background: #e9ecef; color: black; }
+        .msg-name { font-size: 0.75em; opacity: 0.7; margin-bottom: 3px; }
+        
+        /* 輸入區緊接訊息下方，不留多餘白邊，並適應 iOS 底部安全距離 */
+        #input-area { 
+            flex: 0 0 auto; 
+            display: flex; 
+            padding: 10px; 
+            border-top: 1px solid #ccc; 
+            background: #fff; 
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+        }
+        /* font-size 16px 是關鍵：可避免 iOS Safari 點擊輸入框時自動放大畫面 */
+        input[type="text"] { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1px solid #ccc; 
+            border-radius: 20px; 
+            font-size: 16px; 
+        }
+        button { 
+            padding: 10px 20px; 
+            margin-left: 10px; 
+            border: none; 
+            background: #007bff; 
+            color: white; 
+            border-radius: 20px; 
+            cursor: pointer; 
+            font-size: 16px;
+        }
+        button:active { background: #0056b3; }
+        
+        #setup-screen { justify-content: center; padding: 20px; gap: 15px; }
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="setup-screen">
+        <h2 style="text-align: center;">Join</h2>
+        <input type="text" id="setup-room" placeholder="Room Name" autocomplete="off">
+        <input type="text" id="setup-name" placeholder="Your Name" autocomplete="off">
+        <button onclick="joinChat()">Start</button>
+    </div>
+
+<div id="chat-screen">
+        <div class="header">
+            <div id="room-title">Room</div>
+            <div style="font-size: 12px; font-weight: normal; margin-top: 5px;">
+                🟢 Online Count: <span id="online-count">1</span> people
+            </div>
+        </div>
+        <div id="messages"></div>
+        <div id="input-area">
+            <input type="text" id="msg-input" placeholder="Type message..." autocomplete="off">
+            <button onclick="sendMsg()" id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // ================= 全域變數設定 =================
+        const GAS_URL = "https://script.google.com/macros/s/AKfycbz8YavltMeAlpL2ySexOpCjZ5aJybsIT-4PGo-EpvYzLWdoZqjqljk0SzhWpvT7fIF3/exec"; // ★請替換為您部署的 GAS Web App URL★
+        
+        let roomName = "";
+        let userName = "";
+        let lastTime = Date.now(); // 只抓取上線後的訊息
+        let pollTimer; // 使用 setTimeout 的計時器
+        const renderedMsgIds = new Set(); // 記錄畫面上已經顯示過的訊息 ID，防止重複渲染
+
+        // ================= 手機版視窗高度修正 =================
+        // 處理手機 Safari/Chrome 虛擬鍵盤彈出時的高度變化，防止畫面被推擠閃爍
+        if (window.visualViewport) {
+            window.visualViewport.addEventListener("resize", () => {
+                document.documentElement.style.setProperty('--app-height', `${window.visualViewport.height}px`);
+                scrollToBottom();
+            });
+        }
+
+        // ================= 核心邏輯 =================
+
+        // 產生唯一識別碼 (UUID 替代方案)，用於防重複
+        function generateMsgId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        }
+
+        // 1. 初始化：解析 URL 參數 (例如 ?roomA)
+        function init() {
+            const urlParams = new URLSearchParams(window.location.search);
+            // 抓取第一個參數的 key，例如 ?roomA 會抓到 "roomA"
+            const roomParam = Array.from(urlParams.keys())[0]; 
+            
+            if (roomParam) {
+                const roomInput = document.getElementById('setup-room');
+                roomInput.value = roomParam;
+                roomInput.classList.add('hidden'); // URL 有帶參數則隱藏輸入框
+            }
+        }
+
+        // 2. 加入聊天室
+        function joinChat() {
+            roomName = document.getElementById('setup-room').value.trim();
+            userName = document.getElementById('setup-name').value.trim() || "匿名";
+            
+            if (!roomName) return alert("room name is required");
+
+            // 切換畫面
+            document.getElementById('setup-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+            document.getElementById('room-title').innerText = `Room: ${roomName} | ${userName}`;
+            
+            // 啟動安全輪詢
+            pollMessages(); 
+        }
+
+        // 將訊息區滾動到底部
+        function scrollToBottom() {
+            const msgContainer = document.getElementById('messages');
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        // 3. 發送訊息
+        async function sendMsg() {
+            const input = document.getElementById('msg-input');
+            const text = input.value.trim();
+            if (!text) return;
+            
+            const msgId = generateMsgId(); // 產生此則訊息的專屬 ID
+            renderedMsgIds.add(msgId);     // 記錄 ID，表示已在本地渲染過
+            
+            input.value = ''; // 立即清空輸入框，提升使用者體驗
+            renderMessage(userName, text, true); // 樂觀渲染 (先顯示在自己畫面上)
+
+            // 背景非同步發送給 GAS
+            fetch(GAS_URL, {
+                method: 'POST',
+                body: JSON.stringify({ 
+                    action: 'send', 
+                    room: roomName, 
+                    user: userName, 
+                    text: text, 
+                    msgId: msgId 
+                })
+            }).catch(e => console.error("Send error:", e));
+        }
+
+        // 4. 安全輪詢接收訊息 (Short Polling)
+        async function pollMessages() {
+            try {
+                const res = await fetch(GAS_URL, {
+                    method: 'POST',
+                    // ★ 這裡加上 user: userName，當作心跳傳給後端
+                    body: JSON.stringify({ action: 'poll', room: roomName, lastTime: lastTime, user: userName })
+                });
+                const data = await res.json();
+                
+                // ★ 更新畫面上的在線人數
+                if (data.userCount !== undefined) {
+                    document.getElementById('online-count').innerText = data.userCount;
+                }
+
+                if (data.messages && data.messages.length > 0) {
+                    data.messages.forEach(m => {
+                        if (!renderedMsgIds.has(m.msgId)) {
+                            renderedMsgIds.add(m.msgId); 
+                            const isSelf = (m.user === userName);
+                            renderMessage(m.user, m.text, isSelf);
+                        }
+                        lastTime = Math.max(lastTime, m.time); 
+                    });
+                }
+            } catch (e) {
+                console.error("Poll error:", e);
+            } finally {
+                pollTimer = setTimeout(pollMessages, 2500);
+            }
+        }        
+
+        // 5. 渲染單筆訊息到畫面上
+        function renderMessage(sender, text, isSelf) {
+            const container = document.getElementById('messages');
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `msg ${isSelf ? 'self' : 'other'}`;
+            // 避免 XSS 攻擊，這裡簡單使用 textContent 處理文字 (不解析 HTML)
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'msg-name';
+            nameDiv.textContent = sender;
+            
+            const textDiv = document.createElement('div');
+            textDiv.textContent = text;
+
+            msgDiv.appendChild(nameDiv);
+            msgDiv.appendChild(textDiv);
+            
+            container.appendChild(msgDiv);
+            scrollToBottom();
+        }
+
+        // ================= 事件綁定與啟動 =================
+
+        // 綁定 Enter 鍵發送
+        document.getElementById('msg-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendMsg();
+        });
+
+        // 執行初始化
+        init();
+
+        // 註冊 Service Worker 啟用 PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker 註冊成功:', reg.scope))
+                    .catch(err => console.error('Service Worker 註冊失敗:', err));
+            });
+        }
+    </script>
+</body>
+</html>
