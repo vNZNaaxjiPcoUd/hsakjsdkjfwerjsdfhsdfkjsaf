@@ -1,0 +1,287 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kids Math Practice</title>
+
+<style>
+body{
+  font-family: Arial, sans-serif;
+  background:#f4f7ff;
+  margin:0;
+  padding:20px;
+  display:flex;
+  justify-content:center;
+}
+
+.container{
+  position:relative;
+  width:min(520px,100%);
+  background:#fff;
+  border-radius:16px;
+  padding:20px;
+  box-shadow:0 10px 25px rgba(0,0,0,.12);
+  border:4px solid transparent;
+  transition:border-color .15s ease, transform .15s ease;
+  text-align:center;
+}
+
+h1{ margin:6px 0 14px; font-size:22px; }
+
+.question{
+  font-size:44px;
+  margin:18px 0 14px;
+}
+
+input{
+  font-size:24px;
+  width:150px;
+  padding:10px;
+  border-radius:12px;
+  border:2px solid #d9e2ff;
+  text-align:center;
+  outline:none;
+}
+input:focus{ border-color:#4a6cff; }
+
+button{
+  padding:12px 18px;
+  font-size:16px;
+  margin:10px 6px 0;
+  border-radius:12px;
+  border:none;
+  cursor:pointer;
+  background:#4a6cff;
+  color:#fff;
+}
+button:active{ transform:scale(0.98); }
+
+.controls{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+select{
+  padding:10px 12px;
+  border-radius:12px;
+  border:2px solid #d9e2ff;
+  background:#fff;
+  font-size:14px;
+}
+
+.stats{
+  margin-top:14px;
+  font-size:14px;
+  display:flex;
+  justify-content:center;
+  gap:18px;
+  flex-wrap:wrap;
+}
+.pill{
+  background:#eef3ff;
+  padding:8px 12px;
+  border-radius:999px;
+}
+
+/* Overlay */
+.overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  opacity:0;
+  transform:scale(0.98);
+  transition:opacity .12s ease, transform .12s ease;
+}
+.overlay.show{
+  opacity:1;
+  transform:scale(1);
+}
+.overlay .bubble{
+  font-size:38px;
+  font-weight:900;
+  padding:18px 22px;
+  border-radius:18px;
+  color:#fff;
+  box-shadow:0 12px 30px rgba(0,0,0,.18);
+}
+.bubble.good{ background:#22c55e; }      /* green */
+.bubble.soft{ background:#f59e0b; }      /* warm orange */
+
+.flash-good{ border-color:#22c55e; transform:translateY(-2px); }
+.flash-soft{ border-color:#f59e0b; transform:translateY(-2px); }
+
+.confetti{
+  position:absolute;
+  left:50%;
+  top:12px;
+  transform:translateX(-50%);
+  font-size:28px;
+  opacity:0;
+  transition:opacity .12s ease;
+  pointer-events:none;
+}
+.confetti.show{ opacity:1; }
+
+</style>
+</head>
+
+<body>
+<div class="container" id="card">
+
+  <h1>🧮 Math Practice</h1>
+
+  <div class="controls">
+    <select id="mode">
+      <option value="mix">Mixed</option>
+      <option value="1d">1-digit ± 1-digit</option>
+      <option value="2d1d">2-digit ± 1-digit</option>
+    </select>
+
+    <select id="operation">
+      <option value="mix">+ and -</option>
+      <option value="+">Addition Only</option>
+      <option value="-">Subtraction Only</option>
+    </select>
+  </div>
+
+  <div class="question" id="question">0 + 0 = ?</div>
+
+  <input type="number" id="answer" placeholder="Answer" inputmode="numeric">
+  <div>
+    <button id="checkBtn">Check</button>
+    <button id="newBtn">New Question</button>
+  </div>
+
+  <div class="confetti" id="confetti">🎉🎉🎉 ⭐</div>
+
+  <div class="overlay" id="overlay">
+    <div class="bubble good" id="bubble">Correct! 🎉</div>
+  </div>
+
+  <div class="stats">
+    <div class="pill">Total: <span id="total">0</span></div>
+    <div class="pill">Correct: <span id="correct">0</span></div>
+    <div class="pill">Accuracy: <span id="accuracy">0%</span></div>
+  </div>
+
+</div>
+
+<script>
+let num1, num2, op;
+let total = 0, correct = 0;
+
+const $ = (id) => document.getElementById(id);
+
+function randomInt(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function pickOperation(){
+  const selected = $("operation").value;
+  if(selected==="mix") return Math.random()<0.5?"+":"-";
+  return selected;
+}
+
+function showBigFeedback(isGood){
+  const card=$("card");
+  const overlay=$("overlay");
+  const bubble=$("bubble");
+  const confetti=$("confetti");
+
+  card.classList.remove("flash-good","flash-soft");
+  overlay.classList.remove("show");
+  confetti.classList.remove("show");
+
+  if(isGood){
+    card.classList.add("flash-good");
+    bubble.className="bubble good";
+    bubble.textContent="Correct! Awesome! ✅🎉";
+    confetti.classList.add("show");
+  }else{
+    card.classList.add("flash-soft");
+    bubble.className="bubble soft";
+    bubble.textContent="Nice try! You’re so close 😊 Try again!";
+  }
+
+  overlay.classList.add("show");
+
+  setTimeout(()=>{
+    overlay.classList.remove("show");
+    card.classList.remove("flash-good","flash-soft");
+    confetti.classList.remove("show");
+  },isGood?650:950);
+}
+
+function newQuestion(){
+  const mode=$("mode").value;
+  op=pickOperation();
+
+  if(mode==="1d"){
+    num1=randomInt(0,9);
+    num2=randomInt(0,9);
+  }else if(mode==="2d1d"){
+    num1=randomInt(10,99);
+    num2=randomInt(0,9);
+  }else{
+    if(Math.random()<0.5){
+      num1=randomInt(0,9);
+      num2=randomInt(0,9);
+    }else{
+      num1=randomInt(10,99);
+      num2=randomInt(0,9);
+    }
+  }
+
+  if(op==="-"&&num1<num2){
+    [num1,num2]=[num2,num1];
+  }
+
+  $("question").innerText=`${num1} ${op} ${num2} = ?`;
+  $("answer").value="";
+  $("answer").focus();
+}
+
+function checkAnswer(){
+  const user=parseInt($("answer").value,10);
+  if(Number.isNaN(user)) return;
+
+  const right=(op==="+")?num1+num2:num1-num2;
+  total++;
+
+  if(user===right){
+    correct++;
+    showBigFeedback(true);
+    updateStats();
+    setTimeout(newQuestion,650);
+  }else{
+    showBigFeedback(false);
+    updateStats();
+    $("answer").select();
+  }
+}
+
+function updateStats(){
+  $("total").innerText=total;
+  $("correct").innerText=correct;
+  $("accuracy").innerText=
+    total===0?"0%":Math.round((correct/total)*100)+"%";
+}
+
+$("checkBtn").addEventListener("click",checkAnswer);
+$("newBtn").addEventListener("click",newQuestion);
+$("answer").addEventListener("keydown",(e)=>{
+  if(e.key==="Enter") checkAnswer();
+});
+$("mode").addEventListener("change",newQuestion);
+$("operation").addEventListener("change",newQuestion);
+
+newQuestion();
+</script>
+
+</body>
+</html>
