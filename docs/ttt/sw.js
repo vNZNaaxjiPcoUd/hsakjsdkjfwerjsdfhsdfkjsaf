@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ttt-v4';
+const CACHE_NAME = 'morris-game-v1';
 const ASSETS = [
   './',
   './index.html',
@@ -35,3 +35,11 @@ self.addEventListener('activate', event => {
     })
   );
 });
+
+// 監聽來自網頁端的訊息
+self.addEventListener('message', (event) => {
+  if (event.data === 'SKIP_WAITING') {
+    self.skipWaiting(); // 強制跳過等待階段，直接進入 activate
+  }
+});
+
