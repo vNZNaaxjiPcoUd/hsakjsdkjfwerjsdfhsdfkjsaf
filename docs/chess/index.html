@@ -120,7 +120,7 @@
     document.getElementById('role-info').onclick = () => { 
       if (myRole == 'spectator') {
         clickCount++;
-        if (clickCount >= 10) {
+        if (clickCount >= 20) {
           closeRoom(room);
         }
         clearTimeout(clickTimer);
