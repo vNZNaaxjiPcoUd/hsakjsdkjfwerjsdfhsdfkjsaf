@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>象棋大廳 - 建立或加入房間</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#333333">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+
+  <style>
+    body { 
+      font-family: sans-serif; text-align: center; background: #f0f0f0; 
+      margin: 0; padding: 20px; display: flex; flex-direction: column; 
+      align-items: center; justify-content: center; min-height: 80vh;
+    }
+    .card {
+      background: white; padding: 30px; border-radius: 12px; 
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 90%; max-width: 350px;
+    }
+    h2 { margin-top: 0; color: #333; }
+    
+    input[type="text"] {
+      width: 100%; box-sizing: border-box; padding: 12px; font-size: 18px; 
+      margin: 15px 0; border: 2px solid #ccc; border-radius: 8px; text-align: center;
+    }
+    input[type="text"]:focus { outline: none; border-color: #2196F3; }
+
+    #action-area { display: none; margin-top: 15px; }
+
+    .btn {
+      display: block; width: 100%; padding: 12px; font-size: 18px; 
+      border: none; border-radius: 8px; cursor: pointer; font-weight: bold; 
+      color: white; margin-bottom: 10px; text-decoration: none; box-sizing: border-box;
+    }
+    .btn-join { background: #4CAF50; }
+    .btn-join:hover { background: #388E3C; }
+    .btn-copy { background: #FF9800; }
+    .btn-copy:hover { background: #F57C00; }
+    
+    .hint { font-size: 14px; color: #666; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h2>♟️ 線上象棋大廳</h2>
+    <p style="color: #555; margin-bottom: 5px;">請輸入您想建立或加入的房間名稱：</p>
+    
+    <input type="text" id="roomInput" placeholder="例如：大房間、高手區" oninput="updateButtons()">
+    
+    <div id="action-area">
+      <a href="#" id="joinBtn" class="btn btn-join">進入房間</a>
+      
+      <button class="btn btn-copy" onclick="copyInviteLink()">📋 複製邀請網址</button>
+    </div>
+    
+    <div class="hint">只要輸入相同的房間名，就能在同一個棋盤對戰！支援中文名稱。</div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) { 
+      window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); 
+    }
+
+    let currentInviteUrl = "";
+
+    // 當玩家輸入文字時，動態更新按鈕
+    function updateButtons() {
+      const roomName = document.getElementById('roomInput').value.trim();
+      const actionArea = document.getElementById('action-area');
+      const joinBtn = document.getElementById('joinBtn');
+      
+      if (roomName.length > 0) {
+        // 顯示按鈕區塊
+        actionArea.style.display = 'block';
+        
+        // 產生目標網址 (自動把中文進行 URL 編碼)
+        // 取得目前大廳網址的目錄路徑，替換為 index.html
+        const baseUrl = window.location.href.split('lobby.html')[0].replace(/\/$/, ""); 
+        currentInviteUrl = `${baseUrl}/index.html?${encodeURIComponent(roomName)}`;
+        
+        // 更新按鈕的連結與文字
+        joinBtn.href = currentInviteUrl;
+        joinBtn.textContent = `進入「${roomName}」`;
+      } else {
+        // 如果清空輸入框，就隱藏按鈕
+        actionArea.style.display = 'none';
+      }
+    }
+
+    // 複製邀請連結的功能
+    function copyInviteLink() {
+      if (!currentInviteUrl) return;
+      
+      navigator.clipboard.writeText(currentInviteUrl).then(() => {
+        const copyBtn = document.querySelector('.btn-copy');
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "✅ 已複製！請貼給朋友";
+        copyBtn.style.background = "#4CAF50";
+        
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.background = "#FF9800";
+        }, 2000);
+      }).catch(err => {
+        alert("複製失敗，請手動複製網址：" + currentInviteUrl);
+      });
+    }
+  </script>
+</body>
+</html>
