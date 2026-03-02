@@ -93,7 +93,6 @@
   </div>
   
   <div id="req-alert" class="req-alert">對方請求重新開局！</div>
-  <div id="check-msg" class="check-alert">將軍！</div>
 
   <div id="board-container">
     <div id="board-relative-wrapper">
@@ -102,7 +101,9 @@
     </div>
   </div>
 
-  <script>
+  <div id="check-msg" class="check-alert">將軍！</div>
+
+<script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
     // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
