@@ -136,7 +136,8 @@
 
     function drawSVGBoard() {
       let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
-      let svg = `<svg width="100%" height="100%">`; const stroke = `stroke="#333" stroke-width="1.5"`;
+      // 🌟 修改：加入 overflow="visible"，讓超出邊界一點點的數字能顯示在 padding 內
+      let svg = `<svg width="100%" height="100%" overflow="visible">`; const stroke = `stroke="#333" stroke-width="1.5"`;
       for (let c = 0; c < 9; c++) {
         if (c === 0 || c === 8) { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; } 
         else { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(4)}" ${stroke} />`; svg += `<line x1="${getX(c)}" y1="${getY(5)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; }
@@ -148,8 +149,21 @@
       svg += `<text x="38.8%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">河</text>`;
       svg += `<text x="61.1%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">漢</text>`;
       svg += `<text x="72.2%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">界</text>`;
+
+      // 🌟 新增：在棋盤上下方畫出 1~9 的小數字
+      for (let c = 0; c < 9; c++) {
+        let topNum = c + 1;     // 上方：1 到 9 (左至右)
+        let bottomNum = 9 - c;  // 下方：9 到 1 (左至右，即 1 到 9 逆時針)
+        
+        // y="-2.5%" 和 y="102.5%" 會剛好落在外框與棋盤之間的留白處
+        svg += `<text x="${getX(c)}" y="-2.5%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${topNum}</text>`;
+        svg += `<text x="${getX(c)}" y="102.5%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${bottomNum}</text>`;
+      }
+
       svg += `</svg>`; document.getElementById('board-svg-layer').innerHTML = svg;
-    } drawSVGBoard();
+    }
+
+    drawSVGBoard();
 
     async function apiCall(action, extraData = {}) {
       const payload = { action: action, room: room, ...extraData };
