@@ -76,7 +76,7 @@
     </div>
   </div>
 
-  <h2 id="room-title">象棋</h2>
+  <h2 id="room-title">榕樹下</h2>
   <div id="role-info" class="role-badge">連線中...</div>
   
   <div class="status-container">
@@ -91,7 +91,6 @@
   </div>
   
   <div id="req-alert" class="req-alert"></div>
-
   <div id="board-container">
     <div id="board-relative-wrapper">
       <div id="board-svg-layer"></div>
@@ -104,7 +103,6 @@
   <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
-    // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
     let room = '榕樹下';
@@ -122,6 +120,8 @@
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
 
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
+    let pausePollingUntil = 0; 
+
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
 
     function showRoleModal() {
@@ -164,7 +164,13 @@
     }
 
     async function init() { let data = await apiCall('join', { playerId: myId }); if (data) onJoined(data); setInterval(pollState, 1500); }
-    async function pollState() { if (isSyncing) return; let data = await apiCall('get'); if (isSyncing) return; if (data && data.state) updateUI(data.state); }
+    
+    async function pollState() { 
+      if (isSyncing || Date.now() < pausePollingUntil) return; 
+      let data = await apiCall('get'); 
+      if (isSyncing || Date.now() < pausePollingUntil) return; 
+      if (data && data.state) updateUI(data.state); 
+    }
 
     async function requestRole(role) {
       document.getElementById('role-modal').style.display = 'none';
@@ -178,10 +184,14 @@
       if (myRole === 'spectator') return;
       if (actionType === 'request' && !confirm("向對方發送重新開局請求？")) return;
       if (actionType === 'agree' && !confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
-      isSyncing = true; let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); if (data && data.state) updateUI(data.state); isSyncing = false;
+      
+      pausePollingUntil = Date.now() + 2500; 
+      isSyncing = true; 
+      let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); 
+      if (data && data.state) updateUI(data.state); 
+      isSyncing = false;
     }
 
-    // 🌟 新增：發送不同的悔棋動作給後端
     async function requestUndo(actionType) {
       if (myRole === 'spectator') return;
       if (actionType === 'request') {
@@ -190,7 +200,12 @@
       } else if (actionType === 'agree') {
         if (!confirm("確定要同意對方悔棋嗎？")) return;
       }
-      isSyncing = true; let data = await apiCall('undo', { playerId: myId, undoAction: actionType }); if (data && data.state) updateUI(data.state); isSyncing = false;
+      
+      pausePollingUntil = Date.now() + 2500; 
+      isSyncing = true; 
+      let data = await apiCall('undo', { playerId: myId, undoAction: actionType }); 
+      if (data && data.state) updateUI(data.state); 
+      isSyncing = false;
     }
 
     function onJoined(data) {
@@ -211,6 +226,7 @@
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
         alert("管理員已將您移出對戰座位！"); myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
+        return;
       }
 
       let modal = document.getElementById('role-modal');
@@ -227,7 +243,6 @@
       let canUndo = (state.history && state.history.length > 0);
 
       if (myRole === 'b' || myRole === 'r') { 
-        // 重開按鈕邏輯
         restartBtn.style.display = 'inline-block'; 
         if (state.restartRequest === myRole) {
           restartBtn.textContent = "❌ 取消重開"; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
@@ -237,7 +252,6 @@
           restartBtn.textContent = "🆕 重開"; restartBtn.style.backgroundColor = "#4CAF50"; restartBtn.onclick = () => requestRestart('request'); rejectBtn.style.display = 'none';
         }
 
-        // 🌟 新增：悔棋按鈕邏輯
         if (state.undoRequest === myRole) {
           undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 取消悔棋"; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
         } else if (state.undoRequest && state.undoRequest !== myRole) {
@@ -250,15 +264,14 @@
         undoBtn.style.display = 'none'; rejectUndoBtn.style.display = 'none';
       }
 
-      // 提示字樣邏輯 (統整重開與悔棋)
       let reqMsg = "";
       if (state.restartRequest && state.restartRequest !== myRole && myRole !== 'spectator') reqMsg = "對方請求重新開局！";
       else if (state.restartRequest && myRole === 'spectator') reqMsg = (state.restartRequest === 'b' ? '黑方' : '紅方') + " 發起了重開請求...";
       else if (state.undoRequest && state.undoRequest !== myRole && myRole !== 'spectator') reqMsg = "對方請求悔棋！";
       else if (state.undoRequest && myRole === 'spectator') reqMsg = (state.undoRequest === 'b' ? '黑方' : '紅方') + " 發起了悔棋請求...";
 
-      if (reqMsg) { reqAlert.style.display = 'block'; reqAlert.textContent = reqMsg; } 
-      else { reqAlert.style.display = 'none'; }
+      reqAlert.style.display = reqMsg ? 'block' : 'none';
+      reqAlert.textContent = reqMsg;
 
       let checkMsg = document.getElementById('check-msg');
       if (state.status === 'check') { checkMsg.style.display = 'block'; checkMsg.textContent = state.checkMsg + " 將軍！"; } else { checkMsg.style.display = 'none'; }
@@ -304,21 +317,24 @@
 
     async function commitMove(r1, c1, r2, c2) {
       isSyncing = true; 
+      pausePollingUntil = Date.now() + 2000; 
+
       if (!gameState.history) gameState.history = []; gameState.history.push({ board: JSON.parse(JSON.stringify(gameState.board)), turn: gameState.turn, status: gameState.status, checkMsg: gameState.checkMsg }); if (gameState.history.length > 50) gameState.history.shift(); 
       let newBoard = JSON.parse(JSON.stringify(gameState.board)); newBoard[r2][c2] = newBoard[r1][c1]; newBoard[r1][c1] = '';
       let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; let checkAlert = ''; let status = 'playing';
       if (isKingAttacked(newBoard, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
       
       gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; 
-      // 🌟 新增：只要有一方走子，就把雙方的重開和悔棋請求自動清除
       gameState.restartRequest = null; gameState.undoRequest = null; 
       
-      selectedCell = null; renderBoard(); 
-      let res = await apiCall('move', { state: gameState }); if(res && res.state) gameState = res.state; 
+      selectedCell = null; 
+      updateUI(gameState); 
+      
+      let res = await apiCall('move', { state: gameState }); 
+      if(res && res.state) gameState = res.state; 
       isSyncing = false; 
     }
 
-    // --- 象棋規則邏輯 ---
     function getColor(p) { return p === '' ? '' : (p === p.toLowerCase() ? 'b' : 'r'); }
     function isMoveLegal(board, r1, c1, r2, c2) {
       let p = board[r1][c1]; let target = board[r2][c2]; if (p === '') return false; if (target !== '' && getColor(p) === getColor(target)) return false; 
