@@ -128,15 +128,15 @@
       } };
     
     async function closeRoom(roomName) {
-      if (!confirm(`確定要強制退出「${roomName}」的棋手嗎？棋手將要重選。`)) return;
+      if (!confirm(`確定要強制退出「${roomName}」的棋手嗎？棋手將要重新進入。`)) return;
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
           body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), redirect: 'follow'
         });
         const data = await response.json();
-        if (!data.error) { console.log('已成功清除房間資料！'); }
-        else { console.log("清除失敗" ); }
+        if (!data.error) { console.log('已成功強制退出！'); }
+        else { console.log("強制退出失敗" ); }
       } catch (e) { console.log(e); }
     }
 
