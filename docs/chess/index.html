@@ -10,26 +10,16 @@
   <link rel="apple-touch-icon" href="./icon-192.png">
 
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
+    *, *::before, *::after { box-sizing: border-box; }
 
     :root {
-      /* 🌟 調整：把 9.8vw 降為 8.5vw，7.2vh 降為 6.5vh，預留出安全邊距 */
       --cell-size: min(8.5vw, 6.5vh, 55px); 
       --piece-size: calc(var(--cell-size) * 0.88); 
       --font-size: calc(var(--piece-size) * 0.58);
       --board-color: #e4c695;
     }
 
-    body { 
-      font-family: sans-serif; text-align: center; background: #f0f0f0; 
-      margin: 0; padding: 10px; touch-action: pan-y; 
-      /* 🌟 新增：雙重防護，防止出現水平捲軸 */
-      overflow-x: hidden; 
-    }    
-
-    
+    body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; touch-action: pan-y; overflow-x: hidden; }
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
     .status-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
@@ -37,11 +27,14 @@
     
     .btn-undo { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
-    
     .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    
+    .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
+    /* 🌟 新增：拒絕按鈕的樣式 */
+    .btn-reject { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     
     .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
+    .req-alert { color: #E91E63; font-size: clamp(16px, 3.5vw, 20px); font-weight: bold; animation: blink 1.5s infinite; display: none; margin: 5px; }
     @keyframes blink { 50% { opacity: 0; } }
     
     #board-container {
@@ -92,10 +85,16 @@
   <div class="status-container">
     <div id="info">等待同步...</div>
     <button class="btn-reselect" onclick="showRoleModal()">🔄 角色</button>
-    <button id="restart-btn" class="btn-restart" onclick="requestRestart()" style="display:none;">🆕 重開</button>
+    
+    <button id="restart-btn" class="btn-restart" style="display:none;"></button>
+    <button id="reject-btn" class="btn-reject" style="display:none;" onclick="requestRestart('reject')">⛔ 拒絕</button>
+    
     <button id="undo-btn" class="btn-undo" onclick="requestUndo()" style="display:none;">↩ 悔棋</button>
   </div>
   
+  <div id="req-alert" class="req-alert">對方請求重新開局！</div>
+  <div id="check-msg" class="check-alert">將軍！</div>
+
   <div id="board-container">
     <div id="board-relative-wrapper">
       <div id="board-svg-layer"></div>
@@ -103,23 +102,18 @@
     </div>
   </div>
 
-  <div id="check-msg" class="check-alert">將軍！</div>
-
   <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
-    // 你原有的 GAS URL
+    // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
     let room = '榕樹下';
     const queryString = window.location.search.substring(1);
     if (queryString) {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('room')) {
-        room = decodeURIComponent(urlParams.get('room'));
-      } else {
-        room = decodeURIComponent(queryString.split('&')[0].split('=')[0]); 
-      }
+      if (urlParams.has('room')) { room = decodeURIComponent(urlParams.get('room')); } 
+      else { room = decodeURIComponent(queryString.split('&')[0].split('=')[0]); }
     }
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
@@ -178,11 +172,18 @@
 
     async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
 
-    async function requestRestart() {
+    // 🌟 更新：發送不同的重開動作給後端
+    async function requestRestart(actionType) {
       if (myRole === 'spectator') return;
-      if (!confirm("確定要重新開局嗎？這將會清空目前的棋盤。")) return;
+      
+      if (actionType === 'request') {
+        if (!confirm("向對方發送重新開局請求？")) return;
+      } else if (actionType === 'agree') {
+        if (!confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
+      }
+
       isSyncing = true; 
-      let data = await apiCall('restart', { playerId: myId }); 
+      let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); 
       if (data && data.state) updateUI(data.state); 
       isSyncing = false;
     }
@@ -205,8 +206,7 @@
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
         alert("管理員已將您移出對戰座位！");
-        myRole = 'spectator';
-        sessionStorage.removeItem('xq_role_selected_' + room); 
+        myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); 
         hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
       }
 
@@ -219,14 +219,43 @@
 
       let undoBtn = document.getElementById('undo-btn');
       let restartBtn = document.getElementById('restart-btn');
+      let rejectBtn = document.getElementById('reject-btn');
+      let reqAlert = document.getElementById('req-alert');
       
+      // 🌟 更新：處理重開與拒絕按鈕的動態變化
       if (myRole === 'b' || myRole === 'r') { 
         undoBtn.style.display = 'inline-block'; 
         undoBtn.disabled = (!state.history || state.history.length === 0); 
+        
         restartBtn.style.display = 'inline-block'; 
+        if (state.restartRequest === myRole) {
+          restartBtn.textContent = "❌ 取消重開";
+          restartBtn.style.backgroundColor = "#9e9e9e";
+          restartBtn.onclick = () => requestRestart('cancel');
+          rejectBtn.style.display = 'none'; // 自己發起的，不用顯示拒絕
+        } else if (state.restartRequest && state.restartRequest !== myRole) {
+          restartBtn.textContent = "✅ 同意";
+          restartBtn.style.backgroundColor = "#E91E63";
+          restartBtn.onclick = () => requestRestart('agree');
+          rejectBtn.style.display = 'inline-block'; // 對方發起的，顯示拒絕按鈕
+        } else {
+          restartBtn.textContent = "🆕 重開";
+          restartBtn.style.backgroundColor = "#4CAF50";
+          restartBtn.onclick = () => requestRestart('request');
+          rejectBtn.style.display = 'none'; // 沒事的時候不用顯示拒絕
+        }
       } else { 
         undoBtn.style.display = 'none'; 
         restartBtn.style.display = 'none'; 
+        rejectBtn.style.display = 'none';
+      }
+
+      if (state.restartRequest && state.restartRequest !== myRole && myRole !== 'spectator') {
+        reqAlert.style.display = 'block'; reqAlert.textContent = "對方請求重新開局！";
+      } else if (state.restartRequest && myRole === 'spectator') {
+        reqAlert.style.display = 'block'; reqAlert.textContent = (state.restartRequest === 'b' ? '黑方' : '紅方') + " 發起了重開請求...";
+      } else {
+        reqAlert.style.display = 'none';
       }
 
       let checkMsg = document.getElementById('check-msg');
@@ -234,26 +263,17 @@
       renderBoard();
     }
 
-    // 🌟 翻轉棋盤的核心邏輯在這裡 🌟
     function renderBoard() {
       const grid = document.getElementById('board-grid'); grid.innerHTML = '';
-      
-      // 判斷是否為黑方，如果是，就把棋盤上下左右顛倒顯示
       let isFlipped = (myRole === 'b'); 
 
       for (let displayR = 0; displayR < 10; displayR++) {
         for (let displayC = 0; displayC < 9; displayC++) {
-          
-          // 計算真實陣列的座標 (r, c)
           let r = isFlipped ? 9 - displayR : displayR;
           let c = isFlipped ? 8 - displayC : displayC;
 
           let cellDiv = document.createElement('div'); 
-          cellDiv.className = 'cell'; 
-          
-          // 綁定的依然是真實座標，確保下棋邏輯完全不受影響
-          cellDiv.dataset.r = r; 
-          cellDiv.dataset.c = c; 
+          cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; 
           cellDiv.onclick = () => handleCellClick(r, c);
           
           let p = gameState.board[r][c];
@@ -268,7 +288,6 @@
           if (selectedCell && isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) {
              if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, gameState.turn)) cellDiv.classList.add('valid-move');
           }
-          
           grid.appendChild(cellDiv);
         }
       }
