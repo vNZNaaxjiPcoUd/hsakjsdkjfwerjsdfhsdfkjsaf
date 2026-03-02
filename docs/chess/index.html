@@ -20,14 +20,16 @@
     body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; touch-action: pan-y; }
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
-    .status-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+    .status-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
     #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; }
     
-    .btn-undo { padding: 5px 12px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-undo { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
     
-    /* 🌟 新增：切換身分按鈕樣式 */
-    .btn-reselect { padding: 5px 12px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    
+    /* 🌟 新增：重新開局按鈕樣式 */
+    .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     
     .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
     @keyframes blink { 50% { opacity: 0; } }
@@ -53,7 +55,7 @@
     .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
 
     #role-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; position: relative; } /* 加入 position: relative 給關閉按鈕定位 */
+    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; position: relative; }
     .modal-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
     .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     #btn-role-b { background: #212121; } #btn-role-r { background: #d32f2f; } #btn-role-s { background: #757575; }
@@ -79,7 +81,8 @@
   
   <div class="status-container">
     <div id="info">等待同步...</div>
-    <button class="btn-reselect" onclick="showRoleModal()">🔄角色</button>
+    <button class="btn-reselect" onclick="showRoleModal()">🔄 角色</button>
+    <button id="restart-btn" class="btn-restart" onclick="requestRestart()" style="display:none;">🆕 重開</button>
     <button id="undo-btn" class="btn-undo" onclick="requestUndo()" style="display:none;">↩ 悔棋</button>
   </div>
   
@@ -90,7 +93,7 @@
     </div>
   </div>
 
-    <div id="check-msg" class="check-alert">將軍！</div>
+  <div id="check-msg" class="check-alert">將軍！</div>
 
   <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
@@ -98,19 +101,16 @@
     // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
-let room = 'lobby';
+    let room = 'lobby';
     const queryString = window.location.search.substring(1);
     if (queryString) {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.has('room')) {
         room = decodeURIComponent(urlParams.get('room'));
       } else {
-        // 處理如 ?大房間 這種直接帶參數的網址，並解碼中文
         room = decodeURIComponent(queryString.split('&')[0].split('=')[0]); 
       }
     }
-
-
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
 
@@ -121,21 +121,14 @@ let room = 'lobby';
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
 
-    // 🌟 控制 Modal 顯示與隱藏的函數
     function showRoleModal() {
       document.getElementById('role-modal').style.display = 'flex';
-      // 如果已經有身分，就顯示右上角的「×」按鈕讓玩家可以取消
-      if (hasSelectedRoleLocal) {
-        document.getElementById('close-modal-btn').style.display = 'block';
-      } else {
-        document.getElementById('close-modal-btn').style.display = 'none';
-      }
-      if (gameState) updateUI(gameState); // 即時更新按鈕狀態
+      if (hasSelectedRoleLocal) { document.getElementById('close-modal-btn').style.display = 'block'; } 
+      else { document.getElementById('close-modal-btn').style.display = 'none'; }
+      if (gameState) updateUI(gameState); 
     }
 
-    function closeRoleModal() {
-      document.getElementById('role-modal').style.display = 'none';
-    }
+    function closeRoleModal() { document.getElementById('role-modal').style.display = 'none'; }
 
     function drawSVGBoard() {
       let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
@@ -175,13 +168,20 @@ let room = 'lobby';
 
     async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
 
+    // 🌟 新增：觸發重新開局
+    async function requestRestart() {
+      if (myRole === 'spectator') return;
+      if (!confirm("確定要重新開局嗎？這將會清空目前的棋盤。")) return;
+      isSyncing = true; 
+      let data = await apiCall('restart', { playerId: myId }); 
+      if (data && data.state) updateUI(data.state); 
+      isSyncing = false;
+    }
+
     function onJoined(data) {
       myRole = data.role; updateUI(data.state);
       if (myRole === 'b' || myRole === 'r') { hasSelectedRoleLocal = 'true'; sessionStorage.setItem('xq_role_selected_' + room, 'true'); }
-      
-      // 🌟 改用統一的 showRoleModal() 處理
-      if (!hasSelectedRoleLocal) { showRoleModal(); } 
-      else { updateRoleBadge(); }
+      if (!hasSelectedRoleLocal) { showRoleModal(); } else { updateRoleBadge(); }
     }
 
     function updateRoleBadge() {
@@ -198,9 +198,7 @@ let room = 'lobby';
         alert("管理員已將您移出對戰座位！");
         myRole = 'spectator';
         sessionStorage.removeItem('xq_role_selected_' + room); 
-        hasSelectedRoleLocal = null;
-        updateRoleBadge();
-        showRoleModal(); // 被踢時自動彈出選角
+        hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
       }
 
       let modal = document.getElementById('role-modal');
@@ -211,7 +209,18 @@ let room = 'lobby';
       }
 
       let undoBtn = document.getElementById('undo-btn');
-      if (myRole === 'b' || myRole === 'r') { undoBtn.style.display = 'inline-block'; undoBtn.disabled = (!state.history || state.history.length === 0); } else { undoBtn.style.display = 'none'; }
+      let restartBtn = document.getElementById('restart-btn');
+      
+      // 🌟 只有黑紅雙方才會顯示悔棋和重開按鈕
+      if (myRole === 'b' || myRole === 'r') { 
+        undoBtn.style.display = 'inline-block'; 
+        undoBtn.disabled = (!state.history || state.history.length === 0); 
+        restartBtn.style.display = 'inline-block'; 
+      } else { 
+        undoBtn.style.display = 'none'; 
+        restartBtn.style.display = 'none'; 
+      }
+
       let checkMsg = document.getElementById('check-msg');
       if (state.status === 'check') { checkMsg.style.display = 'block'; checkMsg.textContent = state.checkMsg + " 將軍！"; } else { checkMsg.style.display = 'none'; }
       renderBoard();
