@@ -20,11 +20,15 @@
     body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; touch-action: pan-y; }
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
-    .status-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 5px; flex-wrap: wrap; }
-    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; }
+    .status-container { display: flex; justify-content: center; align-items: center; gap: 10px; margin-bottom: 5px; flex-wrap: wrap; }
+    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; }
     
     .btn-undo { padding: 5px 12px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
+    
+    /* 🌟 新增：切換身分按鈕樣式 */
+    .btn-reselect { padding: 5px 12px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    
     .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
     @keyframes blink { 50% { opacity: 0; } }
     
@@ -49,7 +53,7 @@
     .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
 
     #role-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; position: relative; } /* 加入 position: relative 給關閉按鈕定位 */
     .modal-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
     .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
     #btn-role-b { background: #212121; } #btn-role-r { background: #d32f2f; } #btn-role-s { background: #757575; }
@@ -61,6 +65,7 @@
 
   <div id="role-modal">
     <div class="modal-content">
+      <span id="close-modal-btn" style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer; display:none; color:#999;" onclick="closeRoleModal()">&times;</span>
       <h3 style="margin-top:0;">請選擇身分</h3>
       <p style="font-size:14px; color:#666;">房間：<span id="modal-room-name"></span></p>
       <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">執黑棋 (先手)</button>
@@ -69,11 +74,12 @@
     </div>
   </div>
 
-  <h2 id="room-title"></h2>
+  <h2 id="room-title">象棋</h2>
   <div id="role-info" class="role-badge">連線中...</div>
   
   <div class="status-container">
     <div id="info">等待同步...</div>
+    <button class="btn-reselect" onclick="showRoleModal()">🔄角色</button>
     <button id="undo-btn" class="btn-undo" onclick="requestUndo()" style="display:none;">↩ 悔棋</button>
   </div>
   
@@ -92,7 +98,7 @@
     // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
-    let room = '榕樹下';
+    let room = 'lobby';
     const queryString = window.location.search.substring(1);
     if (queryString) {
       const urlParams = new URLSearchParams(window.location.search);
@@ -102,13 +108,28 @@
     document.getElementById('room-title').textContent = "房間：" + room;
     document.getElementById('modal-room-name').textContent = room;
 
-    // 🌟 改變 1：使用 sessionStorage，每一個新分頁 (Tab) 就會產生新的玩家 ID
     let myId = sessionStorage.getItem('xq_id');
     if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
 
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
+
+    // 🌟 控制 Modal 顯示與隱藏的函數
+    function showRoleModal() {
+      document.getElementById('role-modal').style.display = 'flex';
+      // 如果已經有身分，就顯示右上角的「×」按鈕讓玩家可以取消
+      if (hasSelectedRoleLocal) {
+        document.getElementById('close-modal-btn').style.display = 'block';
+      } else {
+        document.getElementById('close-modal-btn').style.display = 'none';
+      }
+      if (gameState) updateUI(gameState); // 即時更新按鈕狀態
+    }
+
+    function closeRoleModal() {
+      document.getElementById('role-modal').style.display = 'none';
+    }
 
     function drawSVGBoard() {
       let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
@@ -143,7 +164,7 @@
       let data = await apiCall('takeRole', { playerId: myId, role: role });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); updateUI(data.state);
-      } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); document.getElementById('role-modal').style.display = 'flex'; } }
+      } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
     }
 
     async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
@@ -151,7 +172,10 @@
     function onJoined(data) {
       myRole = data.role; updateUI(data.state);
       if (myRole === 'b' || myRole === 'r') { hasSelectedRoleLocal = 'true'; sessionStorage.setItem('xq_role_selected_' + room, 'true'); }
-      if (!hasSelectedRoleLocal) document.getElementById('role-modal').style.display = 'flex'; else updateRoleBadge();
+      
+      // 🌟 改用統一的 showRoleModal() 處理
+      if (!hasSelectedRoleLocal) { showRoleModal(); } 
+      else { updateRoleBadge(); }
     }
 
     function updateRoleBadge() {
@@ -164,14 +188,13 @@
       gameState = state;
       document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
 
-      // 🌟 改變 2：偵測是否被管理員踢出
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
         alert("管理員已將您移出對戰座位！");
         myRole = 'spectator';
-        sessionStorage.removeItem('xq_role_selected_' + room); // 清除已選擇記錄
+        sessionStorage.removeItem('xq_role_selected_' + room); 
         hasSelectedRoleLocal = null;
         updateRoleBadge();
-        document.getElementById('role-modal').style.display = 'flex'; // 重新彈出選角視窗
+        showRoleModal(); // 被踢時自動彈出選角
       }
 
       let modal = document.getElementById('role-modal');
@@ -243,9 +266,8 @@
       } return false;
     }
     function countPiecesBetween(board, r1, c1, r2, c2) { let count = 0; if (r1 === r2) { let minC = Math.min(c1, c2), maxC = Math.max(c1, c2); for (let c = minC + 1; c < maxC; c++) if (board[r1][c] !== '') count++; } else { let minR = Math.min(r1, r2), maxR = Math.max(r1, r2); for (let r = minR + 1; r < maxR; r++) if (board[r][c1] !== '') count++; } return count; }
-    function isKingAttacked(board, kingColor) { let kr = -1, kc = -1, targetKing = kingColor === 'b' ? 'k' : 'K'; for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (board[r][c] === targetKing) { kr = r; kc = c; break; } if (kr === -1) return true; let oppColor = kingColor === 'b' ? 'r' : 'b'; for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (getColor(board[r][c]) === oppColor) if (isMoveLegal(board, r, c, kr, kc)) return true; return false; }
-    function leavesKingInCheck(board, r1, c1, r2, c2, color) { let simBoard = JSON.parse(JSON.stringify(board)); simBoard[r2][c2] = simBoard[r1][c1]; simBoard[r1][c1] = ''; if (isKingAttacked(simBoard, color)) return true; let bkR=-1, bkC=-1, rkR=-1, rkC=-1; for (let r=0; r<10; r++) for (let c=0; c<9; c++) { if (simBoard[r][c] === 'k') { bkR = r; bkC = c; } if (simBoard[r][c] === 'K') { rkR = r; rkC = c; } } if (bkC === rkC && bkC !== -1 && countPiecesBetween(simBoard, bkR, bkC, rkR, rkC) === 0) return true; return false; }
-    //function leavesKingInCheck(board, r1, c1, r2, c2, color) {  return false; }
+    function isKingAttacked(board, kingColor) { let kr = -1, kc = -1, targetKing = kingColor === 'b' ? 'k' : 'K'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (board[r][c] === targetKing) { kr = r; kc = c; break; } } if (kr !== -1) break; } if (kr === -1) return true; let oppColor = kingColor === 'b' ? 'r' : 'b'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (getColor(board[r][c]) === oppColor) { if (isMoveLegal(board, r, c, kr, kc)) return true; } } } return false; }
+    function leavesKingInCheck(board, r1, c1, r2, c2, color) { let simBoard = JSON.parse(JSON.stringify(board)); simBoard[r2][c2] = simBoard[r1][c1]; simBoard[r1][c1] = ''; if (isKingAttacked(simBoard, color)) return true; let bkR=-1, bkC=-1, rkR=-1, rkC=-1; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (simBoard[r][c] === 'k') { bkR = r; bkC = c; } if (simBoard[r][c] === 'K') { rkR = r; rkC = c; } } } if (bkC === rkC && bkC !== -1) { if (countPiecesBetween(simBoard, bkR, bkC, rkR, rkC) === 0) return true; } return false; }
     window.onload = init;
   </script>
 </body>
