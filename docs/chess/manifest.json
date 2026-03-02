@@ -1,7 +1,7 @@
 {
-  "name": "線上兩人象棋",
-  "short_name": "線上象棋",
-  "description": "支援多房間與觀戰模式的即時線上象棋遊戲",
+  "name": "象棋",
+  "short_name": "象棋",
+  "description": "即時線上象棋遊戲",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#f0f0f0",
