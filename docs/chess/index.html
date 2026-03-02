@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>線上象棋</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#333333">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+
+  <style>
+    :root {
+      --cell-size: min(9.8vw, 7.2vh, 55px); 
+      --piece-size: calc(var(--cell-size) * 0.88); 
+      --font-size: calc(var(--piece-size) * 0.58);
+      --board-color: #e4c695;
+    }
+
+    body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; touch-action: pan-y; }
+    h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
+    
+    .status-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-bottom: 5px; flex-wrap: wrap; }
+    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; }
+    
+    .btn-undo { padding: 5px 12px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
+    .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
+    @keyframes blink { 50% { opacity: 0; } }
+    
+    #board-container {
+      display: inline-block; background: var(--board-color); border: 3px solid #333;
+      padding: calc(var(--cell-size) / 2); box-shadow: 2px 5px 10px rgba(0,0,0,0.3);
+      -webkit-user-select: none; user-select: none; border-radius: 4px;
+    }
+    #board-relative-wrapper { position: relative; }
+    #board-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    #board-grid { display: grid; position: relative; z-index: 2; grid-template-columns: repeat(9, var(--cell-size)); grid-template-rows: repeat(10, var(--cell-size)); }
+    .cell { position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .piece {
+      width: var(--piece-size); height: var(--piece-size); border-radius: 50%; position: absolute; z-index: 10;
+      display: flex; justify-content: center; align-items: center; font-weight: bold; font-size: var(--font-size); 
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.4); background: #fdf6e3; border: 2px solid #333; 
+    }
+    .piece.red { color: #d32f2f; border-color: #d32f2f; }
+    .piece.black { color: #212121; border-color: #212121; }
+    .piece.selected { box-shadow: 0 0 10px 4px #00BCD4; transform: scale(1.15); z-index: 15; } 
+    .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
+
+    #role-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; }
+    .modal-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
+    .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    #btn-role-b { background: #212121; } #btn-role-r { background: #d32f2f; } #btn-role-s { background: #757575; }
+    .role-badge { display: inline-block; padding: 5px 15px; border-radius: 15px; color: white; background: #555; font-size: clamp(12px, 3vw, 15px); margin-bottom: 5px; }
+    .role-b { background: #212121; } .role-r { background: #d32f2f; }
+  </style>
+</head>
+<body>
+
+  <div id="role-modal">
+    <div class="modal-content">
+      <h3 style="margin-top:0;">請選擇身分</h3>
+      <p style="font-size:14px; color:#666;">房間：<span id="modal-room-name"></span></p>
+      <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">執黑棋 (先手)</button>
+      <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">執紅棋</button>
+      <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">觀棋</button>
+    </div>
+  </div>
+
+  <h2 id="room-title">線上象棋</h2>
+  <div id="role-info" class="role-badge">連線中...</div>
+  
+  <div class="status-container">
+    <div id="info">等待同步...</div>
+    <button id="undo-btn" class="btn-undo" onclick="requestUndo()" style="display:none;">↩ 悔棋</button>
+  </div>
+  
+  <div id="board-container">
+    <div id="board-relative-wrapper">
+      <div id="board-svg-layer"></div>
+      <div id="board-grid"></div>
+    </div>
+  </div>
+
+    <div id="check-msg" class="check-alert">將軍！</div>
+
+  <script>
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
+
+    // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
+
+    let room = '榕樹下';
+    const queryString = window.location.search.substring(1);
+    if (queryString) {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.has('room')) room = urlParams.get('room');
+      else room = queryString.split('&')[0].split('=')[0]; 
+    }
+    document.getElementById('room-title').textContent = "線上象棋 - 房間：" + room;
+    document.getElementById('modal-room-name').textContent = room;
+
+    // 🌟 改變 1：使用 sessionStorage，每一個新分頁 (Tab) 就會產生新的玩家 ID
+    let myId = sessionStorage.getItem('xq_id');
+    if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
+    let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
+
+    let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
+    const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
+
+    function drawSVGBoard() {
+      let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
+      let svg = `<svg width="100%" height="100%">`; const stroke = `stroke="#333" stroke-width="1.5"`;
+      for (let c = 0; c < 9; c++) {
+        if (c === 0 || c === 8) { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; } 
+        else { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(4)}" ${stroke} />`; svg += `<line x1="${getX(c)}" y1="${getY(5)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; }
+      }
+      for (let r = 0; r < 10; r++) { svg += `<line x1="${getX(0)}" y1="${getY(r)}" x2="${getX(8)}" y2="${getY(r)}" ${stroke} />`; }
+      svg += `<line x1="${getX(3)}" y1="${getY(0)}" x2="${getX(5)}" y2="${getY(2)}" ${stroke} />`; svg += `<line x1="${getX(5)}" y1="${getY(0)}" x2="${getX(3)}" y2="${getY(2)}" ${stroke} />`;
+      svg += `<line x1="${getX(3)}" y1="${getY(7)}" x2="${getX(5)}" y2="${getY(9)}" ${stroke} />`; svg += `<line x1="${getX(5)}" y1="${getY(7)}" x2="${getX(3)}" y2="${getY(9)}" ${stroke} />`;
+      svg += `<text x="27.7%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">楚</text>`;
+      svg += `<text x="38.8%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">河</text>`;
+      svg += `<text x="61.1%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">漢</text>`;
+      svg += `<text x="72.2%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">界</text>`;
+      svg += `</svg>`; document.getElementById('board-svg-layer').innerHTML = svg;
+    } drawSVGBoard();
+
+    async function apiCall(action, extraData = {}) {
+      const payload = { action: action, room: room, ...extraData };
+      try {
+        const response = await fetch(GAS_URL, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload), redirect: 'follow' });
+        return await response.json();
+      } catch (e) { return null; }
+    }
+
+    async function init() { let data = await apiCall('join', { playerId: myId }); if (data) onJoined(data); setInterval(pollState, 1500); }
+    async function pollState() { if (isSyncing) return; let data = await apiCall('get'); if (isSyncing) return; if (data && data.state) updateUI(data.state); }
+
+    async function requestRole(role) {
+      document.getElementById('role-modal').style.display = 'none';
+      let data = await apiCall('takeRole', { playerId: myId, role: role });
+      if (data && data.success) {
+        myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); updateUI(data.state);
+      } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); document.getElementById('role-modal').style.display = 'flex'; } }
+    }
+
+    async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
+
+    function onJoined(data) {
+      myRole = data.role; updateUI(data.state);
+      if (myRole === 'b' || myRole === 'r') { hasSelectedRoleLocal = 'true'; sessionStorage.setItem('xq_role_selected_' + room, 'true'); }
+      if (!hasSelectedRoleLocal) document.getElementById('role-modal').style.display = 'flex'; else updateRoleBadge();
+    }
+
+    function updateRoleBadge() {
+      let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀戰者';
+      let badge = document.getElementById('role-info'); badge.textContent = "你是：" + roleText; badge.className = "role-badge " + (myRole === 'spectator' ? '' : 'role-' + myRole);
+    }
+
+    function updateUI(state) {
+      if (gameState && JSON.stringify(gameState.board) !== JSON.stringify(state.board)) selectedCell = null; 
+      gameState = state;
+      document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
+
+      // 🌟 改變 2：偵測是否被管理員踢出
+      if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
+        alert("管理員已將您移出對戰座位！");
+        myRole = 'spectator';
+        sessionStorage.removeItem('xq_role_selected_' + room); // 清除已選擇記錄
+        hasSelectedRoleLocal = null;
+        updateRoleBadge();
+        document.getElementById('role-modal').style.display = 'flex'; // 重新彈出選角視窗
+      }
+
+      let modal = document.getElementById('role-modal');
+      if (modal.style.display === 'flex') {
+        let btnB = document.getElementById('btn-role-b'); let btnR = document.getElementById('btn-role-r');
+        if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "黑棋 (已被選)"; } else { btnB.disabled = false; btnB.textContent = "執黑棋 (先手)"; }
+        if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "紅棋 (已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
+      }
+
+      let undoBtn = document.getElementById('undo-btn');
+      if (myRole === 'b' || myRole === 'r') { undoBtn.style.display = 'inline-block'; undoBtn.disabled = (!state.history || state.history.length === 0); } else { undoBtn.style.display = 'none'; }
+      let checkMsg = document.getElementById('check-msg');
+      if (state.status === 'check') { checkMsg.style.display = 'block'; checkMsg.textContent = state.checkMsg + " 將軍！"; } else { checkMsg.style.display = 'none'; }
+      renderBoard();
+    }
+
+    function renderBoard() {
+      const grid = document.getElementById('board-grid'); grid.innerHTML = '';
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 9; c++) {
+          let cellDiv = document.createElement('div'); cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; cellDiv.onclick = () => handleCellClick(r, c);
+          let p = gameState.board[r][c];
+          if (p) {
+            let pieceDiv = document.createElement('div'); pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
+            if (selectedCell && selectedCell.r === r && selectedCell.c === c) pieceDiv.classList.add('selected');
+            pieceDiv.textContent = piecesText[p]; cellDiv.appendChild(pieceDiv);
+          }
+          if (selectedCell && isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) {
+             if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, gameState.turn)) cellDiv.classList.add('valid-move');
+          }
+          grid.appendChild(cellDiv);
+        }
+      }
+    }
+
+    function handleCellClick(r, c) {
+      if (myRole === 'spectator' || gameState.turn !== myRole) return;
+      let clickedPiece = gameState.board[r][c]; let isMyPiece = clickedPiece && (myRole === 'b' ? clickedPiece === clickedPiece.toLowerCase() : clickedPiece === clickedPiece.toUpperCase());
+      if (selectedCell) {
+        if (selectedCell.r === r && selectedCell.c === c) selectedCell = null; else if (isMyPiece) selectedCell = { r: r, c: c }; 
+        else { if (isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) { if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, myRole)) commitMove(selectedCell.r, selectedCell.c, r, c); else alert("不能送將！"); } }
+      } else { if (isMyPiece) selectedCell = { r: r, c: c }; } renderBoard();
+    }
+
+    async function commitMove(r1, c1, r2, c2) {
+      isSyncing = true; 
+      if (!gameState.history) gameState.history = []; gameState.history.push({ board: JSON.parse(JSON.stringify(gameState.board)), turn: gameState.turn, status: gameState.status, checkMsg: gameState.checkMsg }); if (gameState.history.length > 50) gameState.history.shift(); 
+      let newBoard = JSON.parse(JSON.stringify(gameState.board)); newBoard[r2][c2] = newBoard[r1][c1]; newBoard[r1][c1] = '';
+      let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; let checkAlert = ''; let status = 'playing';
+      if (isKingAttacked(newBoard, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
+      gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; selectedCell = null; renderBoard(); 
+      let res = await apiCall('move', { state: gameState }); if(res && res.state) gameState = res.state; 
+      isSyncing = false; 
+    }
+
+    // --- 象棋規則邏輯 ---
+    function getColor(p) { return p === '' ? '' : (p === p.toLowerCase() ? 'b' : 'r'); }
+    function isMoveLegal(board, r1, c1, r2, c2) {
+      let p = board[r1][c1]; let target = board[r2][c2]; if (p === '') return false; if (target !== '' && getColor(p) === getColor(target)) return false; 
+      let dr = r2 - r1; let dc = c2 - c1; let adr = Math.abs(dr), adc = Math.abs(dc); let pType = p.toLowerCase(), color = getColor(p);
+      switch (pType) {
+        case 'p': if (color === 'b') return (dr === 1 && dc === 0) || (r1 >= 5 && dr === 0 && adc === 1); else return (dr === -1 && dc === 0) || (r1 <= 4 && dr === 0 && adc === 1);
+        case 'r': if (adr > 0 && adc > 0) return false; return countPiecesBetween(board, r1, c1, r2, c2) === 0;
+        case 'h': if (adr === 2 && adc === 1) return board[r1 + dr/2][c1] === ''; if (adr === 1 && adc === 2) return board[r1][c1 + dc/2] === ''; return false;
+        case 'e': if (adr !== 2 || adc !== 2) return false; if (color === 'b' && r2 > 4) return false; if (color === 'r' && r2 < 5) return false; return board[r1 + dr/2][c1 + dc/2] === ''; 
+        case 'a': if (adr !== 1 || adc !== 1) return false; if (c2 < 3 || c2 > 5) return false; if (color === 'b' && r2 > 2) return false; if (color === 'r' && r2 < 7) return false; return true;
+        case 'k': if (adr + adc !== 1) return false; if (c2 < 3 || c2 > 5) return false; if (color === 'b' && r2 > 2) return false; if (color === 'r' && r2 < 7) return false; return true;
+        case 'c': if (adr > 0 && adc > 0) return false; let between = countPiecesBetween(board, r1, c1, r2, c2); if (target === '') return between === 0; else return between === 1; 
+      } return false;
+    }
+    function countPiecesBetween(board, r1, c1, r2, c2) { let count = 0; if (r1 === r2) { let minC = Math.min(c1, c2), maxC = Math.max(c1, c2); for (let c = minC + 1; c < maxC; c++) if (board[r1][c] !== '') count++; } else { let minR = Math.min(r1, r2), maxR = Math.max(r1, r2); for (let r = minR + 1; r < maxR; r++) if (board[r][c1] !== '') count++; } return count; }
+    function isKingAttacked(board, kingColor) { let kr = -1, kc = -1, targetKing = kingColor === 'b' ? 'k' : 'K'; for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (board[r][c] === targetKing) { kr = r; kc = c; break; } if (kr === -1) return true; let oppColor = kingColor === 'b' ? 'r' : 'b'; for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (getColor(board[r][c]) === oppColor) if (isMoveLegal(board, r, c, kr, kc)) return true; return false; }
+    function leavesKingInCheck(board, r1, c1, r2, c2, color) { let simBoard = JSON.parse(JSON.stringify(board)); simBoard[r2][c2] = simBoard[r1][c1]; simBoard[r1][c1] = ''; if (isKingAttacked(simBoard, color)) return true; let bkR=-1, bkC=-1, rkR=-1, rkC=-1; for (let r=0; r<10; r++) for (let c=0; c<9; c++) { if (simBoard[r][c] === 'k') { bkR = r; bkC = c; } if (simBoard[r][c] === 'K') { rkR = r; rkC = c; } } if (bkC === rkC && bkC !== -1 && countPiecesBetween(simBoard, bkR, bkC, rkR, rkC) === 0) return true; return false; }
+    //function leavesKingInCheck(board, r1, c1, r2, c2, color) {  return false; }
+    window.onload = init;
+  </script>
+</body>
+</html>
