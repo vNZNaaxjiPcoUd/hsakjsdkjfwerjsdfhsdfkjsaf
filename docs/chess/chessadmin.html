@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>象棋房間管理後台</title>
+  <style>
+    body { font-family: sans-serif; background: #f0f0f0; padding: 20px; max-width: 600px; margin: auto; }
+    h2 { text-align: center; }
+    
+    /* 🌟 登入區塊樣式 */
+    #login-section { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center; margin-top: 50px; }
+    #login-section input { padding: 10px; font-size: 16px; width: 80%; max-width: 250px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+    #login-section button { padding: 10px 20px; font-size: 16px; background: #212121; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+    
+    #admin-section { display: none; } /* 預設隱藏管理介面 */
+
+    .room-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 15px; }
+    .room-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 10px; }
+    .room-name { font-weight: bold; font-size: 18px; color: #333; }
+    .room-time { font-size: 12px; color: #777; }
+    .btn { border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; font-weight: bold; color: white; margin-right: 5px;}
+    .btn-close { background: #d32f2f; }
+    .btn-kick-b { background: #212121; }
+    .btn-kick-r { background: #d32f2f; }
+    #refresh-btn { display: block; width: 100%; padding: 10px; background: #2196F3; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin-bottom: 20px; font-weight: bold;}
+  </style>
+</head>
+<body>
+
+  <h2>系統房間管理</h2>
+
+  <div id="login-section">
+    <h3 style="margin-top:0;">請輸入管理員密碼</h3>
+    <input type="password" id="admin-pwd" placeholder="輸入密碼" onkeypress="if(event.key === 'Enter') login()">
+    <br>
+    <button onclick="login()">登入後台</button>
+  </div>
+
+  <div id="admin-section">
+    <button id="refresh-btn" onclick="loadRooms()">🔄 重新整理房間列表</button>
+    <div id="room-list">加載中...</div>
+  </div>
+
+  <script>
+    // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
+    let adminPwd = sessionStorage.getItem('xq_admin_pwd') || '';
+
+    // 初始化：如果之前登入過，直接嘗試載入
+    window.onload = () => {
+      if (adminPwd) {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-section').style.display = 'block';
+        loadRooms();
+      }
+    };
+
+    // 登入動作
+    function login() {
+      adminPwd = document.getElementById('admin-pwd').value;
+      if (!adminPwd) return alert("請輸入密碼！");
+      document.getElementById('login-section').style.display = 'none';
+      document.getElementById('admin-section').style.display = 'block';
+      loadRooms();
+    }
+
+    // 處理 API 回傳結果，檢查密碼是否錯誤
+    function handleResponse(data) {
+      if (data.error) {
+        alert(data.error);
+        sessionStorage.removeItem('xq_admin_pwd');
+        adminPwd = '';
+        document.getElementById('admin-section').style.display = 'none';
+        document.getElementById('login-section').style.display = 'block';
+        document.getElementById('admin-pwd').value = '';
+        return false;
+      }
+      return true;
+    }
+
+    async function loadRooms() {
+      const listDiv = document.getElementById('room-list');
+      listDiv.innerHTML = "讀取中...";
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          // 🌟 每次請求都帶上密碼
+          body: JSON.stringify({ action: 'adminList', password: adminPwd }), redirect: 'follow'
+        });
+        const data = await response.json();
+        
+        if (handleResponse(data)) {
+          sessionStorage.setItem('xq_admin_pwd', adminPwd); // 密碼正確，存入 session
+          renderRooms(data.rooms);
+        }
+      } catch (e) { listDiv.innerHTML = "<p style='color:red;'>無法連線至伺服器。</p>"; }
+    }
+
+    function renderRooms(rooms) {
+      const listDiv = document.getElementById('room-list');
+      listDiv.innerHTML = '';
+      const roomNames = Object.keys(rooms);
+      
+      if (roomNames.length === 0) { listDiv.innerHTML = "<p style='text-align:center; color:#555;'>目前沒有活躍的房間</p>"; return; }
+
+      roomNames.sort((a, b) => rooms[b] - rooms[a]).forEach(room => {
+        let lastTime = new Date(rooms[room]).toLocaleString();
+        let card = document.createElement('div');
+        card.className = 'room-card';
+        card.innerHTML = `
+          <div class="room-header">
+            <div>
+              <div class="room-name">房間：${room}</div>
+              <div class="room-time">最後活動：${lastTime}</div>
+              <a href="./index.html?room=${room}" target="_blank" style="font-size:14px; color:#2196F3; display:inline-block; margin-top:5px;">進入房間觀戰</a>
+            </div>
+            <button class="btn btn-close" onclick="closeRoom('${room}')">強制關房</button>
+          </div>
+          <div>
+            <button class="btn btn-kick-b" onclick="kickPlayer('${room}', 'b')">踢出黑方</button>
+            <button class="btn btn-kick-r" onclick="kickPlayer('${room}', 'r')">踢出紅方</button>
+          </div>
+        `;
+        listDiv.appendChild(card);
+      });
+    }
+
+    async function kickPlayer(roomName, role) {
+      let roleName = role === 'b' ? "黑方" : "紅方";
+      if (!confirm(`確定要將房間「${roomName}」的 ${roleName} 踢出座位嗎？`)) return;
+      
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'adminKick', targetRoom: roomName, targetRole: role, password: adminPwd }), redirect: 'follow'
+        });
+        const data = await response.json();
+        if (handleResponse(data)) alert(`已成功釋放 ${roleName} 的座位！`);
+      } catch (e) { alert('操作失敗！'); }
+    }
+
+    async function closeRoom(roomName) {
+      if (!confirm(`確定要強制結束房間「${roomName}」嗎？資料將被清除。`)) return;
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'adminClose', targetRoom: roomName, password: adminPwd }), redirect: 'follow'
+        });
+        const data = await response.json();
+        if (handleResponse(data)) { alert('已成功清除房間資料！'); loadRooms(); }
+      } catch (e) { alert('關閉房間失敗！'); }
+    }
+  </script>
+</body>
+</html>
