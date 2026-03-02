@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>象棋大廳 - 建立或加入房間</title>
+  <title>象棋大廳</title>
   
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#333333">
@@ -45,10 +45,10 @@
 <body>
 
   <div class="card">
-    <h2>♟️ 線上象棋大廳</h2>
-    <p style="color: #555; margin-bottom: 5px;">請輸入您想建立或加入的房間名稱：</p>
+    <h2>象棋大廳</h2>
+    <p style="color: #555; margin-bottom: 5px;">請輸入您想加入的房間名稱：</p>
     
-    <input type="text" id="roomInput" placeholder="例如：大房間、高手區" oninput="updateButtons()">
+    <input type="text" id="roomInput" placeholder="例如：嘉義西區、龍山寺" oninput="updateButtons()">
     
     <div id="action-area">
       <a href="#" id="joinBtn" class="btn btn-join">進入房間</a>
@@ -56,7 +56,7 @@
       <button class="btn btn-copy" onclick="copyInviteLink()">📋 複製邀請網址</button>
     </div>
     
-    <div class="hint">只要輸入相同的房間名，就能在同一個棋盤對戰！支援中文名稱。</div>
+    <div class="hint">只要相同的房間名，就能在同一個棋盤對戰！</div>
   </div>
 
   <script>
