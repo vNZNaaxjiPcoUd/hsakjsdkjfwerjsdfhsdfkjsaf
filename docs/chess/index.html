@@ -10,14 +10,26 @@
   <link rel="apple-touch-icon" href="./icon-192.png">
 
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+
     :root {
-      --cell-size: min(9.8vw, 7.2vh, 55px); 
+      /* 🌟 調整：把 9.8vw 降為 8.5vw，7.2vh 降為 6.5vh，預留出安全邊距 */
+      --cell-size: min(8.5vw, 6.5vh, 55px); 
       --piece-size: calc(var(--cell-size) * 0.88); 
       --font-size: calc(var(--piece-size) * 0.58);
       --board-color: #e4c695;
     }
 
-    body { font-family: sans-serif; text-align: center; background: #f0f0f0; margin: 0; padding: 10px; touch-action: pan-y; }
+    body { 
+      font-family: sans-serif; text-align: center; background: #f0f0f0; 
+      margin: 0; padding: 10px; touch-action: pan-y; 
+      /* 🌟 新增：雙重防護，防止出現水平捲軸 */
+      overflow-x: hidden; 
+    }    
+
+    
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
     .status-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
@@ -27,8 +39,6 @@
     .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
     
     .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    
-    /* 🌟 新增：重新開局按鈕樣式 */
     .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     
     .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
@@ -98,7 +108,7 @@
   <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
-    // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
+    // 你原有的 GAS URL
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
     let room = '榕樹下';
@@ -168,7 +178,6 @@
 
     async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
 
-    // 🌟 新增：觸發重新開局
     async function requestRestart() {
       if (myRole === 'spectator') return;
       if (!confirm("確定要重新開局嗎？這將會清空目前的棋盤。")) return;
@@ -211,7 +220,6 @@
       let undoBtn = document.getElementById('undo-btn');
       let restartBtn = document.getElementById('restart-btn');
       
-      // 🌟 只有黑紅雙方才會顯示悔棋和重開按鈕
       if (myRole === 'b' || myRole === 'r') { 
         undoBtn.style.display = 'inline-block'; 
         undoBtn.disabled = (!state.history || state.history.length === 0); 
@@ -226,20 +234,41 @@
       renderBoard();
     }
 
+    // 🌟 翻轉棋盤的核心邏輯在這裡 🌟
     function renderBoard() {
       const grid = document.getElementById('board-grid'); grid.innerHTML = '';
-      for (let r = 0; r < 10; r++) {
-        for (let c = 0; c < 9; c++) {
-          let cellDiv = document.createElement('div'); cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; cellDiv.onclick = () => handleCellClick(r, c);
+      
+      // 判斷是否為黑方，如果是，就把棋盤上下左右顛倒顯示
+      let isFlipped = (myRole === 'b'); 
+
+      for (let displayR = 0; displayR < 10; displayR++) {
+        for (let displayC = 0; displayC < 9; displayC++) {
+          
+          // 計算真實陣列的座標 (r, c)
+          let r = isFlipped ? 9 - displayR : displayR;
+          let c = isFlipped ? 8 - displayC : displayC;
+
+          let cellDiv = document.createElement('div'); 
+          cellDiv.className = 'cell'; 
+          
+          // 綁定的依然是真實座標，確保下棋邏輯完全不受影響
+          cellDiv.dataset.r = r; 
+          cellDiv.dataset.c = c; 
+          cellDiv.onclick = () => handleCellClick(r, c);
+          
           let p = gameState.board[r][c];
           if (p) {
-            let pieceDiv = document.createElement('div'); pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
+            let pieceDiv = document.createElement('div'); 
+            pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
             if (selectedCell && selectedCell.r === r && selectedCell.c === c) pieceDiv.classList.add('selected');
-            pieceDiv.textContent = piecesText[p]; cellDiv.appendChild(pieceDiv);
+            pieceDiv.textContent = piecesText[p]; 
+            cellDiv.appendChild(pieceDiv);
           }
+          
           if (selectedCell && isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) {
              if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, gameState.turn)) cellDiv.classList.add('valid-move');
           }
+          
           grid.appendChild(cellDiv);
         }
       }
