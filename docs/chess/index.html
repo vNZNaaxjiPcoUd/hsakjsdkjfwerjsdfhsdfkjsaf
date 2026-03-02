@@ -26,11 +26,8 @@
     #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; }
     
     .btn-undo { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    .btn-undo:disabled { background-color: #ccc; cursor: not-allowed; }
     .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-    
-    .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background 0.3s; }
-    /* 🌟 新增：拒絕按鈕的樣式 */
+    .btn-restart { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-reject { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #d32f2f; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     
     .check-alert { color: red; font-size: clamp(18px, 4vw, 24px); font-weight: bold; animation: blink 1s infinite; display: none; margin: 5px; }
@@ -40,7 +37,7 @@
     #board-container {
       display: inline-block; background: var(--board-color); border: 3px solid #333;
       padding: calc(var(--cell-size) / 2); box-shadow: 2px 5px 10px rgba(0,0,0,0.3);
-      -webkit-user-select: none; user-select: none; border-radius: 4px;
+      -webkit-user-select: none; user-select: none; border-radius: 4px; margin-top: 15px; margin-bottom: 15px;
     }
     #board-relative-wrapper { position: relative; }
     #board-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
@@ -89,10 +86,12 @@
     <button id="restart-btn" class="btn-restart" style="display:none;"></button>
     <button id="reject-btn" class="btn-reject" style="display:none;" onclick="requestRestart('reject')">⛔ 拒絕</button>
     
-    <button id="undo-btn" class="btn-undo" onclick="requestUndo()" style="display:none;">↩ 悔棋</button>
+    <button id="undo-btn" class="btn-undo" style="display:none;"></button>
+    <button id="reject-undo-btn" class="btn-reject" style="display:none;" onclick="requestUndo('reject')">⛔ 拒絕</button>
   </div>
   
-  <div id="req-alert" class="req-alert">對方請求重新開局！</div>
+  <div id="req-alert" class="req-alert"></div>
+  <div id="check-msg" class="check-alert">將軍！</div>
 
   <div id="board-container">
     <div id="board-relative-wrapper">
@@ -103,7 +102,7 @@
 
   <div id="check-msg" class="check-alert">將軍！</div>
 
-<script>
+  <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
     // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
@@ -132,12 +131,10 @@
       else { document.getElementById('close-modal-btn').style.display = 'none'; }
       if (gameState) updateUI(gameState); 
     }
-
     function closeRoleModal() { document.getElementById('role-modal').style.display = 'none'; }
 
     function drawSVGBoard() {
       let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
-      // 🌟 修改：加入 overflow="visible"，讓超出邊界一點點的數字能顯示在 padding 內
       let svg = `<svg width="100%" height="100%" overflow="visible">`; const stroke = `stroke="#333" stroke-width="1.5"`;
       for (let c = 0; c < 9; c++) {
         if (c === 0 || c === 8) { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; } 
@@ -151,20 +148,13 @@
       svg += `<text x="61.1%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">漢</text>`;
       svg += `<text x="72.2%" y="50.5%" font-size="clamp(18px, 5vw, 26px)" font-weight="bold" fill="#333" text-anchor="middle" dominant-baseline="central">界</text>`;
 
-      // 🌟 新增：在棋盤上下方畫出 1~9 的小數字
       for (let c = 0; c < 9; c++) {
-        let topNum = c + 1;     // 上方：1 到 9 (左至右)
-        let bottomNum = 9 - c;  // 下方：9 到 1 (左至右，即 1 到 9 逆時針)
-        
-        // y="-2.5%" 和 y="102.5%" 會剛好落在外框與棋盤之間的留白處
-        svg += `<text x="${getX(c)}" y="-2.5%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${topNum}</text>`;
-        svg += `<text x="${getX(c)}" y="102.5%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${bottomNum}</text>`;
+        let topNum = c + 1; let bottomNum = 9 - c;
+        svg += `<text x="${getX(c)}" y="-3%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${topNum}</text>`;
+        svg += `<text x="${getX(c)}" y="103%" font-size="clamp(12px, 2.5vw, 15px)" font-weight="bold" fill="#555" text-anchor="middle" dominant-baseline="central">${bottomNum}</text>`;
       }
-
       svg += `</svg>`; document.getElementById('board-svg-layer').innerHTML = svg;
-    }
-
-    drawSVGBoard();
+    } drawSVGBoard();
 
     async function apiCall(action, extraData = {}) {
       const payload = { action: action, room: room, ...extraData };
@@ -185,22 +175,23 @@
       } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
     }
 
-    async function requestUndo() { if (myRole === 'spectator') return; document.getElementById('undo-btn').disabled = true; isSyncing = true; let data = await apiCall('undo'); if (data && data.state) updateUI(data.state); isSyncing = false; }
-
-    // 🌟 更新：發送不同的重開動作給後端
     async function requestRestart(actionType) {
       if (myRole === 'spectator') return;
-      
-      if (actionType === 'request') {
-        if (!confirm("向對方發送重新開局請求？")) return;
-      } else if (actionType === 'agree') {
-        if (!confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
-      }
+      if (actionType === 'request' && !confirm("向對方發送重新開局請求？")) return;
+      if (actionType === 'agree' && !confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
+      isSyncing = true; let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); if (data && data.state) updateUI(data.state); isSyncing = false;
+    }
 
-      isSyncing = true; 
-      let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); 
-      if (data && data.state) updateUI(data.state); 
-      isSyncing = false;
+    // 🌟 新增：發送不同的悔棋動作給後端
+    async function requestUndo(actionType) {
+      if (myRole === 'spectator') return;
+      if (actionType === 'request') {
+        if (!gameState.history || gameState.history.length === 0) { alert("目前沒有可以悔的棋！"); return; }
+        if (!confirm("向對方發送悔棋請求？")) return;
+      } else if (actionType === 'agree') {
+        if (!confirm("確定要同意對方悔棋嗎？")) return;
+      }
+      isSyncing = true; let data = await apiCall('undo', { playerId: myId, undoAction: actionType }); if (data && data.state) updateUI(data.state); isSyncing = false;
     }
 
     function onJoined(data) {
@@ -220,9 +211,7 @@
       document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
-        alert("管理員已將您移出對戰座位！");
-        myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); 
-        hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
+        alert("管理員已將您移出對戰座位！"); myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
       }
 
       let modal = document.getElementById('role-modal');
@@ -232,46 +221,45 @@
         if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "紅棋 (已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
       }
 
-      let undoBtn = document.getElementById('undo-btn');
-      let restartBtn = document.getElementById('restart-btn');
-      let rejectBtn = document.getElementById('reject-btn');
+      let restartBtn = document.getElementById('restart-btn'); let rejectBtn = document.getElementById('reject-btn');
+      let undoBtn = document.getElementById('undo-btn'); let rejectUndoBtn = document.getElementById('reject-undo-btn');
       let reqAlert = document.getElementById('req-alert');
       
-      // 🌟 更新：處理重開與拒絕按鈕的動態變化
+      let canUndo = (state.history && state.history.length > 0);
+
       if (myRole === 'b' || myRole === 'r') { 
-        undoBtn.style.display = 'inline-block'; 
-        undoBtn.disabled = (!state.history || state.history.length === 0); 
-        
+        // 重開按鈕邏輯
         restartBtn.style.display = 'inline-block'; 
         if (state.restartRequest === myRole) {
-          restartBtn.textContent = "❌ 取消重開";
-          restartBtn.style.backgroundColor = "#9e9e9e";
-          restartBtn.onclick = () => requestRestart('cancel');
-          rejectBtn.style.display = 'none'; // 自己發起的，不用顯示拒絕
+          restartBtn.textContent = "❌ 取消重開"; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
         } else if (state.restartRequest && state.restartRequest !== myRole) {
-          restartBtn.textContent = "✅ 同意";
-          restartBtn.style.backgroundColor = "#E91E63";
-          restartBtn.onclick = () => requestRestart('agree');
-          rejectBtn.style.display = 'inline-block'; // 對方發起的，顯示拒絕按鈕
+          restartBtn.textContent = "✅ 同意重開"; restartBtn.style.backgroundColor = "#E91E63"; restartBtn.onclick = () => requestRestart('agree'); rejectBtn.style.display = 'inline-block';
         } else {
-          restartBtn.textContent = "🆕 重開";
-          restartBtn.style.backgroundColor = "#4CAF50";
-          restartBtn.onclick = () => requestRestart('request');
-          rejectBtn.style.display = 'none'; // 沒事的時候不用顯示拒絕
+          restartBtn.textContent = "🆕 重開"; restartBtn.style.backgroundColor = "#4CAF50"; restartBtn.onclick = () => requestRestart('request'); rejectBtn.style.display = 'none';
+        }
+
+        // 🌟 新增：悔棋按鈕邏輯
+        if (state.undoRequest === myRole) {
+          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 取消悔棋"; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
+        } else if (state.undoRequest && state.undoRequest !== myRole) {
+          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "✅ 同意悔棋"; undoBtn.style.backgroundColor = "#E91E63"; undoBtn.onclick = () => requestUndo('agree'); rejectUndoBtn.style.display = 'inline-block';
+        } else {
+          undoBtn.style.display = canUndo ? 'inline-block' : 'none'; undoBtn.textContent = "↩ 悔棋"; undoBtn.style.backgroundColor = "#ff9800"; undoBtn.onclick = () => requestUndo('request'); rejectUndoBtn.style.display = 'none';
         }
       } else { 
-        undoBtn.style.display = 'none'; 
-        restartBtn.style.display = 'none'; 
-        rejectBtn.style.display = 'none';
+        restartBtn.style.display = 'none'; rejectBtn.style.display = 'none';
+        undoBtn.style.display = 'none'; rejectUndoBtn.style.display = 'none';
       }
 
-      if (state.restartRequest && state.restartRequest !== myRole && myRole !== 'spectator') {
-        reqAlert.style.display = 'block'; reqAlert.textContent = "對方請求重新開局！";
-      } else if (state.restartRequest && myRole === 'spectator') {
-        reqAlert.style.display = 'block'; reqAlert.textContent = (state.restartRequest === 'b' ? '黑方' : '紅方') + " 發起了重開請求...";
-      } else {
-        reqAlert.style.display = 'none';
-      }
+      // 提示字樣邏輯 (統整重開與悔棋)
+      let reqMsg = "";
+      if (state.restartRequest && state.restartRequest !== myRole && myRole !== 'spectator') reqMsg = "對方請求重新開局！";
+      else if (state.restartRequest && myRole === 'spectator') reqMsg = (state.restartRequest === 'b' ? '黑方' : '紅方') + " 發起了重開請求...";
+      else if (state.undoRequest && state.undoRequest !== myRole && myRole !== 'spectator') reqMsg = "對方請求悔棋！";
+      else if (state.undoRequest && myRole === 'spectator') reqMsg = (state.undoRequest === 'b' ? '黑方' : '紅方') + " 發起了悔棋請求...";
+
+      if (reqMsg) { reqAlert.style.display = 'block'; reqAlert.textContent = reqMsg; } 
+      else { reqAlert.style.display = 'none'; }
 
       let checkMsg = document.getElementById('check-msg');
       if (state.status === 'check') { checkMsg.style.display = 'block'; checkMsg.textContent = state.checkMsg + " 將軍！"; } else { checkMsg.style.display = 'none'; }
@@ -284,8 +272,7 @@
 
       for (let displayR = 0; displayR < 10; displayR++) {
         for (let displayC = 0; displayC < 9; displayC++) {
-          let r = isFlipped ? 9 - displayR : displayR;
-          let c = isFlipped ? 8 - displayC : displayC;
+          let r = isFlipped ? 9 - displayR : displayR; let c = isFlipped ? 8 - displayC : displayC;
 
           let cellDiv = document.createElement('div'); 
           cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; 
@@ -296,8 +283,7 @@
             let pieceDiv = document.createElement('div'); 
             pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
             if (selectedCell && selectedCell.r === r && selectedCell.c === c) pieceDiv.classList.add('selected');
-            pieceDiv.textContent = piecesText[p]; 
-            cellDiv.appendChild(pieceDiv);
+            pieceDiv.textContent = piecesText[p]; cellDiv.appendChild(pieceDiv);
           }
           
           if (selectedCell && isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) {
@@ -323,7 +309,12 @@
       let newBoard = JSON.parse(JSON.stringify(gameState.board)); newBoard[r2][c2] = newBoard[r1][c1]; newBoard[r1][c1] = '';
       let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; let checkAlert = ''; let status = 'playing';
       if (isKingAttacked(newBoard, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
-      gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; selectedCell = null; renderBoard(); 
+      
+      gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; 
+      // 🌟 新增：只要有一方走子，就把雙方的重開和悔棋請求自動清除
+      gameState.restartRequest = null; gameState.undoRequest = null; 
+      
+      selectedCell = null; renderBoard(); 
       let res = await apiCall('move', { state: gameState }); if(res && res.state) gameState = res.state; 
       isSyncing = false; 
     }
