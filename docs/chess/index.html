@@ -115,6 +115,31 @@
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
 
+    // handle reset room, click role-info ten times to trigger
+    let clickCount = 0; let clickTimer = null;
+    document.getElementById('role-info').onclick = () => { 
+      if (myRole == 'spectator') {
+        clickCount++;
+        if (clickCount >= 10) {
+          closeRoom(room);
+        }
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 5000); // reset after 5 seconds
+      } };
+    
+    async function closeRoom(roomName) {
+      if (!confirm(`確定要強制退出「${roomName}」的棋手嗎？棋手將要重選。`)) return;
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), redirect: 'follow'
+        });
+        const data = await response.json();
+        if (!data.error) { console.log('已成功清除房間資料！'); }
+        else { console.log("清除失敗" ); }
+      } catch (e) { console.log(e); }
+    }
+
     let myId = sessionStorage.getItem('xq_id');
     if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
