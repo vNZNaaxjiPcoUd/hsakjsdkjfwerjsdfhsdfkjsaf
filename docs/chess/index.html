@@ -98,13 +98,19 @@
     // ⬇️ 必須填入你的 GAS 部署網址 ⬇️
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
-    let room = 'lobby';
+let room = 'lobby';
     const queryString = window.location.search.substring(1);
     if (queryString) {
       const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.has('room')) room = urlParams.get('room');
-      else room = queryString.split('&')[0].split('=')[0]; 
+      if (urlParams.has('room')) {
+        room = decodeURIComponent(urlParams.get('room'));
+      } else {
+        // 處理如 ?大房間 這種直接帶參數的網址，並解碼中文
+        room = decodeURIComponent(queryString.split('&')[0].split('=')[0]); 
+      }
     }
+
+    
     document.getElementById('room-title').textContent = "房間：" + room;
     document.getElementById('modal-room-name').textContent = room;
 
