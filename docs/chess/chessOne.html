@@ -86,14 +86,14 @@
       
       <div class="modal-subtitle">▶ 單機練習 (簡單)</div>
       <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">🤖 你執黑</button>
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">🤖 你執紅</button>
+        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">你執黑</button>
+        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">你執紅</button>
       </div>
 
       <div class="modal-subtitle">▶ 單機挑戰 (高級)</div>
       <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">🧠 你執黑</button>
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">🧠 你執紅</button>
+        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">你執黑</button>
+        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">你執紅</button>
       </div>
     </div>
   </div>
@@ -292,11 +292,10 @@
         isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); updateRoleBadge();
       }
 
-      // 🌟 修復核心 Bug：現在被將軍(status === 'check')時，電腦也會乖乖思考了！
       if (isAiMode && myRole !== 'spectator') {
         if (state.turn === aiRole && (state.status === 'playing' || state.status === 'check') && !isAiThinking) {
           isAiThinking = true; 
-          document.getElementById('info').textContent = "🧠 電腦思考中..."; 
+          document.getElementById('info').textContent = "電腦思考中..."; 
           setTimeout(makeAIMove, 50); 
         }
         if (state.restartRequest === myRole) { apiCall('restart', { playerId: AI_ID, restartAction: 'agree' }); }
@@ -505,7 +504,6 @@
       }
     }
 
-    // 🌟 修正：被將軍也照樣能冷靜思考的 AI
     async function makeAIMove() {
       if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
           isAiThinking = false; return;
@@ -529,7 +527,6 @@
         validMoves.sort((a, b) => b.score - a.score);
         bestMove = validMoves[0];
       } else {
-        // 🧠 高級模式：更深的防禦與反擊推算 (深度 3)
         let bestVal = -Infinity;
         let searchDepth = 3; 
 
@@ -545,7 +542,6 @@
 
           if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
           
-          // 確保瀏覽器畫面順暢不卡死
           await new Promise(r => setTimeout(r, 0));
         }
       }
