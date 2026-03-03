@@ -23,7 +23,7 @@
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
     .status-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
-    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; color: #1565C0; }
+    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; }
     
     .btn-undo { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -55,17 +55,10 @@
     .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
 
     #role-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; }
-    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 340px; position: relative; }
-    .modal-btn { display: block; width: 100%; margin: 8px 0; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
+    .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 300px; position: relative; }
+    .modal-btn { display: block; width: 100%; margin: 10px 0; padding: 12px; font-size: 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; color: white; }
     .modal-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-    
     #btn-role-b { background: #212121; } #btn-role-r { background: #d32f2f; } #btn-role-s { background: #757575; }
-    
-    .btn-ai-easy { background: #8D6E63; margin: 0 !important; flex: 1; }
-    .btn-ai-hard { background: #5E35B1; margin: 0 !important; flex: 1; }
-    .ai-btn-group { display: flex; gap: 8px; margin-bottom: 12px; }
-    .modal-subtitle { margin: 15px 0 8px 0; color: #444; font-size: 15px; font-weight: bold; text-align: left;}
-
     .role-badge { display: inline-block; padding: 5px 15px; border-radius: 15px; color: white; background: #555; font-size: clamp(12px, 3vw, 15px); margin-bottom: 5px; }
     .role-b { background: #212121; } .role-r { background: #d32f2f; }
   </style>
@@ -76,25 +69,10 @@
     <div class="modal-content">
       <span id="close-modal-btn" style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer; display:none; color:#999;" onclick="closeRoleModal()">&times;</span>
       <h3 style="margin-top:0;">請選擇身分</h3>
-      <p style="font-size:14px; color:#666; margin-bottom: 15px;">房間：<span id="modal-room-name"></span></p>
-      
-      <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">聯機對戰 (執黑棋)</button>
-      <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">聯機對戰 (執紅棋)</button>
-      <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">進入觀棋</button>
-
-      <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0 10px 0;">
-      
-      <div class="modal-subtitle">▶ 單機練習 (簡單)</div>
-      <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">你執黑</button>
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">你執紅</button>
-      </div>
-
-      <div class="modal-subtitle">▶ 單機挑戰 (高級)</div>
-      <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">你執黑</button>
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">你執紅</button>
-      </div>
+      <p style="font-size:14px; color:#666;">房間：<span id="modal-room-name"></span></p>
+      <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">執黑棋 (先手)</button>
+      <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">執紅棋</button>
+      <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">觀棋</button>
     </div>
   </div>
 
@@ -137,61 +115,35 @@
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
 
-    let clickCount = 0; 
-    let clickTimer = null;
+    // handle reset room, click role-info ten times to trigger
+    let clickCount = 0; let clickTimer = null;
     document.getElementById('role-info').onclick = () => { 
-      if (myRole === 'spectator') {
+      if (myRole == 'spectator') {
         clickCount++;
-        clearTimeout(clickTimer);
-        
-        if (clickCount >= 10) { 
-          clickCount = 0; 
+        if (clickCount >= 20) {
           closeRoom(room);
-        } else {
-          clickTimer = setTimeout(() => { clickCount = 0; }, 3000); 
         }
-      } 
-    };
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(() => { clickCount = 0; }, 5000); // reset after 5 seconds
+      } };
     
     async function closeRoom(roomName) {
-      if (!confirm(`【管理員操作】\n確定要強制退出「${roomName}」的棋手嗎？\n(當前的棋手將被清空，需重新進入)`)) return;
-      
-      let infoEl = document.getElementById('info');
-      let originalText = infoEl.textContent;
-      infoEl.textContent = "執行強制退出中...";
-
+      if (!confirm(`確定要強制退出「${roomName}」的棋手嗎？棋手將要重新進入。`)) return;
       try {
         const response = await fetch(GAS_URL, {
-          method: 'POST', 
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), 
-          redirect: 'follow'
+          method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), redirect: 'follow'
         });
         const data = await response.json();
-        
-        if (data && !data.error) { 
-          alert('成功！已強制清空該房間的座位。'); 
-          pollState(); 
-        } else { 
-          alert("強制退出失敗：" + (data ? data.error : "未知錯誤")); 
-          infoEl.textContent = originalText;
-        }
-      } catch (e) { 
-        alert("網路異常，強制退出失敗！"); 
-        infoEl.textContent = originalText;
-      }
+        if (!data.error) { console.log('已成功強制退出！'); }
+        else { console.log("強制退出失敗" ); }
+      } catch (e) { console.log(e); }
     }
 
     let myId = sessionStorage.getItem('xq_id');
     if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
-    
-    const AI_ID = "BOT_" + myId;
-    let isAiMode = false;
-    let aiRole = null;
-    let isAiThinking = false;
-    let lastSurrenderedBoard = null; 
-
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
+
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
     let pausePollingUntil = 0; 
 
@@ -236,14 +188,7 @@
       } catch (e) { return null; }
     }
 
-    async function init() { 
-      let storedAiRole = sessionStorage.getItem('xq_ai_mode_' + room);
-      if (storedAiRole) { isAiMode = true; aiRole = storedAiRole; }
-
-      let data = await apiCall('join', { playerId: myId }); 
-      if (data) onJoined(data); 
-      setInterval(pollState, 1500); 
-    }
+    async function init() { let data = await apiCall('join', { playerId: myId }); if (data) onJoined(data); setInterval(pollState, 1500); }
     
     async function pollState() { 
       if (isSyncing || Date.now() < pausePollingUntil) return; 
@@ -254,28 +199,10 @@
 
     async function requestRole(role) {
       document.getElementById('role-modal').style.display = 'none';
-      isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); 
-      
       let data = await apiCall('takeRole', { playerId: myId, role: role });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); updateUI(data.state);
       } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
-    }
-
-    async function startAiGame(humanRole, difficulty) {
-      document.getElementById('role-modal').style.display = 'none';
-      let botRole = humanRole === 'r' ? 'b' : 'r';
-      
-      isAiMode = true; aiRole = botRole;
-      sessionStorage.setItem('xq_ai_mode_' + room, botRole);
-      sessionStorage.setItem('xq_ai_level_' + room, difficulty); 
-      
-      let data = await apiCall('takeRole', { playerId: myId, role: humanRole });
-      if (data && data.success) {
-        myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true';
-        updateRoleBadge(); updateUI(data.state);
-        apiCall('takeRole', { playerId: AI_ID, role: botRole });
-      }
     }
 
     async function requestRestart(actionType) {
@@ -314,56 +241,36 @@
 
     function updateRoleBadge() {
       let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀戰者';
-      if (isAiMode) {
-        let levelText = sessionStorage.getItem('xq_ai_level_' + room) === 'hard' ? '高級' : '簡單';
-        roleText += ` (單機-${levelText})`;
-      }
       let badge = document.getElementById('role-info'); badge.textContent = "你是：" + roleText; badge.className = "role-badge " + (myRole === 'spectator' ? '' : 'role-' + myRole);
     }
 
     function updateUI(state) {
       if (gameState && JSON.stringify(gameState.board) !== JSON.stringify(state.board)) selectedCell = null; 
       gameState = state;
-      
-      if (!isAiThinking) {
-        document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
-      }
+      document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
         alert("管理員已將您移出對戰座位！"); myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
         return;
       }
 
-      if (isAiMode && state.players[aiRole] !== null && state.players[aiRole] !== AI_ID) {
-        isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); updateRoleBadge();
-      }
-
-      if (isAiMode && myRole !== 'spectator') {
-        if (state.turn === aiRole && (state.status === 'playing' || state.status === 'check') && !isAiThinking) {
-          isAiThinking = true; 
-          document.getElementById('info').textContent = "電腦思考中..."; 
-          setTimeout(makeAIMove, 50); 
-        }
-        if (state.restartRequest === myRole) { apiCall('restart', { playerId: AI_ID, restartAction: 'agree' }); }
-        if (state.undoRequest === myRole) { apiCall('undo', { playerId: AI_ID, undoAction: 'agree' }); }
-      }
-
       let modal = document.getElementById('role-modal');
       if (modal.style.display === 'flex') {
         let btnB = document.getElementById('btn-role-b'); let btnR = document.getElementById('btn-role-r');
-        if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "聯機對戰 (已被選)"; } else { btnB.disabled = false; btnB.textContent = "聯機對戰 (執黑棋)"; }
-        if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "聯機對戰 (已被選)"; } else { btnR.disabled = false; btnR.textContent = "聯機對戰 (執紅棋)"; }
+        if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "黑棋 (已被選)"; } else { btnB.disabled = false; btnB.textContent = "執黑棋 (先手)"; }
+        if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "紅棋 (已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
       }
 
       let restartBtn = document.getElementById('restart-btn'); let rejectBtn = document.getElementById('reject-btn');
       let undoBtn = document.getElementById('undo-btn'); let rejectUndoBtn = document.getElementById('reject-undo-btn');
       let reqAlert = document.getElementById('req-alert');
+      
       let canUndo = (state.history && state.history.length > 0);
 
       if (myRole === 'b' || myRole === 'r') { 
         restartBtn.style.display = 'inline-block'; 
         if (state.restartRequest === myRole) {
-          restartBtn.textContent = "❌ 等待同意..."; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
+          restartBtn.textContent = "❌ 取消重開"; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
         } else if (state.restartRequest && state.restartRequest !== myRole) {
           restartBtn.textContent = "✅ 同意重開"; restartBtn.style.backgroundColor = "#E91E63"; restartBtn.onclick = () => requestRestart('agree'); rejectBtn.style.display = 'inline-block';
         } else {
@@ -371,7 +278,7 @@
         }
 
         if (state.undoRequest === myRole) {
-          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 等待同意..."; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
+          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 取消悔棋"; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
         } else if (state.undoRequest && state.undoRequest !== myRole) {
           undoBtn.style.display = 'inline-block'; undoBtn.textContent = "✅ 同意悔棋"; undoBtn.style.backgroundColor = "#E91E63"; undoBtn.onclick = () => requestUndo('agree'); rejectUndoBtn.style.display = 'inline-block';
         } else {
@@ -388,8 +295,8 @@
       else if (state.undoRequest && state.undoRequest !== myRole && myRole !== 'spectator') reqMsg = "對方請求悔棋！";
       else if (state.undoRequest && myRole === 'spectator') reqMsg = (state.undoRequest === 'b' ? '黑方' : '紅方') + " 發起了悔棋請求...";
 
-      if (reqMsg) { reqAlert.style.display = 'block'; reqAlert.textContent = reqMsg; } 
-      else { reqAlert.style.display = 'none'; }
+      reqAlert.style.display = reqMsg ? 'block' : 'none';
+      reqAlert.textContent = reqMsg;
 
       let checkMsg = document.getElementById('check-msg');
       if (state.status === 'check') { checkMsg.style.display = 'block'; checkMsg.textContent = state.checkMsg + " 將軍！"; } else { checkMsg.style.display = 'none'; }
@@ -425,7 +332,7 @@
     }
 
     function handleCellClick(r, c) {
-      if (myRole === 'spectator' || gameState.turn !== myRole || isAiThinking) return;
+      if (myRole === 'spectator' || gameState.turn !== myRole) return;
       let clickedPiece = gameState.board[r][c]; let isMyPiece = clickedPiece && (myRole === 'b' ? clickedPiece === clickedPiece.toLowerCase() : clickedPiece === clickedPiece.toUpperCase());
       if (selectedCell) {
         if (selectedCell.r === r && selectedCell.c === c) selectedCell = null; else if (isMyPiece) selectedCell = { r: r, c: c }; 
@@ -453,232 +360,6 @@
       isSyncing = false; 
     }
 
-    const PIECE_VALUES = { 'k':100000, 'r':1000, 'c':550, 'h':500, 'e':250, 'a':250, 'p':100,
-                           'K':100000, 'R':1000, 'C':550, 'H':500, 'E':250, 'A':250, 'P':100 };
-
-    // 優化陣地評估
-    function evaluateBoard(board, aiColor) {
-      let score = 0;
-      for (let r = 0; r < 10; r++) {
-        for (let c = 0; c < 9; c++) {
-          let p = board[r][c];
-          if (p) {
-            let isBlack = (p === p.toLowerCase());
-            let forwardR = isBlack ? r : 9 - r; 
-            let absC = Math.abs(c - 4); 
-            let val = PIECE_VALUES[p];
-            let pType = p.toLowerCase();
-
-            if (pType === 'p') {
-              if (forwardR > 4) val += 80 + forwardR * 15 + (4 - absC) * 15; 
-              else val += forwardR * 5;
-            } else if (pType === 'h') {
-              val += (4 - absC) * 12 + forwardR * 8; 
-              if (c === 0 || c === 8) val -= 40; // 強烈懲罰邊馬
-              if (forwardR === 9) val -= 30;     // 懲罰沉底馬
-            } else if (pType === 'c') {
-              val += (4 - absC) * 8; 
-              if (forwardR > 4) val += 20; 
-              if (forwardR === 0) val += 15; // 沉底防守炮
-            } else if (pType === 'r') {
-              if (forwardR > 0) val += 25;
-              if (c === 4) val += 20; 
-              if (forwardR === 8 || forwardR === 9) val += 30; // 車壓底線
-              let openFile = true;
-              for(let scanR=0; scanR<10; scanR++) {
-                if(board[scanR][c] && board[scanR][c].toLowerCase() === 'p') openFile = false;
-              }
-              if(openFile) val += 30;
-            }
-
-            if (getColor(p) === aiColor) score += val;
-            else score -= val;
-          }
-        }
-      }
-      return score;
-    }
-
-    function getAllLegalMovesList(board, color) {
-      let moves = [];
-      for (let r = 0; r < 10; r++) {
-        for (let c = 0; c < 9; c++) {
-          if (getColor(board[r][c]) === color) {
-            for (let tr = 0; tr < 10; tr++) {
-              for (let tc = 0; tc < 9; tc++) {
-                if (isMoveLegal(board, r, c, tr, tc) && !leavesKingInCheck(board, r, c, tr, tc, color)) {
-                  let p = board[r][c]; let target = board[tr][tc]; let moveScore = 0;
-                  if (target !== '') moveScore = PIECE_VALUES[target] * 10 - PIECE_VALUES[p];
-                  else moveScore = ((color === 'b') ? tr - r : r - tr) + (4 - Math.abs(tc - 4));
-                  moves.push({ r1: r, c1: c, r2: tr, c2: tc, score: moveScore });
-                }
-              }
-            }
-          }
-        }
-      }
-      moves.sort((a, b) => b.score - a.score);
-      return moves;
-    }
-
-    // 🌟 全新加入：靜態搜索 (Quiescence Search) 解決水平線效應
-    function quiesce(board, alpha, beta, isMaximizing, aiColor, qDepth) {
-      let stand_pat = evaluateBoard(board, aiColor);
-      if (isMaximizing) {
-         if (stand_pat >= beta) return beta;
-         if (alpha < stand_pat) alpha = stand_pat;
-      } else {
-         if (stand_pat <= alpha) return alpha;
-         if (beta > stand_pat) beta = stand_pat;
-      }
-      
-      // 限制深度避免瀏覽器卡死
-      if (qDepth > 2) return stand_pat;
-
-      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
-      // 只生成「吃子」的走法
-      let moves = getAllLegalMovesList(board, currentColor).filter(m => board[m.r2][m.c2] !== '');
-
-      for (let move of moves) {
-          let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
-          board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
-          
-          let score = quiesce(board, alpha, beta, !isMaximizing, aiColor, qDepth + 1);
-          
-          board[move.r1][move.c1] = p; board[move.r2][move.c2] = target;
-
-          if (isMaximizing) {
-              if (score >= beta) return beta;
-              if (score > alpha) alpha = score;
-          } else {
-              if (score <= alpha) return alpha;
-              if (score < beta) beta = score;
-          }
-      }
-      return isMaximizing ? alpha : beta;
-    }
-
-    function minimax(board, depth, alpha, beta, isMaximizing, aiColor) {
-      // 深度抵達 0 時，不再直接返回評分，而是進入靜態搜索計算正在發生的「交換」
-      if (depth === 0) return quiesce(board, alpha, beta, isMaximizing, aiColor, 0);
-
-      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
-      let moves = getAllLegalMovesList(board, currentColor);
-      if (moves.length === 0) return isMaximizing ? -99999 + depth : 99999 - depth;
-
-      if (isMaximizing) {
-        let maxEval = -Infinity;
-        for (let move of moves) {
-          let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
-          board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
-          let ev = minimax(board, depth - 1, alpha, beta, false, aiColor);
-          board[move.r1][move.c1] = p; board[move.r2][move.c2] = target; 
-          
-          maxEval = Math.max(maxEval, ev);
-          alpha = Math.max(alpha, ev);
-          if (beta <= alpha) break; 
-        }
-        return maxEval;
-      } else {
-        let minEval = Infinity;
-        for (let move of moves) {
-          let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
-          board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
-          let ev = minimax(board, depth - 1, alpha, beta, true, aiColor);
-          board[move.r1][move.c1] = p; board[move.r2][move.c2] = target; 
-          
-          minEval = Math.min(minEval, ev);
-          beta = Math.min(beta, ev);
-          if (beta <= alpha) break; 
-        }
-        return minEval;
-      }
-    }
-
-    async function makeAIMove() {
-      while (isSyncing) { await new Promise(r => setTimeout(r, 50)); }
-      await new Promise(r => setTimeout(r, 400)); 
-
-      if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
-          isAiThinking = false; return;
-      }
-
-      let aiLevel = sessionStorage.getItem('xq_ai_level_' + room) || 'easy';
-      let validMoves = getAllLegalMovesList(gameState.board, aiRole);
-
-      if (validMoves.length === 0) {
-        let currentBoardStr = JSON.stringify(gameState.board);
-        if (lastSurrenderedBoard !== currentBoardStr) {
-            lastSurrenderedBoard = currentBoardStr;
-            alert("絕殺！電腦無棋可走，你贏了！\n\n電腦已自動向您發起「重新開局」請求，是否再戰一局？");
-            apiCall('restart', { playerId: AI_ID, restartAction: 'request' });
-        }
-        isAiThinking = false; 
-        document.getElementById('info').textContent = "對局結束：電腦無棋可走";
-        return;
-      }
-
-      // 🌟 全新加入：開局庫 (Opening Book)
-      let totalPieces = 0;
-      for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
-
-      if (aiLevel === 'hard' && totalPieces >= 31) { // 剛開局(32顆棋)或第一回合剛結束
-        let openings = [];
-        if (aiRole === 'b') {
-            openings = [
-                {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, // 中炮
-                {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, // 起馬
-                {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, // 飛相
-                {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  // 仙人指路
-            ];
-        } else {
-            openings = [
-                {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, 
-                {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, 
-                {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, 
-                {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6}  
-            ];
-        }
-        let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
-        if (legalOpenings.length > 0) {
-            let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
-            await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
-            isAiThinking = false;
-            return;
-        }
-      }
-
-      let bestMove = validMoves[0]; 
-
-      if (aiLevel === 'easy') {
-        bestMove = validMoves[Math.floor(Math.random() * Math.min(5, validMoves.length))];
-      } else {
-        let bestVal = -Infinity;
-        // 殘局優化：當棋子少於 16 顆時，電腦運算能力解放，深度提升到 5
-        let searchDepth = totalPieces <= 16 ? 5 : 4; 
-
-        for (let move of validMoves) {
-          let p = gameState.board[move.r1][move.c1]; let target = gameState.board[move.r2][move.c2];
-          gameState.board[move.r2][move.c2] = p; gameState.board[move.r1][move.c1] = '';
-          
-          let moveVal = minimax(gameState.board, searchDepth - 1, -Infinity, Infinity, false, aiRole);
-          
-          gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target; 
-
-          // 微小隨機性，當有多個相同高分的走法時，不至於每次都走同一著
-          moveVal += Math.random() * 2; 
-
-          if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
-          
-          await new Promise(r => setTimeout(r, 0));
-        }
-      }
-
-      await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
-      isAiThinking = false;
-      document.getElementById('info').textContent = gameState.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
-    }
-
     function getColor(p) { return p === '' ? '' : (p === p.toLowerCase() ? 'b' : 'r'); }
     function isMoveLegal(board, r1, c1, r2, c2) {
       let p = board[r1][c1]; let target = board[r2][c2]; if (p === '') return false; if (target !== '' && getColor(p) === getColor(target)) return false; 
@@ -695,30 +376,7 @@
     }
     function countPiecesBetween(board, r1, c1, r2, c2) { let count = 0; if (r1 === r2) { let minC = Math.min(c1, c2), maxC = Math.max(c1, c2); for (let c = minC + 1; c < maxC; c++) if (board[r1][c] !== '') count++; } else { let minR = Math.min(r1, r2), maxR = Math.max(r1, r2); for (let r = minR + 1; r < maxR; r++) if (board[r][c1] !== '') count++; } return count; }
     function isKingAttacked(board, kingColor) { let kr = -1, kc = -1, targetKing = kingColor === 'b' ? 'k' : 'K'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (board[r][c] === targetKing) { kr = r; kc = c; break; } } if (kr !== -1) break; } if (kr === -1) return true; let oppColor = kingColor === 'b' ? 'r' : 'b'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (getColor(board[r][c]) === oppColor) { if (isMoveLegal(board, r, c, kr, kc)) return true; } } } return false; }
-    
-    function leavesKingInCheck(board, r1, c1, r2, c2, color) { 
-      let p = board[r1][c1]; let target = board[r2][c2]; 
-      board[r2][c2] = p; board[r1][c1] = ''; 
-      
-      let inCheck = isKingAttacked(board, color); 
-      let bkR=-1, bkC=-1, rkR=-1, rkC=-1; 
-      
-      if (!inCheck) {
-        for (let r=0; r<10; r++) { 
-          for (let c=0; c<9; c++) { 
-            if (board[r][c] === 'k') { bkR = r; bkC = c; } 
-            if (board[r][c] === 'K') { rkR = r; rkC = c; } 
-          } 
-        } 
-        if (bkC === rkC && bkC !== -1) { 
-          if (countPiecesBetween(board, bkR, bkC, rkR, rkC) === 0) inCheck = true; 
-        } 
-      }
-      
-      board[r1][c1] = p; board[r2][c2] = target; 
-      return inCheck; 
-    }
-    
+    function leavesKingInCheck(board, r1, c1, r2, c2, color) { let simBoard = JSON.parse(JSON.stringify(board)); simBoard[r2][c2] = simBoard[r1][c1]; simBoard[r1][c1] = ''; if (isKingAttacked(simBoard, color)) return true; let bkR=-1, bkC=-1, rkR=-1, rkC=-1; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (simBoard[r][c] === 'k') { bkR = r; bkC = c; } if (simBoard[r][c] === 'K') { rkR = r; rkC = c; } } } if (bkC === rkC && bkC !== -1) { if (countPiecesBetween(simBoard, bkR, bkC, rkR, rkC) === 0) return true; } return false; }
     window.onload = init;
   </script>
 </body>
