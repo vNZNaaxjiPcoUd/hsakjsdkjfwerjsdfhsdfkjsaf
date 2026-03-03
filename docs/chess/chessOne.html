@@ -137,6 +137,51 @@
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
 
+    let clickCount = 0; 
+    let clickTimer = null;
+    document.getElementById('role-info').onclick = () => { 
+      if (myRole === 'spectator') {
+        clickCount++;
+        clearTimeout(clickTimer);
+        
+        if (clickCount >= 10) { 
+          clickCount = 0; 
+          closeRoom(room);
+        } else {
+          clickTimer = setTimeout(() => { clickCount = 0; }, 3000); 
+        }
+      } 
+    };
+    
+    async function closeRoom(roomName) {
+      if (!confirm(`【管理員操作】\n確定要強制退出「${roomName}」的棋手嗎？\n(當前的棋手將被清空，需重新進入)`)) return;
+      
+      let infoEl = document.getElementById('info');
+      let originalText = infoEl.textContent;
+      infoEl.textContent = "執行強制退出中...";
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', 
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), 
+          redirect: 'follow'
+        });
+        const data = await response.json();
+        
+        if (data && !data.error) { 
+          alert('成功！已強制清空該房間的座位。'); 
+          pollState(); 
+        } else { 
+          alert("強制退出失敗：" + (data ? data.error : "未知錯誤")); 
+          infoEl.textContent = originalText;
+        }
+      } catch (e) { 
+        alert("網路異常，強制退出失敗！"); 
+        infoEl.textContent = originalText;
+      }
+    }
+
     let myId = sessionStorage.getItem('xq_id');
     if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
     
@@ -144,6 +189,7 @@
     let isAiMode = false;
     let aiRole = null;
     let isAiThinking = false;
+    let lastSurrenderedBoard = null; 
 
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
@@ -407,9 +453,10 @@
       isSyncing = false; 
     }
 
-    const PIECE_VALUES = { 'k':100000, 'r':1000, 'c':500, 'h':450, 'e':25, 'a':20, 'p':20,
-                           'K':100000, 'R':1000, 'C':500, 'H':450, 'E':25, 'A':20, 'P':20 };
+    const PIECE_VALUES = { 'k':100000, 'r':1000, 'c':550, 'h':500, 'e':250, 'a':250, 'p':100,
+                           'K':100000, 'R':1000, 'C':550, 'H':500, 'E':250, 'A':250, 'P':100 };
 
+    // 優化陣地評估
     function evaluateBoard(board, aiColor) {
       let score = 0;
       for (let r = 0; r < 10; r++) {
@@ -420,19 +467,28 @@
             let forwardR = isBlack ? r : 9 - r; 
             let absC = Math.abs(c - 4); 
             let val = PIECE_VALUES[p];
-
             let pType = p.toLowerCase();
+
             if (pType === 'p') {
-              if (forwardR > 4) val += 40 + forwardR * 10 + (3 - Math.min(absC, 3)) * 10;
-              else val += forwardR * 2;
+              if (forwardR > 4) val += 80 + forwardR * 15 + (4 - absC) * 15; 
+              else val += forwardR * 5;
             } else if (pType === 'h') {
-              val += (4 - absC) * 8 + forwardR * 4;
+              val += (4 - absC) * 12 + forwardR * 8; 
+              if (c === 0 || c === 8) val -= 40; // 強烈懲罰邊馬
+              if (forwardR === 9) val -= 30;     // 懲罰沉底馬
             } else if (pType === 'c') {
-              val += (4 - absC) * 5;
-              if (forwardR > 4) val += 15;
+              val += (4 - absC) * 8; 
+              if (forwardR > 4) val += 20; 
+              if (forwardR === 0) val += 15; // 沉底防守炮
             } else if (pType === 'r') {
-              if (forwardR > 0) val += 20;
-              if (absC === 4) val -= 15;
+              if (forwardR > 0) val += 25;
+              if (c === 4) val += 20; 
+              if (forwardR === 8 || forwardR === 9) val += 30; // 車壓底線
+              let openFile = true;
+              for(let scanR=0; scanR<10; scanR++) {
+                if(board[scanR][c] && board[scanR][c].toLowerCase() === 'p') openFile = false;
+              }
+              if(openFile) val += 30;
             }
 
             if (getColor(p) === aiColor) score += val;
@@ -451,25 +507,62 @@
             for (let tr = 0; tr < 10; tr++) {
               for (let tc = 0; tc < 9; tc++) {
                 if (isMoveLegal(board, r, c, tr, tc) && !leavesKingInCheck(board, r, c, tr, tc, color)) {
-                  moves.push({ r1: r, c1: c, r2: tr, c2: tc });
+                  let p = board[r][c]; let target = board[tr][tc]; let moveScore = 0;
+                  if (target !== '') moveScore = PIECE_VALUES[target] * 10 - PIECE_VALUES[p];
+                  else moveScore = ((color === 'b') ? tr - r : r - tr) + (4 - Math.abs(tc - 4));
+                  moves.push({ r1: r, c1: c, r2: tr, c2: tc, score: moveScore });
                 }
               }
             }
           }
         }
       }
-      moves.sort((a, b) => {
-        let valA = board[a.r2][a.c2] ? PIECE_VALUES[board[a.r2][a.c2]] : 0;
-        let valB = board[b.r2][b.c2] ? PIECE_VALUES[board[b.r2][b.c2]] : 0;
-        return valB - valA;
-      });
+      moves.sort((a, b) => b.score - a.score);
       return moves;
     }
 
-    function minimax(board, depth, alpha, beta, isMaximizing, aiColor) {
-      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
-      if (depth === 0) return evaluateBoard(board, aiColor);
+    // 🌟 全新加入：靜態搜索 (Quiescence Search) 解決水平線效應
+    function quiesce(board, alpha, beta, isMaximizing, aiColor, qDepth) {
+      let stand_pat = evaluateBoard(board, aiColor);
+      if (isMaximizing) {
+         if (stand_pat >= beta) return beta;
+         if (alpha < stand_pat) alpha = stand_pat;
+      } else {
+         if (stand_pat <= alpha) return alpha;
+         if (beta > stand_pat) beta = stand_pat;
+      }
+      
+      // 限制深度避免瀏覽器卡死
+      if (qDepth > 2) return stand_pat;
 
+      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
+      // 只生成「吃子」的走法
+      let moves = getAllLegalMovesList(board, currentColor).filter(m => board[m.r2][m.c2] !== '');
+
+      for (let move of moves) {
+          let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
+          board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
+          
+          let score = quiesce(board, alpha, beta, !isMaximizing, aiColor, qDepth + 1);
+          
+          board[move.r1][move.c1] = p; board[move.r2][move.c2] = target;
+
+          if (isMaximizing) {
+              if (score >= beta) return beta;
+              if (score > alpha) alpha = score;
+          } else {
+              if (score <= alpha) return alpha;
+              if (score < beta) beta = score;
+          }
+      }
+      return isMaximizing ? alpha : beta;
+    }
+
+    function minimax(board, depth, alpha, beta, isMaximizing, aiColor) {
+      // 深度抵達 0 時，不再直接返回評分，而是進入靜態搜索計算正在發生的「交換」
+      if (depth === 0) return quiesce(board, alpha, beta, isMaximizing, aiColor, 0);
+
+      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
       let moves = getAllLegalMovesList(board, currentColor);
       if (moves.length === 0) return isMaximizing ? -99999 + depth : 99999 - depth;
 
@@ -478,10 +571,9 @@
         for (let move of moves) {
           let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
           board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
-          
           let ev = minimax(board, depth - 1, alpha, beta, false, aiColor);
-          
           board[move.r1][move.c1] = p; board[move.r2][move.c2] = target; 
+          
           maxEval = Math.max(maxEval, ev);
           alpha = Math.max(alpha, ev);
           if (beta <= alpha) break; 
@@ -492,10 +584,9 @@
         for (let move of moves) {
           let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
           board[move.r2][move.c2] = p; board[move.r1][move.c1] = '';
-          
           let ev = minimax(board, depth - 1, alpha, beta, true, aiColor);
-          
           board[move.r1][move.c1] = p; board[move.r2][move.c2] = target; 
+          
           minEval = Math.min(minEval, ev);
           beta = Math.min(beta, ev);
           if (beta <= alpha) break; 
@@ -505,6 +596,9 @@
     }
 
     async function makeAIMove() {
+      while (isSyncing) { await new Promise(r => setTimeout(r, 50)); }
+      await new Promise(r => setTimeout(r, 400)); 
+
       if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
           isAiThinking = false; return;
       }
@@ -513,22 +607,55 @@
       let validMoves = getAllLegalMovesList(gameState.board, aiRole);
 
       if (validMoves.length === 0) {
-        alert("絕殺！電腦無棋可走，你贏了！🎉");
-        isAiThinking = false; return;
+        let currentBoardStr = JSON.stringify(gameState.board);
+        if (lastSurrenderedBoard !== currentBoardStr) {
+            lastSurrenderedBoard = currentBoardStr;
+            alert("絕殺！電腦無棋可走，你贏了！\n\n電腦已自動向您發起「重新開局」請求，是否再戰一局？");
+            apiCall('restart', { playerId: AI_ID, restartAction: 'request' });
+        }
+        isAiThinking = false; 
+        document.getElementById('info').textContent = "對局結束：電腦無棋可走";
+        return;
+      }
+
+      // 🌟 全新加入：開局庫 (Opening Book)
+      let totalPieces = 0;
+      for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
+
+      if (aiLevel === 'hard' && totalPieces >= 31) { // 剛開局(32顆棋)或第一回合剛結束
+        let openings = [];
+        if (aiRole === 'b') {
+            openings = [
+                {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, // 中炮
+                {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, // 起馬
+                {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, // 飛相
+                {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  // 仙人指路
+            ];
+        } else {
+            openings = [
+                {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, 
+                {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, 
+                {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, 
+                {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6}  
+            ];
+        }
+        let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
+        if (legalOpenings.length > 0) {
+            let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
+            await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
+            isAiThinking = false;
+            return;
+        }
       }
 
       let bestMove = validMoves[0]; 
 
       if (aiLevel === 'easy') {
-        validMoves.forEach(m => {
-          let target = gameState.board[m.r2][m.c2];
-          m.score = (target ? PIECE_VALUES[target] : 0) + Math.random() * 100;
-        });
-        validMoves.sort((a, b) => b.score - a.score);
-        bestMove = validMoves[0];
+        bestMove = validMoves[Math.floor(Math.random() * Math.min(5, validMoves.length))];
       } else {
         let bestVal = -Infinity;
-        let searchDepth = 3; 
+        // 殘局優化：當棋子少於 16 顆時，電腦運算能力解放，深度提升到 5
+        let searchDepth = totalPieces <= 16 ? 5 : 4; 
 
         for (let move of validMoves) {
           let p = gameState.board[move.r1][move.c1]; let target = gameState.board[move.r2][move.c2];
@@ -538,7 +665,8 @@
           
           gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target; 
 
-          moveVal += Math.random() * 3;
+          // 微小隨機性，當有多個相同高分的走法時，不至於每次都走同一著
+          moveVal += Math.random() * 2; 
 
           if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
           
