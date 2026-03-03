@@ -137,51 +137,6 @@
     document.getElementById('room-title').textContent = "" + room;
     document.getElementById('modal-room-name').textContent = room;
 
-    let clickCount = 0; 
-    let clickTimer = null;
-    document.getElementById('role-info').onclick = () => { 
-      if (myRole === 'spectator') {
-        clickCount++;
-        clearTimeout(clickTimer);
-        
-        if (clickCount >= 10) { 
-          clickCount = 0; 
-          closeRoom(room);
-        } else {
-          clickTimer = setTimeout(() => { clickCount = 0; }, 3000); 
-        }
-      } 
-    };
-    
-    async function closeRoom(roomName) {
-      if (!confirm(`【管理員操作】\n確定要強制退出「${roomName}」的棋手嗎？\n(當前的棋手將被清空，需重新進入)`)) return;
-      
-      let infoEl = document.getElementById('info');
-      let originalText = infoEl.textContent;
-      infoEl.textContent = "執行強制退出中...";
-
-      try {
-        const response = await fetch(GAS_URL, {
-          method: 'POST', 
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), 
-          redirect: 'follow'
-        });
-        const data = await response.json();
-        
-        if (data && !data.error) { 
-          alert('成功！已強制清空該房間的座位。'); 
-          pollState(); 
-        } else { 
-          alert("強制退出失敗：" + (data ? data.error : "未知錯誤")); 
-          infoEl.textContent = originalText;
-        }
-      } catch (e) { 
-        alert("網路異常，強制退出失敗！"); 
-        infoEl.textContent = originalText;
-      }
-    }
-
     let myId = sessionStorage.getItem('xq_id');
     if (!myId) { myId = Math.random().toString(36).substr(2, 9); sessionStorage.setItem('xq_id', myId); }
     
@@ -252,8 +207,15 @@
       if (data && data.state) updateUI(data.state); 
     }
 
+    // 🌟 修改：切換身份時，若從單機模式離開，先強制退出所有執棋者
     async function requestRole(role) {
       document.getElementById('role-modal').style.display = 'none';
+      
+      if (isAiMode) {
+        document.getElementById('info').textContent = "正在清理電腦玩家...";
+        await apiCall('closeThisRoomForNewBeginner', { targetRoom: room });
+      }
+
       isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); 
       
       let data = await apiCall('takeRole', { playerId: myId, role: role });
@@ -262,14 +224,21 @@
       } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
     }
 
+    // 🌟 修改：選擇單機模式時，先強制退出所有執棋者，再把自己跟電腦加進去
     async function startAiGame(humanRole, difficulty) {
       document.getElementById('role-modal').style.display = 'none';
+      document.getElementById('info').textContent = "正在準備單機模式...";
+      
+      // 1. 先退出所有執棋者
+      await apiCall('closeThisRoomForNewBeginner', { targetRoom: room });
+
       let botRole = humanRole === 'r' ? 'b' : 'r';
       
       isAiMode = true; aiRole = botRole;
       sessionStorage.setItem('xq_ai_mode_' + room, botRole);
       sessionStorage.setItem('xq_ai_level_' + room, difficulty); 
       
+      // 2. 將自己和電腦角色加上去
       let data = await apiCall('takeRole', { playerId: myId, role: humanRole });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true';
@@ -456,7 +425,6 @@
     const PIECE_VALUES = { 'k':100000, 'r':1000, 'c':550, 'h':500, 'e':250, 'a':250, 'p':100,
                            'K':100000, 'R':1000, 'C':550, 'H':500, 'E':250, 'A':250, 'P':100 };
 
-    // 優化陣地評估
     function evaluateBoard(board, aiColor) {
       let score = 0;
       for (let r = 0; r < 10; r++) {
@@ -474,16 +442,16 @@
               else val += forwardR * 5;
             } else if (pType === 'h') {
               val += (4 - absC) * 12 + forwardR * 8; 
-              if (c === 0 || c === 8) val -= 40; // 強烈懲罰邊馬
-              if (forwardR === 9) val -= 30;     // 懲罰沉底馬
+              if (c === 0 || c === 8) val -= 40; 
+              if (forwardR === 9) val -= 30;     
             } else if (pType === 'c') {
               val += (4 - absC) * 8; 
               if (forwardR > 4) val += 20; 
-              if (forwardR === 0) val += 15; // 沉底防守炮
+              if (forwardR === 0) val += 15; 
             } else if (pType === 'r') {
               if (forwardR > 0) val += 25;
               if (c === 4) val += 20; 
-              if (forwardR === 8 || forwardR === 9) val += 30; // 車壓底線
+              if (forwardR === 8 || forwardR === 9) val += 30; 
               let openFile = true;
               for(let scanR=0; scanR<10; scanR++) {
                 if(board[scanR][c] && board[scanR][c].toLowerCase() === 'p') openFile = false;
@@ -521,7 +489,6 @@
       return moves;
     }
 
-    // 🌟 全新加入：靜態搜索 (Quiescence Search) 解決水平線效應
     function quiesce(board, alpha, beta, isMaximizing, aiColor, qDepth) {
       let stand_pat = evaluateBoard(board, aiColor);
       if (isMaximizing) {
@@ -532,11 +499,9 @@
          if (beta > stand_pat) beta = stand_pat;
       }
       
-      // 限制深度避免瀏覽器卡死
       if (qDepth > 2) return stand_pat;
 
       let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
-      // 只生成「吃子」的走法
       let moves = getAllLegalMovesList(board, currentColor).filter(m => board[m.r2][m.c2] !== '');
 
       for (let move of moves) {
@@ -559,7 +524,6 @@
     }
 
     function minimax(board, depth, alpha, beta, isMaximizing, aiColor) {
-      // 深度抵達 0 時，不再直接返回評分，而是進入靜態搜索計算正在發生的「交換」
       if (depth === 0) return quiesce(board, alpha, beta, isMaximizing, aiColor, 0);
 
       let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
@@ -618,18 +582,17 @@
         return;
       }
 
-      // 🌟 全新加入：開局庫 (Opening Book)
       let totalPieces = 0;
       for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
 
-      if (aiLevel === 'hard' && totalPieces >= 31) { // 剛開局(32顆棋)或第一回合剛結束
+      if (aiLevel === 'hard' && totalPieces >= 31) { 
         let openings = [];
         if (aiRole === 'b') {
             openings = [
-                {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, // 中炮
-                {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, // 起馬
-                {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, // 飛相
-                {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  // 仙人指路
+                {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, 
+                {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, 
+                {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, 
+                {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  
             ];
         } else {
             openings = [
@@ -654,7 +617,6 @@
         bestMove = validMoves[Math.floor(Math.random() * Math.min(5, validMoves.length))];
       } else {
         let bestVal = -Infinity;
-        // 殘局優化：當棋子少於 16 顆時，電腦運算能力解放，深度提升到 5
         let searchDepth = totalPieces <= 16 ? 5 : 4; 
 
         for (let move of validMoves) {
@@ -665,7 +627,6 @@
           
           gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target; 
 
-          // 微小隨機性，當有多個相同高分的走法時，不至於每次都走同一著
           moveVal += Math.random() * 2; 
 
           if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
