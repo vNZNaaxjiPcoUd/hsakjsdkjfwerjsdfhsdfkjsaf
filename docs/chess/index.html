@@ -11,12 +11,15 @@
             const baseUrl = "https://n.jwint.net/chess/chess";
             const lastPart = window.location.search.slice(1);
             const result = lastPart.replace(/\+/g, "%20");
-            console.log("Extracted and processed part:", result);
-            const kk1 = `${baseUrl}${result}`;
-            let okU = kk1.replace(/(?<!:)\/+/g, "/");
-            const urlLocal = window.location;
-            window.location.href = okU;
-            console.log("Redirecting to:", kk1,okU);
+            let kk1;
+            //console.log("Extracted and processed part:", result);
+            if (result) {
+                kk1 = `${baseUrl}?${result}`;
+            }else{
+                kk1 = baseUrl;
+            }
+            //window.location.href = okU;
+            console.log("Redirecting to:", kk1);
             }
         processAndRedirect();
     </script>
