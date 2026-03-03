@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>象棋 - 管理員控制台</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; background: #f0f0f0; padding: 50px 20px; }
+    .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+    h2 { color: #333; margin-top: 0; }
+    input { padding: 10px; width: 80%; font-size: 16px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 5px; text-align: center; }
+    button { padding: 12px 20px; font-size: 16px; background-color: #d32f2f; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; width: 80%; }
+    button:hover { background-color: #b71c1c; }
+    #status { margin-top: 20px; font-weight: bold; color: #1565C0; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>房間強制清空系統</h2>
+    <p style="color: #666; font-size: 14px; margin-bottom: 20px;">輸入房間名稱，將會踢出該房間內的所有對戰玩家。</p>
+    
+    <input type="text" id="room-input" value="榕樹下" placeholder="請輸入房間名稱">
+    <br>
+    <button onclick="clearRoom()">強制清空座位</button>
+    
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // 這裡請確保使用的是你目前的 Google Apps Script URL
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
+
+    async function clearRoom() {
+      const roomName = document.getElementById('room-input').value.trim();
+      if (!roomName) {
+        alert("請輸入房間名稱！");
+        return;
+      }
+      
+      if (!confirm(`確定要強制退出「${roomName}」的所有棋手嗎？`)) return;
+
+      const statusEl = document.getElementById('status');
+      statusEl.style.color = "#1565C0";
+      statusEl.textContent = "執行中，請稍候...";
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST', 
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'closeThisRoomForNewBeginner', targetRoom: roomName }), 
+          redirect: 'follow'
+        });
+        const data = await response.json();
+        
+        if (data && !data.error) { 
+          statusEl.style.color = "#4CAF50";
+          statusEl.textContent = "✅ 成功！已強制清空「" + roomName + "」的座位。"; 
+        } else { 
+          statusEl.style.color = "red";
+          statusEl.textContent = "❌ 失敗：" + (data ? data.error : "未知錯誤"); 
+        }
+      } catch (e) { 
+        statusEl.style.color = "red";
+        statusEl.textContent = "❌ 網路異常，強制退出失敗！"; 
+      }
+    }
+  </script>
+</body>
+</html>
