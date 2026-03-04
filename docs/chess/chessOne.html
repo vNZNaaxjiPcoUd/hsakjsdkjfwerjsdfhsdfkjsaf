@@ -147,7 +147,6 @@
     let isAiThinking = false;
     let lastSurrenderedBoard = null; 
 
-    // 因為預設就是觀戰者，這個變數用來判斷是否需要再次自動彈出（現在不需要了）
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
     let pausePollingUntil = 0; 
@@ -156,7 +155,7 @@
 
     function showRoleModal() {
       document.getElementById('role-modal').style.display = 'flex';
-      document.getElementById('close-modal-btn').style.display = 'block'; // 永遠顯示關閉按鈕
+      document.getElementById('close-modal-btn').style.display = 'block'; 
       if (gameState) updateUI(gameState); 
     }
     function closeRoleModal() { document.getElementById('role-modal').style.display = 'none'; }
@@ -272,7 +271,6 @@
       isSyncing = false;
     }
 
-    // 🌟 修改：新玩家載入時，默默成為觀棋者，不再自動彈出角色視窗
     function onJoined(data) {
       myRole = data.role || 'spectator'; 
       updateUI(data.state);
@@ -282,7 +280,6 @@
         myRole = 'spectator';
       }
       updateRoleBadge();
-      // 移除了自動呼叫 showRoleModal(); 的邏輯
     }
 
     function updateRoleBadge() {
@@ -298,13 +295,13 @@
       if (gameState && JSON.stringify(gameState.board) !== JSON.stringify(state.board)) selectedCell = null; 
       gameState = state;
       
-      if (!isAiThinking) {
+      if (!isAiThinking && document.getElementById('info').textContent.indexOf('電腦無棋可走') === -1) {
         document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
       }
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
         alert("管理員已將您移出對戰座位！"); 
-        myRole = 'spectator'; // 🌟 修改：被踢出座位後，安靜地轉為觀棋者
+        myRole = 'spectator'; 
         sessionStorage.removeItem('xq_role_selected_' + room); 
         hasSelectedRoleLocal = null; 
         updateRoleBadge(); 
@@ -315,11 +312,17 @@
         isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); updateRoleBadge();
       }
 
+      // 🌟 修復核心：判斷如果盤面跟認輸的盤面一樣，就不再重複啟動 AI
       if (isAiMode && myRole !== 'spectator') {
+        let currentBoardStr = JSON.stringify(state.board);
         if (state.turn === aiRole && (state.status === 'playing' || state.status === 'check') && !isAiThinking) {
-          isAiThinking = true; 
-          document.getElementById('info').textContent = "電腦思考中..."; 
-          setTimeout(makeAIMove, 50); 
+          if (currentBoardStr !== lastSurrenderedBoard) {
+             isAiThinking = true; 
+             document.getElementById('info').textContent = "電腦思考中..."; 
+             setTimeout(makeAIMove, 50); 
+          } else {
+             document.getElementById('info').textContent = "對局結束：電腦無棋可走";
+          }
         }
         if (state.restartRequest === myRole) { apiCall('restart', { playerId: AI_ID, restartAction: 'agree' }); }
         if (state.undoRequest === myRole) { apiCall('undo', { playerId: AI_ID, undoAction: 'agree' }); }
@@ -578,15 +581,26 @@
       let aiLevel = sessionStorage.getItem('xq_ai_level_' + room) || 'easy';
       let validMoves = getAllLegalMovesList(gameState.board, aiRole);
 
+      // 🌟 修復核心：由贏了的人類直接觸發重開請求，避開伺服器無法辨識電腦發送請求的問題
       if (validMoves.length === 0) {
         let currentBoardStr = JSON.stringify(gameState.board);
         if (lastSurrenderedBoard !== currentBoardStr) {
             lastSurrenderedBoard = currentBoardStr;
-            alert("絕殺！電腦無棋可走，你贏了！\n\n電腦已自動向您發起「重新開局」請求，是否再戰一局？");
-            apiCall('restart', { playerId: AI_ID, restartAction: 'request' });
+            isAiThinking = false; 
+            document.getElementById('info').textContent = "對局結束：電腦無棋可走";
+            
+            // 延遲一點點，讓盤面畫完後再跳出視窗
+            setTimeout(async () => {
+                if (confirm("太神啦！電腦被絕殺無棋可走，你贏了！\n\n是否要立即開新局？")) {
+                    pausePollingUntil = Date.now() + 2500;
+                    isSyncing = true;
+                    // 以你 (myId) 的名義發送請求，電腦接收到後會自動點擊「同意」
+                    let data = await apiCall('restart', { playerId: myId, restartAction: 'request' });
+                    if (data && data.state) updateUI(data.state);
+                    isSyncing = false;
+                }
+            }, 100);
         }
-        isAiThinking = false; 
-        document.getElementById('info').textContent = "對局結束：電腦無棋可走";
         return;
       }
 
