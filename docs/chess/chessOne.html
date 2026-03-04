@@ -12,6 +12,15 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
+    /* 🌟 徹底隱藏全站所有滾動條，但依然保留滑動功能 */
+    ::-webkit-scrollbar {
+      display: none; /* Chrome, Safari, Opera */
+    }
+    html, body {
+      -ms-overflow-style: none; /* IE and Edge */
+      scrollbar-width: none; /* Firefox */
+    }
+
     :root {
       --cell-size: min(8.5vw, 6.5vh, 55px); 
       --piece-size: calc(var(--cell-size) * 0.88); 
@@ -23,7 +32,21 @@
     h2 { margin: 5px 0; font-size: clamp(18px, 4vw, 24px); }
     
     .status-container { display: flex; justify-content: center; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
-    #info { font-size: clamp(14px, 3.5vw, 17px); font-weight: bold; margin-right: 5px; color: #1565C0; }
+    
+    #info {
+      font-size: 14px;         
+      color: #a0a0a0;          
+      white-space: pre-wrap;   
+      line-height: 1.6;        
+      font-family: sans-serif;
+      /* 🌟 已移除 max-height，讓區塊自然長高 */
+    }
+
+    #info::first-line {
+      font-size: 24px;         
+      color: #2584f0;          
+      font-weight: bold;       
+    }
     
     .btn-undo { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #ff9800; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
     .btn-reselect { padding: 5px 10px; font-size: clamp(12px, 3vw, 15px); background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
@@ -53,6 +76,20 @@
     .piece.black { color: #212121; border-color: #212121; }
     .piece.selected { box-shadow: 0 0 10px 4px #00BCD4; transform: scale(1.15); z-index: 15; } 
     .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
+
+    .cell.last-move-origin::before {
+      content: ''; position: absolute;
+      width: calc(var(--cell-size) * 0.5);
+      height: calc(var(--cell-size) * 0.5);
+      background-color: rgba(255, 152, 0, 0.4);
+      border-radius: 50%;
+      z-index: 5;
+    }
+    
+    .piece.last-moved {
+      box-shadow: 0 0 0 3px #FF9800, 0 0 15px 4px rgba(255, 152, 0, 0.7);
+      z-index: 14;
+    }
 
     #role-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); z-index: 999; justify-content: center; align-items: center; }
     .modal-content { background: #fff; padding: 25px; border-radius: 10px; text-align: center; max-width: 340px; position: relative; }
@@ -122,16 +159,14 @@
     </div>
   </div>
   
-  <div id="info">等待同步...</div>
-
   <div id="check-msg" class="check-alert">將軍！</div>
+
+  <div id="info">等待同步...</div>
 
   <script>
     if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(e=>{}); }); }
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
-
-    const WAIT_POLLING_DELAY = 3100;
 
     let room = '榕樹下';
     const queryString = window.location.search.substring(1);
@@ -153,8 +188,10 @@
     let lastSurrenderedBoard = null; 
 
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
-    let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
-    let pausePollingUntil = 0; 
+    let gameState = null; let myRole = null; let selectedCell = null; 
+    let isSyncing = false; 
+    
+    let lastActionTime = Date.now(); 
 
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
 
@@ -164,6 +201,21 @@
       if (gameState) updateUI(gameState); 
     }
     function closeRoleModal() { document.getElementById('role-modal').style.display = 'none'; }
+
+    let infoHistory = [];
+    let lastText = "";
+    function updateInformation(text) {
+      if (text !== lastText) {
+        infoHistory.unshift(text); 
+        
+        if (infoHistory.length > 10) {
+          infoHistory.pop(); 
+        }
+        
+        document.getElementById('info').innerHTML = infoHistory.join('<br>');
+        lastText = text;
+      }
+    }
 
     function drawSVGBoard() {
       let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
@@ -206,17 +258,20 @@
     }
     
     async function pollState() { 
-      if (isSyncing || Date.now() < pausePollingUntil) return; 
+      if (isSyncing) return; 
+      let fetchActionTime = lastActionTime; 
       let data = await apiCall('get'); 
-      if (isSyncing || Date.now() < pausePollingUntil) return; 
+      
+      if (isSyncing || fetchActionTime !== lastActionTime) return; 
       if (data && data.state) updateUI(data.state); 
     }
 
     async function requestRole(role) {
       document.getElementById('role-modal').style.display = 'none';
-      
+      isSyncing = true; 
+
       if (isAiMode) {
-        document.getElementById('info').textContent = "正在清理電腦玩家...";
+        updateInformation("正在清理電腦玩家...");
         await apiCall('closeThisRoomForNewBeginner', { targetRoom: room });
       }
 
@@ -224,14 +279,24 @@
       
       let data = await apiCall('takeRole', { playerId: myId, role: role });
       if (data && data.success) {
-        myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); updateUI(data.state);
-      } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
+        myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); 
+        updateInformation(`成功切換身分：${role === 'b' ? '黑方' : (role === 'r' ? '紅方' : '觀戰者')}`);
+        updateUI(data.state);
+      } else { 
+        updateInformation("選擇失敗，該座位可能已被搶先！"); 
+        if (data && data.state) { updateUI(data.state); showRoleModal(); } 
+      }
+
+      isSyncing = false; 
+      lastActionTime = Date.now(); 
     }
 
     async function startAiGame(humanRole, difficulty) {
       document.getElementById('role-modal').style.display = 'none';
-      document.getElementById('info').textContent = "正在準備單機模式...";
+      updateInformation(`正在準備單機模式 (${difficulty === 'hard' ? '高級' : '簡單'})...`);
       
+      isSyncing = true; 
+
       await apiCall('closeThisRoomForNewBeginner', { targetRoom: room });
 
       let botRole = humanRole === 'r' ? 'b' : 'r';
@@ -243,18 +308,36 @@
       let data = await apiCall('takeRole', { playerId: myId, role: humanRole });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true';
-        updateRoleBadge(); updateUI(data.state);
-        apiCall('takeRole', { playerId: AI_ID, role: botRole });
+        updateRoleBadge(); 
+
+        let aiData = await apiCall('takeRole', { playerId: AI_ID, role: botRole });
+        if (aiData && aiData.state) {
+            updateUI(aiData.state);
+        } else {
+            updateUI(data.state);
+        }
       }
+
+      isSyncing = false; 
+      lastActionTime = Date.now();
     }
 
     async function requestRestart(actionType) {
       if (myRole === 'spectator') return;
-      if (actionType === 'request' && !confirm("向對方發送重新開局請求？")) return;
-      if (actionType === 'agree' && !confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
+      if (actionType === 'request') {
+        if (!confirm("向對方發送重新開局請求？")) return;
+        updateInformation("已發出重新開局請求...");
+      } else if (actionType === 'agree') {
+        if (!confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
+        updateInformation("已同意重新開局...");
+      } else if (actionType === 'reject') {
+        updateInformation("已拒絕重新開局...");
+      } else if (actionType === 'cancel') {
+        updateInformation("已取消重新開局請求...");
+      }
       
-      pausePollingUntil = Date.now() + WAIT_POLLING_DELAY; 
       isSyncing = true; 
+      lastActionTime = Date.now();
       let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); 
       if (data && data.state) updateUI(data.state); 
       isSyncing = false;
@@ -263,14 +346,23 @@
     async function requestUndo(actionType) {
       if (myRole === 'spectator') return;
       if (actionType === 'request') {
-        if (!gameState.history || gameState.history.length === 0) { alert("目前沒有可以悔的棋！"); return; }
+        if (!gameState || !gameState.history || gameState.history.length === 0) { 
+          updateInformation("目前沒有可以悔的棋！"); 
+          return; 
+        }
         if (!confirm("向對方發送悔棋請求？")) return;
+        updateInformation("已發出悔棋請求...");
       } else if (actionType === 'agree') {
         if (!confirm("確定要同意對方悔棋嗎？")) return;
+        updateInformation("已同意悔棋...");
+      } else if (actionType === 'reject') {
+        updateInformation("已拒絕悔棋...");
+      } else if (actionType === 'cancel') {
+        updateInformation("已取消悔棋請求...");
       }
       
-      pausePollingUntil = Date.now() + WAIT_POLLING_DELAY; 
       isSyncing = true; 
+      lastActionTime = Date.now();
       let data = await apiCall('undo', { playerId: myId, undoAction: actionType }); 
       if (data && data.state) updateUI(data.state); 
       isSyncing = false;
@@ -297,16 +389,34 @@
     }
 
     function updateUI(state) {
-      if (gameState && JSON.stringify(gameState.board) !== JSON.stringify(state.board)) selectedCell = null; 
+      let oldState = gameState;
+      if (oldState && JSON.stringify(oldState.board) !== JSON.stringify(state.board)) selectedCell = null; 
+      
+      if (oldState) {
+        if (oldState.restartRequest !== state.restartRequest && state.restartRequest) {
+           if (state.restartRequest !== myRole) {
+             updateInformation(state.restartRequest === 'b' ? "黑方發起重新開局請求！" : "紅方發起重新開局請求！");
+           }
+        }
+        if (oldState.undoRequest !== state.undoRequest && state.undoRequest) {
+           if (state.undoRequest !== myRole) {
+             updateInformation(state.undoRequest === 'b' ? "黑方發起悔棋請求！" : "紅方發起悔棋請求！");
+           }
+        }
+        if (oldState.status !== state.status && state.status === 'check') {
+           updateInformation("將軍！");
+        }
+      }
+
       gameState = state;
       
-      if (!isAiThinking && document.getElementById('info').textContent.indexOf('電腦無棋可走') === -1) {
-        document.getElementById('info').textContent = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
+      if (!isAiThinking && document.getElementById('info').innerHTML.indexOf('電腦無棋可走') === -1) {
+        let turnMsg = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
+        updateInformation(turnMsg);
       }
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
-        console.log("myRole:", myRole, "myId:", myId, "state.players:", state.players);
-        alert("管理員已將您移出對戰座位！"); 
+        updateInformation("系統已將您移出對戰座位！");
         myRole = 'spectator'; 
         sessionStorage.removeItem('xq_role_selected_' + room); 
         hasSelectedRoleLocal = null; 
@@ -323,10 +433,9 @@
         if (state.turn === aiRole && (state.status === 'playing' || state.status === 'check') && !isAiThinking) {
           if (currentBoardStr !== lastSurrenderedBoard) {
              isAiThinking = true; 
-             document.getElementById('info').textContent = "電腦思考中..."; 
              setTimeout(makeAIMove, 50); 
           } else {
-             document.getElementById('info').textContent = "對局結束：電腦無棋可走";
+             updateInformation("對局結束：電腦無棋可走");
           }
         }
         if (state.restartRequest === myRole) { apiCall('restart', { playerId: AI_ID, restartAction: 'agree' }); }
@@ -339,7 +448,6 @@
         if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "(已被選)"; } else { btnB.disabled = false; btnB.textContent = "執黑棋"; }
         if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "(已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
 
-        // 🌟 新增：防干擾機制
         let bPlayer = state.players.b ? String(state.players.b) : "";
         let rPlayer = state.players.r ? String(state.players.r) : "";
         let isAiPlaying = bPlayer.startsWith('BOT_') || rPlayer.startsWith('BOT_');
@@ -347,7 +455,6 @@
         
         let aiMenuSection = document.getElementById('ai-menu-section');
         if (aiMenuSection) {
-            // 如果房間裡有人佔位，且不是在和電腦玩 -> 把單機選單隱藏起來
             if (isSomeonePlaying && !isAiPlaying) {
                 aiMenuSection.style.display = 'none';
             } else {
@@ -409,11 +516,20 @@
           cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; 
           cellDiv.onclick = () => handleCellClick(r, c);
           
+          if (gameState.lastMove && gameState.lastMove.r1 === r && gameState.lastMove.c1 === c) {
+            cellDiv.classList.add('last-move-origin');
+          }
+
           let p = gameState.board[r][c];
           if (p) {
             let pieceDiv = document.createElement('div'); 
             pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
             if (selectedCell && selectedCell.r === r && selectedCell.c === c) pieceDiv.classList.add('selected');
+            
+            if (gameState.lastMove && gameState.lastMove.r2 === r && gameState.lastMove.c2 === c) {
+              pieceDiv.classList.add('last-moved');
+            }
+
             pieceDiv.textContent = piecesText[p]; cellDiv.appendChild(pieceDiv);
           }
           
@@ -430,15 +546,33 @@
       let clickedPiece = gameState.board[r][c]; let isMyPiece = clickedPiece && (myRole === 'b' ? clickedPiece === clickedPiece.toLowerCase() : clickedPiece === clickedPiece.toUpperCase());
       if (selectedCell) {
         if (selectedCell.r === r && selectedCell.c === c) selectedCell = null; else if (isMyPiece) selectedCell = { r: r, c: c }; 
-        else { if (isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) { if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, myRole)) commitMove(selectedCell.r, selectedCell.c, r, c); else alert("不能送將！"); } }
+        else { 
+          if (isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) { 
+            if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, myRole)) {
+              commitMove(selectedCell.r, selectedCell.c, r, c); 
+            } else {
+              updateInformation("不能送將！");
+            }
+          } 
+        }
       } else { if (isMyPiece) selectedCell = { r: r, c: c }; } renderBoard();
     }
 
     async function commitMove(r1, c1, r2, c2) {
       isSyncing = true; 
-      pausePollingUntil = Date.now() + 2000; 
+      lastActionTime = Date.now(); 
 
-      if (!gameState.history) gameState.history = []; gameState.history.push({ board: JSON.parse(JSON.stringify(gameState.board)), turn: gameState.turn, status: gameState.status, checkMsg: gameState.checkMsg }); if (gameState.history.length > 50) gameState.history.shift(); 
+      if (!gameState.history) gameState.history = []; 
+      
+      gameState.history.push({ 
+          board: JSON.parse(JSON.stringify(gameState.board)), 
+          turn: gameState.turn, 
+          status: gameState.status, 
+          checkMsg: gameState.checkMsg,
+          lastMove: gameState.lastMove ? JSON.parse(JSON.stringify(gameState.lastMove)) : null
+      }); 
+      
+      if (gameState.history.length > 50) gameState.history.shift(); 
       let newBoard = JSON.parse(JSON.stringify(gameState.board)); newBoard[r2][c2] = newBoard[r1][c1]; newBoard[r1][c1] = '';
       let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; let checkAlert = ''; let status = 'playing';
       if (isKingAttacked(newBoard, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
@@ -446,11 +580,16 @@
       gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; 
       gameState.restartRequest = null; gameState.undoRequest = null; 
       
+      gameState.lastMove = { r1: r1, c1: c1, r2: r2, c2: c2 };
+      
       selectedCell = null; 
+      
       updateUI(gameState); 
       
       let res = await apiCall('move', { state: gameState }); 
-      if(res && res.state) gameState = res.state; 
+      if(res && res.state) {
+        gameState = res.state; 
+      }
       isSyncing = false; 
     }
 
@@ -592,92 +731,98 @@
     }
 
     async function makeAIMove() {
-      while (isSyncing) { await new Promise(r => setTimeout(r, 50)); }
-      await new Promise(r => setTimeout(r, 400)); 
+      try {
+        while (isSyncing) { await new Promise(r => setTimeout(r, 50)); }
+        await new Promise(r => setTimeout(r, 400)); 
 
-      if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
-          isAiThinking = false; return;
-      }
-
-      let aiLevel = sessionStorage.getItem('xq_ai_level_' + room) || 'easy';
-      let validMoves = getAllLegalMovesList(gameState.board, aiRole);
-
-      if (validMoves.length === 0) {
-        let currentBoardStr = JSON.stringify(gameState.board);
-        if (lastSurrenderedBoard !== currentBoardStr) {
-            lastSurrenderedBoard = currentBoardStr;
-            isAiThinking = false; 
-            document.getElementById('info').textContent = "對局結束：電腦無棋可走";
-            
-            setTimeout(async () => {
-                if (confirm("太神啦！電腦被絕殺無棋可走，你贏了！\n\n是否要立即開新局？")) {
-                    pausePollingUntil = Date.now() + WAIT_POLLING_DELAY;
-                    isSyncing = true;
-                    let data = await apiCall('restart', { playerId: myId, restartAction: 'request' });
-                    if (data && data.state) updateUI(data.state);
-                    isSyncing = false;
-                }
-            }, 100);
-        }
-        return;
-      }
-
-      let totalPieces = 0;
-      for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
-
-      if (aiLevel === 'hard' && totalPieces >= 31) { 
-        let openings = [];
-        if (aiRole === 'b') {
-            openings = [
-                {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, 
-                {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, 
-                {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, 
-                {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  
-            ];
-        } else {
-            openings = [
-                {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, 
-                {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, 
-                {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, 
-                {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6}  
-            ];
-        }
-        let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
-        if (legalOpenings.length > 0) {
-            let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
-            await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
-            isAiThinking = false;
+        if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
             return;
         }
-      }
 
-      let bestMove = validMoves[0]; 
+        let aiLevel = sessionStorage.getItem('xq_ai_level_' + room) || 'easy';
+        let validMoves = getAllLegalMovesList(gameState.board, aiRole);
 
-      if (aiLevel === 'easy') {
-        bestMove = validMoves[Math.floor(Math.random() * Math.min(5, validMoves.length))];
-      } else {
-        let bestVal = -Infinity;
-        let searchDepth = totalPieces <= 16 ? 5 : 4; 
-
-        for (let move of validMoves) {
-          let p = gameState.board[move.r1][move.c1]; let target = gameState.board[move.r2][move.c2];
-          gameState.board[move.r2][move.c2] = p; gameState.board[move.r1][move.c1] = '';
-          
-          let moveVal = minimax(gameState.board, searchDepth - 1, -Infinity, Infinity, false, aiRole);
-          
-          gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target; 
-
-          moveVal += Math.random() * 2; 
-
-          if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
-          
-          await new Promise(r => setTimeout(r, 0));
+        if (validMoves.length === 0) {
+          let currentBoardStr = JSON.stringify(gameState.board);
+          if (lastSurrenderedBoard !== currentBoardStr) {
+              lastSurrenderedBoard = currentBoardStr;
+              updateInformation("對局結束：電腦無棋可走");
+          }
+          return;
         }
-      }
 
-      await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
-      isAiThinking = false;
-      document.getElementById('info').textContent = gameState.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
+        let totalPieces = 0;
+        for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
+
+        if (aiLevel === 'hard' && totalPieces >= 31) { 
+          let openings = [];
+          if (aiRole === 'b') {
+              openings = [
+                  {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, 
+                  {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, 
+                  {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, 
+                  {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6}  
+              ];
+          } else {
+              openings = [
+                  {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, 
+                  {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, 
+                  {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, 
+                  {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6}  
+              ];
+          }
+          let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
+          if (legalOpenings.length > 0) {
+              let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
+              await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
+              return;
+          }
+        }
+
+        let bestMove = validMoves[0]; 
+        let historyStrs = (gameState.history || []).map(h => JSON.stringify(h.board));
+
+        if (aiLevel === 'easy') {
+          let nonRepeatingMoves = validMoves.filter(move => {
+            let p = gameState.board[move.r1][move.c1]; let target = gameState.board[move.r2][move.c2];
+            gameState.board[move.r2][move.c2] = p; gameState.board[move.r1][move.c1] = '';
+            let isRep = historyStrs.includes(JSON.stringify(gameState.board));
+            gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target;
+            return !isRep;
+          });
+
+          let candidateMoves = nonRepeatingMoves.length > 0 ? nonRepeatingMoves : validMoves;
+          bestMove = candidateMoves[Math.floor(Math.random() * Math.min(5, candidateMoves.length))];
+        } else {
+          let bestVal = -Infinity;
+          let searchDepth = totalPieces <= 16 ? 5 : 4; 
+
+          for (let move of validMoves) {
+            let p = gameState.board[move.r1][move.c1]; let target = gameState.board[move.r2][move.c2];
+            gameState.board[move.r2][move.c2] = p; gameState.board[move.r1][move.c1] = '';
+            
+            let moveVal = minimax(gameState.board, searchDepth - 1, -Infinity, Infinity, false, aiRole);
+            
+            let currentBoardStr = JSON.stringify(gameState.board);
+            if (historyStrs.includes(currentBoardStr)) {
+              moveVal -= 50000;
+            }
+
+            gameState.board[move.r1][move.c1] = p; gameState.board[move.r2][move.c2] = target; 
+
+            moveVal += Math.random() * 2; 
+
+            if (moveVal > bestVal) { bestVal = moveVal; bestMove = move; }
+            
+            await new Promise(r => setTimeout(r, 0));
+          }
+        }
+
+        await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
+        updateInformation(gameState.turn === 'b' ? "輪到：黑方" : "輪到：紅方");
+      } finally {
+        isAiThinking = false;
+      }
     }
 
     function getColor(p) { return p === '' ? '' : (p === p.toLowerCase() ? 'b' : 'r'); }
