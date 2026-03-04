@@ -2,10 +2,9 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <title>聊天</title>
     
-    <!-- 引入必要的函式庫 -->
     <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
@@ -20,13 +19,12 @@
             --input-bg: rgba(255, 255, 255, 0.95);
         }
 
-        /* 核心布局：防止 iOS 背景捲動並適應高度 */
+        /* 核心布局：使用 dvh 完美適配 iOS Safari */
         html, body {
-            height: 100%;
-            height: -webkit-fill-available;
+            height: 100dvh;
             margin: 0;
             padding: 0;
-            overflow: hidden;
+            overflow: hidden; 
             background-color: var(--bg-color);
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Microsoft JhengHei", sans-serif;
         }
@@ -35,23 +33,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: fixed; /* 關鍵：防止鍵盤彈出時 body 被推上去產生空白 */
             width: 100%;
-        }
-
-        /* 頂部導覽列 */
-        .app-header {
-            width: 100%;
-            max-width: 800px;
-            padding: 12px 20px;
-            background: var(--bg-color);
-            text-align: center;
-            font-weight: 700;
-            font-size: 18px;
-            color: var(--dark-green);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
-            flex-shrink: 0;
-            z-index: 10;
         }
 
         /* 聊天主容器 */
@@ -60,12 +42,13 @@
             max-width: 800px;
             flex-grow: 1;
             overflow-y: auto;
-            -webkit-overflow-scrolling: touch; /* 讓 iOS 捲動平滑 */
+            -webkit-overflow-scrolling: touch;
             padding: 20px 15px;
             display: flex;
             flex-direction: column; 
-            gap: 12px;
+            gap: 16px; 
             box-sizing: border-box;
+            scroll-behavior: smooth;
         }
 
         /* 訊息氣泡設計 */
@@ -76,14 +59,13 @@
             max-width: 85%;
             word-wrap: break-word;
             line-height: 1.6;
-            font-size: 17px; /* 手機端清晰大字體 */
+            font-size: 17px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             animation: fadeIn 0.3s ease;
         }
         
-        /* 預留底部空間給複製按鈕 (不包含系統訊息) */
         .message:not(.info-message) {
-            padding-bottom: 32px; 
+            padding-bottom: 36px; 
         }
 
         @keyframes fadeIn {
@@ -109,50 +91,53 @@
             background-color: var(--system-info);
             color: #33691E;
             font-size: 13px;
-            padding: 5px 12px;
+            padding: 6px 14px;
             align-self: center; 
-            border-radius: 10px;
+            border-radius: 12px;
             box-shadow: none;
+            margin: 8px 0;
         }
 
         /* 複製按鈕樣式 */
         .copy-btn {
             position: absolute;
-            bottom: 4px;
-            right: 10px;
+            bottom: 6px;
+            right: 12px;
             background: transparent;
             border: none;
             color: inherit;
-            font-size: 14px;
-            opacity: 0.6;
+            font-size: 15px;
+            opacity: 0.5;
             cursor: pointer;
             padding: 4px 8px;
-            border-radius: 10px;
+            border-radius: 8px;
             transition: all 0.2s;
             z-index: 5;
+            touch-action: manipulation; 
         }
         
-        .user-message .copy-btn { color: rgba(255,255,255, 0.8); }
-        .ai-message .copy-btn { color: rgba(0,0,0, 0.4); }
+        .user-message .copy-btn { color: rgba(255,255,255, 0.9); }
+        .ai-message .copy-btn { color: rgba(0,0,0, 0.5); }
 
-        .copy-btn:hover {
+        .copy-btn:hover, .copy-btn:active {
             opacity: 1;
-            background-color: rgba(0,0,0,0.05);
+            background-color: rgba(0,0,0,0.08);
+            transform: scale(1.05);
         }
-        .user-message .copy-btn:hover {
-            background-color: rgba(255,255,255,0.2);
+        .user-message .copy-btn:hover, .user-message .copy-btn:active {
+            background-color: rgba(255,255,255,0.25);
         }
 
-        /* 輸入區域：膠囊式設計 */
+        /* 輸入區域 */
         #input-wrapper {
             width: 100%;
             max-width: 800px;
             padding: 10px 15px;
             box-sizing: border-box;
             background: var(--bg-color);
-            /* 適應 iPhone 底部安全區 (Home Indicator) */
             padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
             flex-shrink: 0;
+            z-index: 10;
         }
 
         #input-area {
@@ -166,6 +151,10 @@
             align-items: flex-end; 
             gap: 8px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            transition: border-color 0.3s;
+        }
+        #input-area:focus-within {
+            border-color: var(--primary-green);
         }
 
         #user-input {
@@ -180,6 +169,7 @@
             outline: none;
             color: #000;
             caret-color: var(--primary-green);
+            resize: none; 
         }
 
         /* 按鈕設計 */
@@ -197,6 +187,7 @@
             border-radius: 50%;
             transition: 0.2s;
             flex-shrink: 0;
+            touch-action: manipulation;
         }
 
         .btn:active {
@@ -213,24 +204,45 @@
             margin-bottom: 2px;
         }
 
-        /* 滾動條 */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #C8E6C9; border-radius: 10px; }
+        .recording {
+            animation: pulse 1.5s infinite;
+            color: #F44336 !important;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); background-color: rgba(244, 67, 54, 0.1); }
+            50% { transform: scale(1.1); background-color: rgba(244, 67, 54, 0.3); }
+            100% { transform: scale(1); background-color: rgba(244, 67, 54, 0.1); }
+        }
 
-        /* 電腦端 hover 效果 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(76, 175, 80, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(76, 175, 80, 0.6); }
+
         @media (min-width: 768px) {
             #chat-container { padding: 40px 20px; }
             .message:hover { filter: brightness(0.98); }
+        }
+        
+        /* Markdown 內部樣式優化 */
+        .message pre { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; overflow-x: auto; }
+        .message code { font-family: monospace; background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 4px; }
+        .user-message pre, .user-message code { background: rgba(255,255,255,0.2); }
+        /* 針對 Markdown 引用樣式優化，用於突顯精煉內容 */
+        .message blockquote { 
+            border-left: 4px solid var(--primary-green); 
+            margin: 10px 0; 
+            padding-left: 12px; 
+            color: #444; 
+            background: rgba(76, 175, 80, 0.05);
+            padding: 8px 12px;
+            border-radius: 4px;
         }
     </style>
 </head>
 <body>
 
-    <!--header class="app-header">生活助理</header-->
-
-    <div id="chat-container">
-        <!-- 初始訊息範例會由 JS 生成或在此預填 -->
-    </div>
+    <div id="chat-container"></div>
 
     <div id="input-wrapper">
         <div id="input-area">
@@ -239,15 +251,6 @@
             <button id="send-btn" class="btn">➤</button>
         </div>
     </div>
-
-    <script>
-        // 自動調整 textarea 高度
-        const textarea = document.getElementById('user-input');
-        textarea.addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-    </script>
 
     <script>
         // --- 設定與全域變數 ---
@@ -263,91 +266,12 @@
         情境描述： 「我目前面臨 [具體情境]，請你從 [不同角度，例如：經濟、心理、實際操作] 進行分析，並提供解決方案。」
         問題拆解： 「請將 [複雜問題] 拆解成幾個小步驟，並逐一進行說明與分析。」
         回應態度： 「請你以溫柔，平和、幽默的語氣來回答，並確保內容具有創意、實用性、深度。」
-
-        具體範例如下：
-
-        生活規劃類：
-        「請你扮演一位時間管理專家，我希望在接下來的三個月內，能夠有效提升工作效率並學習一項新技能（例如：程式設計）。請為我制定一份詳細的週計畫，包含每日的具體任務、預計花費時間，並分析執行過程中可能遇到的挑戰及應對策略。」
-        「請您扮演一位經驗豐富的 時間管理與技能學習顧問 👩‍🏫。我的核心目標是，在接下來的 三個月內，能夠顯著 提升工作效率，並成功 學習一項新的程式設計技能（例如：Python 入門）。請您為我制定一份 詳細的週計畫，包含每日的具體任務、預計花費時間，並深入分析 執行過程中可能遇到的挑戰（例如：時間衝突、學習瓶頸）以及 可行的應對策略。假設我們現在處於一個 快節奏的職場環境，我需要同時兼顧現有工作與學習。在我們之前的對話中，我們曾討論過 『番茄工作法』 和 『線上學習資源』 的選擇。請您基於這些資訊，進一步展開分析，並提出 更具體的執行建議和激勵方法。請您以 溫柔、鼓勵且帶點趣味 的語氣回答，確保內容 實用且易於執行。請使用繁體中文，並善用 Emoji 和 Markdown 標示。若有需要，請提供三個相關的網路連結作為參考。」
-        
-        學習分析類：
-        「我正在學習 [某個學科或概念]，但對於 [特定部分] 感到困惑。請你以一位資深教授的身份，從基礎概念開始，逐步深入解釋 [特定部分]，並提供幾個實際應用案例來幫助我理解。請確保解釋清晰、有邏輯，並包含關鍵術語的定義。」
-        「我正在學習 [某個學科或概念，例如：量子力學]，但對於其中的 [特定部分，例如：波粒二象性] 感到非常困惑。請您以一位 資深物理學教授 👨‍🏫 的身份，從 基礎概念 開始，逐步深入解釋 [特定部分]，並提供幾個 實際應用案例 來幫助我理解。請確保您的解釋 清晰、有邏輯，並包含 關鍵術語的定義。請以 耐心、專業且易於理解 的方式進行闡述，並用繁體中文回答。請提供三個相關的網路連結作為參考。」
-
-        決策輔助類：
-        「我正在考慮是否要 [做出某項決定，例如：換工作、購買某項產品]。請你從 [列出您關心的面向，例如：財務、職業發展、個人幸福感] 等多個角度進行深入分析，並列出支持與反對此決定的論點，最後給出一個綜合性的建議。」
-        「我目前正在考慮是否要 [做出某項決定，例如：辭去現有穩定的工作，轉職進入一個新創公司]。請您從 財務狀況、職業發展潛力、個人幸福感與生活品質 等多個角度進行深入分析。請列出 支持與反對此決定的論點，並進行 權衡。最後，請給出一個 綜合性的建議，幫助我做出最適合自己的選擇。請您以 客觀、理性且富有同理心 的語氣回答，並用繁體中文，善用 Markdown 標示。請提供三個相關的網路連結作為參考。」
-
-        問題解決類：
-        「我家中的 [某個物品] 出現了 [某個問題，例如：漏水、無法開機]。請你提供一份詳細的故障排除指南，從最簡單的檢查步驟開始，逐步深入，並說明每個步驟的目的。如果問題無法解決，請建議我下一步該怎麼做。」
-        「我家中的 [某個物品，例如：智慧型手機] 出現了 [某個問題，例如：電池異常耗電且充電緩慢]。請您提供一份 詳細的故障排除指南，從最簡單的檢查步驟開始（例如：檢查充電線、重新啟動手機），逐步深入，並說明每個步驟的目的。如果問題無法解決，請建議我 下一步該怎麼做（例如：聯繫客服、尋求專業維修）。請您以 實用、清晰且有條理 的方式說明，並用繁體中文回答。請提供三個相關的網路連結作為參考。」
-
-
         提示詞的關鍵要素：
-        明確的角色： 讓 AI 知道它應該以什麼樣的身份來回答。
-        具體的情境： 提供越詳細的背景資訊，AI 的回答就越貼切。
-        清晰的目標： 讓 AI 知道您希望從回答中獲得什麼。
-        要求的格式： 指明您希望回答是有條理、有步驟、分析性的。用繁體中文回答。盡量加上emoji。盡量用markdown標示。
-        限制與範圍： 如果有特定的限制或希望 AI 關注的方面，請一併說明。
-        預設地點時間： 如果沒有提供地點和時間，請預設為美國佛羅里達州坦帕市 (Tampa, Florida, USA) 的當前日期和時間。
-        相關的資料： 在每一個階段回應中，提供相關的三個網址。 `;
-
-        /*
-        let SYSTEM_PROMPT = `角色設定 (Role Setting): 🤖
-        格式： 「以一位 [專業角色名稱]，例如：一位經驗豐富的 [生活規劃師] 👩‍💼、一位嚴謹的 [科學研究員] 🔬、一位博學的 [歷史學家] 📜，或是精通 [程式設計的專家] 💻。」
-        目的： 讓 AI 知道它應該以何種專業視角和口吻來回應。
-
-        核心目標 (Core Objective): 🎯
-        格式： 「目標是 [明確闡述您想要達成的目的]，例如：『深入理解並掌握時間管理技巧以提升工作效率，同時學習一項新的程式設計技能』。」
-        目的： 讓 AI 清楚您期望的最終成果。
-
-        前次對話回顧 (Previous Conversation Recap):🔄
-        格式： 「在我們之前的對話中，我們已經討論過 [相關主題]，特別是關於 [重複關鍵詞，例如：『番茄工作法』、『線上學習資源』] 的應用。基於這些資訊，請您在此基礎上，進一步展開分析，並提出 [新的見解或創新的解決方案]。」
-        目的： 提供 AI 足夠的背景資訊，使其能做出更貼切、更有深度的回應。
-
-        具體行動與分析 (Specific Actions & Analysis): 📝
-        格式： 「你提供一份 [具體行動的步驟指南]，例如：『一份為期三個月的詳細週計畫』。同時，請對該計畫的 [優點與潛在挑戰] 進行深入分析，並提出 [可行的應對策略]。」
-        目的： 指導 AI 提供具體的執行方案，並進行風險評估和建議。
-
-        情境與背景 (Context & Background): 🌍
-        情境設定 (Scenario Setting): 「假設我們現在身處於 [特定的環境或情境描述]，例如：『一個快速變動的科技行業，時間緊迫且資源有限』。」
-        前情提要 (Previous Context): 「在我們之前的對話中，我們曾討論過 [相關主題]，特別是關於 [重複關鍵詞，例如：『番茄工作法』、『專案管理工具』] 的應用。基於這些資訊，請您在此基礎上，進一步展開分析，並提出 [新的見解或創新的解決方案]。」
-        目的： 提供 AI 足夠的背景資訊，使其能做出更貼切、更有深度的回應。
-
-        問題拆解 (Problem Decomposition): 🧩
-        格式： 「請您將 [一個複雜的問題或概念]，例如：『如何有效平衡工作與學習』，拆解成幾個 [易於理解的小步驟]，並逐一進行 [詳細的說明與分析]。」
-        目的： 將複雜問題化繁為簡，便於理解和執行。
-
-        回應風格與要求 (Response Style & Requirements): ✨
-        態度： 「請您以 [指定的語氣和風格] 回答，例如：『溫柔、平和且帶有一點幽默感』，同時確保內容 [具備創意、實用性與深度]。」
-        格式要求： 「請務必使用 繁體中文 回答，並盡量使用 Emoji 點綴，同時善用 Markdown 標示（如標題、列表、粗體等）來組織內容。」
-        限制與範圍： 「請您在分析時，特別關注 [您希望 AI 關注的特定面向或限制]，例如：『避免過於學術化的術語，著重於實際操作性』。」
-        地點與時間預設： 「若未特別指定，請預設地點為 美國佛羅里達州坦帕市 (Tampa, Florida, USA)，日期時間為 2026年2月15日 下午2:35:10 (UTC)。」
-        資料來源： 「在您的回應中，請為每一個關鍵資訊點提供 三個相關的網路連結 作為參考資料。」
-
-        具體範例：
-        📅 生活規劃類範例 📅
-        「請您扮演一位經驗豐富的 時間管理與技能學習顧問 👩‍🏫。我的核心目標是，在接下來的 三個月內，能夠顯著 提升工作效率，並成功 學習一項新的程式設計技能（例如：Python 入門）。
-        請您為我制定一份 詳細的週計畫，包含每日的具體任務、預計花費時間，並深入分析 執行過程中可能遇到的挑戰（例如：時間衝突、學習瓶頸）以及 可行的應對策略。
-        假設我們現在處於一個 快節奏的職場環境，我需要同時兼顧現有工作與學習。在我們之前的對話中，我們曾討論過 『番茄工作法』 和 『線上學習資源』 的選擇。請您基於這些資訊，進一步展開分析，並提出 更具體的執行建議和激勵方法。
-        請您以 溫柔、鼓勵且帶點趣味 的語氣回答，確保內容 實用且易於執行。請使用繁體中文，並善用 Emoji 和 Markdown 標示。若有需要，請提供三個相關的網路連結作為參考。」
-
-        📚 學習分析類範例 📚
-        「我正在學習 [某個學科或概念，例如：量子力學]，但對於其中的 [特定部分，例如：波粒二象性] 感到非常困惑。請您以一位 資深物理學教授 👨‍🏫 的身份，從 基礎概念 開始，逐步深入解釋 [特定部分]，並提供幾個 實際應用案例 來幫助我理解。
-        請確保您的解釋 清晰、有邏輯，並包含 關鍵術語的定義。請以 耐心、專業且易於理解 的方式進行闡述，並用繁體中文回答。請提供三個相關的網路連結作為參考。」
-
-        🤔 決策輔助類範例 🤔
-        「我目前正在考慮是否要 [做出某項決定，例如：辭去現有穩定的工作，轉職進入一個新創公司]。請您從 財務狀況、職業發展潛力、個人幸福感與生活品質 等多個角度進行深入分析。
-        請列出 支持與反對此決定的論點，並進行 權衡。最後，請給出一個 綜合性的建議，幫助我做出最適合自己的選擇。
-        請您以 客觀、理性且富有同理心 的語氣回答，並用繁體中文，善用 Markdown 標示。請提供三個相關的網路連結作為參考。」
-
-        🛠️ 問題解決類範例 🛠️
-        「我家中的 [某個物品，例如：智慧型手機] 出現了 [某個問題，例如：電池異常耗電且充電緩慢]。請您提供一份 詳細的故障排除指南，從最簡單的檢查步驟開始（例如：檢查充電線、重新啟動手機），逐步深入，並說明每個步驟的目的。
-        如果問題無法解決，請建議我 下一步該怎麼做（例如：聯繫客服、尋求專業維修）。
-        請您以 實用、清晰且有條理 的方式說明，並用繁體中文回答。請提供三個相關的網路連結作為參考。」`*/
+        內容經過搜尋優化： 讓 AI 知道您希望它提供最新、最相關的資訊。
+        要求的格式： 用繁體中文回答。盡量加上emoji。盡量用markdown標示。`;
         
         let MODEL = "gemini-2.5-flash-lite";
-        let HISTMAX = 12; // 最大歷史記錄數量
+        let HISTMAX = 12; // 基本對話保留長度
         let lastAiMessage = "";
         let hist = [];
         let dateA = "";
@@ -357,7 +281,8 @@
         const DB_NAME = "ChatHistoryDB";
         const DB_VERSION = 1;
         const STORE_NAME = "histories";
-        let  KEYA = "GVkX18O2PMYNSlYBMU3+YBbuyUWUSZteTjL63+63l30jZ86";
+        const AUTOSAVE_SESSION_KEY = "current_session_autosave"; 
+        let KEYA = "GVkX18O2PMYNSlYBMU3+YBbuyUWUSZteTjL63+63l30jZ86";
 
         // --- DOM 元素 ---
         const chatContainer = document.getElementById('chat-container');
@@ -423,8 +348,10 @@
                 const request = store.get(name);
                 request.onsuccess = async () => {
                     if (request.result) {
-                        const decryptedData = await decryptData(request.result.data, KEYA);
-                        resolve(decryptedData);
+                        try {
+                            const decryptedData = await decryptData(request.result.data, KEYA);
+                            resolve(decryptedData);
+                        } catch(e) { resolve(null); }
                     }
                     else resolve(null);
                 };
@@ -459,6 +386,24 @@
             return "已清除所有存檔";
         }
 
+        async function autoSaveSession() {
+            if (hist.length > 0) {
+                await dbSave(AUTOSAVE_SESSION_KEY, hist);
+            } else {
+                await dbDel(AUTOSAVE_SESSION_KEY);
+            }
+        }
+
+        async function loadAutoSavedSession() {
+            const savedData = await dbLoad(AUTOSAVE_SESSION_KEY);
+            if (savedData && Array.isArray(savedData) && savedData.length > 0) {
+                hist = savedData;
+                renderHistory(true);
+                return true;
+            }
+            return false;
+        }
+
         // ==========================================
         // 2. 核心邏輯
         // ==========================================
@@ -467,25 +412,32 @@
             try {
                 const hashKey = CryptoJS.SHA512(inKey).toString(); 
                 const bytes = CryptoJS.AES.decrypt(encKey, hashKey);
-                data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
                 const decryptedText = data.API || "";
 
-                // get other values
                 KEYA = data.KEYA || "";
-
                 return decryptedText.length > 0 ? decryptedText : null;
             } catch (error) {
                 return null;
             }
         }
         
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
         function displayMessage(text, sender, isInfo = false) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
             
-            // 建立內容容器
             const contentDiv = document.createElement('div');
-            contentDiv.innerHTML = text; // 使用 innerHTML 支援 markdown
+            // isInfo 保持純文字/HTML，否則使用 Markdown 解析
+            contentDiv.innerHTML = isInfo ? text : marked.parse(text); 
             messageDiv.appendChild(contentDiv);
 
             lastAiMessage = sender === 'user' ? text : lastAiMessage;
@@ -497,110 +449,176 @@
                 if (isInfo) messageDiv.classList.add('info-message');
             }
             
-            // --- 加入複製按鈕 (不包含系統訊息) ---
             if (!isInfo) {
                 const copyBtn = document.createElement('button');
                 copyBtn.className = 'copy-btn';
-                copyBtn.innerHTML = '❐'; // 複製圖示
+                copyBtn.innerHTML = '❐'; 
                 copyBtn.title = "複製內容";
                 
                 copyBtn.onclick = async (e) => {
-                    // 阻止冒泡防止觸發其他點擊事件（如果有）
                     e.stopPropagation();
                     try {
-                        // 複製 contentDiv 的純文字內容
-                        await navigator.clipboard.writeText(contentDiv.innerText);
+                        // 【優化修改】：直接複製原始 text 變數，保留完整 Markdown 語法
+                        let cleanRawMarkdown = text
+                            .replace(/[ \t]+$/gm, '')       
+                            .replace(/\n{3,}/g, '\n\n')     
+                            .trim();                        
+
+                        await navigator.clipboard.writeText(cleanRawMarkdown);
                         
-                        // 顯示成功回饋
                         const originalHtml = copyBtn.innerHTML;
                         copyBtn.innerHTML = '✅';
-                        
-                        // 1.5秒後恢復原狀
-                        setTimeout(() => {
-                            copyBtn.innerHTML = originalHtml;
-                        }, 1500);
+                        setTimeout(() => copyBtn.innerHTML = originalHtml, 1500);
                     } catch (err) {
                         console.error('複製失敗:', err);
-                        displayMessage("❌ 複製失敗", 'ai', true);
                     }
                 };
-                
                 messageDiv.appendChild(copyBtn);
             }
             
             chatContainer.appendChild(messageDiv);
+            scrollToBottom();
         }
 
-        function scrollToBottom() {
-            setTimeout(() => {
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }, 50);
-        }
-
-        function renderHistory() {
+        function renderHistory(isAutoLoad = false) {
             chatContainer.innerHTML = ""; 
-            if (!API_KEY) displayMessage("🔒 服務鎖定中。", 'ai', true);
-            else displayMessage("♻️ 畫面已刷新", 'ai', true);
+            if (isAutoLoad) {
+                displayMessage("♻️ 已自動恢復前次對話紀錄", 'ai', true);
+            } else {
+                displayMessage("♻️ 畫面已刷新", 'ai', true);
+            }
 
             hist.forEach(item => {
                 const text = item.parts[0].text;
                 const role = item.role === 'model' ? 'ai' : 'user';
-                displayMessage(marked.parse(text), role); // 確保歷史紀錄也渲染 markdown
+                // 跳過系統自己產生的精煉提示句不在畫面顯示
+                if (text.startsWith("【系統已精煉歷史紀錄】")) return; 
+                displayMessage(text, role); 
                 lastAiMessage = role === 'user' ? text : lastAiMessage;
             });
-        }
-
-        function getSpecificHistory(inH) {
-            const A = [];
-            let lastModelMessage = null;
-
-            for (const message of inH) {
-                if (message.role === "user") {
-                    A.push(message);
-                }
-            }
-
-            for (let i = inH.length - 1; i >= 0; i--) {
-                if (inH[i].role === "model") {
-                    lastModelMessage = inH[i];
-                    break; 
-                }
-            }
-
-            if (lastModelMessage) {
-                A.push(lastModelMessage);
-            }
-            
-            console.log("歷史記錄:", A);
-            return A;
+            scrollToBottom();
         }
 
         async function checkDbPwd(){
-            const data = await dbLoad("VkX18O2PM");
+            const pwdData = await dbLoad("VkX18O2PM");
             let endProm = "";
-            if (! data) { 
-                return false; 
-            }
-            else { 
-                hist = data; 
-                hist.forEach(item => {
-                    const text = item.parts[0].text;
-                    const role = item.role === 'model' ? 'ai' : 'user';
-                    endProm = role === 'ai' ? text : endProm;
-                });
-                hist = [];
-                if(endProm === "" || endProm === "月落") return false;
+            if (!pwdData) return false; 
+            
+            // 使用區域變數，不覆寫全域 hist
+            pwdData.forEach(item => {
+                const text = item.parts[0].text;
+                const role = item.role === 'model' ? 'ai' : 'user';
+                endProm = role === 'ai' ? text : endProm;
+            });
+            
+            if(endProm === "" || endProm === "月落") return false;
 
-                userInput.value = endProm;
-                await sendMessage();
-                return true;
+            userInput.value = endProm;
+            // 系統自動幫忙送出該密碼字串
+            await sendMessage();
+            return true;
+        }
+
+        // --- 產生話題名稱的工具 ---
+        async function generateTopicTitle(history) {
+            // 跳過包含「系統精煉」的背景訊息來抓取標題
+            let fallbackText = history.find(h => h.role === 'user' && !h.parts[0].text.startsWith("【"))?.parts[0].text.substring(0, 10).replace(/[\r\n]/g, '') || "未知話題";
+            if (!API_KEY || history.length === 0) return fallbackText;
+
+            try {
+                const prompt = "請根據以下對話紀錄，總結出一個能夠代表這段對話的核心主題名稱。要求：不超過10個字，不要任何標點符號，直接輸出純文字：\n" + history.map(h => h.parts[0].text).join("\n").substring(0, 1000);
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 20 }
+                    })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    let title = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    title = title.replace(/[^\w\u4e00-\u9fa5]/g, '').trim(); 
+                    if (title.length > 0) return title;
+                }
+            } catch (e) { console.error("生成標題失敗:", e); }
+            return fallbackText;
+        }
+
+        // --- 背景精煉歷史記錄：疊加合併版 ---
+        async function compressHistory() {
+            // 當前長度大於或等於 (基本保留數 + 10筆對話) 時才觸發大整理
+            if (hist.length < HISTMAX + 10 || !API_KEY) return;
+            
+            let existingSummary = "";
+            let startIndex = 0;
+
+            // 1. 檢查是否已經有存在的精煉歷史
+            if (hist.length > 0 && hist[0].parts[0].text.startsWith("【系統已精煉歷史紀錄】")) {
+                existingSummary = hist[0].parts[0].text.replace("【系統已精煉歷史紀錄】\n", "");
+                startIndex = 2; // 跳過前兩筆 (精煉 prompt 與 AI 的 OK 回覆)
+            }
+
+            // 2. 抽出舊對話 (抓取 8 筆訊息/ 4 次來回進行壓縮，保留最新幾筆)
+            const compressCount = 8;
+            if (hist.length - startIndex < compressCount) return; 
+
+            const toCompress = hist.slice(startIndex, startIndex + compressCount);
+            const remaining = hist.slice(startIndex + compressCount);
+
+            // 3. 準備給 AI 的合併指令
+            let compressPrompt = "";
+            if (existingSummary) {
+                compressPrompt = "以下是『過去的對話總結』：\n" + existingSummary + "\n\n---\n" +
+                                 "以下是『最新的一段對話』：\n" + 
+                                 toCompress.map(m => `${m.role === 'model' ? 'AI' : 'User'}: ${m.parts[0].text}`).join("\n\n") + 
+                                 "\n\n請將『過去的對話總結』與『最新的一段對話』合併，重新產生一份完整的精煉總結。務必保留所有過去與現在的核心意圖、關鍵資訊與結論，請勿遺漏先前的重點。請條理分明且精簡，直接輸出合併後的總結內容即可：";
+            } else {
+                compressPrompt = "請將以下對話內容進行精煉總結，保留使用者的核心意圖、關鍵資訊與最終結論。請盡量簡短以節省資源，直接輸出總結內容即可：\n\n" + 
+                                 toCompress.map(m => `${m.role === 'model' ? 'AI' : 'User'}: ${m.parts[0].text}`).join("\n\n");
+            }
+
+            try {
+                displayMessage("🔄 累積對話中...正在背景合併並更新歷史記憶。", 'ai', true);
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: compressPrompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const summaryText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    
+                    if(summaryText) {
+                        // 將合併後的精煉結果重新放回歷史紀錄的最開頭
+                        hist = [
+                            { role: "user", parts: [{ text: "【系統已精煉歷史紀錄】\n" + summaryText }] },
+                            { role: "model", parts: [{ text: "好的，我已經記住累積的對話重點了。" }] },
+                            ...remaining
+                        ];
+                        // 寫入 IndexedDB
+                        autoSaveSession();
+                        displayMessage("✅ 記憶精煉與合併累加完成。", 'ai', true);
+                        return;
+                    }
+                }
+                // 若 API 失敗，則 fallback 丟棄舊的兩筆對話
+                hist.splice(startIndex, 2); 
+            } catch (err) {
+                console.error("精煉失敗", err);
+                hist.splice(startIndex, 2); 
             }
         }
 
         async function getGeminiResponse(prompt) {
             if (!API_KEY) {
                 displayMessage(prompt, 'user');
-                displayMessage("🚨", 'ai', true);
+                displayMessage("🚨 請先輸入鑰匙解鎖", 'ai', true);
                 shouldRestartVoice = false;
                 return;
             }
@@ -611,28 +629,17 @@
             const loadingMessage = document.createElement('div');
             loadingMessage.id = loadingId;
             loadingMessage.classList.add('message', 'ai-message');
-            loadingMessage.textContent = '...';
+            loadingMessage.innerHTML = '<span style="animation: pulse 1s infinite; display: inline-block;">思考中...</span>';
             chatContainer.appendChild(loadingMessage);
             scrollToBottom();
 
             dateA = new Date().toLocaleString('zh-TW', { hour12: false });
-            SYMP = SYSTEM_PROMPT+`沒有說地點日期時，預設地點是${LOCT}，日期是${dateA}。`;
+            let SYMP = SYSTEM_PROMPT + `沒有說地點日期時，預設地點是${LOCT}，日期是${dateA}。`;
             
             const requestBody = {
-                    system_instruction: { 
-                        parts: [{ text: SYMP }] 
-                    },
-                    contents: [
-                        ...hist, 
-                        { role: "user", parts: [{ text: prompt }] }
-                    ],
-                    generationConfig: {
-                        temperature: 0.3,
-                        maxOutputTokens: 4096,
-                        "thinkingConfig": {
-                            "thinkingBudget": 0
-                        }
-                    },
+                    system_instruction: { parts: [{ text: SYMP }] },
+                    contents: [...hist, { role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
                     tools: [{ googleSearch: {} }]
                 };
             try {
@@ -652,18 +659,19 @@
                 const parts = data.candidates?.[0]?.content?.parts;
                 let aiText = "無回應";
                 if (parts && Array.isArray(parts)) {
-                    aiText = parts
-                        .map(part => part.text || "") 
-                        .join("")                     
-                        .trim();                      
+                    aiText = parts.map(part => part.text || "").join("").trim();                      
                     if (aiText === "") aiText = "無回應";
                 }
 
-                displayMessage(marked.parse(aiText), 'ai');
+                displayMessage(aiText, 'ai');
 
                 hist.push({ role: "user", parts: [{ text: prompt }] });
                 hist.push({ role: "model", parts: [{ text: aiText }] });
-                if (hist.length > HISTMAX) hist.splice(0, 2);
+                
+                await autoSaveSession();
+                
+                // 檢查是否達到累積門檻觸發精煉
+                await compressHistory(); 
 
             } catch (error) {
                 const loadingElem = document.getElementById(loadingId);
@@ -686,228 +694,250 @@
             const cmd = parts[0].toLowerCase();
             const arg = parts.slice(1).join(" "); 
 
-            if (cmd === '幫幫我' || cmd === '幫我' || cmd === 'help' || cmd === '指令') {
-                const helpText = `🛠️ 指令說明：
-1. 存 談話 : 儲存當下對話
-2. 取 談話 : 載入指定對話
-3. 列 : 列出所有保存對話
-4. 刪 談話 : 刪除指定對話
-5. 清空所有保存談話 : 清除所有對話
-6. 看 談話 : 顯示對話內容
-7. 複製 : 複製當前對話
-8. 貼 : 貼上對話
-9. 清 : 清空對話
-11. 重來 : 重整網頁
-12. ver : 顯示版本
-13. 記 內容 : 備註
-14. 退 : 最後說的不算
-15. 尾 : 再講一次
-16. 密語 小聲說: 嗯。。。秘密話
-17. 開 : 聽聽密語小聲怎麼說
-18. 鑰匙 型號 : 給我看看鑰匙長怎樣
-19. 長 幾分鐘 : 要聊多久呀
-20. 你是 誰 : 我是誰 我來自哪裡 我要去向何方 我為什麼是我  
-`;
+            if (['幫幫我', '幫我', 'help', '指令'].includes(cmd)) {
+                const helpText = `🤖 **指令說明：**
 
-                displayMessage(marked.parse(helpText), 'ai', true);
+* **儲存與管理**
+  * \`存 [名稱]\` : 儲存當下對話
+  * \`取 [名稱]\` : 載入指定對話
+  * \`列\` 或 \`紀錄\` : 列出所有保存的對話與切換方式
+  * \`刪 [名稱]\` : 刪除指定對話
+  * \`清空所有保存談話\` : 清除所有對話庫
+* **檢視與操作**
+  * \`記憶\` 或 \`背景\` : 顯示 AI 當前完整的記憶狀態 (包含精煉總結)
+  * \`看 [名稱]\` : 預覽已封存的對話內容
+  * \`複製\` / \`複\` : 複製當前對話 (JSON 格式)
+  * \`貼\` : 貼上對話 (JSON 格式)
+* **流程控制**
+  * \`新話題\` : 自動封存當前話題並開啟全新的對話
+  * \`清\` : 清空畫面與當下對話紀錄
+  * \`退\` / \`ddd\` : 收回/刪除最後一筆對話
+  * \`尾\` : 重送最後一句 AI 的話
+  * \`長 [數字]\` : 設定短期對話記憶長度
+* **系統指令**
+  * \`重來\` / \`reload\` : 重整網頁
+  * \`ver\` : 顯示版本
+  * \`記 [內容]\` : 留下備註紀錄
+  * \`密語 [內容]\` : 設定悄悄話密碼
+  * \`開\` : 執行悄悄話
+  * \`鑰匙 [key]\` : 系統解鎖
+  * \`你是 [角色]\` : 變更 AI 系統人設`;
+                // 使用 AI 氣泡 (isInfo = false) 支援 Markdown 排版美化
+                displayMessage(helpText, 'ai', false);
+                return true;
+            }
+
+            if (cmd === '新話題') {
+                if (hist.length > 0) {
+                    displayMessage("📦 正在總結並封存目前話題，請稍候...", 'ai', true);
+                    let topic = await generateTopicTitle(hist);
+                    const now = new Date();
+                    const timeStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+                    const saveName = `${topic}-${timeStr}`;
+                    
+                    await dbSave(saveName, hist);
+                    hist = [];
+                    chatContainer.innerHTML = '';
+                    await dbDel(AUTOSAVE_SESSION_KEY);
+                    displayMessage(`💾 前次討論已封存為：「**${saveName}**」\n\n✨ 畫面與記憶已淨空，我們可以開始全新的話題了！`, 'ai', false);
+                } else {
+                    displayMessage("✨ 記憶已經是乾淨的狀態，您可以直接開始新話題！", 'ai', false);
+                }
+                userInput.focus();
+                return true;
+            }
+            
+            // --- 優化：列出所有對話並提供切換方式 ---
+            if (cmd === '列' || cmd === '紀錄') {
+                const keys = await dbList();
+                const filtered = keys.filter(key => !key.includes("VkX18O2PM") && key !== AUTOSAVE_SESSION_KEY);
+                
+                if (filtered.length === 0) {
+                    displayMessage("📂 **目前沒有保存的對話紀錄。**", 'ai', false);
+                    return true;
+                }
+
+                let listMd = "📂 **已保存的話題清單：**\n\n";
+                filtered.forEach(k => {
+                    listMd += `* **${k}** 👉 *(輸入 \`取 ${k}\` 切換)*\n`;
+                });
+                listMd += "\n💡 *您可以直接複製上述指令，或使用 `新話題` 來封存並開始新紀錄。*";
+                displayMessage(listMd, 'ai', false);
+                return true;
+            }
+
+            // --- 新增：顯示當前對話記憶與背景 ---
+            if (cmd === '記憶' || cmd === '背景') {
+                if (hist.length === 0) {
+                    displayMessage("🧠 **當前記憶是空的，我們還沒有開始聊天呢！**", 'ai', false);
+                    return true;
+                }
+
+                let memMd = "🧠 **AI 當前的記憶與對話背景：**\n\n---\n\n";
+                hist.forEach((h) => {
+                    const role = h.role === 'model' ? '🤖 **AI**' : '👤 **You**';
+                    let txt = h.parts[0].text;
+                    // 若有精煉標籤，使用 Markdown 引用樣式突顯
+                    if (txt.startsWith("【系統已精煉歷史紀錄】")) {
+                        txt = `> 📦 *${txt.replace(/\n/g, ' ')}*`;
+                    }
+                    memMd += `${role}:\n${txt}\n\n`;
+                });
+                displayMessage(memMd, 'ai', false);
                 return true;
             }
 
             if (cmd === '看') {
                 let targetHist = hist;
                 let title = "當前對話";
-                
                 if (arg) {
                     const data = await dbLoad(arg);
-                    if (!data) {
-                        displayMessage(`❌ 找不到存檔: ${arg}`, 'ai', true);
-                        return true;
-                    }
+                    if (!data) { displayMessage(`❌ 找不到存檔: ${arg}`, 'ai', true); return true; }
                     targetHist = data;
                     title = `存檔: ${arg}`;
                 }
+                if (targetHist.length === 0) { displayMessage(`📂 [${title}] 是空的`, 'ai', true); return true; }
 
-                if (targetHist.length === 0) {
-                    displayMessage(`📂 [${title}] 是空的`, 'ai', true);
-                    return true;
-                }
-
-                let text = `📄 [${title}] 內容預覽:\n----------------\n`;
+                let text = `📄 **[${title}] 內容預覽:**\n\n---\n\n`;
                 targetHist.forEach(h => {
-                    const role = h.role === 'model' ? '🤖 AI' : '👤 You';
-                    text += `${role}: ${h.parts[0].text}\n\n`;
+                    const role = h.role === 'model' ? '🤖 **AI**' : '👤 **You**';
+                    text += `${role}:\n${h.parts[0].text}\n\n`;
                 });
-                text += "----------------";
-                displayMessage(marked.parse(text), 'ai', true);
+                displayMessage(text, 'ai', false);
                 return true;
             }
 
             if (cmd === '複製'|| cmd === '複') {
-                if (hist.length === 0) {
-                    displayMessage("⚠️ 目前沒有內容可複製", 'ai', true);
-                    return true;
-                }
+                if (hist.length === 0) { displayMessage("⚠️ 目前沒有內容可複製", 'ai', true); return true; }
                 try {
                     await navigator.clipboard.writeText(JSON.stringify(hist));
                     displayMessage("✅ 已複製對話 (JSON) 到剪貼簿", 'ai', true);
-                } catch (err) {
-                    displayMessage("❌ 複製失敗: " + err, 'ai', true);
-                }
+                } catch (err) { displayMessage("❌ 複製失敗: " + err, 'ai', true); }
                 return true;
             }
 
             if (cmd === '貼') {
                 try {
                     const text = await navigator.clipboard.readText();
-                    if (!text) {
-                        displayMessage("⚠️ 剪貼簿是空的", 'ai', true);
-                        return true;
-                    }
+                    if (!text) { displayMessage("⚠️ 剪貼簿是空的", 'ai', true); return true; }
                     const parsed = JSON.parse(text);
                     if (Array.isArray(parsed)) {
                         hist = [...hist, ...parsed]; 
                         renderHistory(); 
+                        autoSaveSession();
                         displayMessage(`✅ 已貼上並合併 ${parsed.length} 筆記錄`, 'ai', true);
-                    } else {
-                        displayMessage("❌ 格式錯誤: 剪貼簿內容不是陣列", 'ai', true);
-                    }
-                } catch (err) {
-                    displayMessage("❌ 貼上失敗: " + err + "\n(請確認是有效的JSON)", 'ai', true);
-                }
+                    } else { displayMessage("❌ 格式錯誤: 不是陣列", 'ai', true); }
+                } catch (err) { displayMessage("❌ 貼上失敗: 請確認是有效的JSON", 'ai', true); }
                 return true;
             }
 
             if (cmd === '存') {
                 const res = await dbSave(arg, hist);
-                displayMessage(`💾 ${res}`, 'ai', true);
-                return true;
+                displayMessage(`💾 ${res}`, 'ai', true); return true;
             }
             if (cmd === '取') {
-                file = arg || "道"; 
+                const file = arg || "道"; 
                 const data = await dbLoad(file);
-                if (data) { hist = data; renderHistory(); }
+                if (data) { hist = data; renderHistory(); autoSaveSession(); }
                 else { displayMessage(`❌ 找不到: ${arg}`, 'ai', true); }
-                return true;
-            }
-            if (cmd === '列') {
-                const keys = await dbList();
-                displayMessage(keys.length ? `📂 存檔:\n${keys.filter(key => !key.includes("VkX18O2PM")).join('\n')}` : "📂 無存檔", 'ai', true);
                 return true;
             }
             if (cmd === '刪') {
                 if (!arg) { displayMessage("❌ 請指定名稱", 'ai', true); return true; }
                 const res = await dbDel(arg);
-                displayMessage(`🗑️ ${res}`, 'ai', true);
-                return true;
+                displayMessage(`🗑️ ${res}`, 'ai', true); return true;
             }
             if (cmd === '清空所有保存談話') {
-                const res = await dbDelAll();
-                displayMessage(`🔥 ${res}`, 'ai', true);
-                return true;
+                await dbDelAll();
+                displayMessage(`🔥 已清除所有存檔`, 'ai', true); return true;
             }
             if (cmd === '清') {
                 hist = [];
                 chatContainer.innerHTML = '';
-                for (let i = 39; i >0 ; i--) {
-                    let ii = i < 28 ? i : 28;
-                    displayMessage(A.repeat(ii), 'ai', true);
-                }
-                displayMessage("🧹 已清除，我回來了！", 'ai', true);
+                await dbDel(AUTOSAVE_SESSION_KEY); 
+                displayMessage("🧹 畫面與記憶已淨空，我們重新開始吧！", 'ai', false);
                 userInput.focus();
-                
                 return true;
             }
             if (cmd === 'modela') {
-                MODEL = "gemini-2.5-flash";
+                MODEL = "gemini-3.1-flash-lite-preview";
                 if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-                displayMessage(`🤖 模型: Flash`, 'ai', true);
-                return true;
+                displayMessage(`🤖 模型切換: ${MODEL}`, 'ai', true); return true;
             }
             if (cmd === 'modelb') {
                 MODEL = "gemini-2.5-flash-lite";
                 if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
-                displayMessage(`🤖 模型: Lite`, 'ai', true);
-                return true;
+                displayMessage(`🤖 模型切換: ${MODEL}`, 'ai', true); return true;
             }
-            if (cmd === '重來' || cmd === '新' || cmd === '重' || cmd === 'reload') {
-                window.location.reload();
-                return true;
+            if (['重來', '新', '重', 'reload'].includes(cmd)) {
+                window.location.reload(); return true;
             }
             if (cmd === 'ver') {
-                displayMessage(`🤖 1.1 + Copy Btn`, 'ai', true); 
-                return true;
+                displayMessage(`🤖 版本: 1.7 (複製按鈕支援完整 Markdown 語法)`, 'ai', true); return true;
             }
             if (cmd === '記') {
                 if (!arg) { displayMessage("❌ 請輸入備註內容", 'ai', true); return true; }
                 displayMessage(`🔖 ${arg}`, 'ai', true); 
                 hist.push({ role: "user", parts: [{ text: cmd }] });
                 hist.push({ role: "model", parts: [{ text: arg }] });
-                if (hist.length > HISTMAX) hist.splice(0, 2);
+                autoSaveSession();
                 return true;
             }
             if (cmd === 'ddd' || cmd === '退') {
-                displayMessage(`🧹 清除最後一筆`, 'ai', true); 
-                hist.pop(); 
-                hist.pop(); 
+                if(hist.length >= 2) {
+                    hist.pop(); hist.pop(); 
+                    autoSaveSession();
+                    displayMessage(`🧹 已收回最後一組對話`, 'ai', true); 
+                } else {
+                    displayMessage(`⚠️ 沒有對話可以收回了`, 'ai', true); 
+                }
                 return true;
             }
             if (cmd === '尾') {
                 userInput.value = lastAiMessage;
-                await sendMessage(); 
-                return true;
+                await sendMessage(); return true;
             }
-            if (cmd === '保存密語' || cmd === '密語' || cmd === '密碼') {
-                let k = "";
-                if (!arg.startsWith(INIT_KEY)) { k = "月落"; }
-                else { k = arg; }
-                let sDB = [];
-                sDB.push({ role: "user", parts: [{ text: cmd }] });
-                sDB.push({ role: "model", parts: [{ text: k }] });    
-                const res = await dbSave("VkX18O2PM", sDB);
-                displayMessage(`悄悄話收到了！`, 'ai', true);
-                return true;
+            if (['保存密語', '密語', '密碼'].includes(cmd)) {
+                let k = arg.startsWith(INIT_KEY) ? arg : "月落";
+                const res = await dbSave("VkX18O2PM", [{ role: "user", parts: [{ text: cmd }] }, { role: "model", parts: [{ text: k }] }]);
+                displayMessage(`🤫 悄悄話收到了！`, 'ai', true); return true;
             }
             if (cmd === '開' || cmd === '開始'){
                 let ret = await checkDbPwd();
-                if (!ret) {
-                    displayMessage("❌ 找不到檔案", 'ai', true);
-                }else
-                    return true;
+                if (!ret) displayMessage("❌ 找不到檔案", 'ai', true);
+                return true;
             }
             if (cmd === 'key' || cmd === '鑰匙') {
                 API_KEY = arg;
-                displayMessage("鑰匙來了", 'user');
-                displayMessage("門開人來了", 'ai', true);
+                displayMessage("鑰匙收到了", 'user');
+                displayMessage("🔓 門鎖已開，隨時為您服務", 'ai', true);
                 API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
                 voiceBtn.disabled = false;
                 return true;
             }
             if (cmd === '長') {
-                displayMessage(`聊久一點`, 'user', true);
-                displayMessage(`好呀`, 'ai', true);
-                if(arg !==""){
-                    displayMessage(`好呀`, 'ai', true);
+                displayMessage(`聊久一點`, 'user');
+                if(arg !== "" && !isNaN(arg)){
                     HISTMAX = parseInt(arg, 10);
-                } else{
-                    displayMessage(`不行，短短的就好。`, 'ai', true);
+                    displayMessage(`好的，基本記憶保留長度已設為 **${HISTMAX}**。\n(系統將在累積 ${HISTMAX + 10} 筆訊息後才進行背景精煉整理)`, 'ai', false);
+                } else {
+                    displayMessage(`請輸入有效的數字長度`, 'ai', true);
                 }
                 return true;
             }
             if (cmd === '你是') {
-                displayMessage(`你是。。。`, 'user', true);
-                
-                if(arg !==""){
-                    displayMessage(`嗯，好的，換個腦袋`, 'ai', true);
+                displayMessage(`你是。。。`, 'user');
+                if(arg !== ""){
+                    displayMessage(`💡 明白，我現在是 **${arg}** 了`, 'ai', false);
                     SYSTEM_PROMPT = "你是" + arg;
                 }else{
-                    displayMessage(`我是個聰明人呀 ！ :)`, 'ai', true);
+                    displayMessage(`我是您的智慧小幫手呀！`, 'ai', false);
                 }
                 return true;
             }
             if (cmd === '你是誰?' || cmd === '你是誰') {
-                displayMessage(`你是誰？`, 'user', true);
-                
-                displayMessage(`${SYSTEM_PROMPT.replace(/你/g, "我")}`, 'ai', true);
+                displayMessage(`你是誰？`, 'user');
+                displayMessage(`${SYSTEM_PROMPT.replace(/你/g, "我")}`, 'ai', false);
                 return true;
             }
             
@@ -919,7 +949,7 @@
             if (!text) return;
 
             userInput.value = '';
-            resetInputHeight();
+            userInput.style.height = '24px'; 
             
             if (text.startsWith(INIT_KEY)) {
                 const inKey = text.substring(INIT_KEY.length).trim();
@@ -930,16 +960,14 @@
                     voiceBtn.disabled = false;
                     displayMessage("輕舟已過萬重山來到你眼前，你好！", 'ai', true);
                 } else {
-                    displayMessage("❌", 'ai', true);
+                    displayMessage("❌ 密碼錯誤", 'ai', true);
                 }
                 return;
             }
 
             try {
                 const isCmd = await handleCommand(text);
-                if (isCmd === true) {
-                    return;
-                }
+                if (isCmd === true) return;
             } catch (err) {
                 console.error("指令處理發生錯誤:", err);
                 displayMessage("⚠️ 指令執行發生異常", 'ai', true);
@@ -979,7 +1007,8 @@
                 }
                 if (finalTranscript) {
                     userInput.value = finalTranscript;
-                    autoResizeInput();
+                    userInput.style.height = 'auto';
+                    userInput.style.height = (userInput.scrollHeight) + 'px';
                 }
                 silenceTimeout = setTimeout(handleSilenceTimeout, SILENCE_THRESHOLD);
             };
@@ -1012,15 +1041,6 @@
             if (isRecording) recognition.stop();
         }
 
-        function autoResizeInput() {
-            userInput.style.height = 'auto';
-            userInput.style.height = (userInput.scrollHeight) + 'px';
-        }
-
-        function resetInputHeight() {
-            userInput.style.height = '24px';
-        }
-
         voiceBtn.addEventListener('click', () => {
             if (isRecording) {
                 recognition.stop();
@@ -1041,29 +1061,34 @@
                 shouldRestartVoice = false;
                 sendMessage();
             }
-            userInput.focus();
         });
 
-        userInput.addEventListener('input', autoResizeInput);
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
 
         document.addEventListener('DOMContentLoaded', async () => {
-            
             initVoiceRecognition();
-            console.log("Hello World!");
-            A = ".";
-            for (let i = 39; i >0 ; i--) {
-                let ii = i < 28 ? i : 28;
+            
+            const A = ".";
+            for (let i = 15; i > 0 ; i--) {
+                let ii = i < 10 ? i : 10;
                 displayMessage(A.repeat(ii), 'ai', true);
             }
 
-            let ret = await checkDbPwd();
-            if (!ret) {
-                displayMessage("🔒 很高興見到你！", 'ai', true);
-            }else{
-                displayMessage("歡迎回來 ！", 'ai', true);
+            // 1. 無論是否有紀錄，都先嘗試使用儲存的密語解鎖系統
+            let isUnlocked = await checkDbPwd();
+            
+            // 2. 載入自動存檔的對話紀錄
+            let hasAutoSave = await loadAutoSavedSession();
+            
+            if (!isUnlocked) {
+                displayMessage("🔒 系統待命，請輸入鑰匙解鎖。", 'ai', true);
             }
-            scrollToBottom();
+            
             userInput.focus();
+            scrollToBottom();
         });
     </script>
 </body>
