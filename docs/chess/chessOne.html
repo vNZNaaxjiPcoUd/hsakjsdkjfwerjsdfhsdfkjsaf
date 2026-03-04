@@ -131,6 +131,8 @@
 
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec"; 
 
+    const WAIT_POLLING_DELAY = 3100;
+
     let room = '榕樹下';
     const queryString = window.location.search.substring(1);
     if (queryString) {
@@ -251,7 +253,7 @@
       if (actionType === 'request' && !confirm("向對方發送重新開局請求？")) return;
       if (actionType === 'agree' && !confirm("確定要同意重新開局嗎？棋盤將立即清空。")) return;
       
-      pausePollingUntil = Date.now() + 2500; 
+      pausePollingUntil = Date.now() + WAIT_POLLING_DELAY; 
       isSyncing = true; 
       let data = await apiCall('restart', { playerId: myId, restartAction: actionType }); 
       if (data && data.state) updateUI(data.state); 
@@ -267,7 +269,7 @@
         if (!confirm("確定要同意對方悔棋嗎？")) return;
       }
       
-      pausePollingUntil = Date.now() + 2500; 
+      pausePollingUntil = Date.now() + WAIT_POLLING_DELAY; 
       isSyncing = true; 
       let data = await apiCall('undo', { playerId: myId, undoAction: actionType }); 
       if (data && data.state) updateUI(data.state); 
@@ -303,6 +305,7 @@
       }
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
+        console.log("myRole:", myRole, "myId:", myId, "state.players:", state.players);
         alert("管理員已將您移出對戰座位！"); 
         myRole = 'spectator'; 
         sessionStorage.removeItem('xq_role_selected_' + room); 
@@ -608,7 +611,7 @@
             
             setTimeout(async () => {
                 if (confirm("太神啦！電腦被絕殺無棋可走，你贏了！\n\n是否要立即開新局？")) {
-                    pausePollingUntil = Date.now() + 2500;
+                    pausePollingUntil = Date.now() + WAIT_POLLING_DELAY;
                     isSyncing = true;
                     let data = await apiCall('restart', { playerId: myId, restartAction: 'request' });
                     if (data && data.state) updateUI(data.state);
