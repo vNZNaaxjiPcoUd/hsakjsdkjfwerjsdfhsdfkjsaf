@@ -12,13 +12,12 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; }
 
-    /* 🌟 徹底隱藏全站所有滾動條，但依然保留滑動功能 */
     ::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera */
+      display: none; 
     }
     html, body {
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
+      -ms-overflow-style: none; 
+      scrollbar-width: none; 
     }
 
     :root {
@@ -39,7 +38,6 @@
       white-space: pre-wrap;   
       line-height: 1.6;        
       font-family: sans-serif;
-      /* 🌟 已移除 max-height，讓區塊自然長高 */
     }
 
     #info::first-line {
@@ -151,7 +149,6 @@
     <button id="reject-undo-btn" class="btn-reject" style="display:none;" onclick="requestUndo('reject')">⛔ 拒絕</button>
   </div>
   
-  <div id="req-alert" class="req-alert"></div>
   <div id="board-container">
     <div id="board-relative-wrapper">
       <div id="board-svg-layer"></div>
@@ -159,6 +156,7 @@
     </div>
   </div>
   
+  <div id="req-alert" class="req-alert"></div>
   <div id="check-msg" class="check-alert">將軍！</div>
 
   <div id="info">等待同步...</div>
@@ -195,6 +193,40 @@
 
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
 
+    // 🌟 新增：將移動座標轉換為標準象棋記譜法
+    function getMoveNotation(p, r1, c1, r2, c2) {
+      if (!p) return ""; 
+      let color = (p === p.toLowerCase()) ? 'b' : 'r';
+      let colorStr = color === 'b' ? '黑' : '紅';
+      let pName = piecesText[p];
+      
+      // 紅方由右至左是 9 到 1；黑方由右至左是 1 到 9
+      let startCol = color === 'r' ? (9 - c1) : (c1 + 1);
+      
+      let dir = '';
+      if (r1 === r2) {
+        dir = '平';
+      } else if (color === 'r') {
+        dir = r2 < r1 ? '進' : '退';
+      } else {
+        dir = r2 > r1 ? '進' : '退';
+      }
+      
+      let endVal = '';
+      let pType = p.toLowerCase();
+      if (dir === '平') {
+        endVal = color === 'r' ? (9 - c2) : (c2 + 1);
+      } else {
+        // 直線兵種 (車砲將卒) 進退看步數，斜線兵種 (馬象士) 看目標行
+        if (['r', 'c', 'p', 'k'].includes(pType)) {
+          endVal = Math.abs(r1 - r2); 
+        } else {
+          endVal = color === 'r' ? (9 - c2) : (c2 + 1); 
+        }
+      }
+      return `${colorStr}${pName}${startCol}${dir}${endVal}`;
+    }
+
     function showRoleModal() {
       document.getElementById('role-modal').style.display = 'flex';
       document.getElementById('close-modal-btn').style.display = 'block'; 
@@ -207,11 +239,7 @@
     function updateInformation(text) {
       if (text !== lastText) {
         infoHistory.unshift(text); 
-        
-        if (infoHistory.length > 10) {
-          infoHistory.pop(); 
-        }
-        
+        if (infoHistory.length > 10) infoHistory.pop(); 
         document.getElementById('info').innerHTML = infoHistory.join('<br>');
         lastText = text;
       }
@@ -390,9 +418,18 @@
 
     function updateUI(state) {
       let oldState = gameState;
-      if (oldState && JSON.stringify(oldState.board) !== JSON.stringify(state.board)) selectedCell = null; 
+      let boardChanged = false;
       
       if (oldState) {
+        boardChanged = JSON.stringify(oldState.board) !== JSON.stringify(state.board);
+        if (boardChanged) selectedCell = null; 
+        
+        // 判斷是否為悔棋操作導致的盤面變化
+        let isUndo = false;
+        if (oldState.history && state.history) {
+            if (state.history.length < oldState.history.length) isUndo = true;
+        }
+
         if (oldState.restartRequest !== state.restartRequest && state.restartRequest) {
            if (state.restartRequest !== myRole) {
              updateInformation(state.restartRequest === 'b' ? "黑方發起重新開局請求！" : "紅方發起重新開局請求！");
@@ -405,6 +442,20 @@
         }
         if (oldState.status !== state.status && state.status === 'check') {
            updateInformation("將軍！");
+        }
+        
+        // 🌟 核心：只有當盤面改變時，才印出走法
+        if (boardChanged) {
+            if (isUndo) {
+                updateInformation("↩ 已悔棋");
+            } else if (state.lastMove) {
+                let m = state.lastMove;
+                let p = state.board[m.r2][m.c2];
+                if (p) {
+                   let notation = getMoveNotation(p, m.r1, m.c1, m.r2, m.c2);
+                   updateInformation(`${notation}`);
+                }
+            }
         }
       }
 
@@ -471,7 +522,7 @@
       if (myRole === 'b' || myRole === 'r') { 
         restartBtn.style.display = 'inline-block'; 
         if (state.restartRequest === myRole) {
-          restartBtn.textContent = "❌ 等待同意..."; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
+          restartBtn.textContent = "❌ 等待..."; restartBtn.style.backgroundColor = "#9e9e9e"; restartBtn.onclick = () => requestRestart('cancel'); rejectBtn.style.display = 'none';
         } else if (state.restartRequest && state.restartRequest !== myRole) {
           restartBtn.textContent = "✅ 同意重開"; restartBtn.style.backgroundColor = "#E91E63"; restartBtn.onclick = () => requestRestart('agree'); rejectBtn.style.display = 'inline-block';
         } else {
@@ -479,7 +530,7 @@
         }
 
         if (state.undoRequest === myRole) {
-          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 等待同意..."; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
+          undoBtn.style.display = 'inline-block'; undoBtn.textContent = "❌ 等待..."; undoBtn.style.backgroundColor = "#9e9e9e"; undoBtn.onclick = () => requestUndo('cancel'); rejectUndoBtn.style.display = 'none';
         } else if (state.undoRequest && state.undoRequest !== myRole) {
           undoBtn.style.display = 'inline-block'; undoBtn.textContent = "✅ 同意悔棋"; undoBtn.style.backgroundColor = "#E91E63"; undoBtn.onclick = () => requestUndo('agree'); rejectUndoBtn.style.display = 'inline-block';
         } else {
@@ -562,9 +613,11 @@
       isSyncing = true; 
       lastActionTime = Date.now(); 
 
-      if (!gameState.history) gameState.history = []; 
+      // 🌟 將狀態獨立深拷貝一份，交給 updateUI 去比對與更新，避免直接突變 gameState
+      let nextState = JSON.parse(JSON.stringify(gameState));
       
-      gameState.history.push({ 
+      if (!nextState.history) nextState.history = []; 
+      nextState.history.push({ 
           board: JSON.parse(JSON.stringify(gameState.board)), 
           turn: gameState.turn, 
           status: gameState.status, 
@@ -572,23 +625,30 @@
           lastMove: gameState.lastMove ? JSON.parse(JSON.stringify(gameState.lastMove)) : null
       }); 
       
-      if (gameState.history.length > 50) gameState.history.shift(); 
-      let newBoard = JSON.parse(JSON.stringify(gameState.board)); newBoard[r2][c2] = newBoard[r1][c1]; newBoard[r1][c1] = '';
-      let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; let checkAlert = ''; let status = 'playing';
-      if (isKingAttacked(newBoard, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
+      if (nextState.history.length > 50) nextState.history.shift(); 
       
-      gameState.board = newBoard; gameState.turn = nextTurn; gameState.status = status; gameState.checkMsg = checkAlert; 
-      gameState.restartRequest = null; gameState.undoRequest = null; 
+      nextState.board[r2][c2] = nextState.board[r1][c1]; 
+      nextState.board[r1][c1] = '';
       
-      gameState.lastMove = { r1: r1, c1: c1, r2: r2, c2: c2 };
+      let nextTurn = gameState.turn === 'b' ? 'r' : 'b'; 
+      let checkAlert = ''; let status = 'playing';
+      if (isKingAttacked(nextState.board, nextTurn)) { status = 'check'; checkAlert = nextTurn === 'b' ? '黑方' : '紅方'; }
+      
+      nextState.turn = nextTurn; 
+      nextState.status = status; 
+      nextState.checkMsg = checkAlert; 
+      nextState.restartRequest = null; 
+      nextState.undoRequest = null; 
+      nextState.lastMove = { r1: r1, c1: c1, r2: r2, c2: c2 };
       
       selectedCell = null; 
       
-      updateUI(gameState); 
+      // 呼叫 updateUI 會負責觸發 記譜法列印，並將 gameState = nextState
+      updateUI(nextState); 
       
       let res = await apiCall('move', { state: gameState }); 
       if(res && res.state) {
-        gameState = res.state; 
+        updateUI(res.state); 
       }
       isSyncing = false; 
     }
@@ -819,7 +879,6 @@
         }
 
         await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
-        updateInformation(gameState.turn === 'b' ? "輪到：黑方" : "輪到：紅方");
       } finally {
         isAiThinking = false;
       }
