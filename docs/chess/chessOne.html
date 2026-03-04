@@ -82,19 +82,22 @@
       <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">執紅棋</button>
       <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">進入觀棋</button>
 
-      <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0 10px 0;">
-      
-      <div class="modal-subtitle">▶ 單機練習 (簡單)</div>
-      <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">執黑</button>
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">執紅</button>
+      <div id="ai-menu-section">
+        <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0 10px 0;">
+        
+        <div class="modal-subtitle">▶ 單機練習 (簡單)</div>
+        <div class="ai-btn-group">
+          <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">執黑</button>
+          <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">執紅</button>
+        </div>
+
+        <div class="modal-subtitle">▶ 單機練習 (高級)</div>
+        <div class="ai-btn-group">
+          <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">執黑</button>
+          <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">執紅</button>
+        </div>
       </div>
 
-      <div class="modal-subtitle">▶ 單機練習 (高級)</div>
-      <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">執黑</button>
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">執紅</button>
-      </div>
     </div>
   </div>
 
@@ -312,7 +315,6 @@
         isAiMode = false; sessionStorage.removeItem('xq_ai_mode_' + room); updateRoleBadge();
       }
 
-      // 🌟 修復核心：判斷如果盤面跟認輸的盤面一樣，就不再重複啟動 AI
       if (isAiMode && myRole !== 'spectator') {
         let currentBoardStr = JSON.stringify(state.board);
         if (state.turn === aiRole && (state.status === 'playing' || state.status === 'check') && !isAiThinking) {
@@ -333,6 +335,22 @@
         let btnB = document.getElementById('btn-role-b'); let btnR = document.getElementById('btn-role-r');
         if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "(已被選)"; } else { btnB.disabled = false; btnB.textContent = "執黑棋"; }
         if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "(已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
+
+        // 🌟 新增：防干擾機制
+        let bPlayer = state.players.b ? String(state.players.b) : "";
+        let rPlayer = state.players.r ? String(state.players.r) : "";
+        let isAiPlaying = bPlayer.startsWith('BOT_') || rPlayer.startsWith('BOT_');
+        let isSomeonePlaying = bPlayer !== "" || rPlayer !== "";
+        
+        let aiMenuSection = document.getElementById('ai-menu-section');
+        if (aiMenuSection) {
+            // 如果房間裡有人佔位，且不是在和電腦玩 -> 把單機選單隱藏起來
+            if (isSomeonePlaying && !isAiPlaying) {
+                aiMenuSection.style.display = 'none';
+            } else {
+                aiMenuSection.style.display = 'block';
+            }
+        }
       }
 
       let restartBtn = document.getElementById('restart-btn'); let rejectBtn = document.getElementById('reject-btn');
@@ -581,7 +599,6 @@
       let aiLevel = sessionStorage.getItem('xq_ai_level_' + room) || 'easy';
       let validMoves = getAllLegalMovesList(gameState.board, aiRole);
 
-      // 🌟 修復核心：由贏了的人類直接觸發重開請求，避開伺服器無法辨識電腦發送請求的問題
       if (validMoves.length === 0) {
         let currentBoardStr = JSON.stringify(gameState.board);
         if (lastSurrenderedBoard !== currentBoardStr) {
@@ -589,12 +606,10 @@
             isAiThinking = false; 
             document.getElementById('info').textContent = "對局結束：電腦無棋可走";
             
-            // 延遲一點點，讓盤面畫完後再跳出視窗
             setTimeout(async () => {
                 if (confirm("太神啦！電腦被絕殺無棋可走，你贏了！\n\n是否要立即開新局？")) {
                     pausePollingUntil = Date.now() + 2500;
                     isSyncing = true;
-                    // 以你 (myId) 的名義發送請求，電腦接收到後會自動點擊「同意」
                     let data = await apiCall('restart', { playerId: myId, restartAction: 'request' });
                     if (data && data.state) updateUI(data.state);
                     isSyncing = false;
