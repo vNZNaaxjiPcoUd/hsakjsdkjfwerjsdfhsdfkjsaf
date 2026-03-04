@@ -424,10 +424,19 @@
         boardChanged = JSON.stringify(oldState.board) !== JSON.stringify(state.board);
         if (boardChanged) selectedCell = null; 
         
-        // 判斷是否為悔棋操作導致的盤面變化
+        // 🌟 修正：精準判斷是「悔棋」還是「重新開局」
         let isUndo = false;
-        if (oldState.history && state.history) {
-            if (state.history.length < oldState.history.length) isUndo = true;
+        let isRestart = false;
+        let oldHistoryLen = oldState.history ? oldState.history.length : 0;
+        let newHistoryLen = state.history ? state.history.length : 0;
+
+        // 如果歷史紀錄歸零（或一開始沒有），且舊狀態是有紀錄的，代表是重新開局
+        if (newHistoryLen === 0 && oldHistoryLen > 0) {
+            isRestart = true;
+        } 
+        // 否則如果歷史紀錄變短，代表是悔棋
+        else if (newHistoryLen < oldHistoryLen) {
+            isUndo = true;
         }
 
         if (oldState.restartRequest !== state.restartRequest && state.restartRequest) {
@@ -444,9 +453,11 @@
            updateInformation("將軍！");
         }
         
-        // 🌟 核心：只有當盤面改變時，才印出走法
+        // 🌟 核心：根據情況印出對應訊息
         if (boardChanged) {
-            if (isUndo) {
+            if (isRestart) {
+                updateInformation("🆕 已重新開局");
+            } else if (isUndo) {
                 updateInformation("↩ 已悔棋");
             } else if (state.lastMove) {
                 let m = state.lastMove;
