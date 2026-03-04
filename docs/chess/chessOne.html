@@ -74,26 +74,26 @@
 
   <div id="role-modal">
     <div class="modal-content">
-      <span id="close-modal-btn" style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer; display:none; color:#999;" onclick="closeRoleModal()">&times;</span>
+      <span id="close-modal-btn" style="position:absolute; top:10px; right:15px; font-size:24px; cursor:pointer; display:block; color:#999;" onclick="closeRoleModal()">&times;</span>
       <h3 style="margin-top:0;">請選擇身分</h3>
       <p style="font-size:14px; color:#666; margin-bottom: 15px;">房間：<span id="modal-room-name"></span></p>
       
-      <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">聯機對戰 (執黑棋)</button>
-      <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">聯機對戰 (執紅棋)</button>
+      <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">執黑棋</button>
+      <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">執紅棋</button>
       <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">進入觀棋</button>
 
       <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0 10px 0;">
       
       <div class="modal-subtitle">▶ 單機練習 (簡單)</div>
       <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">你執黑</button>
-        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">你執紅</button>
+        <button class="modal-btn btn-ai-easy" onclick="startAiGame('b', 'easy')">執黑</button>
+        <button class="modal-btn btn-ai-easy" onclick="startAiGame('r', 'easy')">執紅</button>
       </div>
 
-      <div class="modal-subtitle">▶ 單機挑戰 (高級)</div>
+      <div class="modal-subtitle">▶ 單機練習 (高級)</div>
       <div class="ai-btn-group">
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">你執黑</button>
-        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">你執紅</button>
+        <button class="modal-btn btn-ai-hard" onclick="startAiGame('b', 'hard')">執黑</button>
+        <button class="modal-btn btn-ai-hard" onclick="startAiGame('r', 'hard')">執紅</button>
       </div>
     </div>
   </div>
@@ -146,6 +146,7 @@
     let isAiThinking = false;
     let lastSurrenderedBoard = null; 
 
+    // 因為預設就是觀戰者，這個變數用來判斷是否需要再次自動彈出（現在不需要了）
     let hasSelectedRoleLocal = sessionStorage.getItem('xq_role_selected_' + room);
     let gameState = null; let myRole = null; let selectedCell = null; let isSyncing = false; 
     let pausePollingUntil = 0; 
@@ -154,8 +155,7 @@
 
     function showRoleModal() {
       document.getElementById('role-modal').style.display = 'flex';
-      if (hasSelectedRoleLocal) { document.getElementById('close-modal-btn').style.display = 'block'; } 
-      else { document.getElementById('close-modal-btn').style.display = 'none'; }
+      document.getElementById('close-modal-btn').style.display = 'block'; // 永遠顯示關閉按鈕
       if (gameState) updateUI(gameState); 
     }
     function closeRoleModal() { document.getElementById('role-modal').style.display = 'none'; }
@@ -207,7 +207,6 @@
       if (data && data.state) updateUI(data.state); 
     }
 
-    // 🌟 修改：切換身份時，若從單機模式離開，先強制退出所有執棋者
     async function requestRole(role) {
       document.getElementById('role-modal').style.display = 'none';
       
@@ -224,12 +223,10 @@
       } else { alert("選擇失敗，該座位可能已被搶先！"); if (data && data.state) { updateUI(data.state); showRoleModal(); } }
     }
 
-    // 🌟 修改：選擇單機模式時，先強制退出所有執棋者，再把自己跟電腦加進去
     async function startAiGame(humanRole, difficulty) {
       document.getElementById('role-modal').style.display = 'none';
       document.getElementById('info').textContent = "正在準備單機模式...";
       
-      // 1. 先退出所有執棋者
       await apiCall('closeThisRoomForNewBeginner', { targetRoom: room });
 
       let botRole = humanRole === 'r' ? 'b' : 'r';
@@ -238,7 +235,6 @@
       sessionStorage.setItem('xq_ai_mode_' + room, botRole);
       sessionStorage.setItem('xq_ai_level_' + room, difficulty); 
       
-      // 2. 將自己和電腦角色加上去
       let data = await apiCall('takeRole', { playerId: myId, role: humanRole });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true';
@@ -275,10 +271,17 @@
       isSyncing = false;
     }
 
+    // 🌟 修改：新玩家載入時，默默成為觀棋者，不再自動彈出角色視窗
     function onJoined(data) {
-      myRole = data.role; updateUI(data.state);
-      if (myRole === 'b' || myRole === 'r') { hasSelectedRoleLocal = 'true'; sessionStorage.setItem('xq_role_selected_' + room, 'true'); }
-      if (!hasSelectedRoleLocal) { showRoleModal(); } else { updateRoleBadge(); }
+      myRole = data.role || 'spectator'; 
+      updateUI(data.state);
+      if (myRole === 'b' || myRole === 'r') { 
+        hasSelectedRoleLocal = 'true'; sessionStorage.setItem('xq_role_selected_' + room, 'true'); 
+      } else {
+        myRole = 'spectator';
+      }
+      updateRoleBadge();
+      // 移除了自動呼叫 showRoleModal(); 的邏輯
     }
 
     function updateRoleBadge() {
@@ -299,7 +302,11 @@
       }
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
-        alert("管理員已將您移出對戰座位！"); myRole = 'spectator'; sessionStorage.removeItem('xq_role_selected_' + room); hasSelectedRoleLocal = null; updateRoleBadge(); showRoleModal(); 
+        alert("管理員已將您移出對戰座位！"); 
+        myRole = 'spectator'; // 🌟 修改：被踢出座位後，安靜地轉為觀棋者
+        sessionStorage.removeItem('xq_role_selected_' + room); 
+        hasSelectedRoleLocal = null; 
+        updateRoleBadge(); 
         return;
       }
 
@@ -320,8 +327,8 @@
       let modal = document.getElementById('role-modal');
       if (modal.style.display === 'flex') {
         let btnB = document.getElementById('btn-role-b'); let btnR = document.getElementById('btn-role-r');
-        if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "聯機對戰 (已被選)"; } else { btnB.disabled = false; btnB.textContent = "聯機對戰 (執黑棋)"; }
-        if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "聯機對戰 (已被選)"; } else { btnR.disabled = false; btnR.textContent = "聯機對戰 (執紅棋)"; }
+        if (state.players.b && state.players.b !== myId) { btnB.disabled = true; btnB.textContent = "(已被選)"; } else { btnB.disabled = false; btnB.textContent = "執黑棋"; }
+        if (state.players.r && state.players.r !== myId) { btnR.disabled = true; btnR.textContent = "(已被選)"; } else { btnR.disabled = false; btnR.textContent = "執紅棋"; }
       }
 
       let restartBtn = document.getElementById('restart-btn'); let rejectBtn = document.getElementById('reject-btn');
