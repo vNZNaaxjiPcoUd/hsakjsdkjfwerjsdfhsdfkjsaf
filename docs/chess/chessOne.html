@@ -239,7 +239,7 @@
     function updateInformation(text) {
       if (text !== lastText) {
         infoHistory.unshift(text); 
-        if (infoHistory.length > 10) infoHistory.pop(); 
+        if (infoHistory.length > 100) infoHistory.pop(); 
         document.getElementById('info').innerHTML = infoHistory.join('<br>');
         lastText = text;
       }
