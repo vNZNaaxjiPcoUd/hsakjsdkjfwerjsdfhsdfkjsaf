@@ -305,7 +305,7 @@
       let data = await apiCall('takeRole', { playerId: myId, role: role });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); 
-        updateInformation(`成功切換身分：${role === 'b' ? '黑方' : (role === 'r' ? '紅方' : '觀棋者')}`);
+        updateInformation(`成功切換身分：${role === 'b' ? '黑方' : (role === 'r' ? '紅方' : '觀戰者')}`);
         updateUI(data.state);
       } else { 
         updateInformation("選擇失敗，該座位可能已被搶先！"); 
@@ -405,7 +405,7 @@
     }
 
     function updateRoleBadge() {
-      let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀棋者';
+      let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀戰者';
       if (isAiMode) {
         let levelText = sessionStorage.getItem('xq_ai_level_' + room) === 'hard' ? '高級' : '簡單';
         roleText += ` (單機-${levelText})`;
@@ -505,12 +505,15 @@
 
         let bPlayer = state.players.b ? String(state.players.b) : "";
         let rPlayer = state.players.r ? String(state.players.r) : "";
-        let isAiPlaying = bPlayer.startsWith('BOT_') || rPlayer.startsWith('BOT_');
-        let isSomeonePlaying = bPlayer !== "" || rPlayer !== "";
+        
+        // 🌟 核心修正：檢查這個房間是否已經被「別人 (非自己、非電腦)」佔據
+        let isOtherHumanPlaying = (bPlayer !== "" && bPlayer !== myId && !bPlayer.startsWith('BOT_')) || 
+                                  (rPlayer !== "" && rPlayer !== myId && !rPlayer.startsWith('BOT_'));
         
         let aiMenuSection = document.getElementById('ai-menu-section');
         if (aiMenuSection) {
-            if (isSomeonePlaying && !isAiPlaying) {
+            // 如果有別人在玩，就直接隱藏單機模式選單！
+            if (isOtherHumanPlaying) {
                 aiMenuSection.style.display = 'none';
             } else {
                 aiMenuSection.style.display = 'block';
@@ -613,7 +616,6 @@
       } else { if (isMyPiece) selectedCell = { r: r, c: c }; } renderBoard();
     }
 
-    // 🌟 新增：用陣列來排隊背景傳輸，不讓畫面卡住
     let syncQueue = [];
     let isProcessingQueue = false;
 
@@ -623,7 +625,6 @@
       isSyncing = true;
 
       while (syncQueue.length > 0) {
-        // 直接抽出最後一個狀態來發送，丟棄沒意義的中間步驟
         let stateToSync = syncQueue[syncQueue.length - 1];
         syncQueue = []; 
         
@@ -636,7 +637,6 @@
       isSyncing = false;
     }
 
-    // 🌟 修正：讓 commitMove 瞬間完成並把資料丟給背景同步
     function commitMove(r1, c1, r2, c2) {
       lastActionTime = Date.now(); 
 
@@ -814,8 +814,7 @@
 
     async function makeAIMove() {
       try {
-        // 🌟 拔除原本在這裡強制等待伺服器同步的 while 迴圈！
-        await new Promise(r => setTimeout(r, 100)); // 只有視覺上的 100ms 停頓，看起來不生硬
+        await new Promise(r => setTimeout(r, 100)); 
 
         if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
             return;
@@ -856,7 +855,7 @@
           let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
           if (legalOpenings.length > 0) {
               let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
-              commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); // 🌟 移除了 await
+              commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); 
               return;
           }
         }
@@ -900,9 +899,9 @@
           }
         }
 
-        commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); // 🌟 移除了 await
+        commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); 
       } finally {
-        isAiThinking = false; // 🌟 立刻解除鎖定，輪回你馬上就可以下棋！
+        isAiThinking = false; 
       }
     }
 
