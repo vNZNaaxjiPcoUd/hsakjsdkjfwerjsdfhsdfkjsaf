@@ -465,9 +465,19 @@
 
       gameState = state;
       
+      // 🌟 新增：檢查房間座位狀態並顯示無人執棋
       if (!isAiThinking && document.getElementById('info').innerHTML.indexOf('電腦無棋可走') === -1) {
-        let turnMsg = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
-        updateInformation(turnMsg);
+        let bPlayer = state.players.b ? String(state.players.b) : "";
+        let rPlayer = state.players.r ? String(state.players.r) : "";
+        
+        if (bPlayer === "" && rPlayer === "") {
+          updateInformation("沒有人在執棋");
+        } else if (bPlayer === "" || rPlayer === "") {
+          updateInformation("等待對手加入...");
+        } else {
+          let turnMsg = state.turn === 'b' ? "輪到：黑方" : "輪到：紅方";
+          updateInformation(turnMsg);
+        }
       }
 
       if ((myRole === 'b' && state.players.b !== myId) || (myRole === 'r' && state.players.r !== myId)) {
@@ -506,13 +516,11 @@
         let bPlayer = state.players.b ? String(state.players.b) : "";
         let rPlayer = state.players.r ? String(state.players.r) : "";
         
-        // 🌟 核心修正：檢查這個房間是否已經被「別人 (非自己、非電腦)」佔據
         let isOtherHumanPlaying = (bPlayer !== "" && bPlayer !== myId && !bPlayer.startsWith('BOT_')) || 
                                   (rPlayer !== "" && rPlayer !== myId && !rPlayer.startsWith('BOT_'));
         
         let aiMenuSection = document.getElementById('ai-menu-section');
         if (aiMenuSection) {
-            // 如果有別人在玩，就直接隱藏單機模式選單！
             if (isOtherHumanPlaying) {
                 aiMenuSection.style.display = 'none';
             } else {
