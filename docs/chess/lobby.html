@@ -57,7 +57,6 @@
     </div>
     
     <div class="hint">只要相同的房間名，就能在同一個棋盤對戰！</div>
-    
     <div class="hint"><a href="https://n.jwint.net/r?chess" target="_blank">使用說明</a></div>
   </div>
 
@@ -86,8 +85,8 @@
         
         // 產生目標網址 (自動把中文進行 URL 編碼)
         // 取得目前大廳網址的目錄路徑，替換為 index.html
-        const baseUrl = window.location.href.split('lobby.html')[0].replace(/\/$/, ""); 
-        currentInviteUrl = `${baseUrl}/index.html?${encodeURIComponent(roomName)}`;
+        //const baseUrl = window.location.href.split('lobby.html')[0].replace(/\/$/, ""); 
+        currentInviteUrl = `https://h.jwint.net/chess/chessOne?${encodeURIComponent(roomName)}`;
         
         // 更新按鈕的連結與文字
         joinBtn.href = currentInviteUrl;
