@@ -305,7 +305,7 @@
       let data = await apiCall('takeRole', { playerId: myId, role: role });
       if (data && data.success) {
         myRole = data.role; sessionStorage.setItem('xq_role_selected_' + room, 'true'); hasSelectedRoleLocal = 'true'; updateRoleBadge(); 
-        updateInformation(`成功切換身分：${role === 'b' ? '黑方' : (role === 'r' ? '紅方' : '觀戰者')}`);
+        updateInformation(`成功切換身分：${role === 'b' ? '黑方' : (role === 'r' ? '紅方' : '觀棋者')}`);
         updateUI(data.state);
       } else { 
         updateInformation("選擇失敗，該座位可能已被搶先！"); 
@@ -405,7 +405,7 @@
     }
 
     function updateRoleBadge() {
-      let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀戰者';
+      let roleText = myRole === 'b' ? '黑方' : myRole === 'r' ? '紅方' : '觀棋者';
       if (isAiMode) {
         let levelText = sessionStorage.getItem('xq_ai_level_' + room) === 'hard' ? '高級' : '簡單';
         roleText += ` (單機-${levelText})`;
