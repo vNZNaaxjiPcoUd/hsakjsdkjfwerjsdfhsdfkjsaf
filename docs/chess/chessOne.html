@@ -115,7 +115,7 @@
       
       <button id="btn-role-b" class="modal-btn" onclick="requestRole('b')">執黑棋</button>
       <button id="btn-role-r" class="modal-btn" onclick="requestRole('r')">執紅棋</button>
-      <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">進入觀棋</button>
+      <button id="btn-role-s" class="modal-btn" onclick="requestRole('spectator')">觀棋</button>
 
       <div id="ai-menu-section">
         <hr style="border: 0; height: 1px; background: #ddd; margin: 20px 0 10px 0;">
@@ -193,14 +193,12 @@
 
     const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
 
-    // 🌟 新增：將移動座標轉換為標準象棋記譜法
     function getMoveNotation(p, r1, c1, r2, c2) {
       if (!p) return ""; 
       let color = (p === p.toLowerCase()) ? 'b' : 'r';
       let colorStr = color === 'b' ? '黑' : '紅';
       let pName = piecesText[p];
       
-      // 紅方由右至左是 9 到 1；黑方由右至左是 1 到 9
       let startCol = color === 'r' ? (9 - c1) : (c1 + 1);
       
       let dir = '';
@@ -217,7 +215,6 @@
       if (dir === '平') {
         endVal = color === 'r' ? (9 - c2) : (c2 + 1);
       } else {
-        // 直線兵種 (車砲將卒) 進退看步數，斜線兵種 (馬象士) 看目標行
         if (['r', 'c', 'p', 'k'].includes(pType)) {
           endVal = Math.abs(r1 - r2); 
         } else {
@@ -424,17 +421,14 @@
         boardChanged = JSON.stringify(oldState.board) !== JSON.stringify(state.board);
         if (boardChanged) selectedCell = null; 
         
-        // 🌟 修正：精準判斷是「悔棋」還是「重新開局」
         let isUndo = false;
         let isRestart = false;
         let oldHistoryLen = oldState.history ? oldState.history.length : 0;
         let newHistoryLen = state.history ? state.history.length : 0;
 
-        // 如果歷史紀錄歸零（或一開始沒有），且舊狀態是有紀錄的，代表是重新開局
         if (newHistoryLen === 0 && oldHistoryLen > 0) {
             isRestart = true;
         } 
-        // 否則如果歷史紀錄變短，代表是悔棋
         else if (newHistoryLen < oldHistoryLen) {
             isUndo = true;
         }
@@ -453,7 +447,6 @@
            updateInformation("將軍！");
         }
         
-        // 🌟 核心：根據情況印出對應訊息
         if (boardChanged) {
             if (isRestart) {
                 updateInformation("🆕 已重新開局");
@@ -620,11 +613,33 @@
       } else { if (isMyPiece) selectedCell = { r: r, c: c }; } renderBoard();
     }
 
-    async function commitMove(r1, c1, r2, c2) {
-      isSyncing = true; 
+    // 🌟 新增：用陣列來排隊背景傳輸，不讓畫面卡住
+    let syncQueue = [];
+    let isProcessingQueue = false;
+
+    async function processSyncQueue() {
+      if (isProcessingQueue) return;
+      isProcessingQueue = true;
+      isSyncing = true;
+
+      while (syncQueue.length > 0) {
+        // 直接抽出最後一個狀態來發送，丟棄沒意義的中間步驟
+        let stateToSync = syncQueue[syncQueue.length - 1];
+        syncQueue = []; 
+        
+        try {
+          await apiCall('move', { state: stateToSync });
+        } catch(e) {}
+      }
+
+      isProcessingQueue = false;
+      isSyncing = false;
+    }
+
+    // 🌟 修正：讓 commitMove 瞬間完成並把資料丟給背景同步
+    function commitMove(r1, c1, r2, c2) {
       lastActionTime = Date.now(); 
 
-      // 🌟 將狀態獨立深拷貝一份，交給 updateUI 去比對與更新，避免直接突變 gameState
       let nextState = JSON.parse(JSON.stringify(gameState));
       
       if (!nextState.history) nextState.history = []; 
@@ -654,14 +669,10 @@
       
       selectedCell = null; 
       
-      // 呼叫 updateUI 會負責觸發 記譜法列印，並將 gameState = nextState
       updateUI(nextState); 
       
-      let res = await apiCall('move', { state: gameState }); 
-      if(res && res.state) {
-        updateUI(res.state); 
-      }
-      isSyncing = false; 
+      syncQueue.push(gameState);
+      processSyncQueue();
     }
 
     const PIECE_VALUES = { 'k':100000, 'r':1000, 'c':550, 'h':500, 'e':250, 'a':250, 'p':100,
@@ -803,8 +814,8 @@
 
     async function makeAIMove() {
       try {
-        while (isSyncing) { await new Promise(r => setTimeout(r, 50)); }
-        await new Promise(r => setTimeout(r, 400)); 
+        // 🌟 拔除原本在這裡強制等待伺服器同步的 while 迴圈！
+        await new Promise(r => setTimeout(r, 100)); // 只有視覺上的 100ms 停頓，看起來不生硬
 
         if (!isAiMode || gameState.turn !== aiRole || (gameState.status !== 'playing' && gameState.status !== 'check')) {
             return;
@@ -845,7 +856,7 @@
           let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
           if (legalOpenings.length > 0) {
               let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
-              await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
+              commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); // 🌟 移除了 await
               return;
           }
         }
@@ -889,9 +900,9 @@
           }
         }
 
-        await commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2);
+        commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); // 🌟 移除了 await
       } finally {
-        isAiThinking = false;
+        isAiThinking = false; // 🌟 立刻解除鎖定，輪回你馬上就可以下棋！
       }
     }
 
