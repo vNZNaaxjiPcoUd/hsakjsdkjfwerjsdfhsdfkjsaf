@@ -1,0 +1,1111 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <title>聊天</title>
+    <meta http-equiv="cache-control" content="no-cache" />
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#333333">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="description" content="一個AI聊天應用。">
+    <meta name="keywords" content="AI talk">
+    <meta name="author" content="VK">
+    <link rel="canonical" href="https://h.jwint.net/chess/index.html">
+    <meta name="robots" content="index, follow">
+    
+    <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #F1F8E9;           /* 背景：極淺綠 */
+            --primary-green: #4CAF50;      /* 主色：森林綠 */
+            --dark-green: #1B5E20;         /* 文字：深綠 */
+            --ai-bubble: #FFFFFF;          /* AI 氣泡 */
+            --user-bubble: #4CAF50;        /* 用戶氣泡 */
+            --system-info: #DCEDC8;        /* 系統標籤 */
+            --input-bg: rgba(255, 255, 255, 0.95);
+        }
+
+        /* 核心布局：使用 dvh 完美適配 iOS Safari */
+        html, body {
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; 
+            background-color: var(--bg-color);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang TC", "Microsoft JhengHei", sans-serif;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        /* 聊天主容器 */
+        #chat-container {
+            width: 100%;
+            max-width: 800px;
+            flex-grow: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px 15px;
+            display: flex;
+            flex-direction: column; 
+            gap: 16px; 
+            box-sizing: border-box;
+            scroll-behavior: smooth;
+        }
+
+        /* 訊息氣泡設計 */
+        .message {
+            position: relative;
+            padding: 12px 18px;
+            border-radius: 22px;
+            max-width: 85%;
+            word-wrap: break-word;
+            line-height: 1.6;
+            font-size: 17px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .message:not(.info-message) {
+            padding-bottom: 36px; 
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            background-color: var(--user-bubble);
+            color: #ffffff;
+            align-self: flex-end; 
+            border-bottom-right-radius: 4px;
+        }
+
+        .ai-message {
+            background-color: var(--ai-bubble);
+            color: var(--dark-green);
+            align-self: flex-start; 
+            border-bottom-left-radius: 4px;
+        }
+        
+        .info-message {
+            background-color: var(--system-info);
+            color: #33691E;
+            font-size: 13px;
+            padding: 6px 14px;
+            align-self: center; 
+            border-radius: 12px;
+            box-shadow: none;
+            margin: 8px 0;
+        }
+
+        /* 複製按鈕樣式 */
+        .copy-btn {
+            position: absolute;
+            bottom: 6px;
+            right: 12px;
+            background: transparent;
+            border: none;
+            color: inherit;
+            font-size: 15px;
+            opacity: 0.5;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: all 0.2s;
+            z-index: 5;
+            touch-action: manipulation; 
+        }
+        
+        .user-message .copy-btn { color: rgba(255,255,255, 0.9); }
+        .ai-message .copy-btn { color: rgba(0,0,0, 0.5); }
+
+        .copy-btn:hover, .copy-btn:active {
+            opacity: 1;
+            background-color: rgba(0,0,0,0.08);
+            transform: scale(1.05);
+        }
+        .user-message .copy-btn:hover, .user-message .copy-btn:active {
+            background-color: rgba(255,255,255,0.25);
+        }
+
+        /* 輸入區域 */
+        #input-wrapper {
+            width: 100%;
+            max-width: 800px;
+            padding: 10px 15px;
+            box-sizing: border-box;
+            background: var(--bg-color);
+            padding-bottom: calc(10px + env(safe-area-inset-bottom)); 
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        #input-area {
+            background-color: var(--input-bg);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 28px;
+            padding: 6px 8px 6px 16px;
+            display: flex;
+            align-items: flex-end; 
+            gap: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.03);
+            transition: border-color 0.3s;
+        }
+        #input-area:focus-within {
+            border-color: var(--primary-green);
+        }
+
+        #user-input {
+            flex-grow: 1;
+            padding: 8px 0;
+            border: none;
+            background: transparent;
+            font-size: 17px; 
+            min-height: 24px; 
+            max-height: 120px;
+            line-height: 1.4;
+            outline: none;
+            color: #000;
+            caret-color: var(--primary-green);
+            resize: none; 
+        }
+
+        /* 按鈕設計 */
+        .btn {
+            background-color: transparent;
+            color: var(--primary-green);
+            border: none;
+            width: 38px;
+            height: 38px;
+            font-size: 22px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 50%;
+            transition: 0.2s;
+            flex-shrink: 0;
+            touch-action: manipulation;
+        }
+
+        .btn:active {
+            background-color: rgba(0,0,0,0.05);
+            transform: scale(0.9);
+        }
+
+        #send-btn {
+            background-color: var(--primary-green);
+            color: #fff;
+            width: 34px;
+            height: 34px;
+            font-size: 18px;
+            margin-bottom: 2px;
+        }
+
+        .recording {
+            animation: pulse 1.5s infinite;
+            color: #F44336 !important;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); background-color: rgba(244, 67, 54, 0.1); }
+            50% { transform: scale(1.1); background-color: rgba(244, 67, 54, 0.3); }
+            100% { transform: scale(1); background-color: rgba(244, 67, 54, 0.1); }
+        }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(76, 175, 80, 0.3); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(76, 175, 80, 0.6); }
+
+        @media (min-width: 768px) {
+            #chat-container { padding: 40px 20px; }
+            .message:hover { filter: brightness(0.98); }
+        }
+        
+        /* Markdown 內部樣式優化 */
+        .message pre { background: rgba(0,0,0,0.05); padding: 10px; border-radius: 8px; overflow-x: auto; }
+        .message code { font-family: monospace; background: rgba(0,0,0,0.05); padding: 2px 4px; border-radius: 4px; }
+        .user-message pre, .user-message code { background: rgba(255,255,255,0.2); }
+        /* 針對 Markdown 引用樣式優化，用於突顯精煉內容 */
+        .message blockquote { 
+            border-left: 4px solid var(--primary-green); 
+            margin: 10px 0; 
+            padding-left: 12px; 
+            color: #444; 
+            background: rgba(76, 175, 80, 0.05);
+            padding: 8px 12px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chat-container"></div>
+
+    <div id="input-wrapper">
+        <div id="input-area">
+            <button id="voice-btn" class="btn">🎤</button>
+            <textarea id="user-input" placeholder="訊息..." rows="1"></textarea>
+            <button id="send-btn" class="btn">➤</button>
+        </div>
+    </div>
+
+    <script>
+        // --- 設定與全域變數 ---
+        const ENCRYPTED_KEY_HOLDER = "U2FsdGVkX195q7/pYnCceTQn6dFe7ggkz6n74wX1DVwzOmb7itC1BTQ6Y7hvu8dSvXdPLNH6Gd5FvajTUJjWW/lV3YH+lN+ppGMYFYG+HpO11sq1UBX8dXw0ykeB5tW3Ni+4KlBfsS0cPDEeL4U+eJspQEPlwQxccXLc0yc37bs9cYER9SpPccW91ByDCIX73fvb7VmaRMpuMBNIWbooMcZCeWco+NmIfXv/7AB7iK4lrlY6BTsMPHZAhmoPtSHXgs3ETC99uTIgQHq1OVER8nS7MDdSbkisxVu6yAH7jYbmBgF0tEKaVNGYg2GNUl9o0GKM3DkynP8c/9ZTgoO8FSlst4+ZnHplDyvACEpVhyCf/6zwv1fpSuPyVuxgFBa+hzNZf7DS66s1nRcQDf2sdzrHjioeUaQx5Dim2DUrUf6r0kLq4voOjL4oukY1F/06/ZxQ6rdxq6X8JTVOLWEuLaqXhUAC8vvDLgvXpC70ycDeubzINMt51hVuTuRb2GUONqbWXK7c8YFDbsxZLqx4ka192qArVt2gXnmfnCxslVJGr3YmDBexhVwwuLbZVQYkH+cegorC0qKpcWrj5oFL/z9LR7SpMUhk76K/uER1tr2dZ0n65UtXm6IF+dJjUHzYPIhbpwmOw2cQMvj1rFbxHj0dFn1diCXp/y3eTIR6ILPf0HCWgEteDxNXmyb2QIlytCSrL3oEAwPnC99ErGjNuoQCZ76i2AHf9VS8xkHut9Ign4X5d2JAnjmXphNWB1FBCHpt0adIhp/9Liwqrsir8DEcWX1UZVT7DNFuJMQZJxJp7h3iDEWxf1qLrjVsk1hhHh1TrJmlZCjCrmF/nbE1y13uZ5rs4Ei0ibJCBeSkdFfD8j5RGTFLQoIDYIov5ej506jwRXMLuWIHQVtTGbl5SLa80HEkXpC/3YHOuKerYAoYL9GwfeSug5iP7IgKtI2puMRDoLtkb/Fi73JNQYOcHh8DjsxT8YHYoPGD6EeKc9gDcIhd8RVL2NXRSwxFwv14FpXWM3r3qDt6jxDEGG4Ymu+PZ9+h/CCXQX2ZAmapbQsJBeRgATYLbujDsUsYAGcHVQ9cedDoayp89oSi4E00udM0kfaJHxOxDeEVEkK8lw3BhU0VuY7espPAknHbvYonURk7rNdE56JcyeO9Ha+fo5h0sJDwo+ca8HWxrnLNzFgSQAh7p5k/PnFZCkKWWxOXXZXxKuI6fGb99SmQlYScsefaQXtr5oA8lEHYIgKSF0OQq85GLtxfVjjNJAHnuTW1GARgRxz0D7JrkL3Fef8O+X/zH4yeV1T/WwckQzB3kGoPL7ziZWi7w+oTtiJSomioSEUHTwwyiENNq3FHQAJq+TAOvgV2EOO6OHlaTd6QS5cq8DFP7ppHbDLwtDq5ZJ7B/GODX2ZWW5gFWIR9WwMbwe+Ub3lWPLd56xC/641QbmL63JSX80+RXVfTcWqzin4KXlSY7/GFWE2LiBNVlLA4Y1jLcPQ7Ulm8iRX/a+KNaktAezW/Ww2IYHWJhqMeaciLpF6XIq3z/LBkJF+LfVfZ4FcE9VG5Un2iNJLCfKYnO/cw/N3ppsDQqKFMcwDDrOn0sb4FzF9LGpeix+CObIlFjwaaqmqVM5Kr7gJGrlOCpaIroFg9flMu092OlNyncccDjE4g4LpD8Mnyq5nAEzbP7HdttWV7+8pRVoQcyCBJUtBcOmzI4LlibZq0/9CyYCEdKB9VOYgwI2MBo2WYaJ3Amulzi8kJyjXEFaQIwy0zs4jtP9+x9YVcg7Zvd+Zl0clAaV57XMka/fgmqmjOes/DfTdHv6i5zZ3jgc7+f+0XIFA=";
+        const INIT_KEY = "月落";
+        let API_KEY = null; 
+        let API_URL = null; 
+        
+        let SYSTEM_PROMPT = `請你是一位 [專業角色，例如：生活顧問、科學家、歷史學家、程式設計的專家]，針對 [主題] 進行詳細分析。
+        目標設定： 目標是 [討論主題]，提供一份 [具體行動] 的步驟指南，並分析其中的優缺點。
+        前情提要： 在之前的對話中，我們已經討論過 [相關主題]，重複前面對話的[關鍵詞]，基於這些資訊，進一步展開分析，並提出新的見解。
+        環境設定：  假設現在處於 [特定環境，例如：未來世界、特定國家、某個行業]，從這個環境的特點出發，分析 [相關主題] 的發展趨勢和可能的挑戰。
+        情境描述： 目前面臨 [具體情境]從 [不同角度，例如：經濟、心理、實際操作] 進行分析，並提供解決方案。
+        問題拆解： 將 [複雜問題] 拆解成幾個小步驟，列出步驟，再逐一進行說明與分析。
+        問題回答： 針對 [具體問題]，提供一個詳細的解答，並分析這個解答的可行性、優缺點，以及可能的後續影響。
+        後續發展： 基於目前的討論，預測 [相關主題] 在未來可能的發展方向，並分析這些發展對 [特定群體或行業] 的影響。
+        總結回顧： 回顧整個討論過程，總結出 [核心觀點]，並提出一個 [具體建議] 作為結論。
+        回應態度： 以溫柔，平和、幽默的語氣來回答，並確保內容具有創意、實用性、深度。
+        回應格式： 用繁體中文回答。盡量加上emoji。盡量用markdown標示。盡量提供相關的參考資料或連結。
+        其他要求： 回答中盡量避免使用過於專業的術語，確保內容通俗易懂，適合大眾閱讀。
+        以上是你需要遵守的角色設定和回應要求，請牢記並在每次回應中體現出來。
+        `;
+        
+        //let MODEL = "gemini-2.5-flash-lite";
+        let MODEL = "gemini-3.1-flash-lite-preview";
+        let HISTMAX = 12; // 基本對話保留長度
+        let lastAiMessage = "";
+        let hist = [];
+        let dateA = "";
+        let LOCT = "美國佛羅里達州坦帕市 (Tampa, Florida, USA)。";
+
+        // --- IndexedDB 設定 ---
+        const DB_NAME = "ChatHistoryDB";
+        const DB_VERSION = 1;
+        const STORE_NAME = "histories";
+        const AUTOSAVE_SESSION_KEY = "current_session_autosave"; 
+        let KEYA = "GVkX18O2PMYNSlYBMU3+YBbuyUWUSZteTjL63+63l30jZ86";
+
+        // --- DOM 元素 ---
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const voiceBtn = document.getElementById('voice-btn');
+
+        // --- 語音變數 ---
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        let recognition = null;
+        let isRecording = false;
+        let silenceTimeout; 
+        const SILENCE_THRESHOLD = 6000;
+        let shouldRestartVoice = false; 
+
+        // ==========================================
+        // 1. IndexedDB 功能
+        // ==========================================
+        
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains(STORE_NAME)) {
+                        db.createObjectStore(STORE_NAME, { keyPath: "name" });
+                    }
+                };
+                request.onsuccess = (e) => resolve(e.target.result);
+                request.onerror = (e) => reject("DB Open Error");
+            });
+        }
+
+        async function encryptData(data, keyA) {
+            if (keyA === "") return null;
+            const jsonData = JSON.stringify(data);
+            const encrypted = CryptoJS.AES.encrypt(jsonData, keyA).toString();
+            return encrypted;
+        }
+
+        async function decryptData(encryptedString, keyA) {
+            if (keyA === "") return null;
+            const decrypted = CryptoJS.AES.decrypt(encryptedString, keyA);
+            const originalJson = decrypted.toString(CryptoJS.enc.Utf8);
+            return JSON.parse(originalJson);
+        }
+
+        async function dbSave(name, historyData) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            const saveName = name || "道"; 
+            const encryptedData = await encryptData(historyData, KEYA);
+            store.put({ name: saveName, data: encryptedData, timestamp: new Date() });
+            return `已儲存為: ${saveName}`;
+        }
+
+        async function dbLoad(name) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            return new Promise((resolve, reject) => {
+                const request = store.get(name);
+                request.onsuccess = async () => {
+                    if (request.result) {
+                        try {
+                            const decryptedData = await decryptData(request.result.data, KEYA);
+                            resolve(decryptedData);
+                        } catch(e) { resolve(null); }
+                    }
+                    else resolve(null);
+                };
+                request.onerror = () => reject("Load Error");
+            });
+        }
+
+        async function dbList() {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readonly");
+            const store = tx.objectStore(STORE_NAME);
+            return new Promise((resolve, reject) => {
+                const request = store.getAllKeys();
+                request.onsuccess = () => resolve(request.result);
+                request.onerror = () => reject("List Error");
+            });
+        }
+
+        async function dbDel(name) {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            store.delete(name);
+            return `已刪除: ${name}`;
+        }
+
+        async function dbDelAll() {
+            const db = await openDB();
+            const tx = db.transaction(STORE_NAME, "readwrite");
+            const store = tx.objectStore(STORE_NAME);
+            store.clear();
+            return "已清除所有存檔";
+        }
+
+        async function autoSaveSession() {
+            if (hist.length > 0) {
+                await dbSave(AUTOSAVE_SESSION_KEY, hist);
+            } else {
+                await dbDel(AUTOSAVE_SESSION_KEY);
+            }
+        }
+
+        async function loadAutoSavedSession() {
+            const savedData = await dbLoad(AUTOSAVE_SESSION_KEY);
+            if (savedData && Array.isArray(savedData) && savedData.length > 0) {
+                hist = savedData;
+                renderHistory(true);
+                return true;
+            }
+            return false;
+        }
+
+        // ==========================================
+        // 2. 核心邏輯
+        // ==========================================
+
+        function decryptApiKey(encKey, inKey) {
+            try {
+                const hashKey = CryptoJS.SHA512(inKey).toString(); 
+                const bytes = CryptoJS.AES.decrypt(encKey, hashKey);
+                let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+                const decryptedText = data.API || "";
+
+                KEYA = data.KEYA || "";
+                return decryptedText.length > 0 ? decryptedText : null;
+            } catch (error) {
+                return null;
+            }
+        }
+        
+        function scrollToBottom() {
+            requestAnimationFrame(() => {
+                chatContainer.scrollTo({
+                    top: chatContainer.scrollHeight,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        function displayMessage(text, sender, isInfo = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            
+            const contentDiv = document.createElement('div');
+            // isInfo 保持純文字/HTML，否則使用 Markdown 解析
+            contentDiv.innerHTML = isInfo ? text : marked.parse(text); 
+            messageDiv.appendChild(contentDiv);
+
+            lastAiMessage = sender === 'user' ? text : lastAiMessage;
+
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+            } else {
+                messageDiv.classList.add('ai-message');
+                if (isInfo) messageDiv.classList.add('info-message');
+            }
+            
+            if (!isInfo) {
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.innerHTML = '❐'; 
+                copyBtn.title = "複製內容";
+                
+                copyBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    try {
+                        // 【優化修改】：直接複製原始 text 變數，保留完整 Markdown 語法
+                        let cleanRawMarkdown = text
+                            .replace(/[ \t]+$/gm, '')       
+                            .replace(/\n{3,}/g, '\n\n')     
+                            .trim();                        
+
+                        await navigator.clipboard.writeText(cleanRawMarkdown);
+                        
+                        const originalHtml = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '✅';
+                        setTimeout(() => copyBtn.innerHTML = originalHtml, 1500);
+                    } catch (err) {
+                        console.error('複製失敗:', err);
+                    }
+                };
+                messageDiv.appendChild(copyBtn);
+            }
+            
+            chatContainer.appendChild(messageDiv);
+            scrollToBottom();
+        }
+
+        function renderHistory(isAutoLoad = false) {
+            chatContainer.innerHTML = ""; 
+            if (isAutoLoad) {
+                displayMessage("♻️ 已自動恢復前次對話紀錄", 'ai', true);
+            } else {
+                displayMessage("♻️ 畫面已刷新", 'ai', true);
+            }
+
+            hist.forEach(item => {
+                const text = item.parts[0].text;
+                const role = item.role === 'model' ? 'ai' : 'user';
+                // 跳過系統自己產生的精煉提示句不在畫面顯示
+                if (text.startsWith("【系統已精煉歷史紀錄】")) return; 
+                displayMessage(text, role); 
+                lastAiMessage = role === 'user' ? text : lastAiMessage;
+            });
+            scrollToBottom();
+        }
+
+        async function checkDbPwd(){
+            const pwdData = await dbLoad("VkX18O2PM");
+            let endProm = "";
+            if (!pwdData) return false; 
+            
+            // 使用區域變數，不覆寫全域 hist
+            pwdData.forEach(item => {
+                const text = item.parts[0].text;
+                const role = item.role === 'model' ? 'ai' : 'user';
+                endProm = role === 'ai' ? text : endProm;
+            });
+            
+            if(endProm === "" || endProm === "月落") return false;
+
+            userInput.value = endProm;
+            // 系統自動幫忙送出該密碼字串
+            await sendMessage();
+            return true;
+        }
+
+        // --- 產生話題名稱的工具 ---
+        async function generateTopicTitle(history) {
+            // 跳過包含「系統精煉」的背景訊息來抓取標題
+            let fallbackText = history.find(h => h.role === 'user' && !h.parts[0].text.startsWith("【"))?.parts[0].text.substring(0, 10).replace(/[\r\n]/g, '') || "未知話題";
+            if (!API_KEY || history.length === 0) return fallbackText;
+
+            try {
+                const prompt = "請根據以下對話紀錄，總結出一個能夠代表這段對話的核心主題名稱。要求：不超過10個字，不要任何標點符號，直接輸出純文字：\n" + history.map(h => h.parts[0].text).join("\n").substring(0, 1000);
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: prompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 20 }
+                    })
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    let title = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    title = title.replace(/[^\w\u4e00-\u9fa5]/g, '').trim(); 
+                    if (title.length > 0) return title;
+                }
+            } catch (e) { console.error("生成標題失敗:", e); }
+            return fallbackText;
+        }
+
+        // --- 背景精煉歷史記錄：疊加合併版 ---
+        async function compressHistory() {
+            // 當前長度大於或等於 (基本保留數 + 10筆對話) 時才觸發大整理
+            if (hist.length < HISTMAX + 10 || !API_KEY) return;
+            
+            let existingSummary = "";
+            let startIndex = 0;
+
+            // 1. 檢查是否已經有存在的精煉歷史
+            if (hist.length > 0 && hist[0].parts[0].text.startsWith("【系統已精煉歷史紀錄】")) {
+                existingSummary = hist[0].parts[0].text.replace("【系統已精煉歷史紀錄】\n", "");
+                startIndex = 2; // 跳過前兩筆 (精煉 prompt 與 AI 的 OK 回覆)
+            }
+
+            // 2. 抽出舊對話 (抓取 8 筆訊息/ 4 次來回進行壓縮，保留最新幾筆)
+            const compressCount = 8;
+            if (hist.length - startIndex < compressCount) return; 
+
+            const toCompress = hist.slice(startIndex, startIndex + compressCount);
+            const remaining = hist.slice(startIndex + compressCount);
+
+            // 3. 準備給 AI 的合併指令
+            let compressPrompt = "";
+            if (existingSummary) {
+                compressPrompt = "以下是『過去的對話總結』：\n" + existingSummary + "\n\n---\n" +
+                                 "以下是『最新的一段對話』：\n" + 
+                                 toCompress.map(m => `${m.role === 'model' ? 'AI' : 'User'}: ${m.parts[0].text}`).join("\n\n") + 
+                                 "\n\n請將『過去的對話總結』與『最新的一段對話』合併，重新產生一份完整的精煉總結。務必保留所有過去與現在的核心意圖、關鍵資訊與結論，請勿遺漏先前的重點。請條理分明且精簡，直接輸出合併後的總結內容即可：";
+            } else {
+                compressPrompt = "請將以下對話內容進行精煉總結，保留使用者的核心意圖、關鍵資訊與最終結論。請盡量簡短以節省資源，直接輸出總結內容即可：\n\n" + 
+                                 toCompress.map(m => `${m.role === 'model' ? 'AI' : 'User'}: ${m.parts[0].text}`).join("\n\n");
+            }
+
+            try {
+                displayMessage("🔄 累積對話中...正在背景合併並更新歷史記憶。", 'ai', true);
+                
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ role: "user", parts: [{ text: compressPrompt }] }],
+                        generationConfig: { temperature: 0.1, maxOutputTokens: 800 }
+                    }),
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const summaryText = data.candidates?.[0]?.content?.parts?.[0]?.text || "";
+                    
+                    if(summaryText) {
+                        // 將合併後的精煉結果重新放回歷史紀錄的最開頭
+                        hist = [
+                            { role: "user", parts: [{ text: "【系統已精煉歷史紀錄】\n" + summaryText }] },
+                            { role: "model", parts: [{ text: "好的，我已經記住累積的對話重點了。" }] },
+                            ...remaining
+                        ];
+                        // 寫入 IndexedDB
+                        autoSaveSession();
+                        displayMessage("✅ 記憶精煉與合併累加完成。", 'ai', true);
+                        return;
+                    }
+                }
+                // 若 API 失敗，則 fallback 丟棄舊的兩筆對話
+                hist.splice(startIndex, 2); 
+            } catch (err) {
+                console.error("精煉失敗", err);
+                hist.splice(startIndex, 2); 
+            }
+        }
+
+        async function getGeminiResponse(prompt) {
+            if (!API_KEY) {
+                displayMessage(prompt, 'user');
+                displayMessage("🚨 請先輸入鑰匙解鎖", 'ai', true);
+                shouldRestartVoice = false;
+                return;
+            }
+            
+            displayMessage(prompt, 'user');
+            
+            const loadingId = 'loading-' + Date.now();
+            const loadingMessage = document.createElement('div');
+            loadingMessage.id = loadingId;
+            loadingMessage.classList.add('message', 'ai-message');
+            loadingMessage.innerHTML = '<span style="animation: pulse 1s infinite; display: inline-block;">思考中...</span>';
+            chatContainer.appendChild(loadingMessage);
+            scrollToBottom();
+
+            dateA = new Date().toLocaleString('zh-TW', { hour12: false });
+            let SYMP = SYSTEM_PROMPT + `沒有說地點日期時，預設地點是${LOCT}，日期是${dateA}。`;
+            
+            const requestBody = {
+                    system_instruction: { parts: [{ text: SYMP }] },
+                    contents: [...hist, { role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.3, maxOutputTokens: 4096 },
+                    tools: [{ googleSearch: {} }]
+                };
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody),
+                });
+
+                if (!response.ok) throw new Error(`API: ${response.status}`);
+
+                const data = await response.json();
+                
+                const loadingElem = document.getElementById(loadingId);
+                if(loadingElem) chatContainer.removeChild(loadingElem);
+
+                const parts = data.candidates?.[0]?.content?.parts;
+                let aiText = "無回應";
+                if (parts && Array.isArray(parts)) {
+                    aiText = parts.map(part => part.text || "").join("").trim();                      
+                    if (aiText === "") aiText = "無回應";
+                }
+
+                displayMessage(aiText, 'ai');
+
+                hist.push({ role: "user", parts: [{ text: prompt }] });
+                hist.push({ role: "model", parts: [{ text: aiText }] });
+                
+                await autoSaveSession();
+                
+                // 檢查是否達到累積門檻觸發精煉
+                await compressHistory(); 
+
+            } catch (error) {
+                const loadingElem = document.getElementById(loadingId);
+                if(loadingElem) chatContainer.removeChild(loadingElem);
+                console.log("API 錯誤:", error);
+                displayMessage(`錯誤: ${error.message}`, 'ai', true);
+            } finally {
+                if (shouldRestartVoice) setTimeout(startVoiceRecognition, 500);
+                shouldRestartVoice = false;
+            }
+        }
+
+        // ==========================================
+        // 3. 指令處理
+        // ==========================================
+
+        async function handleCommand(input) {
+            const lowerInput = input.trim();
+            const parts = lowerInput.split(/\s+/);
+            const cmd = parts[0].toLowerCase();
+            const arg = parts.slice(1).join(" "); 
+
+            if (['幫幫我', '幫我', 'help', '指令'].includes(cmd)) {
+                const helpText = `🤖 **指令說明：**
+
+* **儲存與管理**
+  * \`存 [名稱]\` : 儲存當下對話
+  * \`取 [名稱]\` : 載入指定對話
+  * \`列\` 或 \`紀錄\` : 列出所有保存的對話與切換方式
+  * \`刪 [名稱]\` : 刪除指定對話
+  * \`清空所有保存談話\` : 清除所有對話庫
+* **檢視與操作**
+  * \`記憶\` 或 \`背景\` : 顯示 AI 當前完整的記憶狀態 (包含精煉總結)
+  * \`看 [名稱]\` : 預覽已封存的對話內容
+  * \`複製\` / \`複\` : 複製當前對話 (JSON 格式)
+  * \`貼\` : 貼上對話 (JSON 格式)
+* **流程控制**
+  * \`新話題\` : 自動封存當前話題並開啟全新的對話
+  * \`清\` : 清空畫面與當下對話紀錄
+  * \`退\` / \`ddd\` : 收回/刪除最後一筆對話
+  * \`尾\` : 重送最後一句 AI 的話
+  * \`長 [數字]\` : 設定短期對話記憶長度
+* **系統指令**
+  * \`重來\` / \`reload\` : 重整網頁
+  * \`ver\` : 顯示版本
+  * \`記 [內容]\` : 留下備註紀錄
+  * \`密語 [內容]\` : 設定悄悄話密碼
+  * \`開\` : 執行悄悄話
+  * \`鑰匙 [key]\` : API KEY SETTING 
+  * \`你是 [角色]\` : 變更 AI 系統人設`;
+                // 使用 AI 氣泡 (isInfo = false) 支援 Markdown 排版美化
+                displayMessage(helpText, 'ai', false);
+                return true;
+            }
+
+            if (cmd === '新話題') {
+                if (hist.length > 0) {
+                    displayMessage("📦 正在總結並封存目前話題，請稍候...", 'ai', true);
+                    let topic = await generateTopicTitle(hist);
+                    const now = new Date();
+                    const timeStr = `${now.getFullYear()}${(now.getMonth()+1).toString().padStart(2,'0')}${now.getDate().toString().padStart(2,'0')}_${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+                    const saveName = `${topic}-${timeStr}`;
+                    
+                    await dbSave(saveName, hist);
+                    hist = [];
+                    chatContainer.innerHTML = '';
+                    await dbDel(AUTOSAVE_SESSION_KEY);
+                    displayMessage(`💾 前次討論已封存為：「**${saveName}**」\n\n✨ 畫面與記憶已淨空，我們可以開始全新的話題了！`, 'ai', false);
+                } else {
+                    displayMessage("✨ 記憶已經是乾淨的狀態，您可以直接開始新話題！", 'ai', false);
+                }
+                userInput.focus();
+                return true;
+            }
+            
+            // --- 優化：列出所有對話並提供切換方式 ---
+            if (cmd === '列' || cmd === '紀錄') {
+                const keys = await dbList();
+                const filtered = keys.filter(key => !key.includes("VkX18O2PM") && key !== AUTOSAVE_SESSION_KEY);
+                
+                if (filtered.length === 0) {
+                    displayMessage("📂 **目前沒有保存的對話紀錄。**", 'ai', false);
+                    return true;
+                }
+
+                let listMd = "📂 **已保存的話題清單：**\n\n";
+                filtered.forEach(k => {
+                    listMd += `* **${k}** 👉 *(輸入 \`取 ${k}\` 切換)*\n`;
+                });
+                listMd += "\n💡 *您可以直接複製上述指令，或使用 `新話題` 來封存並開始新紀錄。*";
+                displayMessage(listMd, 'ai', false);
+                return true;
+            }
+
+            // --- 新增：顯示當前對話記憶與背景 ---
+            if (cmd === '記憶' || cmd === '背景') {
+                if (hist.length === 0) {
+                    displayMessage("🧠 **當前記憶是空的，我們還沒有開始聊天呢！**", 'ai', false);
+                    return true;
+                }
+
+                let memMd = "🧠 **AI 當前的記憶與對話背景：**\n\n---\n\n";
+                hist.forEach((h) => {
+                    const role = h.role === 'model' ? '🤖 **AI**' : '👤 **You**';
+                    let txt = h.parts[0].text;
+                    // 若有精煉標籤，使用 Markdown 引用樣式突顯
+                    if (txt.startsWith("【系統已精煉歷史紀錄】")) {
+                        txt = `> 📦 *${txt.replace(/\n/g, ' ')}*`;
+                    }
+                    memMd += `${role}:\n${txt}\n\n`;
+                });
+                displayMessage(memMd, 'ai', false);
+                return true;
+            }
+
+            if (cmd === '看') {
+                let targetHist = hist;
+                let title = "當前對話";
+                if (arg) {
+                    const data = await dbLoad(arg);
+                    if (!data) { displayMessage(`❌ 找不到存檔: ${arg}`, 'ai', true); return true; }
+                    targetHist = data;
+                    title = `存檔: ${arg}`;
+                }
+                if (targetHist.length === 0) { displayMessage(`📂 [${title}] 是空的`, 'ai', true); return true; }
+
+                let text = `📄 **[${title}] 內容預覽:**\n\n---\n\n`;
+                targetHist.forEach(h => {
+                    const role = h.role === 'model' ? '🤖 **AI**' : '👤 **You**';
+                    text += `${role}:\n${h.parts[0].text}\n\n`;
+                });
+                displayMessage(text, 'ai', false);
+                return true;
+            }
+
+            if (cmd === '複製'|| cmd === '複') {
+                if (hist.length === 0) { displayMessage("⚠️ 目前沒有內容可複製", 'ai', true); return true; }
+                try {
+                    await navigator.clipboard.writeText(JSON.stringify(hist));
+                    displayMessage("✅ 已複製對話 (JSON) 到剪貼簿", 'ai', true);
+                } catch (err) { displayMessage("❌ 複製失敗: " + err, 'ai', true); }
+                return true;
+            }
+
+            if (cmd === '貼') {
+                try {
+                    const text = await navigator.clipboard.readText();
+                    if (!text) { displayMessage("⚠️ 剪貼簿是空的", 'ai', true); return true; }
+                    const parsed = JSON.parse(text);
+                    if (Array.isArray(parsed)) {
+                        hist = [...hist, ...parsed]; 
+                        renderHistory(); 
+                        autoSaveSession();
+                        displayMessage(`✅ 已貼上並合併 ${parsed.length} 筆記錄`, 'ai', true);
+                    } else { displayMessage("❌ 格式錯誤: 不是陣列", 'ai', true); }
+                } catch (err) { displayMessage("❌ 貼上失敗: 請確認是有效的JSON", 'ai', true); }
+                return true;
+            }
+
+            if (cmd === '存') {
+                const res = await dbSave(arg, hist);
+                displayMessage(`💾 ${res}`, 'ai', true); return true;
+            }
+            if (cmd === '取') {
+                const file = arg || "道"; 
+                const data = await dbLoad(file);
+                if (data) { hist = data; renderHistory(); autoSaveSession(); }
+                else { displayMessage(`❌ 找不到: ${arg}`, 'ai', true); }
+                return true;
+            }
+            if (cmd === '刪') {
+                if (!arg) { displayMessage("❌ 請指定名稱", 'ai', true); return true; }
+                const res = await dbDel(arg);
+                displayMessage(`🗑️ ${res}`, 'ai', true); return true;
+            }
+            if (cmd === '清空所有保存談話') {
+                await dbDelAll();
+                displayMessage(`🔥 已清除所有存檔`, 'ai', true); return true;
+            }
+            if (cmd === '清') {
+                hist = [];
+                chatContainer.innerHTML = '';
+                await dbDel(AUTOSAVE_SESSION_KEY); 
+                displayMessage("🧹 畫面與記憶已淨空，我們重新開始吧！", 'ai', false);
+                userInput.focus();
+                return true;
+            }
+            if (cmd === 'modela') {
+                MODEL = "gemini-3.1-flash-lite-preview";
+                if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                displayMessage(`🤖 模型切換: ${MODEL}`, 'ai', true); return true;
+            }
+            if (cmd === 'modelb') {
+                MODEL = "gemini-2.5-flash-lite";
+                if(API_KEY) API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                displayMessage(`🤖 模型切換: ${MODEL}`, 'ai', true); return true;
+            }
+            if (['重來', '新', '重', 'reload'].includes(cmd)) {
+                window.location.reload(); return true;
+            }
+            if (cmd === 'ver') {
+                displayMessage(`🤖 版本: 1.7 (複製按鈕支援完整 Markdown 語法)`, 'ai', true); return true;
+            }
+            if (cmd === '記') {
+                if (!arg) { displayMessage("❌ 請輸入備註內容", 'ai', true); return true; }
+                displayMessage(`🔖 ${arg}`, 'ai', true); 
+                hist.push({ role: "user", parts: [{ text: cmd }] });
+                hist.push({ role: "model", parts: [{ text: arg }] });
+                autoSaveSession();
+                return true;
+            }
+            if (cmd === 'ddd' || cmd === '退') {
+                if(hist.length >= 2) {
+                    hist.pop(); hist.pop(); 
+                    autoSaveSession();
+                    displayMessage(`🧹 已收回最後一組對話`, 'ai', true); 
+                } else {
+                    displayMessage(`⚠️ 沒有對話可以收回了`, 'ai', true); 
+                }
+                return true;
+            }
+            if (cmd === '尾') {
+                userInput.value = lastAiMessage;
+                await sendMessage(); return true;
+            }
+            if (['保存密語', '密語', '密碼'].includes(cmd)) {
+                let k = arg.startsWith(INIT_KEY) ? arg : "月落";
+                const res = await dbSave("VkX18O2PM", [{ role: "user", parts: [{ text: cmd }] }, { role: "model", parts: [{ text: k }] }]);
+                displayMessage(`🤫 悄悄話收到了！`, 'ai', true); return true;
+            }
+            if (cmd === '開' || cmd === '開始'){
+                let ret = await checkDbPwd();
+                if (!ret) displayMessage("❌ 找不到檔案", 'ai', true);
+                return true;
+            }
+            if (cmd === 'key' || cmd === '鑰匙') {
+                API_KEY = arg;
+                displayMessage("鑰匙收到了", 'user');
+                displayMessage("🔓 門鎖已開，隨時為您服務", 'ai', true);
+                API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                voiceBtn.disabled = false;
+                return true;
+            }
+            if (cmd === '長') {
+                displayMessage(`聊久一點`, 'user');
+                if(arg !== "" && !isNaN(arg)){
+                    HISTMAX = parseInt(arg, 10);
+                    displayMessage(`好的，基本記憶保留長度已設為 **${HISTMAX}**。\n(系統將在累積 ${HISTMAX + 10} 筆訊息後才進行背景精煉整理)`, 'ai', false);
+                } else {
+                    displayMessage(`請輸入有效的數字長度`, 'ai', true);
+                }
+                return true;
+            }
+            if (cmd === '你是') {
+                displayMessage(`你是。。。`, 'user');
+                if(arg !== ""){
+                    displayMessage(`💡 明白，我現在是 **${arg}** 了`, 'ai', false);
+                    SYSTEM_PROMPT = "你是" + arg;
+                }else{
+                    displayMessage(`我是您的智慧小幫手呀！`, 'ai', false);
+                }
+                return true;
+            }
+            if (cmd === '你是誰?' || cmd === '你是誰') {
+                displayMessage(`你是誰？`, 'user');
+                displayMessage(`${SYSTEM_PROMPT.replace(/你/g, "我")}`, 'ai', false);
+                return true;
+            }
+            
+            return false;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            if (!text) return;
+
+            userInput.value = '';
+            userInput.style.height = '24px'; 
+            
+            if (text.startsWith(INIT_KEY)) {
+                const inKey = text.substring(INIT_KEY.length).trim();
+                const decryptedKey = decryptApiKey(ENCRYPTED_KEY_HOLDER, inKey);
+                if (decryptedKey) {
+                    API_KEY = decryptedKey;
+                    API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+                    voiceBtn.disabled = false;
+                    displayMessage("輕舟已過萬重山來到你眼前，你好！", 'ai', true);
+                } else {
+                    displayMessage("❌ 密碼錯誤", 'ai', true);
+                }
+                return;
+            }
+
+            try {
+                const isCmd = await handleCommand(text);
+                if (isCmd === true) return;
+            } catch (err) {
+                console.error("指令處理發生錯誤:", err);
+                displayMessage("⚠️ 指令執行發生異常", 'ai', true);
+                return; 
+            }
+
+            getGeminiResponse(text);
+        }
+
+        // ==========================================
+        // 4. 語音辨識與介面初始化
+        // ==========================================
+        
+        function initVoiceRecognition() {
+            if (!SpeechRecognition) {
+                voiceBtn.style.display = 'none';
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.lang = 'zh-Hant';
+            recognition.interimResults = false;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                voiceBtn.classList.add('recording');
+                userInput.placeholder = "聆聽中...";
+                clearTimeout(silenceTimeout);
+                silenceTimeout = setTimeout(handleSilenceTimeout, SILENCE_THRESHOLD);
+            };
+
+            recognition.onresult = (event) => {
+                clearTimeout(silenceTimeout);
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
+                }
+                if (finalTranscript) {
+                    userInput.value = finalTranscript;
+                    userInput.style.height = 'auto';
+                    userInput.style.height = (userInput.scrollHeight) + 'px';
+                }
+                silenceTimeout = setTimeout(handleSilenceTimeout, SILENCE_THRESHOLD);
+            };
+
+            recognition.onend = () => {
+                clearTimeout(silenceTimeout);
+                isRecording = false;
+                voiceBtn.classList.remove('recording');
+                userInput.placeholder = "訊息...";
+                if (userInput.value.trim() && shouldRestartVoice) sendMessage();
+                else shouldRestartVoice = false;
+            };
+            
+            recognition.onerror = () => {
+                isRecording = false; 
+                voiceBtn.classList.remove('recording');
+                shouldRestartVoice = false;
+            };
+        }
+
+        function startVoiceRecognition() {
+            if (recognition && !isRecording) {
+                userInput.value = '';
+                shouldRestartVoice = true;
+                try { recognition.start(); } catch(e){}
+            }
+        }
+        
+        function handleSilenceTimeout() {
+            if (isRecording) recognition.stop();
+        }
+
+        voiceBtn.addEventListener('click', () => {
+            if (isRecording) {
+                recognition.stop();
+                shouldRestartVoice = false;
+            } else {
+                startVoiceRecognition();
+            }
+        });
+
+        sendBtn.addEventListener('click', () => {
+            shouldRestartVoice = false;
+            sendMessage();
+        });
+
+        userInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                shouldRestartVoice = false;
+                sendMessage();
+            }
+        });
+
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            initVoiceRecognition();
+            
+            const A = ".";
+            for (let i = 15; i > 0 ; i--) {
+                let ii = i < 10 ? i : 10;
+                displayMessage(A.repeat(ii), 'ai', true);
+            }
+
+            // 1. 無論是否有紀錄，都先嘗試使用儲存的密語解鎖系統
+            let isUnlocked = await checkDbPwd();
+            
+            // 2. 載入自動存檔的對話紀錄
+            let hasAutoSave = await loadAutoSavedSession();
+            
+            if (!isUnlocked) {
+                displayMessage("🔒 系統待命，請輸入鑰匙解鎖。", 'ai', true);
+            }
+            
+            userInput.focus();
+            scrollToBottom();
+        });
+    </script>
+</body>
+</html>
