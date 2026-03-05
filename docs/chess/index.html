@@ -3,13 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="cache-control" content="no-cache" />
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#333333">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="A chess game built with JavaScript, HTML, and CSS. Play against the computer or a friend on the same device.">
+    <meta name="keywords" content="chess, game, JavaScript, HTML, CSS, play chess online, chess game">
+    <meta name="author" content="VK">
+    <link rel="canonical" href="https://h.jwint.net/chess/index.html">
+    <meta name="robots" content="index, follow">
+
     <title></title>
 </head>
 <body>
     <script>
         function processAndRedirect() {
-            const baseUrl = "https://h.jwint.net/chess/lobby";
-            const result = "榕樹下";
+            const baseUrl = "https://n.jwint.net/chess/chess";
+            const lastPart = window.location.search.slice(1);
+            const result = lastPart.replace(/\+/g, "%20");
             let kk1;
             //console.log("Extracted and processed part:", result);
             if (result) {
@@ -17,7 +30,7 @@
             }else{
                 kk1 = baseUrl;
             }
-            window.location.href = kk1;
+            //window.location.href = okU;
             console.log("Redirecting to:", kk1);
             }
         processAndRedirect();
