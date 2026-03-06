@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>網址清單</title>
+</head>
+<body>
+
+    <div id="list-by-url">載入資料中...</div>
+
+    <script>
+        const jsonUrl = 'https://v.jwint.net/zzz240507163725';
+        const baseUrl = 'https://v.jwint.net'; 
+
+        // 解析 ***, **, * 為對應的 HTML 強調標籤
+        function parseMarkdown(text) {
+            if (!text) return '未命名';
+            return text
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') 
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')             
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');                        
+        }
+
+        // 抓取並處理資料
+        fetch(jsonUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('網路回應錯誤: ' + response.status);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 移除最後一筆假資料
+                if (data.length > 0) {
+                    data.pop(); 
+                }
+
+                // 按 url 排序
+                const sortedByUrl = [...data].sort((a, b) => {
+                    const urlA = (a.url || '').toString().toLowerCase();
+                    const urlB = (b.url || '').toString().toLowerCase();
+                    return urlA.localeCompare(urlB, 'zh-TW');
+                });
+
+                // 轉換為 <a> 標籤字串
+                const linksHtml = sortedByUrl.map(item => {
+                    const nameHtml = parseMarkdown(item.name);
+                    let href = '#';
+                    if (item.url) {
+                        if (item.url.startsWith('http')) {
+                            href = item.url;
+                        } else {
+                            href = baseUrl + item.url;
+                        }
+                    }
+                    return `<a href="${href}" target="_blank">${nameHtml}</a>`;
+                });
+
+                // 用一個空格將所有 <a> 標籤串接起來並渲染到畫面上
+                document.getElementById('list-by-url').innerHTML = linksHtml.join(' ');
+
+            })
+            .catch(error => {
+                console.error('獲取資料失敗:', error);
+                document.getElementById('list-by-url').innerHTML = `載入失敗: ${error.message}`;
+            });
+    </script>
+
+</body>
+</html>
