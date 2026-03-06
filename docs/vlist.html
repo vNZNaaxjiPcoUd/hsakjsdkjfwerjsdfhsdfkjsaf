@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://h.jwint.net/styles.css">
+    <title>網址清單排序</title>
+    <style>
+
+        /* 鎖定畫面的樣式 */
+        #lock-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 80vh;
+            color: #666;
+        }
+        
+        /* 秘密觸發區域的游標樣式 */
+        #secret-trigger {
+            cursor: pointer;
+            user-select: none; /* 防止手機點擊時反白文字 */
+        }
+
+        /* 手機版密碼輸入框 (預設隱藏) */
+        #mobile-input {
+            display: none;
+            margin-top: 20px;
+            padding: 10px 15px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            outline: none;
+            width: 200px;
+            text-align: center;
+            letter-spacing: 2px;
+            background-color: #f9f9f9;
+        }
+        #mobile-input:focus {
+            border-color: #1a0dab;
+            background-color: #fff;
+        }
+
+        /* 主要內容預設隱藏 */
+        #main-content {
+            display: none;
+        }
+        
+        /* 回到最上面的按鈕 */
+        #back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: none; 
+            padding: 10px 15px;
+            font-size: 16px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            transition: background-color 0.3s;
+        }
+        #back-to-top:hover {
+            background-color: #d93025; 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="lock-screen">
+        <h2 id="secret-trigger" title="點擊解鎖">🔒 頁面已鎖定</h2>
+        <p>請直接在鍵盤上輸入密碼以解鎖...</p>
+        
+        <input type="password" id="mobile-input" placeholder="請輸入密碼">
+    </div>
+
+    <div id="main-content">
+  
+        <div id="list-by-url" class="inline-list">載入資料中...</div>
+
+        <div style="display: none;">
+            <div id="list-by-name" class="inline-list">載入資料中...</div>
+        </div>
+    </div>
+    
+    <button id="back-to-top" title="回到最上面">⬆️ 回頂端</button>
+
+    <script>
+        // ==========================================
+        // 1. 密碼驗證機制 (包含電腦盲打與手機輸入)
+        // ==========================================
+        const PASSWORD = "d0a4b3d376be0af335a4d748e48327cbc6a4fd9e12dbfef2cea690cf2393319f65ff1deef529a0bf49826c408ba4c757788bcf4cf9ad7b7a85ea018a57540087";
+        const SALT = "f862f1d08bf480f0a6c1f8db1914330976935c513eb154813220bad9fccad8a53f96d6ca0a12cead5d5fb2a65cbbd6e27d3b31d622f38c731e18de1d669df512d565ecea212aae";
+        let buffer = [];        
+        const MAX_BUFFER = 99;
+        let statePsCheck = false;  
+
+        async function hashPassword(password, salt) {
+            const encoder = new TextEncoder(); 
+            const data = encoder.encode(password + salt); 
+            const hashBuffer = await crypto.subtle.digest('SHA-512', data);
+            const hashArray = new Uint8Array(hashBuffer);
+            const hashHex = Array.from(hashArray).map(byte => byte.toString(16).padStart(2, '0')).join(''); 
+            return hashHex;
+        }
+
+        async function checkPassword(inputPassword, storedSalt, storedHash) {
+            const inputHash = await hashPassword(inputPassword, storedSalt);
+            if (inputHash === storedHash) {
+                statePsCheck = true;
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        // --- 電腦版盲打監聽 ---
+        document.addEventListener("keydown", async function(e) {
+            if (statePsCheck) return;
+
+            if (e.key.length === 1) {
+                buffer.push(e.key.toLowerCase()); 
+
+                if (buffer.length > MAX_BUFFER) {
+                    buffer.shift();
+                }
+                
+                if (e.key === ' ') { 
+                    e.preventDefault();
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    buffer = []; 
+                } else if (await checkPassword(buffer.join(""), SALT, PASSWORD)) {
+                    showContent();
+                }
+            }
+            if (e.key === "Backspace") {
+                buffer.pop();
+            }
+        });
+
+        // --- 手機版觸發與輸入監聽 ---
+        const secretTrigger = document.getElementById('secret-trigger');
+        const mobileInput = document.getElementById('mobile-input');
+
+        // 點擊「🔒 頁面已鎖定」時顯示輸入框並自動對焦
+        secretTrigger.addEventListener('click', () => {
+            if (!statePsCheck) {
+                mobileInput.style.display = 'block';
+                mobileInput.focus(); // 喚起手機虛擬鍵盤
+            }
+        });
+
+        // 監聽手機輸入框的內容變化
+        mobileInput.addEventListener('input', async (e) => {
+            // 手機鍵盤有時會自動大寫字首，所以統一轉小寫進行驗證
+            const val = e.target.value.toLowerCase();
+            if (await checkPassword(val, SALT, PASSWORD)) {
+                showContent();
+            }
+        });
+
+        // 顯示內容的函數
+        function showContent() {
+            document.getElementById('lock-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            loadData(); 
+        }
+
+        // ==========================================
+        // 2. 資料載入與渲染邏輯
+        // ==========================================
+        const jsonUrl = 'https://v.jwint.net/zzz240507163725';
+        const baseUrl = 'https://v.jwint.net'; 
+
+        function parseMarkdown(text) {
+            if (!text) return '未命名';
+            return text
+                .replace(/\*\*\*(.*?)\*\*\*/g, '<strong><em>$1</em></strong>') 
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')             
+                .replace(/\*(.*?)\*/g, '<em>$1</em>');                        
+        }
+
+        function renderInlineList(elementId, items) {
+            const container = document.getElementById(elementId);
+            const linksHtml = items.map(item => {
+                const nameHtml = parseMarkdown(item.name);
+                let href = '#';
+                if (item.url) {
+                    if (item.url.startsWith('http')) {
+                        href = item.url;
+                    } else {
+                        href = baseUrl + item.url;
+                    }
+                }
+                return `<a href="${href}" target="_blank">${nameHtml}</a>`;
+            });
+            container.innerHTML = linksHtml.join(' ');
+        }
+
+        function loadData() {
+            fetch(jsonUrl)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('網路回應錯誤: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.length > 0) {
+                        data.pop(); 
+                    }
+
+                    // 按 url 排序
+                    const sortedByUrl = [...data].sort((a, b) => {
+                        const urlA = (a.url || '').toString().toLowerCase();
+                        const urlB = (b.url || '').toString().toLowerCase();
+                        return urlA.localeCompare(urlB, 'zh-TW');
+                    });
+                    renderInlineList('list-by-url', sortedByUrl);
+
+                    // 按 name 排序
+                    const sortedByName = [...data].sort((a, b) => {
+                        const nameA = (a.name || '').toString().toLowerCase();
+                        const nameB = (b.name || '').toString().toLowerCase();
+                        return nameA.localeCompare(nameB, 'zh-TW'); 
+                    });
+                    renderInlineList('list-by-name', sortedByName);
+                })
+                .catch(error => {
+                    console.error('獲取資料失敗:', error);
+                    const errorMsg = `<span class="error">載入失敗: ${error.message}</span>`;
+                    document.getElementById('list-by-name').innerHTML = errorMsg;
+                    document.getElementById('list-by-url').innerHTML = errorMsg;
+                });
+        }
+
+        // ==========================================
+        // 3. 回到最上面的按鈕控制邏輯
+        // ==========================================
+        const backToTopBtn = document.getElementById('back-to-top');
+
+        window.addEventListener('scroll', () => {
+            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
+                backToTopBtn.style.display = 'block';
+            } else {
+                backToTopBtn.style.display = 'none';
+            }
+        });
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+
+</body>
+</html>
