@@ -154,14 +154,14 @@ function handleID(id){
 
             let nUrl= "";
 			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
-			const b = `<a href="${nUrl}">重複看</a>`;
+			const b = `<a href="${nUrl}">一回看</a>`;
 			jumpA = nUrl;
 			
 			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
-			const c = `<a href="${nUrl}">一回看</a>`;
+			const c = `<a href="${nUrl}">重複看</a>`;
 			jumpB = nUrl;
 			
-			const bc= c+"<br><br>"+b;
+			const bc= b+"<br><br>"+c;
 			document.getElementById("uID").innerHTML = bc;
             document.getElementById("showID").style.display = "block";
 
