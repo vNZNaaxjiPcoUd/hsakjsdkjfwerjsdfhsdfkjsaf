@@ -103,6 +103,10 @@ a.visited {
 
 <script defer>
 
+function closeMsgInput(){
+	document.getElementById("passwordOverlay").style.display = "none";
+	document.getElementById("helloWorld").style.display = "block";
+}
 
 function ShowMsgInput(){
 	document.getElementById("passwordOverlay").style.display = "flex";
@@ -169,6 +173,8 @@ function handleID(id){
 			document.getElementById('passwordInput').value = "";
 			document.getElementById("passwordOverlay").style.display = "none";
 
+			ShowMsgInput();
+
 			window.open(jumpA, '_blank');
 		}else {
 
@@ -191,8 +197,15 @@ function checkUrlPara() {
 	
 document.getElementById("passwordInput").onkeydown = async function(e) {
 	    if (e.key === "Enter") {
-			let id = this.value;
-			handleID(id);
+			if (this.value !=="url" && this.value.length > 0) {
+				let id = this.value;
+				handleID(id);
+				return;
+			}else{
+				closeMsgInput();
+				return;
+			}
+
 	    }else{
 
 		}
