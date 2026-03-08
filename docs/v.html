@@ -48,7 +48,7 @@ a.visited {
 	position: fixed;
 	top: 0; left: 0; right: 0; bottom: 0;
 	background: rgba(0,0,0,0.95);
-	display: none;
+	display: block;
 	justify-content: center;
 	align-items: center;
 	flex-direction: column;
@@ -171,7 +171,7 @@ function handleID(id){
 
 			document.getElementById("helloWorld").style.display = "block";
 			document.getElementById('passwordInput').value = "";
-			document.getElementById("passwordOverlay").style.display = "none";
+
 
 			ShowMsgInput();
 
@@ -180,10 +180,12 @@ function handleID(id){
 
 			document.getElementById("helloWorld").style.display = "block";
 			document.getElementById('passwordInput').value = "";
-			document.getElementById("passwordOverlay").style.display = "none";
+			//document.getElementById("passwordOverlay").style.display = "none";
 
 			document.getElementById("uID").innerHTML = "?????????";
             document.getElementById("showID").style.display = "block";
+
+			ShowMsgInput();
         }	
 	}
   
@@ -213,7 +215,13 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 
 function bntStart(){
 		const id = document.getElementById("passwordInput").value;
-		handleID(id);
+		if (id !=="url" && id.length > 0) {
+			handleID(id);
+			return;
+		}else{
+			closeMsgInput();
+			return;
+		}
 	}
 
 ShowMsgInput();
