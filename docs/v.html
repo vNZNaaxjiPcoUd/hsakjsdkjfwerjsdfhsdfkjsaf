@@ -103,15 +103,6 @@ a.visited {
 
 <script defer>
 
-const allText = `<iframe 
-  style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
-  src="https://www.youtube-nocookie.com/embed/AAURL?playlist=AAURL&autoplay=1&mute=1" 
-  title="AAURL" 
-  frameborder="0" 
-  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-  referrerpolicy="strict-origin-when-cross-origin" 
-  allowfullscreen>
-</iframe>`;
 
 function ShowMsgInput(){
 	document.getElementById("passwordOverlay").style.display = "flex";
@@ -160,7 +151,6 @@ function handleID(id){
 			id = getID(id);
 		}
 		if (id.length === IDL){
-			const updateURL = allText.replaceAll('AAURL',id);
 
             let nUrl= "";
 			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
@@ -181,19 +171,20 @@ function handleID(id){
 
 			window.open(jumpA, '_blank');
 		}else {
-			const displayA= document.getElementById('passwordInput');
-            displayA.style.borderBottomColor = "#ff0088";
-            displayA.value = "";
-            displayA.placeholder = "錯的啦！";
+
+			document.getElementById("helloWorld").style.display = "block";
+			document.getElementById('passwordInput').value = "";
+			document.getElementById("passwordOverlay").style.display = "none";
+
+			document.getElementById("uID").innerHTML = "?????????";
+            document.getElementById("showID").style.display = "block";
         }	
 	}
   
 function checkUrlPara() {
 		const lastPart = window.location.search.slice(1);
 		if ( lastPart === ""){
-			console.log("Nono");
 		}else{
-			console.log(lastPart);
 			handleID(lastPart);
 		}
 	}
@@ -201,7 +192,6 @@ function checkUrlPara() {
 document.getElementById("passwordInput").onkeydown = async function(e) {
 	    if (e.key === "Enter") {
 			let id = this.value;
-			console.log(id);
 			handleID(id);
 	    }else{
 
@@ -210,7 +200,6 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 
 function bntStart(){
 		const id = document.getElementById("passwordInput").value;
-		console.log(id);
 		handleID(id);
 	}
 
