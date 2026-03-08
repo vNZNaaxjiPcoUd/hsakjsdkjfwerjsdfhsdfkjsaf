@@ -5,7 +5,7 @@
 	<base target="_blank">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Feedback</title>
+	<title>走！</title>
 <style>
 
 body {
@@ -76,34 +76,17 @@ a.visited {
 </head>
 <body>
 <br><br>
-<div id="secretArea">
-	<div id="allT">.</div>
-</div>
+
 <div id="helloWorld">按這裡，貼上去，走！</div>
+<br>
 <div id="showID">
-	<br>
 	<div id="uID"></div>
-	<br>
-
-	<a href="https://v.jwint.net/zzz240424143118"></a>
-
-	<div>
-
-	</div>
 </div>
 
 <div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="貼" autocomplete="off"><button onclick="bntStart()">走！</button></div>
 
-	
-<script defer>
-// update clock
-
-
-</script>
 
 <script defer>
-
-
 
 const allText = `<iframe 
   style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
@@ -164,9 +147,6 @@ function handleID(id){
 		if (id.length === IDL){
 			const updateURL = allText.replaceAll('AAURL',id);
 
-			document.getElementById("allT").innerHTML = updateURL ;
-			//document.getElementById("secretArea").style.display = "block"; // do by button
-
             let nUrl= "";
 			nUrl=  "https://h.jwint.net/b?"+prefix+id+suffix;
 			const b = `<a href="${nUrl}">重複看</a>`;
@@ -183,6 +163,7 @@ function handleID(id){
 			document.getElementById("helloWorld").style.display = "block";
 			document.getElementById('passwordInput').value = "";
 			document.getElementById("passwordOverlay").style.display = "none";
+
 			window.open(jumpA, '_blank');
 		}else {
 			const displayA= document.getElementById('passwordInput');
@@ -208,13 +189,7 @@ document.getElementById("passwordInput").onkeydown = async function(e) {
 			console.log(id);
 			handleID(id);
 	    }else{
-			if(e.key === "@"){
-				document.getElementById("passwordOverlay").style.display = "none";
-				document.getElementById("helloWorld").style.display = "block";
-				document.getElementById('passwordInput').value = "";
-			}else{
-			console.log(e.key);
-			}
+
 		}
 	};
 
