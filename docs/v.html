@@ -71,6 +71,18 @@ a.visited {
 	color: #888;
 	font-size: 14px;
 }
+
+#startButton {
+	margin-top: 20px;
+	padding: 10px 20px;
+	font-size: 18px;
+	color: #fff;
+	background: #00ff88;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background 0.3s;
+}
 </style>
 
 </head>
@@ -83,7 +95,10 @@ a.visited {
 	<div id="uID"></div>
 </div>
 
-<div id="passwordOverlay"><input type="text" id="passwordInput" placeholder="貼" autocomplete="off"><button onclick="bntStart()">走！</button></div>
+<div id="passwordOverlay">
+	<input type="text" id="passwordInput" placeholder="貼" autocomplete="off">
+	<button id="startButton" onclick="bntStart()">走！</button>
+</div>
 
 
 <script defer>
