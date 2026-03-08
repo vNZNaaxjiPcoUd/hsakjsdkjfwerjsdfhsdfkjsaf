@@ -73,7 +73,7 @@ function handleID(id){
 			document.getElementById("otherInfo").style.display = "none";
         }	
     	document.getElementById("secretArea").style.display = "block";
-        document.getElementById("Plys").focus();
+
 	}
 function extractMiddle(str) {
         const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
@@ -126,13 +126,15 @@ function startTimer() {
 		}, ms);
 	}
 
-	/*
-setTimeout(() => {
-	console.log('時間到了！');
-	//location.reload();
-	window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
-	}, 12*60*60*1000);
-	*/
+// 確保在 iframe 載入完成後才執行 focus
+document.getElementById("Plys").onload = function() {
+    this.contentWindow.focus(); // 嘗試聚焦於內部的視窗
+};
+
+// 或者是監聽點擊，讓使用者點一下頁面後自動幫他 focus 到影片
+window.addEventListener('click', function() {
+    document.getElementById("Plys").focus();
+});
 </script>
 
 </body>
