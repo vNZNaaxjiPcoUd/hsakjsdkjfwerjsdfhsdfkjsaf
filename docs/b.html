@@ -45,7 +45,7 @@
 
 <script defer>
 // get url, replace and show page
-const allText = `<iframe style="width:100%; height:100vh; border:none; margin:0; padding:0; display:block;" 
+const allText = `<iframe id="Plys" style="width:100%; height:100vh; border:none; margin:0; padding:0; display:block;" 
 src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1" 
 title="" frameborder="0" 
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -73,6 +73,7 @@ function handleID(id){
 			document.getElementById("otherInfo").style.display = "none";
         }	
     	document.getElementById("secretArea").style.display = "block";
+        document.getElementById("Plys").focus();
 	}
 function extractMiddle(str) {
         const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
