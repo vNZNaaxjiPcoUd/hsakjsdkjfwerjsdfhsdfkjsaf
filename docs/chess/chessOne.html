@@ -658,7 +658,7 @@
           lastMove: gameState.lastMove ? JSON.parse(JSON.stringify(gameState.lastMove)) : null
       }); 
       
-      if (nextState.history.length > 50) nextState.history.shift(); 
+      //if (nextState.history.length > 50) nextState.history.shift(); 
       
       nextState.board[r2][c2] = nextState.board[r1][c1]; 
       nextState.board[r1][c1] = '';
@@ -725,7 +725,6 @@
         }
       }
       
-      // 🌟 新增：評估將軍狀態，給予懲罰與獎勵
       let aiOppColor = aiColor === 'b' ? 'r' : 'b';
       if (isKingAttacked(board, aiColor)) score -= 150;
       if (isKingAttacked(board, aiOppColor)) score += 150;
@@ -755,14 +754,12 @@
       return moves;
     }
 
-    // 🌟 修正：靜止搜尋 (Quiescence Search) 的致命缺陷
     function quiesce(board, alpha, beta, isMaximizing, aiColor, qDepth) {
       let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
       let inCheck = isKingAttacked(board, currentColor);
       
       let stand_pat = evaluateBoard(board, aiColor);
       
-      // 如果沒有被將軍，我們才能用「原地不動 (stand_pat)」的評分來剪枝
       if (!inCheck) {
           if (isMaximizing) {
              if (stand_pat >= beta) return beta;
@@ -773,17 +770,14 @@
           }
       }
       
-      // 避免深度爆掉
       if (qDepth > 3) return stand_pat;
 
       let moves = getAllLegalMovesList(board, currentColor);
       
-      // 如果被將軍且無路可走，回傳被死將的慘烈分數 (越深層被將死，稍微好一點點)
       if (inCheck && moves.length === 0) {
           return isMaximizing ? -99999 + 10 + qDepth : 99999 - 10 - qDepth;
       }
 
-      // 如果沒被將軍，我們才過濾「只計算吃子」，否則強制計算所有防禦步
       if (!inCheck) {
           moves = moves.filter(m => board[m.r2][m.c2] !== ''); 
       }
@@ -866,7 +860,10 @@
         let totalPieces = 0;
         for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
 
-        if (aiLevel === 'hard' && totalPieces >= 31) { 
+        // 🌟 核心修正：只有在「沒有被將軍」的情況下，才允許使用開局庫！
+        let isCurrentlyInCheck = isKingAttacked(gameState.board, aiRole);
+
+        if (aiLevel === 'hard' && totalPieces >= 31 && !isCurrentlyInCheck) { 
           let openings = [];
           if (aiRole === 'b') {
               openings = [
@@ -883,7 +880,13 @@
                   {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6}  
               ];
           }
-          let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2));
+          
+          // 🌟 加強保險：過濾開局時，除了檢查步伐，也必須確保不會讓自己陷入被將軍的危險
+          let legalOpenings = openings.filter(m => 
+              isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2) && 
+              !leavesKingInCheck(gameState.board, m.r1, m.c1, m.r2, m.c2, aiRole)
+          );
+          
           if (legalOpenings.length > 0) {
               let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)];
               commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); 
