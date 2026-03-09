@@ -465,7 +465,6 @@
 
       gameState = state;
       
-      // 🌟 新增：檢查房間座位狀態並顯示無人執棋
       if (!isAiThinking && document.getElementById('info').innerHTML.indexOf('電腦無棋可走') === -1) {
         let bPlayer = state.players.b ? String(state.players.b) : "";
         let rPlayer = state.players.r ? String(state.players.r) : "";
@@ -725,6 +724,12 @@
           }
         }
       }
+      
+      // 🌟 新增：評估將軍狀態，給予懲罰與獎勵
+      let aiOppColor = aiColor === 'b' ? 'r' : 'b';
+      if (isKingAttacked(board, aiColor)) score -= 150;
+      if (isKingAttacked(board, aiOppColor)) score += 150;
+      
       return score;
     }
 
@@ -750,20 +755,38 @@
       return moves;
     }
 
+    // 🌟 修正：靜止搜尋 (Quiescence Search) 的致命缺陷
     function quiesce(board, alpha, beta, isMaximizing, aiColor, qDepth) {
+      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
+      let inCheck = isKingAttacked(board, currentColor);
+      
       let stand_pat = evaluateBoard(board, aiColor);
-      if (isMaximizing) {
-         if (stand_pat >= beta) return beta;
-         if (alpha < stand_pat) alpha = stand_pat;
-      } else {
-         if (stand_pat <= alpha) return alpha;
-         if (beta > stand_pat) beta = stand_pat;
+      
+      // 如果沒有被將軍，我們才能用「原地不動 (stand_pat)」的評分來剪枝
+      if (!inCheck) {
+          if (isMaximizing) {
+             if (stand_pat >= beta) return beta;
+             if (alpha < stand_pat) alpha = stand_pat;
+          } else {
+             if (stand_pat <= alpha) return alpha;
+             if (beta > stand_pat) beta = stand_pat;
+          }
       }
       
-      if (qDepth > 2) return stand_pat;
+      // 避免深度爆掉
+      if (qDepth > 3) return stand_pat;
 
-      let currentColor = isMaximizing ? aiColor : (aiColor === 'b' ? 'r' : 'b');
-      let moves = getAllLegalMovesList(board, currentColor).filter(m => board[m.r2][m.c2] !== '');
+      let moves = getAllLegalMovesList(board, currentColor);
+      
+      // 如果被將軍且無路可走，回傳被死將的慘烈分數 (越深層被將死，稍微好一點點)
+      if (inCheck && moves.length === 0) {
+          return isMaximizing ? -99999 + 10 + qDepth : 99999 - 10 - qDepth;
+      }
+
+      // 如果沒被將軍，我們才過濾「只計算吃子」，否則強制計算所有防禦步
+      if (!inCheck) {
+          moves = moves.filter(m => board[m.r2][m.c2] !== ''); 
+      }
 
       for (let move of moves) {
           let p = board[move.r1][move.c1]; let target = board[move.r2][move.c2];
