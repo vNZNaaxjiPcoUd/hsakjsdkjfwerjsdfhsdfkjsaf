@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>經典殘局控制台</title>
+  <title>經典殘局</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -26,19 +26,19 @@
 </head>
 <body>
 
-  <h1>📖 經典殘局控制台</h1>
+  <h1>📖 經典殘局</h1>
   <p class="subtitle">選擇一個定式，立即將指定房間佈置為該殘局</p>
 
   <div class="control-panel">
     <label for="room-input">🏠 目標房間名</label>
     <input type="text" id="room-input" value="榕樹下">
 
-    <label for="admin-password">🔑 管理員密碼</label>
+    <label for="admin-password">🔑 密碼</label>
     <input type="password" id="admin-password" placeholder="請輸入佈局密碼">
 
     <label for="scenario-select">♟️ 選擇殘局定式</label>
     <select id="scenario-select">
-      <optgroup label="江湖四大名局">
+      <optgroup label="四大名局">
         <option value="f1">1. 七星聚會</option>
         <option value="f2">2. 野馬操田</option>
         <option value="f3">3. 蚯蚓降龍</option>
@@ -116,6 +116,8 @@
 
     <button id="set-btn" onclick="applyScenario()">🚀 立即佈置殘局</button>
     <div id="status-msg"></div>
+    <a href="./chessadmin.html" target="_blank">🚀 管理棋局</a>
+
   </div>
 
   <script>
