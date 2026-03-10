@@ -56,6 +56,9 @@
       console.log("防呆機制");
     }
 
+    // ==========================================================
+    // 🌟 請把 xxq-shiQingYaQu_2009-551f.fen 的所有文字貼在下面 🌟
+    // ==========================================================
     const rawFenData = `
 2eaka3/3P3H1/eH7/7hc/9/4C1P2/P5h1P/E3R3E/4Apr2/2RAK3c w 0 1
 C3kae2/4a4/h3c1h2/3Hp1p2/1R4P2/1R7/4P4/4E4/1pCp1p3/1crAK1H2 w 0 1
@@ -608,8 +611,11 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
 4c4/3ka4/9/3P5/9/9/9/9/5K3/9 w 0 1
 4k4/9/9/9/9/9/9/E4h3/9/3K5 w 0 1
 2c6/4k4/4H4/9/9/9/9/9/9/4K4 w 0 1
+
     `;
+    // ==========================================================
     
+    // 網頁載入時，自動解析上方的字串並產生選單
     window.onload = function() {
       const lines = rawFenData.split('\n');
       const select = document.getElementById('scenario-select');
@@ -620,11 +626,13 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         line = line.trim();
         if (!line) continue;
 
+        // 🌟 修正點：放寬字母限制，完美支援 e/E (象) 和 h/H (馬)
         const fenMatch = line.match(/([a-zA-Z1-9]+\/){9}[a-zA-Z1-9]+/);
         if (fenMatch) {
           validCount++;
           let fullFen = fenMatch[0] + " w - - 0 1"; 
           
+          //let title = `適情雅趣 第 ${validCount.toString().padStart(3, '0')} 局`;
           let title = `第 ${validCount.toString().padStart(3, '0')} 局`;
 
           let opt = document.createElement('option');
@@ -658,6 +666,7 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           if (char >= '1' && char <= '9') {
             c += parseInt(char, 10);
           } else {
+            // 自動轉換字元
             if (char === 'b') char = 'e';
             else if (char === 'B') char = 'E';
             else if (char === 'n') char = 'h';
@@ -705,22 +714,9 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       const targetBoard = buildBoardFromFEN(selectedFEN);
 
       btn.disabled = true;
-      showStatus('驗證通過！正在強力清除後端舊歷史資料...', 'loading');
+      showStatus('驗證通過！正在向伺服器讀取房間資訊...', 'loading');
 
       try {
-        // 🌟 核心升級 1：發送 Restart，讓 GAS 後端強制刪除所有殘留的歷史軌跡
-        await fetch(GAS_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: 'restart', room: roomName, playerId: 'ADMIN_FORCE_RESET', restartAction: 'agree' })
-        });
-
-        // 🌟 稍微停頓 1000 毫秒，確保 GAS 有足夠的時間把所有的幽靈歷史刪乾淨
-        await new Promise(r => setTimeout(r, 1000));
-
-        showStatus('舊資料已清除乾淨！正在寫入殘局陣型...', 'loading');
-
-        // 🌟 核心升級 2：抓取已經變為「白紙」的乾淨狀態
         let getResponse = await fetch(GAS_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -730,16 +726,17 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         if (getResponse && getResponse.state) {
           let state = getResponse.state;
 
-          // 🌟 核心升級 3：將 FEN 陣列寫入，並將所有狀態指標歸零
           state.board = targetBoard; 
           state.turn = 'r'; 
           state.status = 'playing';
           state.checkMsg = '';
-          state.history = []; // 歷史軌跡徹底清空
-          state.lastMove = null; // 上一步提示點清空
+          state.history = []; 
+          state.lastMove = null;
           state.restartRequest = null;
           state.undoRequest = null;
           state.lastActivityTime = new Date().getTime();
+
+          showStatus('正在佈置新盤面到房間中...', 'loading');
 
           let moveResponse = await fetch(GAS_URL, {
             method: 'POST',
@@ -748,7 +745,8 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           }).then(res => res.json());
 
           if (moveResponse) {
-            showStatus('✅ 佈局成功！紅方先行。', 'success');
+            showStatus('✅ 佈局成功！初始盤面已送出，請切換回棋盤查看。', 'success');
+            //document.getElementById('admin-password').value = '';
           } else {
             showStatus('❌ 佈局寫入失敗。', 'error');
           }
