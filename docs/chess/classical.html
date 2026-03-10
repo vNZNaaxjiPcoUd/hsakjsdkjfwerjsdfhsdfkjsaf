@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>適情雅趣 551 局</title>
+  <title>適情雅趣</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -26,7 +26,7 @@
 </head>
 <body>
 
-  <h1>📖 適情雅趣 551 局</h1>
+  <h1>📖 適情雅趣</h1>
 
   <div class="control-panel">
     <label for="room-input">🏠 目標房間名</label>
@@ -35,7 +35,7 @@
     <label for="admin-password">🔑 密碼</label>
     <input type="password" id="admin-password" placeholder="請輸入佈局密碼">
 
-    <label for="scenario-select">♟️ 選擇棋局 (<span id="count-display">載入中...</span>)</label>
+    <label for="scenario-select">♟️ 選擇棋局 <span id="count-display">載入中...</span></label>
     <select id="scenario-select">
       </select>
 
@@ -625,7 +625,7 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           validCount++;
           let fullFen = fenMatch[0] + " w - - 0 1"; 
           
-          let title = `適情雅趣 第 ${validCount.toString().padStart(3, '0')} 局`;
+          let title = `第 ${validCount.toString().padStart(3, '0')} 局`;
 
           let opt = document.createElement('option');
           opt.value = fullFen;
@@ -637,7 +637,8 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       if(validCount === 0) {
         document.getElementById('count-display').textContent = `載入失敗，請確認資料已貼入`;
       } else {
-        document.getElementById('count-display').textContent = `成功載入 ${validCount} 局`;
+        //document.getElementById('count-display').textContent = `成功載入 ${validCount} 局`;
+        document.getElementById('count-display').textContent = ``;
       }
     };
 
@@ -747,7 +748,7 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           }).then(res => res.json());
 
           if (moveResponse) {
-            showStatus('✅ 佈局成功！幽靈歷史已清除，棋局保證順暢無錯。', 'success');
+            showStatus('✅ 佈局成功！紅方先行。', 'success');
           } else {
             showStatus('❌ 佈局寫入失敗。', 'error');
           }
