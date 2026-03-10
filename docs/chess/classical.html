@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>經典殘局控制台</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+  <style>
+    body { font-family: sans-serif; background-color: #f4f4f9; color: #333; text-align: center; padding: 20px; margin: 0; }
+    h1 { color: #d32f2f; margin-bottom: 10px; font-size: 24px; }
+    p.subtitle { color: #666; font-size: 14px; margin-bottom: 25px; }
+    
+    .control-panel { background: white; max-width: 400px; margin: 0 auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: left; }
+    label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 15px; }
+    input[type="text"], input[type="password"], select { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
+    
+    button { width: 100%; padding: 12px; background-color: #4CAF50; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+    button:hover { background-color: #45a049; }
+    button:disabled { background-color: #9e9e9e; cursor: not-allowed; }
+    
+    #status-msg { margin-top: 15px; font-size: 14px; font-weight: bold; text-align: center; min-height: 20px; }
+    .success { color: #2e7d32; } .error { color: #d32f2f; } .loading { color: #1976d2; }
+  </style>
+</head>
+<body>
+
+  <h1>📖 經典殘局控制台</h1>
+  <p class="subtitle">選擇一個定式，立即將指定房間佈置為該殘局</p>
+
+  <div class="control-panel">
+    <label for="room-input">🏠 目標房間名</label>
+    <input type="text" id="room-input" value="榕樹下">
+
+    <label for="admin-password">🔑 管理員密碼</label>
+    <input type="password" id="admin-password" placeholder="請輸入佈局密碼">
+
+    <label for="scenario-select">♟️ 選擇殘局定式</label>
+    <select id="scenario-select">
+      <optgroup label="江湖四大名局">
+        <option value="f1">1. 七星聚會</option>
+        <option value="f2">2. 野馬操田</option>
+        <option value="f3">3. 蚯蚓降龍</option>
+        <option value="f4">4. 千里獨行</option>
+      </optgroup>
+      <optgroup label="一、 兵卒類">
+        <option value="p2">2. 高兵勝單將</option>
+        <option value="p3">3. 高兵勝單士</option>
+        <option value="p4">4. 底兵和單士</option>
+        <option value="p5">5. 雙高兵勝雙士</option>
+        <option value="p6">6. 三高兵勝士象全</option>
+      </optgroup>
+      <optgroup label="二、 單馬類">
+        <option value="m6">6. 單馬勝單將</option>
+        <option value="m7">7. 單馬擒單士</option>
+        <option value="m8">8. 單馬擒單象</option>
+        <option value="m9">9. 馬高兵勝單缺士</option>
+        <option value="m10">10. 馬高兵勝單缺象</option>
+      </optgroup>
+      <optgroup label="三、 單炮類">
+        <option value="c11">11. 炮仕勝單象</option>
+        <option value="c12">12. 炮仕勝雙士</option>
+        <option value="c13">13. 炮高兵勝單缺象</option>
+        <option value="c14">14. 炮高兵勝單缺士</option>
+        <option value="c15">15. 炮高兵勝雙士</option>
+      </optgroup>
+      <optgroup label="四、 單車類">
+        <option value="r16">16. 單車勝雙士</option>
+        <option value="r17">17. 單車勝雙象</option>
+        <option value="r18">18. 單車勝單缺士</option>
+        <option value="r19">19. 單車勝單缺象</option>
+        <option value="r20">20. 單車勝馬單士</option>
+        <option value="r21">21. 單車勝炮單象</option>
+        <option value="r22">22. 單車和士象全</option>
+        <option value="r23">23. 單車和馬雙象</option>
+        <option value="r24">24. 單車和炮雙士</option>
+        <option value="r25">25. 單車巧勝馬雙士</option>
+      </optgroup>
+      <optgroup label="五、 雙馬/雙炮類">
+        <option value="mm26">26. 雙馬勝士象全</option>
+        <option value="mm27">27. 雙馬勝雙士</option>
+        <option value="mm28">28. 雙馬勝單缺士</option>
+        <option value="cc29">29. 雙炮勝雙士</option>
+        <option value="cc30">30. 雙炮勝單缺象</option>
+        <option value="cc31">31. 雙炮勝單缺士</option>
+      </optgroup>
+      <optgroup label="六、 馬炮類">
+        <option value="mc32">32. 馬炮勝雙士</option>
+        <option value="mc33">33. 馬炮勝單缺士</option>
+        <option value="mc34">34. 馬炮勝單缺象</option>
+        <option value="mc35">35. 馬炮勝士象全</option>
+        <option value="mc36">36. 馬炮仕相全和單車</option>
+      </optgroup>
+      <optgroup label="七、 車兵類">
+        <option value="rp37">37. 車高兵勝單車</option>
+        <option value="rp38">38. 車低兵和單車</option>
+        <option value="rp39">39. 車高兵勝士象全</option>
+        <option value="rp40">40. 車雙兵勝車單缺士</option>
+        <option value="rp41">41. 車雙兵勝車單缺象</option>
+      </optgroup>
+      <optgroup label="八、 車馬 / 車炮類">
+        <option value="rm42">42. 車馬勝車雙士</option>
+        <option value="rm43">43. 車馬勝士象全</option>
+        <option value="rc44">44. 車炮勝車雙象</option>
+        <option value="rc45">45. 車炮勝士象全</option>
+        <option value="rc46">46. 車炮勝車單缺士</option>
+      </optgroup>
+      <optgroup label="九、 複雜與巧勝類">
+        <option value="rr47">47. 雙車勝車士象全</option>
+        <option value="rm48">48. 單車巧勝雙馬</option>
+        <option value="rc49">49. 單車巧勝雙炮</option>
+        <option value="rmc50">50. 單車巧勝馬炮</option>
+      </optgroup>
+    </select>
+
+    <button id="set-btn" onclick="applyScenario()">🚀 立即佈置殘局</button>
+    <div id="status-msg"></div>
+  </div>
+
+  <script>
+    // ⚠️ 請確保這是您正式的 GAS 網址
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec";
+
+    // 🌟 密文定義
+    const ENC_PASSWD = "U2FsdGVkX18mUjH6Sqj38b/qWjie8xJcyqgfnvJND/BNrqSapB/zFV2sUf/xckD9";
+    const EXPECTED_TEXT = "Yes You Pass Here.....";
+
+    const scenarioData = {
+      // 四大名局
+      "f1": "k04,e02,a14,p34,p43,p45,P62,P66,P73,P74,P75,K94",
+      "f2": "k04,p30,p32,p34,p36,P60,P62,P64,P66,R92,H93,K94,H95,R96",
+      "f3": "k04,p22,p26,R63,R65,K94",
+      "f4": "k04,p24,P64,R84,K94",
+
+      // 一、 兵卒類
+      "p2": "k04,P34,K94",
+      "p3": "k04,a05,P34,K94",
+      "p4": "k04,a14,P03,K94", 
+      "p5": "k04,a03,a05,P33,P35,K94",
+      "p6": "k04,a03,a05,e22,e26,P33,P34,P35,K94",
+
+      // 二、 單馬類
+      "m6":  "k04,H25,K94",
+      "m7":  "k04,a05,H25,K94",
+      "m8":  "k04,e26,H25,K94",
+      "m9":  "k04,a03,e22,e26,H54,P34,K94",
+      "m10": "k04,a03,a05,e22,H54,P34,K94",
+
+      // 三、 單炮類
+      "c11": "k04,e22,C54,A84,K94",
+      "c12": "k04,a03,a05,C54,A84,K94",
+      "c13": "k04,a03,a05,e22,C54,P34,K94",
+      "c14": "k04,a05,e22,e26,C54,P34,K94",
+      "c15": "k04,a03,a05,C54,P34,K94",
+
+      // 四、 單車類
+      "r16": "k04,a03,a05,R54,K94",
+      "r17": "k04,e22,e26,R54,K94",
+      "r18": "k04,a05,e22,e26,R54,K94",
+      "r19": "k04,a03,a05,e22,R54,K94",
+      "r20": "k04,a05,h24,R54,K94",
+      "r21": "k04,e22,c24,R54,K94",
+      "r22": "k04,a03,a05,e22,e26,R54,K94",
+      "r23": "k04,e22,e26,h14,R54,K94",
+      "r24": "k04,a03,a05,c14,R54,K94",
+      "r25": "k04,a03,a05,h13,R54,K94",
+
+      // 五、 雙馬/雙炮類
+      "mm26": "k04,a03,a05,e22,e26,H53,H55,K94",
+      "mm27": "k04,a03,a05,H53,H55,K94",
+      "mm28": "k04,a05,e22,e26,H53,H55,K94",
+      "cc29": "k04,a03,a05,C54,C64,A84,K94",
+      "cc30": "k04,a03,a05,e22,C54,C64,A84,K94",
+      "cc31": "k04,a05,e22,e26,C54,C64,A84,K94",
+
+      // 六、 馬炮類
+      "mc32": "k04,a03,a05,H53,C64,K94",
+      "mc33": "k04,a05,e22,e26,H53,C64,K94",
+      "mc34": "k04,a03,a05,e22,H53,C64,K94",
+      "mc35": "k04,a03,a05,e22,e26,H53,C64,A84,K94",
+      "mc36": "k04,r24,H73,C84,A83,A85,E72,E76,K94",
+
+      // 七、 車兵類
+      "rp37": "k04,r14,R55,P34,K94",
+      "rp38": "k04,r14,R55,P14,K94",
+      "rp39": "k04,a03,a05,e22,e26,R55,P34,K94",
+      "rp40": "k04,a05,e22,e26,r14,R55,P33,P35,K94",
+      "rp41": "k04,a03,a05,e22,r14,R55,P33,P35,K94",
+
+      // 八、 車馬 / 車炮類
+      "rm42": "k04,a03,a05,r14,R55,H64,K94",
+      "rm43": "k04,a03,a05,e22,e26,R55,H64,K94",
+      "rc44": "k04,e22,e26,r14,R55,C64,K94",
+      "rc45": "k04,a03,a05,e22,e26,R55,C64,K94",
+      "rc46": "k04,a05,e22,e26,r14,R55,C64,K94",
+
+      // 九、 複雜與巧勝類
+      "rr47": "k04,a03,a05,e22,e26,r14,R53,R55,K94",
+      "rm48": "k04,h23,h25,R54,K94",
+      "rc49": "k04,c23,c25,R54,K94",
+      "rmc50":"k04,h23,c25,R54,K94"
+    };
+
+    function buildBoardFromArrayStr(posStr) {
+      let board = Array.from({length: 10}, () => Array(9).fill(''));
+      if (!posStr) return board;
+      let pieces = posStr.split(',');
+      for (let pStr of pieces) {
+        if (pStr.length < 3) continue;
+        let pt = pStr[0];
+        let r = parseInt(pStr[1], 10);
+        let c = parseInt(pStr[2], 10);
+        board[r][c] = pt;
+      }
+      return board;
+    }
+
+    function showStatus(text, type) {
+      const msgDiv = document.getElementById('status-msg');
+      msgDiv.textContent = text;
+      msgDiv.className = type;
+    }
+
+    async function applyScenario() {
+      const roomName = document.getElementById('room-input').value.trim();
+      const passwordInput = document.getElementById('admin-password').value;
+      const scenarioKey = document.getElementById('scenario-select').value;
+      const btn = document.getElementById('set-btn');
+
+      if (!roomName) { showStatus('請輸入房間名！', 'error'); return; }
+      if (!passwordInput) { showStatus('請輸入管理員密碼！', 'error'); return; }
+
+      // 🌟 AES 密碼驗證邏輯
+      try {
+        const bytes = CryptoJS.AES.decrypt(ENC_PASSWD, passwordInput);
+        const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
+        
+        if (decryptedText !== EXPECTED_TEXT) {
+          showStatus('❌ 密碼錯誤，無法解鎖盤面！', 'error');
+          return;
+        }
+      } catch (e) {
+        // 如果密碼不對，CryptoJS 在解密時可能會直接拋出錯誤 (Malformed UTF-8)
+        showStatus('❌ 密碼錯誤，解密失敗！', 'error');
+        return;
+      }
+
+      const rawStr = scenarioData[scenarioKey];
+      if (!rawStr) { showStatus('此殘局尚未設定陣列！', 'error'); return; }
+      
+      const targetBoard = buildBoardFromArrayStr(rawStr);
+
+      btn.disabled = true;
+      showStatus('驗證通過！正在向伺服器讀取房間資訊...', 'loading');
+
+      try {
+        let getResponse = await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'get', room: roomName })
+        }).then(res => res.json());
+
+        if (getResponse && getResponse.state) {
+          let state = getResponse.state;
+
+          state.board = targetBoard; 
+          state.turn = 'r'; 
+          state.status = 'playing';
+          state.checkMsg = '';
+          state.history = []; 
+          state.lastMove = null;
+          state.restartRequest = null;
+          state.undoRequest = null;
+          state.lastActivityTime = new Date().getTime();
+
+          showStatus('正在佈置新盤面到房間中...', 'loading');
+
+          let moveResponse = await fetch(GAS_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'move', room: roomName, state: state })
+          }).then(res => res.json());
+
+          if (moveResponse) {
+            showStatus('✅ 佈局成功！請切換回遊戲頁面查看。', 'success');
+            // 成功後清空密碼欄位，增加安全性
+            document.getElementById('admin-password').value = '';
+          } else {
+            showStatus('❌ 佈局寫入失敗。', 'error');
+          }
+        } else {
+          showStatus('❌ 讀取房間失敗，可能是 GAS_URL 錯誤。', 'error');
+        }
+      } catch (error) {
+        showStatus('❌ 網路連線錯誤：' + error.message, 'error');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
