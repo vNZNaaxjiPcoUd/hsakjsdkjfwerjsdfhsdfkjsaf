@@ -757,12 +757,26 @@
         let totalPieces = 0; for (let r=0; r<10; r++) for (let c=0; c<9; c++) if (gameState.board[r][c] !== '') totalPieces++;
         let isCurrentlyInCheck = isKingAttacked(gameState.board, aiRole); let turnCount = gameState.history ? gameState.history.length : 0;
 
-        if (turnCount <= 4 && !isCurrentlyInCheck) { 
+        /*if (turnCount <= 4 && !isCurrentlyInCheck) { 
           let openings = [];
           if (aiRole === 'b') openings = [ {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6} ];
           else openings = [ {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6} ];
           
           let legalOpenings = openings.filter(m => isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2) && !leavesKingInCheck(gameState.board, m.r1, m.c1, m.r2, m.c2, aiRole));
+          if (legalOpenings.length > 0) { let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)]; commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); return; }
+        }*/
+
+        // 🌟 修正：只有在滿盤 (總棋子數接近32) 時才使用開局庫，且必須檢查棋子是不是自己的！
+        if (turnCount <= 4 && !isCurrentlyInCheck && totalPieces >= 30) { 
+          let openings = [];
+          if (aiRole === 'b') openings = [ {r1:2, c1:1, r2:2, c2:4}, {r1:2, c1:7, r2:2, c2:4}, {r1:0, c1:1, r2:2, c2:2}, {r1:0, c1:7, r2:2, c2:6}, {r1:0, c1:2, r2:2, c2:4}, {r1:0, c1:6, r2:2, c2:4}, {r1:3, c1:2, r2:4, c2:2}, {r1:3, c1:6, r2:4, c2:6} ];
+          else openings = [ {r1:7, c1:1, r2:7, c2:4}, {r1:7, c1:7, r2:7, c2:4}, {r1:9, c1:1, r2:7, c2:2}, {r1:9, c1:7, r2:7, c2:6}, {r1:9, c1:2, r2:7, c2:4}, {r1:9, c1:6, r2:7, c2:4}, {r1:6, c1:2, r2:5, c2:2}, {r1:6, c1:6, r2:5, c2:6} ];
+          
+          let legalOpenings = openings.filter(m => 
+            getColor(gameState.board[m.r1][m.c1]) === aiRole && // 👈 關鍵修正：確保要動的棋子是 AI 自己的顏色
+            isMoveLegal(gameState.board, m.r1, m.c1, m.r2, m.c2) && 
+            !leavesKingInCheck(gameState.board, m.r1, m.c1, m.r2, m.c2, aiRole)
+          );
           if (legalOpenings.length > 0) { let bestMove = legalOpenings[Math.floor(Math.random() * legalOpenings.length)]; commitMove(bestMove.r1, bestMove.c1, bestMove.r2, bestMove.c2); return; }
         }
 
