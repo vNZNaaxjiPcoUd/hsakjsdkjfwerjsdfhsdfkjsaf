@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>經典殘局</title>
+  <title>適情雅趣 551 局 (完美載入版)</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 
@@ -26,8 +26,8 @@
 </head>
 <body>
 
-  <h1>📖 經典殘局</h1>
-  <p class="subtitle">選擇一個定式，立即將指定房間佈置為該殘局</p>
+  <h1>📖 適情雅趣 551 局</h1>
+  <p class="subtitle">已完美相容 e/h 特殊字母版 FEN 碼</p>
 
   <div class="control-panel">
     <label for="room-input">🏠 目標房間名</label>
@@ -36,184 +36,647 @@
     <label for="admin-password">🔑 密碼</label>
     <input type="password" id="admin-password" placeholder="請輸入佈局密碼">
 
-    <label for="scenario-select">♟️ 選擇殘局定式</label>
+    <label for="scenario-select">♟️ 選擇棋局 (<span id="count-display">載入中...</span>)</label>
     <select id="scenario-select">
-      <optgroup label="四大名局">
-        <option value="f1">1. 七星聚會</option>
-        <option value="f2">2. 野馬操田</option>
-        <option value="f3">3. 蚯蚓降龍</option>
-        <option value="f4">4. 千里獨行</option>
-      </optgroup>
-      <optgroup label="一、 兵卒類">
-        <option value="p2">2. 高兵勝單將</option>
-        <option value="p3">3. 高兵勝單士</option>
-        <option value="p4">4. 底兵和單士</option>
-        <option value="p5">5. 雙高兵勝雙士</option>
-        <option value="p6">6. 三高兵勝士象全</option>
-      </optgroup>
-      <optgroup label="二、 單馬類">
-        <option value="m6">6. 單馬勝單將</option>
-        <option value="m7">7. 單馬擒單士</option>
-        <option value="m8">8. 單馬擒單象</option>
-        <option value="m9">9. 馬高兵勝單缺士</option>
-        <option value="m10">10. 馬高兵勝單缺象</option>
-      </optgroup>
-      <optgroup label="三、 單炮類">
-        <option value="c11">11. 炮仕勝單象</option>
-        <option value="c12">12. 炮仕勝雙士</option>
-        <option value="c13">13. 炮高兵勝單缺象</option>
-        <option value="c14">14. 炮高兵勝單缺士</option>
-        <option value="c15">15. 炮高兵勝雙士</option>
-      </optgroup>
-      <optgroup label="四、 單車類">
-        <option value="r16">16. 單車勝雙士</option>
-        <option value="r17">17. 單車勝雙象</option>
-        <option value="r18">18. 單車勝單缺士</option>
-        <option value="r19">19. 單車勝單缺象</option>
-        <option value="r20">20. 單車勝馬單士</option>
-        <option value="r21">21. 單車勝炮單象</option>
-        <option value="r22">22. 單車和士象全</option>
-        <option value="r23">23. 單車和馬雙象</option>
-        <option value="r24">24. 單車和炮雙士</option>
-        <option value="r25">25. 單車巧勝馬雙士</option>
-      </optgroup>
-      <optgroup label="五、 雙馬/雙炮類">
-        <option value="mm26">26. 雙馬勝士象全</option>
-        <option value="mm27">27. 雙馬勝雙士</option>
-        <option value="mm28">28. 雙馬勝單缺士</option>
-        <option value="cc29">29. 雙炮勝雙士</option>
-        <option value="cc30">30. 雙炮勝單缺象</option>
-        <option value="cc31">31. 雙炮勝單缺士</option>
-      </optgroup>
-      <optgroup label="六、 馬炮類">
-        <option value="mc32">32. 馬炮勝雙士</option>
-        <option value="mc33">33. 馬炮勝單缺士</option>
-        <option value="mc34">34. 馬炮勝單缺象</option>
-        <option value="mc35">35. 馬炮勝士象全</option>
-        <option value="mc36">36. 馬炮仕相全和單車</option>
-      </optgroup>
-      <optgroup label="七、 車兵類">
-        <option value="rp37">37. 車高兵勝單車</option>
-        <option value="rp38">38. 車低兵和單車</option>
-        <option value="rp39">39. 車高兵勝士象全</option>
-        <option value="rp40">40. 車雙兵勝車單缺士</option>
-        <option value="rp41">41. 車雙兵勝車單缺象</option>
-      </optgroup>
-      <optgroup label="八、 車馬 / 車炮類">
-        <option value="rm42">42. 車馬勝車雙士</option>
-        <option value="rm43">43. 車馬勝士象全</option>
-        <option value="rc44">44. 車炮勝車雙象</option>
-        <option value="rc45">45. 車炮勝士象全</option>
-        <option value="rc46">46. 車炮勝車單缺士</option>
-      </optgroup>
-      <optgroup label="九、 複雜與巧勝類">
-        <option value="rr47">47. 雙車勝車士象全</option>
-        <option value="rm48">48. 單車巧勝雙馬</option>
-        <option value="rc49">49. 單車巧勝雙炮</option>
-        <option value="rmc50">50. 單車巧勝馬炮</option>
-      </optgroup>
-    </select>
+      </select>
 
-    <button id="set-btn" onclick="applyScenario()">🚀 立即佈置殘局</button>
+    <button id="set-btn" onclick="applyScenario()">🚀 立即佈置名局</button>
     <div id="status-msg"></div>
-    <a href="./chessadmin.html" target="_blank">🚀 管理棋局</a><a href="./index.html" target="_blank">    🚀 回到大廳</a>
-
+    <div style="text-align:center;">
+      <a href="./chessadmin.html" target="_blank" style="display:inline-block; margin-top:15px; text-decoration:none; color:#1976d2;">🚀 管理棋局</a> | 
+      <a href="./index.html" target="_blank" style="display:inline-block; margin-top:15px; text-decoration:none; color:#1976d2;">🚀 回到大廳</a>
+    </div>
   </div>
 
   <script>
-    // ⚠️ 請確保這是您正式的 GAS 網址
     const GAS_URL = "https://script.google.com/macros/s/AKfycbz406JW4H-C1z9jOYfkd0jlHsolkQ-OYZHjn8Defb3nUl15twNELedAO91IzVlt-l0/exec";
-
-    // 🌟 密文定義
     const ENC_PASSWD = "U2FsdGVkX18mUjH6Sqj38b/qWjie8xJcyqgfnvJND/BNrqSapB/zFV2sUf/xckD9";
     const EXPECTED_TEXT = "Yes You Pass Here.....";
 
-    const scenarioData = {
-      // 四大名局
-      "f1": "k04,e02,a14,p34,p43,p45,P62,P66,P73,P74,P75,K94",
-      "f2": "k04,p30,p32,p34,p36,P60,P62,P64,P66,R92,H93,K94,H95,R96",
-      "f3": "k04,p22,p26,R63,R65,K94",
-      "f4": "k04,p24,P64,R84,K94",
+    function solveSimpleChallenge() {
+      console.log("防呆機制");
+    }
 
-      // 一、 兵卒類
-      "p2": "k04,P34,K94",
-      "p3": "k04,a05,P34,K94",
-      "p4": "k04,a14,P03,K94", 
-      "p5": "k04,a03,a05,P33,P35,K94",
-      "p6": "k04,a03,a05,e22,e26,P33,P34,P35,K94",
+    // ==========================================================
+    // 🌟 請把 xxq-shiQingYaQu_2009-551f.fen 的所有文字貼在下面 🌟
+    // ==========================================================
+    const rawFenData = `
+2eaka3/3P3H1/eH7/7hc/9/4C1P2/P5h1P/E3R3E/4Apr2/2RAK3c w 0 1
+C3kae2/4a4/h3c1h2/3Hp1p2/1R4P2/1R7/4P4/4E4/1pCp1p3/1crAK1H2 w 0 1
+1reckaP2/3PaP1r1/1P2e4/1R7/Hh7/CREp1h3/4C4/9/4p1p2/1c3K3 w 0 1
+2ek1ae2/4a4/9/p1P6/3HC4/4Pp3/P5h2/4E3H/4Ar3/1REAK2cr w 0 1
+2ea1k3/4a1R2/9/1cp2H3/1He6/3h2P2/4C4/3AE4/3r1p1h1/2R1KAr1c w 0 1
+2e1kaeh1/4aR3/3R2H2/4p1p2/5P3/4P4/3H2Pr1/4C1h2/3pAr3/4K3c w 0 1
+3a2e2/1P1k5/2Pae4/7RC/9/9/2P2c3/2HA5/3KAr3/chh1r4 w 0 1
+C1eac1RH1/r2Rak3/7h1/1rP6/2H1P1p2/6E2/9/2h6/5p3/4Kc3 w 0 1
+3a1k3/1C7/c4a3/8H/3P5/9/8C/E8/r2phpp2/4K1cRR w 0 1
+4kae1C/4a4/9/1R7/4P1H2/2H3E2/1h5r1/4h4/4A4/c1EAK4 w 0 1
+3k2e2/4P4/crR1e2Rc/9/9/9/9/1C3H1C1/4p1r2/2p2K3 w 0 1
+1C2kae2/rH2a2R1/2r1c3e/9/9/5R3/9/7C1/9/3K5 w 0 1
+4k4/3P2P2/e2H2R2/7r1/2e6/9/9/3h5/4p3r/2R2K3 w 0 1
+C3k4/4a1r2/5a3/1H7/1Cp6/1R7/9/3p5/4p3r/3K5 w 0 1
+r1e1k4/c1PPaRc2/r2ae3h/4C4/7RC/9/9/9/4p4/3K5 w 0 1
+3aka3/3P1h3/RR2e4/4p4/1Ce4C1/6E1r/9/4p4/3pp4/5K3 w 0 1
+C3ka3/4aP1r1/hR2c4/p8/6e2/9/9/2C6/3p1p3/c1rAK4 w 0 1
+3a1keh1/4P4/1c2h1r2/4p4/9/CC5pp/9/9/r1p1p4/3K3RR w 0 1
+3k1a3/4a4/2h6/HP1C1P3/9/C8/9/3AEcr1E/3pAp1h1/4K3c w 0 1
+2eak2r1/4aP2R/2R1e4/6p1p/1Hp6/P1C6/9/9/3pr4/5K2c w 0 1
+3ak4/3RaR3/4e3H/6H2/2e6/9/3pP4/E3C1h1E/2rp2r2/4K4 w 0 1
+r1H3e2/1c1kaP3/3ae4/8H/9/9/9/4EA3/5p3/C1R1K1Rrc w 0 1
+2ehk4/9/e8/2PRp1RH1/9/9/9/1C2E1r2/4p1r2/c1pC1K2c w 0 1
+2eak4/4a4/9/4pHpHh/6e2/9/4P4/3p5/crR1K3C/2hr2E2 w 0 1
+2Rakc3/4aR3/4e1h2/4C4/1P4e2/2E6/4c4/2h1E3C/1r2A1p2/4KA3 w 0 1
+2Pak3C/3Pa4/e5C1H/4p1p2/6e2/5H3/4c4/6h2/5p1r1/1r1cK4 w 0 1
+2eP1k2r/1hh1P4/3cec3/9/2p3P1p/7RC/9/4p4/3p1R3/2pCK4 w 0 1
+3ak1e2/4aP1R1/4e3h/3H3H1/3r5/2R5r/9/4EC1C1/1h2p1p2/c4K3 w 0 1
+2e1R1Hr1/1Hr2k3/9/C2R1P1h1/2eCp1P2/5pc2/9/5h3/2p1p4/3K5 w 0 1
+4kaPP1/c2Pa2hR/4e1P1r/6h2/6eH1/9/4C1R2/9/1r1p1p3/4K4 w 0 1
+4k1er1/r3aPRH1/2Rae1P1h/8p/6P2/8C/9/9/3p1p3/4K2c1 w 0 1
+2eakae2/h6P1/9/1R7/4H4/1C7/9/3AEA3/1H1p1p3/2p1KCrc1 w 0 1
+3a1k2C/2R1a2R1/4e3H/8p/2e6/7h1/9/4C3E/3rAr1p1/4KAE1c w 0 1
+2e1kaR2/4aR3/3heP3/3Hp4/9/9/4P4/1C2C4/3pAp2r/4KAE1c w 0 1
+1Ceaka3/1R7/2h1e4/2H1p4/9/3R5/4P1r2/4C3E/4Ar1h1/2EAK3c w 0 1
+4k1e2/4a3h/1C1ae1R2/1HR6/2r1C4/9/9/4EA3/1h1p1p3/c1rAK1H2 w 0 1
+CR3a3/3ka4/1R2e1P2/4C4/H1e6/9/6P2/4E1h2/2cpAp2r/4KAE1c w 0 1
+3ak1eR1/4aP2r/9/2p3pC1/5Pc2/1RE6/7p1/9/5r3/4K4 w 0 1
+2eak1e2/4aR2C/6H1h/9/9/9/5c3/4EC3/3p1r1h1/4K2c1 w 0 1
+2e2a1h1/3k3C1/2Pa5/8C/6e2/9/4c4/2h1R1p2/2r1R1r2/4K4 w 0 1
+2eak1e2/3Ra4/2H6/2p6/5R3/2C6/9/9/1r1pA4/4KA1rc w 0 1
+3ak4/2h1aP3/2P6/6p2/9/6P2/2P6/C1H1EK3/6p2/R1E1r4 w 0 1
+C4keH1/R2Pa4/4ca3/4rHR2/6e2/6c2/9/4C4/4p3r/5K3 w 0 1
+4ka3/3P1R3/5P2e/6P1H/1R4e1c/2h6/8C/5A3/4AK3/1r4r2 w 0 1
+2eak1r2/4aP3/4e4/7H1/9/5C1R1/4p1p2/1ch6/1C1r5/c3K4 w 0 1
+3k5/4aH3/2R2a3/5h3/2R6/9/1pP6/E1h1EA1H1/1r2A1p2/c4K3 w 0 1
+1R3a3/2H1ak3/4P4/C2H4p/9/9/4cp3/4E1h1E/4A3r/3AK4 w 0 1
+3k1a1h1/4aR3/4e1C2/4C1R2/2e1H4/2E6/2P6/2hrE4/5p3/4K4 w 0 1
+2e2a3/1P1k1P3/3a5/9/h1e6/9/9/4RA3/2C1Hr3/2p1KA1rc w 0 1
+3H3r1/3R4C/3aka3/6pH1/9/9/4h4/2C6/4p4/5Kc1r w 0 1
+R2akae2/3h3P1/1HC1e4/5R3/2p3p2/9/9/5p3/4r3r/5K3 w 0 1
+3ak3r/4a1R2/e1C1ec3/1H2C3H/9/3p5/2h6/3K5/9/r8 w 0 1
+1h1k1a3/R8/e2ae4/2R6/9/6C2/9/4C4/3pArh1c/4K4 w 0 1
+C7r/3kaP3/e1c1ea3/1R3H3/9/C8/9/9/4p1r2/5K3 w 0 1
+3R4C/3P1P3/4kah2/9/C4PeH1/1h3H3/9/5p3/r3p4/3K5 w 0 1
+5k3/3PP4/e2Pe4/5P1C1/2c6/3p5/2r6/6p2/4r4/CR1K5 w 0 1
+3ack3/1HR1a1P2/3h2R2/9/2C6/9/9/9/1r2p2r1/3K5 w 0 1
+4kae1r/4a4/4e4/CR2R4/8r/2C6/9/9/c3p4/5K3 w 0 1
+2e1ka1r1/3Pa4/5Rc2/5Hr2/9/9/9/7C1/C2p5/4K4 w 0 1
+4k3C/4a4/5P2H/8P/6p2/9/9/E2A3p1/1r1pA4/c3K4 w 0 1
+2ek1a3/1R2a2H1/rCc1e4/9/9/9/9/4C2R1/3r1p3/4K4 w 0 1
+3ak4/4a4/4cc3/1H1r2CRC/9/9/9/3h1R3/r3p4/3K5 w 0 1
+3akarr1/1HC2P2C/9/9/R8/9/6p2/4E4/2h1p4/5K3 w 0 1
+2e2k3/C3P4/1P2e4/p8/9/9/P7r/c3K4/3C1pp2/3R4c w 0 1
+2ea1k3/4a4/h3H4/9/9/9/9/3RE1r2/2p2r3/3AK2R1 w 0 1
+1reak3r/1H1Ra4/cR2e1H2/9/9/9/9/9/5p3/4K4 w 0 1
+1h1ck3C/2PPa1R2/5a3/9/8H/9/9/3h5/4p2r1/5K3 w 0 1
+2Ck1a3/2R1aR3/9/5H3/r8/r8/9/3C5/4p1h2/3K5 w 0 1
+C3kC3/2PRa4/1h5P1/9/9/1H5H1/9/3p5/4r2r1/3K5 w 0 1
+4k3C/5H1rC/5c3/4p4/4H4/9/9/6h2/2r2p3/3RK4 w 0 1
+C3ka1r1/3Ra4/9/5HR2/9/9/9/9/r2p1pc2/4K4 w 0 1
+4kae1H/4a3C/4e4/H8/9/4C4/9/5p3/2h1p4/5K3 w 0 1
+4k4/1R5h1/1H7/9/3P1H3/3r1R3/9/4p4/3r1p3/1c2K4 w 0 1
+2R6/C2Rak3/4e3e/9/1r7/4P4/3p5/9/4rp3/3K5 w 0 1
+4rc3/4ak3/9/9/9/9/9/2R6/3pA4/cr1AKC3 w 0 1
+3a1a3/9/3k5/2P6/3P5/3H2C1C/9/1c3p3/4p4/3h1K3 w 0 1
+4ka1c1/9/3a5/9/4c1r1r/9/1RR6/9/3p1p3/C3K4 w 0 1
+1rC2k3/9/h1R6/9/4H4/9/R3c4/4C4/4rh3/3K5 w 0 1
+C3ka3/4a2r1/H3e4/3C5/3H5/9/9/5p3/4p4/5K3 w 0 1
+1r3a3/9/3ak4/5PR2/9/6C2/9/3pp4/3pp4/5K3 w 0 1
+1rP1k2h1/3R1H3/9/6H2/9/C8/9/5p3/4p4/c4K3 w 0 1
+4k4/4a4/2P5h/5H3/9/5R3/9/9/2p2p2r/C3K4 w 0 1
+2ek5/1R5H1/9/9/9/9/9/5Cr2/r2p1p3/4K2R1 w 0 1
+1C3k3/1H2P4/1hH1e4/9/9/9/9/4p4/3p1p3/4K4 w 0 1
+3ak3C/4aP2h/4R3H/8H/9/9/9/9/2rp1p3/4K4 w 0 1
+4k4/5P3/3P5/9/6e2/9/9/2p3p2/4AK1hr/3A1C3 w 0 1
+5n1R1/5kC2/P1P6/9/9/1p7/1r7/3R5/5r3/3K5 w 0 1
+4k4/C4R3/9/9/9/5R2P/4r4/4E3E/4p2r1/5K3 w 0 1
+2eak1e2/1h3P3/3a5/4p1p1H/6P1C/2R6/C1R1Pp1h1/3A5/3K2crc/3Ar4 w 0 1
+3aka3/1R1H5/1c2e1c2/1Hp1p1p2/6h2/C6R1/2P1P4/2h1C4/4Ap2r/r2AK4 w 0 1
+2e1kaR2/3Ra2h1/1h2e4/5H3/2p3p2/1HE3C2/9/4E4/1r1p1r3/c3KC3 w 0 1
+2eak4/C2Ra4/H3e3R/1C5h1/9/2Eh5/9/E8/c1rp1p3/4Kc3 w 0 1
+3k2e1r/C4R3/P3e4/h2c1R3/9/1H7/9/4EA3/3p1p3/c1EAK4 w 0 1
+2eaka3/1R7/4e2hh/4R2CH/4H4/9/9/5p3/2rc4r/5K3 w 0 1
+9/1h2ak3/5aP2/3H5/6e2/5r3/1C7/4R1p2/1p3r1p1/1C2K2c1 w 0 1
+3akc3/4a4/4e1h2/C2RR2H1/4C4/5r3/9/3pE2r1/4p4/3K5 w 0 1
+4k3H/3Ph4/4e4/c1p3h1R/4P3r/9/5R3/5C3/2r1p4/5K3 w 0 1
+4ka3/4aH3/9/RC7/2e2Pe2/9/9/4pp3/3hr3r/5K3 w 0 1
+c2a1k3/3Ra4/4c1P2/7R1/9/9/9/1C2E4/1r7/2EK5 w 0 1
+2r6/4akH2/C3P2c1/1C4P2/7r1/8R/9/5p3/4p4/5K3 w 0 1
+R1eak2CR/5P3/9/9/9/1rE6/9/9/4p3r/5KE2 w 0 1
+3ak4/R3a1P1R/e3e4/1C7/4c4/9/9/9/2r3r2/4K4 w 0 1
+3ak3H/4aP3/8R/1rr5H/9/9/9/9/5p3/4K4 w 0 1
+6e2/1H3k2C/5a3/3R5/9/R8/9/4c1h2/3p5/3AKAr1c w 0 1
+2e1ka3/4a3c/4e4/6h2/7RH/9/9/3CCR3/2rp1p3/4KAr1c w 0 1
+2eak3r/3Ra4/4e4/6P2/7h1/2R3EH1/9/2h1C4/1r7/c3K3C w 0 1
+1R1c1ae2/5k3/3r1a3/3C5/6e1H/3R5/9/3AE4/2p1p4/3K1H1rc w 0 1
+2eak4/4aPP2/4e4/3H5/2r1C4/9/9/C2R2hr1/4Ap3/3AK3c w 0 1
+2ha1ke1R/2R6/4ea3/4C4/7r1/2C6/4c3P/4E4/4A3p/3AK3c w 0 1
+3akaP2/9/4eR3/4p3C/7H1/9/3p5/4E4/3rApp2/c1HAK4 w 0 1
+2e1ka3/3Ra4/1c2e3c/H8/R8/6E2/4C1r2/C8/4Ap1h1/3AK4 w 0 1
+2eak4/C3a2HR/4e4/9/6p2/1C2c4/9/4E4/1r2A1c2/3RKAr2 w 0 1
+2e2k3/1R2a1P2/3a5/4p1H2/6e2/9/3hP4/4C1C2/3rAp3/c1hAK4 w 0 1
+2eak2r1/C3a4/1H2e3c/4p2H1/9/2R6/9/2h6/3pA4/c1rAK3R w 0 1
+4k4/3PaR3/4ea3/2HH5/2p1r1e2/9/9/4C4/1hrpA4/c3KAR2 w 0 1
+2e1ka3/4a4/e6c1/7H1/2P1p4/1CR1C4/2P6/2h1p1hr1/8R/1rE1K4 w 0 1
+2e1ka1r1/3Ra4/3Pe4/9/9/1R7/2Phc4/1C1CE3E/4Ap3/3AK3c w 0 1
+1C3a3/3k4C/2R2a3/2p1pPH2/9/9/2P5P/1ch6/2p2pp2/4K4 w 0 1
+4k1C2/3Pa2R1/4eaH2/h8/9/9/2p6/3C5/4p1r1r/R4K3 w 0 1
+R2rk4/4hP3/2h1e4/6H2/9/1r2C4/4c4/4E4/3pH4/4KC3 w 0 1
+2h1ka3/3RaR3/C3e3H/6H2/6e2/9/9/9/r2p1pr2/4K4 w 0 1
+4kaeC1/4a4/4e2H1/5P3/9/9/9/6Cr1/R1pp4r/R3K4 w 0 1
+1Hea1k1h1/7P1/9/1P2R1h2/5re2/9/9/C3R4/3p1r3/c3K4 w 0 1
+3k1ae2/2R3H2/1r1a2R1e/4p4/2p1c1P2/9/H8/9/4r1p2/3K5 w 0 1
+5k2c/CH2a2R1/4ea3/3R5/9/2H6/9/3AE1h2/3p1p2r/4K4 w 0 1
+2ea2h2/4ak3/4e4/4R4/4H4/9/9/5C3/3rAp3/c1rAK4 w 0 1
+1c2kar2/3Pa4/H3e4/4C2R1/2e1CR3/9/9/9/5p3/2rhK4 w 0 1
+2eak1C2/3Pa1R2/4e1H1H/9/9/9/4Pr3/5C3/3hpr3/3K5 w 0 1
+2ek1a3/1R2RH3/c3ea3/2h6/9/1C7/9/9/3r1p2r/1Cc1K4 w 0 1
+4k3C/c4P3/4H2c1/r6P1/4P2P1/4h3p/2p5R/3p5/4p1h2/3KC2H1 w 0 1
+2eak3C/2C1aR2h/2h5H/9/7H1/9/9/1r6E/5p2r/3RK4 w 0 1
+4kae2/1h2a2cC/2R1P3e/3H5/9/9/9/3p4r/r3p4/2RK5 w 0 1
+2e1kae2/3Pa4/2H3h2/2C1pR1CH/9/9/9/4p4/1r5r1/4K4 w 0 1
+1C1k5/4P4/3H4R/5h2C/9/9/5H3/3AEAr2/1r1p1p3/4K3c w 0 1
+1P3k1h1/4a4/5a1R1/1H2P3H/1C3h3/9/1c7/3p5/r3p4/3K1p3 w 0 1
+3aka3/3P1h3/HR2e4/1Cp1p1p2/4c2C1/9/9/9/6r1r/5K3 w 0 1
+3k1a1R1/9/2cae4/2h1R4/2e6/4P4/3H5/3CE4/1r1p4r/4K4 w 0 1
+2eaka3/3H4C/4e4/1r2PR3/9/9/4c4/2hR3C1/5p2r/4K4 w 0 1
+C4k3/4a4/5a3/9/4H4/1p3RH1c/4c4/2p1C4/1rh4r1/3K1R3 w 0 1
+4k3c/3Ra1P2/3ae1H2/9/2e6/9/9/3KCR3/1hr1p1r2/5C3 w 0 1
+2Pak4/CR2a1P2/4e2R1/9/9/1C7/4c4/9/2hr1p3/1r1cK1E2 w 0 1
+1h2ka3/R3a1P2/1P2e1h1C/5R3/2e1P4/1H7/9/5p3/4r4/3p1K3 w 0 1
+2eak1r2/4aP1R1/e3c4/8p/9/2R6/r8/4E2C1/p3A4/4K1E2 w 0 1
+2e1ka3/4a4/4e3h/3R1H3/6R2/9/9/3C3C1/1hrpA4/1c2KA3 w 0 1
+ChC1k4/9/7P1/4p4/p5p2/6E1r/1R4Pr1/4EAH2/6p2/5K3 w 0 1
+3a5/1h1ka4/9/5H3/2P6/C8/R8/E2AEA1r1/3pHp3/rc2K4 w 0 1
+3akaP2/9/1R7/2pHp4/1C4e2/9/9/3HE4/1h1p1p3/4Kcr1c w 0 1
+2R6/C2Rak3/4ea2e/P8/1r7/9/2p1p4/3Ah1p2/3KA4/2r6 w 0 1
+4R4/3ca4/4ka3/5P3/C1e2R3/9/4P4/3AE1h1r/3p1p3/2H1K4 w 0 1
+3aka2R/1R7/c1P2P3/2P1rr3/2H5C/7C1/9/3p5/4p4/1p1K5 w 0 1
+3ak1e2/2P2P3/3ac2P1/9/1R7/C5H2/9/3p1A1C1/4p2r1/5K3 w 0 1
+3akaer1/1R3P3/9/9/2C6/4H4/9/4p4/2hh2r2/1R2K4 w 0 1
+H2k1a3/5P3/3a5/9/9/9/9/C3RA3/4Hr3/2p1K1phc w 0 1
+3a1k2C/3ra4/4e4/9/6e1H/6cR1/9/3h5/4r4/3K2cR1 w 0 1
+2e1ka2H/6R2/eR7/9/1C2r3C/9/9/9/c1r3p2/c2K5 w 0 1
+3k5/1PR1a4/2Hae3e/6C2/9/4h4/9/9/2cp5/1rc1K2R1 w 0 1
+2eak4/4a4/4e4/H4CH1R/9/9/3h5/9/2p1AK3/c2A2r2 w 0 1
+C3kae2/4a4/H3e4/2H6/9/3C5/9/3A2r2/3K3c1/3A2h1c w 0 1
+3ak4/4a4/4e4/6H2/9/3rC4/4c4/4ER2C/1h1rA4/4KA3 w 0 1
+3cka1h1/3Ra4/3he4/7H1/9/6C2/9/9/2r2p2r/1R2K4 w 0 1
+9/3k5/R2aeH2C/C3P4/2e6/9/9/4p4/2r6/cr1AK4 w 0 1
+2eakae2/5RP2/7P1/2P6/9/2H6/9/4Cp2C/r3p4/5K3 w 0 1
+c4a3/1r1kaP2C/e1R1e2c1/4CH3/9/9/9/9/4p3r/5K3 w 0 1
+3a1k3/2R1a4/3ce1h2/1C2H4/2e1C3R/9/9/9/r1r2p3/4K4 w 0 1
+3k1h3/1R3R1h1/e3e4/3P5/9/9/9/4E1CC1/3ppcr2/5K3 w 0 1
+4ka3/2R1aR3/3ce4/9/3H5/9/9/C3C4/3p1phr1/4K4 w 0 1
+2e1ka3/1R2a1P2/4e4/5R2C/4H4/4h4/9/4p4/1r5r1/4K4 w 0 1
+3ak4/3ra3R/9/9/9/1r2P1C2/5HP2/6h2/3p1p3/4K2R1 w 0 1
+2e1R2c1/R3a4/1h2kaH2/4p4/2eP5/6C2/9/9/3r1r3/4K4 w 0 1
+6e2/3PR1P1c/3P1k3/7c1/2e3p2/2H6/9/2C6/3p1r3/4K4 w 0 1
+3k3C1/2P6/4cH3/9/9/9/4P4/4Ep3/1rrhA2R1/5K1p1 w 0 1
+3a1k2C/4a3H/5c3/5P3/9/9/9/6p2/1h1p5/2p1KAC1c w 0 1
+4ka3/4aR3/4H4/4p4/9/9/4P4/4C4/c1hrAR3/4KA3 w 0 1
+2e1ka3/3Pa4/4e1c2/6RC1/3R2c2/8C/9/2h6/3p3r1/4K4 w 0 1
+C2R4c/5k3/e2a1H2e/2R6/9/9/9/4p4/3hr1p2/c4K2C w 0 1
+6RHr/5k3/4ea3/9/9/9/9/2R1p4/3pAr3/4K4 w 0 1
+3k5/8C/9/p6R1/7R1/9/9/4E4/r2rA4/4KAE2 w 0 1
+4ka3/3RaP1h1/6R2/9/4P4/6C2/9/9/2rrp4/c4K3 w 0 1
+2C6/5k3/eP1Hh1R1h/1r7/6R2/9/5c3/3p5/4p4/3K5 w 0 1
+3k5/2R6/3a1hH2/9/9/9/9/5R3/1h1r1C3/2c1KcrH1 w 0 1
+2eakae2/7r1/9/3H5/9/8C/9/3RE4/4pch2/3K5 w 0 1
+2eaka3/9/4c1R2/6H2/8C/9/9/4E1r2/4pp3/2EK5 w 0 1
+c3k3C/2P6/1P6e/9/9/2C6/9/3REr3/1p2r4/2EK5 w 0 1
+C2k5/4P4/r2ce1H1e/8C/6r2/9/9/6p2/4p4/5K1R1 w 0 1
+5k1h1/c3a4/5aR1e/6H2/2r5C/9/9/9/3p1p3/4K1R2 w 0 1
+2e6/1C2k4/h3eR3/6H2/9/9/9/1R7/3p2rr1/1C2K3c w 0 1
+3a1k3/RC1cc4/r2a5/2H6/9/9/9/5p3/4p2r1/5K2R w 0 1
+2eak3C/4a4/2P1e4/6RR1/9/9/9/9/c1hr1p3/4K4 w 0 1
+3a1k3/4a1R2/4erH2/1H7/9/9/9/1C4p2/3p4p/4K3C w 0 1
+3ak4/c3a3R/5c2H/6C2/9/9/9/9/1r3p3/4K2R1 w 0 1
+3k1a3/1HR2h3/3a5/1r4CC1/2e6/9/9/9/1c1p3r1/4K4 w 0 1
+2eak3C/4aP2H/4e4/5C3/9/9/9/3p5/4p2r1/3K5 w 0 1
+2ea1k3/4a4/4e3R/9/8R/9/9/3A2h2/3pA1r2/4K2c1 w 0 1
+3a1a3/3k3c1/1h2RH3/5r3/8R/9/2h6/9/3r1p3/2c1K4 w 0 1
+2ek1aH2/1R7/3a5/9/9/9/C7C/1p7/1hp2p1r1/4K4 w 0 1
+2ea1ke2/1P2a1R2/3chrH2/C8/9/9/9/9/4p4/3K5 w 0 1
+2ek4C/9/3a5/5cH2/9/9/8P/6h1E/2r6/1R2KA2r w 0 1
+4kC3/3RaP3/3C2h1c/Hr1R5/9/9/9/4p4/6r2/4K4 w 0 1
+5k3/3Pa2R1/4ea2e/4C4/4H4/9/4c4/9/5p3/1r1hK4 w 0 1
+3a1k3/R3a4/4e1P2/3R4C/9/4C1H2/r8/9/2r1p4/3K5 w 0 1
+3ak1P1P/4a4/9/9/4p3C/c3C1R2/9/5p3/2rp5/4K1R2 w 0 1
+3ak1e2/9/4ea3/5R1H1/3r5/9/4c4/2r1E2R1/4A4/4KA3 w 0 1
+9/4a4/3k1a3/1HP1p4/9/8C/4P4/cr1AKA3/5r3/2h6 w 0 1
+R1C6/2P6/e2ak4/6P2/6e2/6E2/9/c4K2h/9/2rR2r2 w 0 1
+3aka3/9/4e2Rc/4P2H1/6e2/7C1/9/9/2hrA4/4KA3 w 0 1
+9/4a4/4ka3/1HP1p4/9/9/8C/1p2KA1rc/2c1A4/5p3 w 0 1
+2ea1k3/2P6/1h1a5/4C1H1R/1h5Cr/9/9/3p5/4p4/3K5 w 0 1
+2ea5/4a4/1P1k5/R7H/C8/6E2/9/2h1E4/5pr2/4K3c w 0 1
+4ka3/3Rh4/4e1r2/H1p6/1hP6/9/9/3C5/5r1p1/4K3c w 0 1
+Hr2kc3/4a3h/2R3h2/4RH3/9/9/7C1/9/3p1pr2/4K4 w 0 1
+r4Re2/4k2C1/4e4/9/1H7/1r6R/9/4h4/3p1p3/4K3C w 0 1
+1R3a3/3k3C1/3a4e/6pH1/9/9/4h3c/5p2C/4r4/5K3 w 0 1
+3ak4/4a4/e1C1e4/9/6H1R/9/9/5p3/r3p4/3p1K1R1 w 0 1
+r2aka3/7rC/1R2e4/3H5/9/9/9/p7E/5pp2/4K4 w 0 1
+5a3/4k4/4e4/6H2/6e2/9/2hR5/2rC4C/4p4/3K1c2r w 0 1
+2eak3C/3ra4/4c3e/7R1/9/9/9/3A5/r3p4/3K2R2 w 0 1
+3ak4/3haP1C1/8R/P8/9/9/9/1rp1E4/4p4/3K5 w 0 1
+r2aka3/3P5/8R/4r3C/6C2/6R2/9/3p5/4p4/3K1p3 w 0 1
+cc1a1k3/3Pa1R2/5rHr1/9/6R2/9/9/9/3p5/3AK4 w 0 1
+1r2ka3/2P1a2P1/h3H4/4R4/6H2/9/9/9/5pc2/c3K4 w 0 1
+R4a1C1/3ka4/8e/7H1/6e2/1r7/9/2C6/4p3r/c4K3 w 0 1
+1R1a3r1/1C1cak3/2H6/5r3/1R7/9/9/5h3/C3p4/3K5 w 0 1
+3akr3/R4r2C/3a5/9/9/9/9/6h2/C2pA4/1R2K4 w 0 1
+3a1k3/1Hc1a1R2/5rH2/9/9/9/9/9/3p5/4K1Rrc w 0 1
+3k5/1R2h1P2/2R1e4/9/r2P5/7H1/9/9/4r3C/3K5 w 0 1
+4k4/4a4/4Pa3/4p1pCR/3H5/9/9/5p3/6r2/5K3 w 0 1
+3k1a3/2R1a1H1c/2R6/9/9/9/9/4Cp3/4r4/r2c1K3 w 0 1
+9/9/3ak1P2/5PR2/6C2/9/9/9/hr2p1pp1/R4K3 w 0 1
+4k1e2/4aPH2/5a3/9/H8/6C2/4c4/9/2hr1p3/4K4 w 0 1
+2eakce2/4a4/9/2H6/1C7/3R5/4R4/4K4/5r3/2h2r3 w 0 1
+2eak1e2/4aR3/9/3HR4/9/9/9/6h2/r2r1p3/4K4 w 0 1
+5a3/3ka4/2Hce4/9/9/C8/9/3R3r1/3pAp3/4K4 w 0 1
+4k4/3RaP3/h3Ha3/8C/9/9/6r2/5p3/4p4/R4K3 w 0 1
+h4k3/1R7/3a5/2H6/9/2C5R/5h3/9/r4cp1r/4K4 w 0 1
+2ek2r2/P3aR3/h1r1e4/9/9/6R2/9/3h5/4p4/1C3K3 w 0 1
+3ak1e2/4a1P2/4e4/5H3/R3C1p2/9/9/5h3/4r4/3K5 w 0 1
+2e1k1e2/3Ra4/2r2a2r/6R2/4P4/7C1/9/9/4p4/5K3 w 0 1
+5a1C1/3ka4/4e4/7H1/1Re6/9/9/5h3/2r1p4/c4K3 w 0 1
+3akae2/2r6/4e4/2C4H1/9/9/9/1p3p3/4p4/3K3R1 w 0 1
+4kae2/5P3/4e1h2/1H1H5/9/1h4C2/9/3p5/4p4/3K5 w 0 1
+2e2a3/C3a4/3ke4/9/9/5RH2/9/1C7/r2r1p3/4K4 w 0 1
+3aka3/6P2/9/6P2/6h1C/7R1/9/1r3p3/4p2C1/5K3 w 0 1
+3r1k3/C5P2/e4a3/CR2R4/9/9/9/2h6/5pr2/4K4 w 0 1
+1R1a5/2P1k4/1h2e4/4c4/9/9/9/2C5R/4r1r2/5K3 w 0 1
+2ea1k3/4a4/9/9/9/4R4/9/2CrE4/3r5/2E1K3R w 0 1
+3k1a3/4a4/4P4/9/6C2/9/9/2R1E1r2/5p1p1/3AK4 w 0 1
+3k5/2P1a4/c8/1r3H3/6e2/9/5RP2/C8/4p4/5K3 w 0 1
+6R2/5k3/5a3/5R3/6p2/9/9/4rC2E/2h6/5KEr1 w 0 1
+9/9/3ak4/9/4P4/9/6R1P/r2AE4/2r6/3K4R w 0 1
+6c2/5k3/1H2e4/4C4/2e2C3/3R5/9/6h2/7r1/4K3c w 0 1
+2rak1C2/5R3/3a5/6H2/9/9/9/r3C4/4p4/3K4R w 0 1
+4ka3/4a4/3h5/3H5/9/C1R6/2R6/4h1r2/3p5/4K4 w 0 1
+3a1ke2/4a4/4e4/5HH2/9/9/9/8C/3r4c/4K1h2 w 0 1
+3a3hC/1R4c2/2C1k2r1/9/9/r6H1/9/9/4p4/3K5 w 0 1
+3k5/2R6/9/9/9/9/9/3ppp3/2Rp5/2E1K4 w 0 1
+4k4/C8/3R5/9/9/9/9/3RE1h2/1r2r4/3K5 w 0 1
+6e2/9/3k4C/4P4/9/9/9/4R4/3r1p3/4K1E2 w 0 1
+3ak4/4a2P1/2R6/9/9/9/9/5A3/3R1pr2/4K4 w 0 1
+3k5/9/9/8p/9/2R3E1r/9/4EA3/6r2/2R2K3 w 0 1
+3k5/4R4/4e3R/2r1p4/9/7C1/9/9/5pr2/4K4 w 0 1
+9/9/R2ak1P2/2rH5/9/9/1C7/4rh3/3K5/9 w 0 1
+2Pa5/1r2a2R1/4k4/9/4H4/9/9/3p1h3/9/3K5 w 0 1
+4k4/4a3R/4Pa3/7C1/4p4/9/9/2r6/5r3/3K5 w 0 1
+6e2/1H1R5/5k3/9/9/9/9/4p4/2Rp1p2r/4K4 w 0 1
+2e1k4/2P6/3Rh1P2/9/4r4/9/9/3R5/4r4/3K5 w 0 1
+3k1a3/9/3a5/3rRH2C/9/9/9/6h2/5r3/4K4 w 0 1
+3C1a1c1/9/C2keH3/4P4/9/9/9/9/r4p3/4K4 w 0 1
+9/4ak3/5a3/6P2/7r1/1r7/9/C2RR4/5p3/4K4 w 0 1
+1c2k1C2/c4P3/5a3/9/9/9/9/7R1/3rp4/5K1C1 w 0 1
+H2k1ae2/2R1a4/2R6/9/9/5r3/9/5h3/4r4/5K3 w 0 1
+3a1k3/c2P5/2r2a3/6H2/9/6R2/9/4C4/4r4/5K3 w 0 1
+3k1aP2/8C/5a3/4R1H2/9/9/9/6h2/3r1p3/4K4 w 0 1
+9/r2k5/1R1ae4/3H5/2e6/1C7/9/3h1p3/9/5K3 w 0 1
+3k1a3/hPR1a4/2Hr5/9/9/9/9/9/5r3/2c1K4 w 0 1
+2raka3/9/9/4C1HRp/9/9/9/5p3/3p5/4K4 w 0 1
+1c1k5/4R4/4H4/4rC3/9/6Rr1/9/6C2/4p4/5K3 w 0 1
+5k3/9/1P7/7HH/9/8C/9/3p5/r3p4/3K5 w 0 1
+5k3/8P/4ra3/9/9/9/9/5R1R1/4r4/5K3 w 0 1
+3ak1e1r/4a2Ph/4e4/4C4/9/9/cR7/h8/4A1p2/3AKC3 w 0 1
+3ak4/1C2aR3/2h1c4/7H1/9/7R1/9/4C4/4A1rhr/3AK3c w 0 1
+3ak4/4aR3/h3H4/4P4/2e6/8C/4c4/H3E1h2/1r2A4/3RKAr2 w 0 1
+4ka3/4aR3/4H1C1e/c1p1p4/9/9/2H1P1R2/5C3/r1rp5/5K3 w 0 1
+1r1akae2/5R3/4e1h2/7H1/9/2E6/2r1P4/E2RC4/3KA4/c8 w 0 1
+4ka3/R3a4/e2re4/4P2H1/9/9/9/3Ap4/4pp3/1R1K1A3 w 0 1
+r4k3/4a1Ph1/1h3a3/4H1p2/9/9/9/4C4/4p4/2EK5 w 0 1
+3k3r1/4a4/3a5/6H2/9/9/9/4C4/4p2c1/2ER1K3 w 0 1
+2ek1a2r/4ah3/cR2e3H/p3CR3/2p1p4/1C7/4Pp2P/2c1E4/3pr4/2E2K3 w 0 1
+1he1kae1r/3Ra4/3cc1h2/C1H1p1pR1/9/3H1p3/4Pp3/4C3E/4r2p1/5K3 w 0 1
+2ea1keRC/3Ra4/9/2pPp4/3Hc4/9/4P4/3pE1H2/r2pA4/c3KAE2 w 0 1
+2eak4/r2PaRR2/1h2H3e/4p1h2/9/9/9/4C4/2p1App2/2E1KAE1c w 0 1
+3ak1Chr/2P4Rh/3a5/9/9/C8/9/2p1E4/4rp3/3K5 w 0 1
+r1P1k4/5P3/9/1c7/9/2H6/9/9/2p3p2/1p1KCH1rc w 0 1
+1h1ak1er1/1r2aR3/4R3c/9/9/9/9/1C2E2Cp/4A4/3AK3c w 0 1
+4ka2R/3ha4/2rce3h/1R3H1HC/2e4P1/9/9/6pr1/7p1/5K3 w 0 1
+5a3/3k1P3/2P1eah2/1H7/2e6/9/P5p2/4E4/3pr4/c1EA1K1R1 w 0 1
+6e2/4ak1C1/2H2aR2/4P4/2e6/9/8P/4E1p1r/r3Ap3/3AK3c w 0 1
+C1e6/1RCka4/5a3/p1p1p4/2e6/9/P1P1P4/9/c3p2p1/5K1c1 w 0 1
+3ak4/2PPa4/e3e4/2p1C1H2/3c5/1rE6/9/3p5/4p2p1/1CE2K3 w 0 1
+r2k1a3/3ha1R2/3ce1c2/3H1R3/6P2/3C5/9/E4p2E/2p3r2/4K4 w 0 1
+2ea1k3/2rPa4/R3e4/4cP1C1/2p6/9/3rP4/4E4/3pp4/2E2K1R1 w 0 1
+4kaeh1/R3a4/4e1P1r/9/p8/2P5P/9/1R1pEC3/2r3p2/3AKAEc1 w 0 1
+3ak1e2/4a4/4e3h/2R1C1pCp/5R3/2Eh5/9/4EA3/6rcc/3AK4 w 0 1
+2erk3C/4a4/3ae3h/2p3H2/4C4/2P6/9/E1p1E4/c2pA1p2/c3KA3 w 0 1
+2eak1r2/3Pa4/4ec3/H6R1/p8/3R2E2/4P1h2/2C6/2r3p2/c1EAK4 w 0 1
+2eaR1cHC/R8/5k3/8p/3r1h3/2p6/P1P5P/4C3E/2p1A1r1c/4KA3 w 0 1
+3ak4/2P1aP3/8H/9/4P4/3p5/8P/4Ep2h/2p1H4/3K1A3 w 0 1
+2eak3C/4a2P1/6H1e/2C5p/9/9/P7h/2p1E4/4pp3/3K5 w 0 1
+C2k2e1c/4a4/e2a2H2/2R3p2/2p3h2/9/9/5A2r/4AKh2/9 w 0 1
+1P1ak1e2/4a4/4e4/6p2/2H4H1/1C2C4/6P2/r2ppp3/9/c3K4 w 0 1
+3ak4/4a4/4e4/9/2e4R1/1H5h1/5p1r1/3RE4/2p1r4/2E2K1c1 w 0 1
+3k1ae2/2R1aP3/2h1e3r/9/5R3/9/3r5/H3E4/4AC3/4K3c w 0 1
+1r4e2/4k4/rH2e1P1h/6p1p/9/3R3C1/9/5A3/p4pc2/3RK4 w 0 1
+3ak4/4a4/e3e3P/9/4H2R1/9/2p6/1p1AE4/3KA4/h3r1E2 w 0 1
+4kae2/4a1RCr/4e3h/2pRH4/4H4/4P4/5p3/9/3pr4/5K3 w 0 1
+3a1ke2/4a1P2/4e4/5H3/9/P7C/6P2/4E4/r2pA4/c3KAE2 w 0 1
+2ea1keRC/2H1a4/9/4p4/4c1p2/9/9/1p2E1r2/4r1h2/3K2E2 w 0 1
+4kae2/4a3C/3re4/h1R4Cc/5R3/1r7/9/4E4/3pp4/2E2K3 w 0 1
+c2a1k3/3Pa4/h3e4/5P1CP/6e2/1rE6/9/9/3pp4/2E2K1R1 w 0 1
+2eak1e1H/9/2h1ca3/3R1C3/9/9/9/C3E4/c3p2p1/1rE2K3 w 0 1
+3k1ae2/4a4/2R1P1r2/9/2e6/7r1/9/1p2E1C1R/5p1p1/4K4 w 0 1
+5kec1/9/P5h1r/1RH6/9/9/3p1p3/R3C1r1E/2h6/5K3 w 0 1
+3rk3C/4a4/3ae4/4C1H2/9/9/9/E3E4/r2pA4/c3KA3 w 0 1
+4ka3/3Ra1C2/4e2RH/4h4/9/9/5p3/9/4Ar2r/3AK3c w 0 1
+3ak4/3RaP1H1/5c1Cc/9/1re6/9/9/5C3/1p2r1p2/3K5 w 0 1
+1r1a1a3/4k4/4ec3/cH1R1C3/2e6/9/9/9/4pp3/2EK2C2 w 0 1
+5a3/2P1k4/r2Pea3/7C1/p7P/9/9/9/p3p3p/5K3 w 0 1
+2ea1k3/4a4/4e4/5H1Rp/9/9/3pp4/4E4/4pp3/3K2E2 w 0 1
+C1e6/1RCka4/5a3/p1p6/2e6/9/P8/9/c3p2p1/5K1c1 w 0 1
+2e1kae1r/C3a4/9/PH7/9/3p5/9/C8/5p1p1/2E1K2c1 w 0 1
+3k1her1/2P1a4/e2a5/8R/9/6R2/9/5p3/4p2p1/3K5 w 0 1
+2ea1k3/3Pa4/4e4/4pP1C1/9/9/9/1r2E4/3pp4/2E2K1R1 w 0 1
+2eakae2/9/9/9/4H2R1/2P6/9/E3E4/r2pA4/c3KA3 w 0 1
+3ak1eR1/9/4ea3/5H3/C7p/2E5r/8c/3p5/5p3/3AK4 w 0 1
+2eak1C2/3caP3/4e4/3H1Ch2/9/9/9/8h/4p4/5K3 w 0 1
+4R4/3k4r/4e4/7P1/6e2/7p1/9/C7E/4A2r1/2E1KA1p1 w 0 1
+2ra1a2r/4k3C/4e3H/5R2p/2p3e2/9/9/9/4p4/5K3 w 0 1
+4k4/2PP3PP/9/9/4p1rH1/5p3/9/4E4/3pp4/5K1R1 w 0 1
+3a5/2H4H1/1r1k5/2P6/9/9/3r4P/4EA3/3pA4/2E1K4 w 0 1
+1he2kr2/3Pa2R1/3hea3/H3C2C1/6r2/9/9/9/9/5K3 w 0 1
+2eak2r1/4a4/4e4/C2H1C3/9/3R5/9/2p6/2c1p4/3K2p2 w 0 1
+2ea1a3/4k4/e1R2H2P/9/4P4/9/3r1p3/3A5/3pp4/5K3 w 0 1
+3a1ker1/1C2a4/2P6/p8/4p4/9/9/3p5/4Cp3/3K2R2 w 0 1
+C3kae1r/2C1a4/e1h5c/1H7/9/9/9/9/2pc1p3/4K4 w 0 1
+C8/C2Pak3/3cea2e/9/9/9/2R2p1r1/9/4r2p1/5K3 w 0 1
+2ek1a3/5P3/3a5/1C2p1C1p/9/9/9/4E4/1p2r1p2/3K5 w 0 1
+4ka3/4aPH2/8e/7Cp/9/2P6/9/E8/2p2p2c/4K3c w 0 1
+4kr3/4a2R1/3ae3e/9/6P2/9/4r4/1R2C4/5p2c/3K5 w 0 1
+1P2ka3/9/e2a1PC2/4C1p1p/9/9/9/9/1p2pp3/3K5 w 0 1
+H1eakae2/R8/9/9/9/9/5pp2/4E4/3pp4/5K3 w 0 1
+3k5/4a2P1/9/2P6/9/3p5/9/ER4p2/rp2pp3/2EK5 w 0 1
+C3kahr1/9/1R2ca2c/9/1H7/9/9/9/4p2p1/5K3 w 0 1
+2e1k1e2/3P1P3/3a1a3/7C1/9/9/9/9/1p2pp3/3K5 w 0 1
+2ea5/3k3C1/2Pa3R1/2p6/8P/9/9/9/1p2r4/3K5 w 0 1
+4k1e2/3Pa4/4e4/9/9/7C1/2P6/2rc5/4p4/1R1K5 w 0 1
+9/3Pak1P1/5a3/9/4H4/9/9/4E4/1p2rp3/2EK5 w 0 1
+6e2/1R7/3ke4/P6P1/9/9/9/9/pp3pp2/4K2p1 w 0 1
+4k4/9/9/4H4/9/2E6/9/hR1pEp3/p2r5/c3K4 w 0 1
+5a3/4a4/5k3/9/6P1R/9/1pp6/3A5/1h1KA4/4r4 w 0 1
+2e2a3/2P1k4/1r1Pea3/6C2/9/9/9/9/4p4/2p2K3 w 0 1
+5k3/1P7/2PP1a1P1/9/9/4R4/9/5p3/3p1p3/1p2K4 w 0 1
+5a3/3P5/4ka3/C8/9/1H7/P8/9/3pp2p1/5K3 w 0 1
+r2k5/9/2P6/9/6eH1/4R4/9/2hp1ph2/4K4/9 w 0 1
+3k1a3/2P4R1/3a5/9/9/7C1/9/9/1p2rp3/3K1c2R w 0 1
+3k1a3/2P4R1/3a5/9/6eR1/9/9/7C1/1p2rp3/3K5 w 0 1
+4ka3/3Pa4/4P3e/9/9/9/8p/6C2/4rp3/3K2R2 w 0 1
+3k5/9/3a5/9/9/9/9/5R3/c2rA2p1/3C1K3 w 0 1
+3k2e2/4P4/r5c2/p5R2/8p/9/9/9/9/4K4 w 0 1
+4k4/9/3aP4/9/9/9/3p1p3/4R4/3p1p3/4K4 w 0 1
+6R2/3P1k3/3a1a3/9/9/6E2/9/E1r6/5p3/4K4 w 0 1
+4ka3/9/3a1P3/4C4/6C2/9/9/9/1p2pp3/3K5 w 0 1
+4k4/9/3a5/9/9/9/6Rp1/3pp2R1/3pp4/5K3 w 0 1
+5k3/3P5/3a1a3/9/9/9/p3r3p/C6R1/5K3/9 w 0 1
+8r/5k3/r8/p8/9/4R4/P8/4C3E/9/4K1E2 w 0 1
+3a5/5k3/2H2a3/8P/4C4/9/9/9/1p1p2p2/1c2K4 w 0 1
+6e2/1R7/3ke4/9/9/9/9/4E4/pp3pp2/4K2p1 w 0 1
+3a1k3/4a4/9/h7c/6P2/2C4H1/9/5A3/5r3/4K4 w 0 1
+9/3Pak3/5aP2/9/9/3H1p1p1/9/5p3/4p4/3K5 w 0 1
+3ak4/4a4/2R6/9/9/9/9/2C3p2/3r5/4K1c2 w 0 1
+4k4/3RaP3/4r4/9/9/9/9/9/4A4/3AK1E2 w 0 1
+5k3/7P1/9/1HH6/9/9/2p1p4/3K1p3/9/9 w 0 1
+6e2/9/3k5/4P1H2/2e6/9/9/9/3p2p2/4K4 w 0 1
+9/4k4/4eR3/9/2e6/4r4/9/9/3KC4/3A5 w 0 1
+4k4/9/H8/9/9/9/5pp2/9/3pp4/5K1R1 w 0 1
+4k4/P3a4/5r3/9/9/9/p8/7R1/4K4/9 w 0 1
+3k1c3/4R4/5r3/9/9/9/9/1p7/4A3C/4K4 w 0 1
+5ke1R/4P2P1/6r1e/9/9/9/9/9/9/4K4 w 0 1
+3k5/4CP3/9/9/5R3/4r1E2/9/9/6pp1/5K3 w 0 1
+9/6P2/4k4/3Rp4/4r1e2/9/9/9/3K5/9 w 0 1
+4ka3/4a4/9/9/9/1R7/4pp3/9/9/4K4 w 0 1
+4k4/3Pa4/4r4/9/9/7p1/9/5R3/5K3/9 w 0 1
+9/2P1k4/5R3/4p4/4r4/9/9/9/5K3/9 w 0 1
+4k4/9/9/9/9/9/9/3pp4/8R/2p1K4 w 0 1
+9/5k3/3a5/9/9/9/9/4R3C/4K4/5r3 w 0 1
+3ak4/9/4r4/5P3/9/2R6/9/9/9/3K5 w 0 1
+3R5/4r4/5k3/4p4/9/8P/9/4K4/9/9 w 0 1
+9/3P5/5k3/8R/2e1r4/9/9/9/9/3K5 w 0 1
+4k4/5P3/9/9/4r4/5R3/9/9/5K3/9 w 0 1
+4k4/5P3/9/9/2e1r4/5R3/9/9/5K3/9 w 0 1
+2P2R3/4r4/3k5/9/9/9/9/9/5K3/9 w 0 1
+2e1ka3/4a4/4e4/1H2p3p/2HC5/5h3/4c1PCc/4p4/5K3/9 w 0 1
+4kae2/3Pa4/4e4/1H1H5/9/9/5p3/4E3h/3p4p/5K2c w 0 1
+4P4/3Pa4/4k1HH1/9/9/9/9/hp2Ep3/2p6/c1EAK4 w 0 1
+2ea5/4ak3/ec4PH1/2p6/8p/p8/9/9/3p5/4K4 w 0 1
+2ea1keh1/2P6/5a3/2p3p1H/9/9/9/9/4K4/2E3E2 w 0 1
+3a2e2/4a1PC1/5k3/2p1P4/6e1p/9/9/8E/4p4/3K3p1 w 0 1
+3k1a3/2P1a1P2/H8/9/9/9/9/3p4p/4p4/2E2K3 w 0 1
+2e2ae2/3PP4/5k3/4P4/9/1p7/9/C6p1/4p4/3K5 w 0 1
+1c1ak3H/4aP3/9/9/p8/9/9/9/5p3/4K4 w 0 1
+4ka3/4a4/9/9/5R3/4pp3/9/9/4A4/3AK4 w 0 1
+3a2e2/3ka4/4e4/9/9/2E3R2/9/E2A5/9/3AK4 w 0 1
+4ka3/4a4/9/9/4R4/9/pp5pp/9/9/4K4 w 0 1
+2eak4/4a4/4e4/4P4/9/8R/4pp3/9/4A4/2E1K4 w 0 1
+5ae2/1P1k5/3a4e/9/6p2/9/6P2/9/4K4/5C3 w 0 1
+9/3k1P3/3a1a3/9/2e6/6E2/9/3AKA3/9/3C5 w 0 1
+9/5k3/8r/9/9/9/4R3P/4E4/3pA4/2EAK4 w 0 1
+4ka3/3Pa4/8e/7Cp/9/9/9/9/1p5p1/4K4 w 0 1
+3a1k3/9/3H1a1P1/9/8C/9/9/1p3p3/4p4/3K5 w 0 1
+3H1k3/4P4/e8/p4h3/2e6/9/9/9/4p4/5KE2 w 0 1
+3hka3/4a4/8R/4R4/9/9/9/3ppp3/9/4K4 w 0 1
+3k5/2P1a1P2/5a3/2H6/9/9/9/9/1p1p2p2/4K4 w 0 1
+9/3R2P2/3ak4/4p4/4r1e2/9/9/4E4/9/4K1E2 w 0 1
+C3ka3/4a4/1cC6/9/9/6E1P/p8/E8/5p3/4K4 w 0 1
+3k2e2/4P4/4e4/3cH4/9/9/9/3K5/2p1Ap3/3A5 w 0 1
+3k5/4CP3/2P6/9/9/5p3/9/8p/4p4/5K3 w 0 1
+3cka3/4a4/9/p8/2p6/7R1/9/9/9/4K4 w 0 1
+4k1e2/9/4e4/9/7Rp/9/8P/9/4K3c/9 w 0 1
+3k5/4P4/9/9/9/1h7/7c1/3A5/2C6/1H2K4 w 0 1
+4kae2/4a4/4e4/4P4/9/9/9/9/3K5/7C1 w 0 1
+2eaka3/5P3/e8/9/9/9/9/9/3K5/7C1 w 0 1
+3k5/5P3/3a1a2e/2H6/6e2/9/9/9/9/3K5 w 0 1
+3a1k3/2R1a4/e8/9/2e6/9/9/9/9/4K4 w 0 1
+9/4aR3/3k1a2e/9/6e2/9/9/9/9/4K4 w 0 1
+3a5/5k3/2R1ea3/9/2e6/9/9/9/5K3/9 w 0 1
+5k3/4a4/3a4e/9/6e2/9/7R1/9/9/4K4 w 0 1
+2eak4/2R1a4/e8/9/9/9/9/9/9/4K4 w 0 1
+3k1ae2/4a4/8e/9/9/9/9/9/4K4/8R w 0 1
+3a5/4a4/5k2e/9/6e2/9/9/9/9/2R1K4 w 0 1
+5a3/4ak3/2R1e4/9/2e6/9/9/9/9/4K4 w 0 1
+6e2/3k5/4e4/1P7/9/6E2/9/6C2/4K4/9 w 0 1
+9/3ka4/1HP2a3/9/9/8p/9/9/9/4K4 w 0 1
+5k3/9/9/4R4/9/9/3ppp3/9/9/3K2E2 w 0 1
+3aka3/9/9/p8/4P4/2C6/9/9/9/4K4 w 0 1
+9/9/5k3/4P4/9/2c3p2/9/5A3/4C4/4K4 w 0 1
+2cCka3/3Pa4/9/9/9/9/9/9/9/4K4 w 0 1
+2e1C1e2/4PP3/3k5/9/9/9/9/9/9/5K3 w 0 1
+3ak4/4aP3/e8/9/9/6P2/9/9/9/4K4 w 0 1
+9/1P1k5/4e4/3P5/6e2/9/9/9/9/4K4 w 0 1
+3a5/3Pak3/9/5P3/9/9/9/9/9/4K4 w 0 1
+2ek5/R8/e7c/9/9/9/9/9/9/4K4 w 0 1
+2e1k1h2/9/4e4/4R4/9/9/9/9/9/4K4 w 0 1
+2R6/3ka4/3a5/3h5/9/9/9/9/9/3K5 w 0 1
+4k1e2/9/4h3e/4R4/9/9/9/9/9/4K4 w 0 1
+4ka3/4ah3/9/9/4R4/9/9/9/9/4K4 w 0 1
+4k4/4a1P2/5a3/9/9/9/9/3K5/9/5C3 w 0 1
+5k3/4a4/3a5/9/9/9/9/3K5/4C4/5C3 w 0 1
+5c3/9/5k3/4P4/9/9/9/3KE4/9/4C4 w 0 1
+3k5/4a4/5a3/9/9/9/9/3A1K3/9/4C4 w 0 1
+3k5/9/9/6p2/9/4P4/9/7C1/5p3/4K4 w 0 1
+3k2e2/4P4/2c6/2H6/9/9/9/9/9/4K4 w 0 1
+9/4P4/3k5/2H1h4/9/9/9/9/9/4K4 w 0 1
+5k3/9/9/9/9/9/9/4C2R1/4r4/3K5 w 0 1
+3ck4/4c4/4R4/9/9/9/9/9/9/3K5 w 0 1
+4C4/4P4/3k5/9/6e2/9/9/9/9/4K4 w 0 1
+9/3k5/9/4P4/2e6/9/9/4C4/5K3/9 w 0 1
+5k3/9/9/p8/9/4P4/9/2C6/9/4K4 w 0 1
+4k4/4a4/9/4P4/9/9/9/9/4A4/4K4 w 0 1
+9/3kaH3/9/9/9/9/9/9/9/4K4 w 0 1
+1r3a3/9/3ak4/5PR2/6C2/9/4P4/3pp4/3pr4/5K3 w 0 1
+3ak4/3PaP3/9/5H3/9/9/9/9/3p1p3/4K4 w 0 1
+3k1a3/2P1a1P2/H8/9/9/3p5/9/9/p3p4/3K5 w 0 1
+4k4/9/9/9/9/9/4r4/3HE4/4A1r2/3CKAE2 w 0 1
+4k4/9/9/9/9/9/4r4/3CE4/4A1r2/3CKAE2 w 0 1
+2e1k4/9/4e4/9/9/3R5/9/4E4/1r1p5/3AK1E2 w 0 1
+4k4/9/9/9/9/2E6/7r1/2R2A3/1p2Ap3/2EK5 w 0 1
+2e1k4/4a4/3ae4/9/9/9/9/E2R5/4p4/1rCK5 w 0 1
+4k1e2/4a4/4ea3/9/9/9/9/5R1H1/4p1r2/5KC2 w 0 1
+5c3/4k4/3a1a3/6P2/2e3e2/9/9/5A3/5K3/9 w 0 1
+3ak4/1c2aPPP1/9/9/9/9/9/9/4p4/5K3 w 0 1
+4k4/9/9/1P7/2p3p2/9/7p1/4E4/4A4/3A1K3 w 0 1
+3k1a3/4a4/4e3e/7P1/9/2P3P2/9/9/9/4K4 w 0 1
+3k5/9/9/9/9/6E2/3p5/E8/2p1Ap3/3K1A3 w 0 1
+2e1k4/9/4e4/9/r8/9/9/9/p2R5/4KA3 w 0 1
+2e6/4k4/4e4/9/4r4/2E2R3/9/4C4/9/3K5 w 0 1
+3k5/9/9/9/4r4/9/9/5R3/2r1A4/3CKA3 w 0 1
+5k3/9/9/9/9/9/r8/C3E3C/3p5/4K1E2 w 0 1
+4k4/9/9/PPP1r4/9/9/9/4E4/9/2E1K4 w 0 1
+4k4/6c2/3a1a2e/6H2/6e2/9/9/9/5K3/9 w 0 1
+3c5/5k3/4e4/9/2e6/6E2/9/4E4/4p4/3K5 w 0 1
+3k5/9/9/9/9/2R6/6P1r/4EA3/6r2/2R2K3 w 0 1
+3k5/9/9/9/9/6E2/2h6/3A5/4Ap3/4K1E2 w 0 1
+4k4/9/9/9/9/2E6/9/E2A5/2r1A4/5K3 w 0 1
+4k4/9/9/9/9/9/9/E2K5/4A1r2/2E2A3 w 0 1
+3k4C/2H6/9/9/9/9/9/9/3p2p2/4K3h w 0 1
+4k4/9/9/8r/9/1HE6/2P6/4E4/9/4K4 w 0 1
+9/1c2PPP2/5k3/9/9/9/2p6/9/9/4K4 w 0 1
+9/5k3/4e4/9/4r4/3R5/9/3Ap4/3K5/9 w 0 1
+4k4/9/9/9/9/4r1h2/9/3R1A3/4A4/3K5 w 0 1
+2e2k3/9/9/2PPP4/9/9/4r4/9/9/3K5 w 0 1
+5k3/4P4/9/9/2e6/9/9/9/3p2p2/4KC3 w 0 1
+4k4/9/9/4PP3/9/9/4r4/4E4/9/4K1E2 w 0 1
+4k4/9/9/4PP3/9/4r4/9/5A3/4AK3/9 w 0 1
+1C7/4k4/1P7/9/9/9/9/9/4p4/rC1K5 w 0 1
+4k4/9/9/9/9/6E2/6h2/4E1C2/4p4/5K3 w 0 1
+4k4/9/9/9/9/9/9/4E4/4Ar3/2E1KH3 w 0 1
+4k4/9/9/9/9/9/9/3H5/2r1A4/2E1KA3 w 0 1
+4k4/9/9/9/9/6E2/9/3A5/3pAK1h1/9 w 0 1
+4k4/9/9/9/9/6E2/9/4E4/1h1K1p3/3A5 w 0 1
+3rka3/4a4/2Rc5/9/9/9/9/9/9/4K4 w 0 1
+h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
+9/4ck3/9/9/9/4R4/9/2r1E4/9/4K1E2 w 0 1
+9/4ck3/9/9/3R5/2r6/9/5A3/4A4/4K4 w 0 1
+4k4/4a4/4r4/9/9/9/9/3R1A3/3K1p3/9 w 0 1
+4k4/9/9/9/9/2E6/9/1p2E1p2/5K3/9 w 0 1
+4k4/9/9/9/9/2E6/9/4E1p2/5K1p1/9 w 0 1
+4k4/9/9/9/9/9/9/3A2p2/3pAK3/9 w 0 1
+5k3/9/9/9/9/9/9/9/2p1K1p2/3A1A3 w 0 1
+4k3H/9/1r7/9/9/9/4P4/4E4/4K4/9 w 0 1
+3C5/2PP5/4k4/9/9/4r4/9/9/3K5/9 w 0 1
+5k3/9/9/3PP4/9/9/6r2/4C4/9/4K4 w 0 1
+3C5/2CP5/4k4/9/9/4r4/9/9/3K5/9 w 0 1
+9/4k4/9/9/9/9/1c2r4/ER7/3K5/9 w 0 1
+4k4/9/4H4/3PP4/9/9/6r2/9/9/3K5 w 0 1
+3Ck4/3PC4/9/9/9/4r4/9/9/3K5/9 w 0 1
+4k4/9/9/4C4/4PP3/9/5r3/9/9/4K4 w 0 1
+4k4/9/9/4P4/4PP3/4r4/9/9/3K5/9 w 0 1
+3k5/9/9/9/4R4/9/9/9/3r1p3/4K1C2 w 0 1
+3c5/3k5/9/9/4R4/9/9/9/2pp5/4K4 w 0 1
+4k4/9/9/4p4/2H1r4/9/9/4E4/4K4/9 w 0 1
+4k4/9/9/9/9/4C4/6r2/4E4/9/4K1E2 w 0 1
+4k4/9/9/9/9/6E2/4r4/4H3E/9/4K4 w 0 1
+3ck4/4a4/3a5/9/4R4/9/9/9/9/4K4 w 0 1
+3c5/2R1a4/3k1a3/9/9/9/9/9/9/4K4 w 0 1
+5k3/9/6C2/9/6p2/7p1/9/7p1/9/4K4 w 0 1
+4k4/9/9/9/9/9/8p/5K3/4pp3/3H5 w 0 1
+3c5/4a4/C3k4/9/9/9/9/3K5/4p4/9 w 0 1
+5k3/9/9/9/9/9/3h1H3/4C4/4p4/5K3 w 0 1
+4ca3/9/3ak4/9/9/9/9/3C5/3K5/9 w 0 1
+4c4/3c5/4k4/9/9/9/9/4E4/3K5/6E2 w 0 1
+5k3/4R4/4cr3/9/9/9/9/9/9/4K4 w 0 1
+9/3k5/9/3r5/4R4/9/9/9/4K4/5p3 w 0 1
+4k4/9/9/9/9/4rH3/9/4H4/3K5/9 w 0 1
+4k4/9/9/9/9/6H2/9/3K5/4r4/3C5 w 0 1
+4k4/9/9/3r5/9/3C5/9/9/3K5/3C5 w 0 1
+4c4/9/2c1k4/9/9/9/9/9/3K5/3C5 w 0 1
+4k4/9/9/9/9/9/3hC4/5K3/4p4/9 w 0 1
+4k4/9/9/9/9/9/9/4E4/3cp4/5K3 w 0 1
+4k4/4a4/9/4P4/9/9/9/9/9/4K4 w 0 1
+4c4/3k5/9/6P2/9/9/4p4/9/5K3/9 w 0 1
+4c4/3ka4/9/3P5/9/9/9/9/5K3/9 w 0 1
+4k4/9/9/9/9/9/9/E4h3/9/3K5 w 0 1
+2c6/4k4/4H4/9/9/9/9/9/9/4K4 w 0 1
 
-      // 二、 單馬類
-      "m6":  "k04,H25,K94",
-      "m7":  "k04,a05,H25,K94",
-      "m8":  "k04,e26,H25,K94",
-      "m9":  "k04,a03,e22,e26,H54,P34,K94",
-      "m10": "k04,a03,a05,e22,H54,P34,K94",
+    `;
+    // ==========================================================
+    
+    // 網頁載入時，自動解析上方的字串並產生選單
+    window.onload = function() {
+      const lines = rawFenData.split('\n');
+      const select = document.getElementById('scenario-select');
+      select.innerHTML = ''; 
+      let validCount = 0;
 
-      // 三、 單炮類
-      "c11": "k04,e22,C54,A84,K94",
-      "c12": "k04,a03,a05,C54,A84,K94",
-      "c13": "k04,a03,a05,e22,C54,P34,K94",
-      "c14": "k04,a05,e22,e26,C54,P34,K94",
-      "c15": "k04,a03,a05,C54,P34,K94",
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
 
-      // 四、 單車類
-      "r16": "k04,a03,a05,R54,K94",
-      "r17": "k04,e22,e26,R54,K94",
-      "r18": "k04,a05,e22,e26,R54,K94",
-      "r19": "k04,a03,a05,e22,R54,K94",
-      "r20": "k04,a05,h24,R54,K94",
-      "r21": "k04,e22,c24,R54,K94",
-      "r22": "k04,a03,a05,e22,e26,R54,K94",
-      "r23": "k04,e22,e26,h14,R54,K94",
-      "r24": "k04,a03,a05,c14,R54,K94",
-      "r25": "k04,a03,a05,h13,R54,K94",
+        // 🌟 修正點：放寬字母限制，完美支援 e/E (象) 和 h/H (馬)
+        const fenMatch = line.match(/([a-zA-Z1-9]+\/){9}[a-zA-Z1-9]+/);
+        if (fenMatch) {
+          validCount++;
+          let fullFen = fenMatch[0] + " w - - 0 1"; 
+          
+          let title = `適情雅趣 第 ${validCount.toString().padStart(3, '0')} 局`;
 
-      // 五、 雙馬/雙炮類
-      "mm26": "k04,a03,a05,e22,e26,H53,H55,K94",
-      "mm27": "k04,a03,a05,H53,H55,K94",
-      "mm28": "k04,a05,e22,e26,H53,H55,K94",
-      "cc29": "k04,a03,a05,C54,C64,A84,K94",
-      "cc30": "k04,a03,a05,e22,C54,C64,A84,K94",
-      "cc31": "k04,a05,e22,e26,C54,C64,A84,K94",
-
-      // 六、 馬炮類
-      "mc32": "k04,a03,a05,H53,C64,K94",
-      "mc33": "k04,a05,e22,e26,H53,C64,K94",
-      "mc34": "k04,a03,a05,e22,H53,C64,K94",
-      "mc35": "k04,a03,a05,e22,e26,H53,C64,A84,K94",
-      "mc36": "k04,r24,H73,C84,A83,A85,E72,E76,K94",
-
-      // 七、 車兵類
-      "rp37": "k04,r14,R55,P34,K94",
-      "rp38": "k04,r14,R55,P14,K94",
-      "rp39": "k04,a03,a05,e22,e26,R55,P34,K94",
-      "rp40": "k04,a05,e22,e26,r14,R55,P33,P35,K94",
-      "rp41": "k04,a03,a05,e22,r14,R55,P33,P35,K94",
-
-      // 八、 車馬 / 車炮類
-      "rm42": "k04,a03,a05,r14,R55,H64,K94",
-      "rm43": "k04,a03,a05,e22,e26,R55,H64,K94",
-      "rc44": "k04,e22,e26,r14,R55,C64,K94",
-      "rc45": "k04,a03,a05,e22,e26,R55,C64,K94",
-      "rc46": "k04,a05,e22,e26,r14,R55,C64,K94",
-
-      // 九、 複雜與巧勝類
-      "rr47": "k04,a03,a05,e22,e26,r14,R53,R55,K94",
-      "rm48": "k04,h23,h25,R54,K94",
-      "rc49": "k04,c23,c25,R54,K94",
-      "rmc50":"k04,h23,c25,R54,K94"
+          let opt = document.createElement('option');
+          opt.value = fullFen;
+          opt.innerHTML = title;
+          select.appendChild(opt);
+        }
+      }
+      
+      if(validCount === 0) {
+        document.getElementById('count-display').textContent = `載入失敗，請確認資料已貼入`;
+      } else {
+        document.getElementById('count-display').textContent = `成功載入 ${validCount} 局`;
+      }
     };
 
-    function buildBoardFromArrayStr(posStr) {
+    function buildBoardFromFEN(fen) {
       let board = Array.from({length: 10}, () => Array(9).fill(''));
-      if (!posStr) return board;
-      let pieces = posStr.split(',');
-      for (let pStr of pieces) {
-        if (pStr.length < 3) continue;
-        let pt = pStr[0];
-        let r = parseInt(pStr[1], 10);
-        let c = parseInt(pStr[2], 10);
-        board[r][c] = pt;
+      if (!fen) return board;
+      
+      let boardPart = fen.split(' ')[0];
+      let rows = boardPart.split('/');
+      
+      for (let r = 0; r < 10; r++) {
+        if (!rows[r]) continue;
+        let c = 0;
+        for (let i = 0; i < rows[r].length; i++) {
+          let char = rows[r][i];
+          
+          if (char >= '1' && char <= '9') {
+            c += parseInt(char, 10);
+          } else {
+            // 自動轉換字元
+            if (char === 'b') char = 'e';
+            else if (char === 'B') char = 'E';
+            else if (char === 'n') char = 'h';
+            else if (char === 'N') char = 'H';
+            
+            if (c < 9) {
+              board[r][c] = char;
+              c++;
+            }
+          }
+        }
       }
       return board;
     }
@@ -227,13 +690,13 @@
     async function applyScenario() {
       const roomName = document.getElementById('room-input').value.trim();
       const passwordInput = document.getElementById('admin-password').value;
-      const scenarioKey = document.getElementById('scenario-select').value;
+      const selectedFEN = document.getElementById('scenario-select').value;
       const btn = document.getElementById('set-btn');
 
       if (!roomName) { showStatus('請輸入房間名！', 'error'); return; }
       if (!passwordInput) { showStatus('請輸入管理員密碼！', 'error'); return; }
+      if (!selectedFEN) { showStatus('選單中沒有棋局！', 'error'); return; }
 
-      // 🌟 AES 密碼驗證邏輯
       try {
         const bytes = CryptoJS.AES.decrypt(ENC_PASSWD, passwordInput);
         const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
@@ -243,15 +706,11 @@
           return;
         }
       } catch (e) {
-        // 如果密碼不對，CryptoJS 在解密時可能會直接拋出錯誤 (Malformed UTF-8)
         showStatus('❌ 密碼錯誤，解密失敗！', 'error');
         return;
       }
 
-      const rawStr = scenarioData[scenarioKey];
-      if (!rawStr) { showStatus('此殘局尚未設定陣列！', 'error'); return; }
-      
-      const targetBoard = buildBoardFromArrayStr(rawStr);
+      const targetBoard = buildBoardFromFEN(selectedFEN);
 
       btn.disabled = true;
       showStatus('驗證通過！正在向伺服器讀取房間資訊...', 'loading');
@@ -285,9 +744,8 @@
           }).then(res => res.json());
 
           if (moveResponse) {
-            showStatus('✅ 佈局成功！請切換回棋盤查看。棋局紅先，必勝或和。', 'success');
-            // 成功後清空密碼欄位，增加安全性
-            document.getElementById('admin-password').value = '';
+            showStatus('✅ 佈局成功！初始盤面已送出，請切換回棋盤查看。', 'success');
+            //document.getElementById('admin-password').value = '';
           } else {
             showStatus('❌ 佈局寫入失敗。', 'error');
           }
