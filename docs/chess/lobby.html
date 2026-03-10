@@ -45,19 +45,21 @@
 <body>
 
   <div class="card">
-    <h2>象棋大廳</h2>
-    <p style="color: #555; margin-bottom: 5px;">請輸入您想加入的房間名稱：</p>
+    <h2>棋社大廳</h2>
+    <p style="color: #555; margin-bottom: 5px;">想進入的房間：</p>
     
     <input type="text" id="roomInput" placeholder="例如：嘉義西區、龍山寺" value="" oninput="updateButtons()">
     
     <div id="action-area">
-      <a href="#" id="joinBtn" class="btn btn-join">進入房間</a>
+      <a href="#" id="joinBtn" class="btn btn-join">進入</a>
       
-      <button class="btn btn-copy" onclick="copyInviteLink()">📋 複製邀請網址</button>
+      <button class="btn btn-copy" onclick="copyInviteLink()">📋邀請網址</button>
     </div>
     
-    <div class="hint">只要相同的房間名，就能在同一個棋盤對戰！</div>
+    <!--div class="hint">就能在同一個棋盤對戰！</div-->
+    <div class="hint"><a href="./classical.html" target="_blank">經典棋局布局，密碼是板橋的電話</a></div>
     <div class="hint"><a href="https://n.jwint.net/r?chess" target="_blank">使用說明</a></div>
+    
   </div>
 
   <script>
