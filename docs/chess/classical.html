@@ -22,6 +22,8 @@
     
     .btn-blue { background-color: #2196F3; }
     .btn-blue:hover { background-color: #1976D2; }
+    .btn-orange { background-color: #ff9800; }
+    .btn-orange:hover { background-color: #e68a00; }
 
     #status-msg { margin-top: 15px; font-size: 14px; font-weight: bold; text-align: center; min-height: 20px; }
     .success { color: #2e7d32; } .error { color: #d32f2f; } .loading { color: #1976d2; }
@@ -36,6 +38,8 @@
   <div class="control-panel">
     <label for="room-input">🏠 目標房間名</label>
     <input type="text" id="room-input" value="榕樹下">
+    
+    <button onclick="jumpToRoom()" class="btn-orange">🚪 直接進入棋盤房間</button>
 
     <label for="admin-password">🔑 密碼</label>
     <input type="password" id="admin-password" placeholder="請輸入佈局密碼，為板橋電話8碼">
@@ -622,7 +626,6 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
 4c4/3ka4/9/3P5/9/9/9/9/5K3/9 w 0 1
 4k4/9/9/9/9/9/9/E4h3/9/3K5 w 0 1
 2c6/4k4/4H4/9/9/9/9/9/9/4K4 w 0 1
-
     `;
     // ==========================================================
     
@@ -693,6 +696,17 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       msgDiv.className = type;
     }
 
+    // 🌟 新增的跳轉房間函數
+    function jumpToRoom() {
+      const roomName = document.getElementById('room-input').value.trim();
+      if (!roomName) {
+        showStatus('請先輸入房間名！', 'error');
+        return;
+      }
+      // 開啟新分頁跳轉到指定房間，並將房間名稱編碼附加在網址後方
+      window.open('./chessOne.html?' + encodeURIComponent(roomName), '_blank');
+    }
+
     // --- 觸發來源：下拉選單 ---
     function applyScenario() {
       const selectedFEN = document.getElementById('scenario-select').value;
@@ -716,6 +730,7 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         if(plr !== 'b') plr = 'r'
         return plr;
     };
+
     // --- 核心佈局邏輯（已整合防 Bug 機制） ---
     async function executeLayout(fenString, btnElement) {
       const roomName = document.getElementById('room-input').value.trim();
