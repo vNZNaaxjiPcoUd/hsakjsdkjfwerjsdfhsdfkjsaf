@@ -16,12 +16,17 @@
     label { font-weight: bold; display: block; margin-bottom: 8px; font-size: 15px; }
     input[type="text"], input[type="password"], select { width: 100%; padding: 10px; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; box-sizing: border-box; }
     
-    button { width: 100%; padding: 12px; background-color: #4CAF50; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; }
+    button { width: 100%; padding: 12px; background-color: #4CAF50; color: white; font-size: 16px; font-weight: bold; border: none; border-radius: 6px; cursor: pointer; transition: background 0.3s; margin-bottom: 10px; }
     button:hover { background-color: #45a049; }
     button:disabled { background-color: #9e9e9e; cursor: not-allowed; }
     
+    .btn-blue { background-color: #2196F3; }
+    .btn-blue:hover { background-color: #1976D2; }
+
     #status-msg { margin-top: 15px; font-size: 14px; font-weight: bold; text-align: center; min-height: 20px; }
     .success { color: #2e7d32; } .error { color: #d32f2f; } .loading { color: #1976d2; }
+    
+    .divider { border: 0; height: 1px; background: #ddd; margin: 25px 0; }
   </style>
 </head>
 <body>
@@ -33,13 +38,18 @@
     <input type="text" id="room-input" value="榕樹下">
 
     <label for="admin-password">🔑 密碼</label>
-    <input type="password" id="admin-password" placeholder="請輸入佈局密碼(板橋電話8碼)">
+    <input type="password" id="admin-password" placeholder="請輸入佈局密碼，為板橋電話8碼">
 
     <label for="scenario-select">♟️ 選擇棋局 <span id="count-display">載入中...</span></label>
-    <select id="scenario-select">
-      </select>
+    <select id="scenario-select"></select>
+    <button id="set-btn" onclick="applyScenario()">🚀 佈置所選名局</button>
 
-    <button id="set-btn" onclick="applyScenario()">🚀 立即佈置名局</button>
+    <hr class="divider">
+
+    <label for="custom-fen">🧩 或貼上自訂 FEN</label>
+    <input type="text" id="custom-fen" placeholder="在此貼上 FEN 字串...">
+    <button id="set-custom-btn" class="btn-blue" onclick="applyCustomFen()">🚀 佈置自訂 FEN</button>
+
     <div id="status-msg"></div>
     <div style="text-align:center;">
       <a href="./chessadmin.html" target="_blank" style="display:inline-block; margin-top:15px; text-decoration:none; color:#1976d2;">🚀 管理棋局</a> | 
@@ -616,7 +626,6 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
     `;
     // ==========================================================
     
-    // 網頁載入時，自動解析上方的字串並產生選單
     window.onload = function() {
       const lines = rawFenData.split('\n');
       const select = document.getElementById('scenario-select');
@@ -627,13 +636,10 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         line = line.trim();
         if (!line) continue;
 
-        // 🌟 修正點：放寬字母限制，完美支援 e/E (象) 和 h/H (馬)
         const fenMatch = line.match(/([a-zA-Z1-9]+\/){9}[a-zA-Z1-9]+/);
         if (fenMatch) {
           validCount++;
           let fullFen = fenMatch[0] + " w - - 0 1"; 
-          
-          //let title = `適情雅趣 第 ${validCount.toString().padStart(3, '0')} 局`;
           let title = `第 ${validCount.toString().padStart(3, '0')} 局`;
 
           let opt = document.createElement('option');
@@ -644,9 +650,8 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       }
       
       if(validCount === 0) {
-        document.getElementById('count-display').textContent = `載入失敗，請確認資料已貼入`;
+        document.getElementById('count-display').textContent = `載入失敗`;
       } else {
-        //document.getElementById('count-display').textContent = `成功載入 ${validCount} 局`;
         document.getElementById('count-display').textContent = ``;
       }
     };
@@ -667,7 +672,6 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           if (char >= '1' && char <= '9') {
             c += parseInt(char, 10);
           } else {
-            // 自動轉換字元
             if (char === 'b') char = 'e';
             else if (char === 'B') char = 'E';
             else if (char === 'n') char = 'h';
@@ -689,20 +693,40 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       msgDiv.className = type;
     }
 
-    async function applyScenario() {
+    // --- 觸發來源：下拉選單 ---
+    function applyScenario() {
+      const selectedFEN = document.getElementById('scenario-select').value;
+      if (!selectedFEN) { showStatus('選單中沒有棋局！', 'error'); return; }
+      executeLayout(selectedFEN, document.getElementById('set-btn'));
+    }
+
+    // --- 觸發來源：自訂 FEN 輸入框 ---
+    function applyCustomFen() {
+      let customFen = document.getElementById('custom-fen').value.trim();
+      if (!customFen) { showStatus('請先貼上 FEN 字串！', 'error'); return; }
+      
+      // 簡單補齊 FEN 格式（確保有後面的參數供 AI 讀取）
+      if (customFen.indexOf(' ') === -1) { customFen += " w - - 0 1"; }
+      
+      executeLayout(customFen, document.getElementById('set-custom-btn'));
+    }
+
+    function fPlayer(str){
+        return str.split(' ')[1]; 
+    };
+    // --- 核心佈局邏輯（已整合防 Bug 機制） ---
+    async function executeLayout(fenString, btnElement) {
       const roomName = document.getElementById('room-input').value.trim();
       const passwordInput = document.getElementById('admin-password').value;
-      const selectedFEN = document.getElementById('scenario-select').value;
-      const btn = document.getElementById('set-btn');
+      const btn1 = document.getElementById('set-btn');
+      const btn2 = document.getElementById('set-custom-btn');
 
       if (!roomName) { showStatus('請輸入房間名！', 'error'); return; }
       if (!passwordInput) { showStatus('請輸入管理員密碼！', 'error'); return; }
-      if (!selectedFEN) { showStatus('選單中沒有棋局！', 'error'); return; }
 
       try {
         const bytes = CryptoJS.AES.decrypt(ENC_PASSWD, passwordInput);
         const decryptedText = bytes.toString(CryptoJS.enc.Utf8);
-        
         if (decryptedText !== EXPECTED_TEXT) {
           showStatus('❌ 密碼錯誤，無法解鎖盤面！', 'error');
           return;
@@ -712,12 +736,26 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         return;
       }
 
-      const targetBoard = buildBoardFromFEN(selectedFEN);
+      const targetBoard = buildBoardFromFEN(fenString);
 
-      btn.disabled = true;
-      showStatus('驗證通過！正在向伺服器讀取房間資訊...', 'loading');
+      // 鎖定兩顆按鈕
+      btn1.disabled = true; btn2.disabled = true;
+      showStatus('驗證通過！正在清理舊資料並重啟房間...', 'loading');
 
       try {
+        // 1. 發送 restart 清除幽靈軌跡
+        await fetch(GAS_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: 'restart', room: roomName, playerId: 'ADMIN_FORCE_RESET', restartAction: 'agree' })
+        });
+
+        // 稍微等待 GAS 清除完畢
+        await new Promise(r => setTimeout(r, 1000));
+
+        showStatus('正在寫入殘局陣型與 AI 狀態...', 'loading');
+
+        // 2. 獲取空房間狀態
         let getResponse = await fetch(GAS_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -727,17 +765,23 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         if (getResponse && getResponse.state) {
           let state = getResponse.state;
 
+          // 3. 注入盤面與防呆屬性
           state.board = targetBoard; 
-          state.turn = 'r'; 
+          //state.turn = 'r'; 
+          state.turn = fPlayer(fenString); 
           state.status = 'playing';
           state.checkMsg = '';
           state.history = []; 
           state.lastMove = null;
+          
+          // 🌟 關鍵防護：強制把 FEN 寫入狀態，避免 AI 誤判
+          state.initialFen = fenString; 
+          state.fen = fenString;
+          state.startFen = fenString;
+
           state.restartRequest = null;
           state.undoRequest = null;
           state.lastActivityTime = new Date().getTime();
-
-          showStatus('正在佈置新盤面到房間中...', 'loading');
 
           let moveResponse = await fetch(GAS_URL, {
             method: 'POST',
@@ -746,8 +790,7 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
           }).then(res => res.json());
 
           if (moveResponse) {
-            showStatus('✅ 佈局成功！初始盤面已送出，請切換回棋盤查看。', 'success');
-            //document.getElementById('admin-password').value = '';
+            showStatus('✅ 佈局成功！請切換回棋盤查看。', 'success');
           } else {
             showStatus('❌ 佈局寫入失敗。', 'error');
           }
@@ -757,7 +800,8 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
       } catch (error) {
         showStatus('❌ 網路連線錯誤：' + error.message, 'error');
       } finally {
-        btn.disabled = false;
+        // 解鎖兩顆按鈕
+        btn1.disabled = false; btn2.disabled = false;
       }
     }
   </script>
