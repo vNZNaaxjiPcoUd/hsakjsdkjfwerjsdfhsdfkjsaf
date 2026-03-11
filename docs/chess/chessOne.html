@@ -354,7 +354,7 @@
         if (riClickCnt === 3) {
             riClickCnt = 0; // 成功後重置
             const targetRoom = typeof room !== 'undefined' ? room : "";
-            window.location.href = "./index.html?" + targetRoom;
+            window.location.href = "./lobby.html?" + targetRoom;
         } else {
             // 4. 如果還沒點滿，設定一個「限時」，例如 1000 毫秒 (1秒)
             // 超過 1 秒沒點下一點，次數就會歸零
