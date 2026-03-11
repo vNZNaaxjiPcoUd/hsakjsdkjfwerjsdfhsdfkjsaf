@@ -338,6 +338,33 @@
       let badge = document.getElementById('role-info'); badge.textContent = "你是：" + roleText; badge.className = "role-badge " + (myRole === 'spectator' ? '' : 'role-' + myRole);
     }
 
+    let riClickCnt = 0;
+    let riTimer = null; // 用來儲存計時器
+
+    document.getElementById('role-info').onclick = function() {
+        // 1. 每點一次，就清除上一個計時器，重新開始計時
+        if (riTimer) {
+            clearTimeout(riTimer);
+        }
+
+        // 2. 增加點擊次數
+        riClickCnt++;
+
+        // 3. 判斷是否達成連點目標（例如連點 3 下）
+        if (riClickCnt === 3) {
+            riClickCnt = 0; // 成功後重置
+            const targetRoom = typeof room !== 'undefined' ? room : "";
+            window.location.href = "./index.html?" + targetRoom;
+        } else {
+            // 4. 如果還沒點滿，設定一個「限時」，例如 1000 毫秒 (1秒)
+            // 超過 1 秒沒點下一點，次數就會歸零
+            riTimer = setTimeout(() => {
+                console.log('連點中斷，次數重置');
+                riClickCnt = 0;
+            }, 3000); 
+        }
+    };
+
     function updateUI(state) {
       let oldState = gameState; let boardChanged = false;
       
