@@ -712,7 +712,9 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
     }
 
     function fPlayer(str){
-        return str.split(' ')[1]; 
+        let plr = str.split(' ')[1]; 
+        if(plr !== 'b') plr = 'r'
+        return plr;
     };
     // --- 核心佈局邏輯（已整合防 Bug 機制） ---
     async function executeLayout(fenString, btnElement) {
