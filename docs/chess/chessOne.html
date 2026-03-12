@@ -524,15 +524,22 @@
       isReplayPaused = false;
       replayStep = 0;
       replaySteps = gameState.history;
-      replayBoard = getInitialBoardLocal();
+
+      // 🌟 核心修改 3：讓覆盤能抓到正確的起點
+      if (gameState.initialBoard) {
+        console.log('getinitialBoard',gameState.initialBoard )
+        replayBoard = JSON.parse(JSON.stringify(gameState.initialBoard));
+      } else {
+        replayBoard = getInitialBoardLocal();
+      }
       
       let replayBtn = document.getElementById('btn-replay');
-      replayBtn.style.backgroundColor = "#FF9800"; // 橘色表示暫停鍵
+      replayBtn.style.backgroundColor = "#FF9800"; 
       replayBtn.textContent = "⏸️ 暫停";
       replayBtn.onclick = toggleReplayPlayPause;
       
       let stopBtn = document.getElementById('btn-replay-stop');
-      stopBtn.style.display = 'inline-block'; // 顯示結束按鈕
+      stopBtn.style.display = 'inline-block'; 
       
       updateInformation("開始覆盤...");
       renderCustomBoard(replayBoard, null); 
