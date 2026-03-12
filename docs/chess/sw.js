@@ -1,5 +1,5 @@
 // 如果未來你有大幅修改 index.html 或 CSS，可以把這裡的 v3 改成 v4，強制使用者設備更新畫面
-const CACHE_NAME = 'xq-v5.1.8'; 
+const CACHE_NAME = 'xq-v5.1.9'; 
 
 // 這裡列出需要被快取到手機/電腦裡的靜態檔案
 const urlsToCache = [
