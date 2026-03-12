@@ -39,20 +39,20 @@
     <label for="room-input">🏠 目標房間名</label>
     <input type="text" id="room-input" value="榕樹下">
     
-    <button onclick="jumpToRoom()" class="btn-orange">🚪 直接進入棋盤房間</button>
+    <button onclick="jumpToRoom()" class="btn-orange">🚪 進入棋盤房間</button>
 
     <label for="admin-password">🔑 密碼</label>
-    <input type="password" id="admin-password" placeholder="請輸入佈局密碼，為板橋電話8碼">
+    <input type="password" id="admin-password" placeholder="輸入密碼(板橋電話8碼)">
 
     <label for="scenario-select">♟️ 選擇棋局 <span id="count-display">載入中...</span></label>
     <select id="scenario-select"></select>
-    <button id="set-btn" onclick="applyScenario()">🚀 佈置所選名局</button>
+    <button id="set-btn" onclick="applyScenario()">🚀 佈局</button>
 
     <hr class="divider">
 
-    <label for="custom-fen">🧩 或貼上FEN</label>
-    <input type="text" id="custom-fen" placeholder="在此貼上 FEN..">
-    <button id="set-custom-btn" class="btn-blue" onclick="applyCustomFen()">🚀 佈置自訂棋局</button>
+    <label for="custom-fen">🧩 貼上FEN</label>
+    <input type="text" id="custom-fen" placeholder="貼上盤面FEN.">
+    <button id="set-custom-btn" class="btn-blue" onclick="applyCustomFen()">🚀 自訂佈局</button>
 
     <div id="status-msg"></div>
     <div style="text-align:center;">
@@ -75,6 +75,7 @@
     // 🌟 請把 fen 的所有文字貼在下面 🌟
     // ==========================================================
     const rawFenData = `
+rnbakabnr/9/1c5c1/p1p1p1p1p/9/9/P1P1P1P1P/1C5C1/9/RNBAKABNR w - - 0 1
 2eaka3/3P3H1/eH7/7hc/9/4C1P2/P5h1P/E3R3E/4Apr2/2RAK3c w 0 1
 C3kae2/4a4/h3c1h2/3Hp1p2/1R4P2/1R7/4P4/4E4/1pCp1p3/1crAK1H2 w 0 1
 1reckaP2/3PaP1r1/1P2e4/1R7/Hh7/CREp1h3/4C4/9/4p1p2/1c3K3 w 0 1
@@ -643,7 +644,8 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
         if (fenMatch) {
           validCount++;
           let fullFen = fenMatch[0] + " w - - 0 1"; 
-          let title = `第 ${validCount.toString().padStart(3, '0')} 局`;
+          let showCount = validCount - 1;
+          let title = `第 ${showCount.toString().padStart(3, '0')} 局`;
 
           let opt = document.createElement('option');
           opt.value = fullFen;
@@ -784,7 +786,11 @@ h2rka3/4a4/9/9/9/9/9/9/9/1R2K4 w 0 1
 
           // 3. 注入盤面與防呆屬性
           state.board = targetBoard; 
-          //state.turn = 'r'; 
+          
+          // 🌟 新增記憶點：強制把這個佈局盤面存為「重新開局」跟「覆盤」的基準點
+          state.initialBoard = JSON.parse(JSON.stringify(targetBoard));
+          state.initialTurn = fPlayer(fenString);
+
           state.turn = fPlayer(fenString); 
           state.status = 'playing';
           state.checkMsg = '';
