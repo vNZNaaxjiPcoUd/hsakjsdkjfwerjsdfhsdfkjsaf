@@ -1,5 +1,5 @@
 ---
 layout: youtubeList
-title: News
+title: List
 list:
 ---
