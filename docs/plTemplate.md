@@ -1,5 +1,5 @@
 ---
-layout: youttubeList
+layout: youtubeList
 title: News
 list:
 ---
