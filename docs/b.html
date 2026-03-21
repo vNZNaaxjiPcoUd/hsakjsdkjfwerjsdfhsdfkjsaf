@@ -122,7 +122,7 @@
         <div class="btn-grid-3">
             <button onclick="player && player.playVideo()">Play</button>
             <button onclick="player && player.pauseVideo()">Pause</button>
-            <button onclick="player && player.stopVideo()">Stop</button>
+            <!--button onclick="player && player.stopVideo()">Stop</button-->
         </div>
     </div>
 
@@ -131,13 +131,13 @@
         <div class="btn-grid-4">
             <button onclick="seekVideo(-30)">⏪ -30s</button>
             <button onclick="seekVideo(-10)">⏪ -10s</button>
-            <button onclick="seekVideo(10)">+10s ⏩</button>
-            <button onclick="seekVideo(30)">+30s ⏩</button>
+            <button onclick="seekVideo(10)">⏩ +10s</button>
+            <button onclick="seekVideo(30)">⏩ +30s</button>
         </div>
     </div>
 
     <div class="control-group">
-        <h4>🔊 Audio Controls</h4>
+        <h4>🔊 Audio</h4>
         <div class="btn-grid-2">
             <button onclick="player && player.mute()">Mute</button>
             <button onclick="player && player.unMute()">Unmute</button>
@@ -145,14 +145,21 @@
     </div>
 
     <div class="control-group" id="countdown">
+		<h4>🔊 Countdown</h4>
         <input type="number" id="minutes" placeholder="Mins">
         <button onclick="startTimer()">Send</button>
     </div>
     
-    <div class="control-group" id="uID" style="text-align:center; padding: 10px; background: transparent;"></div>
+    <div class="control-group">
+		<h4>🔊 Video</h4>
+		<div id="uID" style="text-align:center; padding: 10px; background: transparent;"></div> 
+	</div>
     
-    <div class="control-group" id="closeWindow" style="background: transparent; padding: 0;">
-        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close Window</button>
+    <div class="control-group" >
+		<h4>🔊 Close player</h4>
+		<div id="closeWindow" style="background: transparent; padding: 0;">
+        	<button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close</button>
+		</div>
     </div>
 </div>
 
