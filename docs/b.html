@@ -4,89 +4,161 @@
     <meta charset="UTF-8">
     <base target="_blank">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>Show</title>
     <style>
+    /* 基礎重置與 iPhone 最佳化 */
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊灰色閃爍 */
+    }
     body {
-        font-family: 'Inter', sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         font-size: 16px;
         color: #f0f0f0;
         background-color: #000000;
+        margin: 0;
+        padding: 0;
+        /* 避免橡皮筋捲動效應過度干擾 */
+        overscroll-behavior-y: none; 
     }
     a, a.visited {
         color: inherit;
         text-decoration: none;
     }
-    .control-group { 
-        margin-top: 15px; 
-        padding: 10px; 
-        background: #222; 
-        border-radius: 8px; 
+    
+    /* 影片區塊與控制區塊的容器 */
+    #secretArea {
+        width: 100%;
+        background: #000;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
     }
-    h4 { margin: 0 0 10px 0; color: #fff; }
+    .controls-container {
+        padding: 15px;
+        padding-bottom: env(safe-area-inset-bottom); /* 適配 iPhone 底部橫條 */
+    }
+
+    /* 控制面板樣式 */
+    .control-group { 
+        margin-bottom: 15px; 
+        padding: 15px; 
+        background: #1c1c1e; /* 蘋果風格的深灰色 */
+        border-radius: 12px; 
+    }
+    h4 { 
+        margin: 0 0 12px 0; 
+        color: #fff; 
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* 按鈕使用 Grid 系統，自動適應螢幕 */
+    .btn-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
     button { 
-        padding: 8px 12px; 
-        font-size: 16px; 
-        margin: 0 5px 8px 0; 
+        padding: 12px 5px; 
+        font-size: 15px; 
+        font-weight: 500;
         cursor: pointer; 
         border: none;
-        border-radius: 4px;
-        background-color: #444;
-        color: white;
+        border-radius: 8px;
+        background-color: #333336;
+        color: #fff;
+        transition: background-color 0.1s;
     }
-    button:active { background-color: #666; }
+    button:active { background-color: #55555a; transform: scale(0.98); }
+
+    /* 輸入框專屬設計 */
+    #countdown {
+        display: flex;
+        gap: 10px;
+    }
+    input[type="number"] {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #444;
+        background: #000;
+        color: #fff;
+        font-size: 16px; /* 關鍵：避免 iOS Safari 自動放大畫面 */
+        outline: none;
+    }
+    input[type="number"]::placeholder { color: #888; }
+    #countdown button { padding: 12px 20px; background-color: #0A84FF; color: white; }
+    #countdown button:active { background-color: #006ee6; }
+
+    /* 隱藏/顯示區塊 */
+    #otherInfo { display: none; }
     </style>
 </head>
 <body>
-<div id="secretArea"><div id="allT">.</div></div>
-<div id="otherInfo">
-</div>
 
+<div id="secretArea"><div id="allT">.</div></div>
+
+<div class="controls-container">
+    
     <div class="control-group">
         <h4>⏩ Playback Speed</h4>
-        <button onclick="setSpeed(0.5)">0.5x</button>
-        <button onclick="setSpeed(0.6)">0.6x</button>
-        <button onclick="setSpeed(0.7)">0.7x</button>
-        <button onclick="setSpeed(0.75)">0.75x</button>
-        <button onclick="setSpeed(0.8)">0.8x</button>
-        <button onclick="setSpeed(0.9)">0.9x</button>
-        <button onclick="setSpeed(1)">1x</button>
-        <button onclick="setSpeed(1.5)">1.5x</button>
+        <div class="btn-grid-4">
+            <button onclick="setSpeed(0.5)">0.5x</button>
+            <button onclick="setSpeed(0.6)">0.6x</button>
+            <button onclick="setSpeed(0.7)">0.7x</button>
+            <button onclick="setSpeed(0.75)">0.75x</button>
+            <button onclick="setSpeed(0.8)">0.8x</button>
+            <button onclick="setSpeed(0.9)">0.9x</button>
+            <button onclick="setSpeed(1)">1x</button>
+            <button onclick="setSpeed(1.5)">1.5x</button>
+        </div>
     </div>
 
     <div class="control-group">
         <h4>⏯ Playback Controls</h4>
-        <button onclick="player && player.playVideo()">Play</button>
-        <button onclick="player && player.pauseVideo()">Pause</button>
-        <button onclick="player && player.stopVideo()">Stop</button>
+        <div class="btn-grid-3">
+            <button onclick="player && player.playVideo()">Play</button>
+            <button onclick="player && player.pauseVideo()">Pause</button>
+            <button onclick="player && player.stopVideo()">Stop</button>
+        </div>
     </div>
 
     <div class="control-group">
         <h4>⏳ Skip / Rewind</h4>
-        <button onclick="seekVideo(-30)">⏪ -30s</button>
-        <button onclick="seekVideo(-10)">⏪ -10s</button>
-        <button onclick="seekVideo(10)">+10s ⏩</button>
-        <button onclick="seekVideo(30)">+30s ⏩</button>
+        <div class="btn-grid-4">
+            <button onclick="seekVideo(-30)">⏪ -30s</button>
+            <button onclick="seekVideo(-10)">⏪ -10s</button>
+            <button onclick="seekVideo(10)">+10s ⏩</button>
+            <button onclick="seekVideo(30)">+30s ⏩</button>
+        </div>
     </div>
 
     <div class="control-group">
         <h4>🔊 Audio Controls</h4>
-        <button onclick="player && player.mute()">Mute</button>
-        <button onclick="player && player.unMute()">Unmute</button>
+        <div class="btn-grid-2">
+            <button onclick="player && player.mute()">Mute</button>
+            <button onclick="player && player.unMute()">Unmute</button>
+        </div>
     </div>
 
-<div class="control-group" id="countdown">
-<input type="number" id="minutes" placeholder="countdown minutes">
-<button onclick="startTimer()">send</button>
-</div>
-<div class="control-group" id="uID"></div>
-<div class="control-group" id="closeWindow">
-    <button id="closeWindowBnt" onclick="window.close()">Close</button>
+    <div class="control-group" id="countdown">
+        <input type="number" id="minutes" placeholder="Mins">
+        <button onclick="startTimer()">Send</button>
+    </div>
+    
+    <div class="control-group" id="uID" style="text-align:center; padding: 10px; background: transparent;"></div>
+    
+    <div class="control-group" id="closeWindow" style="background: transparent; padding: 0;">
+        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close Window</button>
+    </div>
 </div>
 
 <script>
-// iframe 原始碼 (加入 enablejsapi=1 & playsinline=1，ID 為 Plys)
-const allText = `<iframe id="Plys" style="width:100%; height:100dvh; border:none; margin:0; padding:0; display:block;" 
+// 注意：這裡將 iframe 修改為 aspect-ratio: 16/9，取代 100dvh
+const allText = `<iframe id="Plys" style="width:100%; aspect-ratio:16/9; border:none; margin:0; padding:0; display:block; object-fit: cover;" 
 src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1&enablejsapi=1&playsinline=1" 
 title="" frameborder="0" 
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
@@ -107,18 +179,13 @@ function handleID(id){
         }
         if (id.length === 11){
             const updateURL = allText.replaceAll('AAURL',id);
-            // 將 iframe 寫入網頁
             document.getElementById("allT").innerHTML = updateURL ;
             nUrl = "https://h.jwint.net/b?"+nowID;
-            document.getElementById("uID").innerHTML = `<a href="${nUrl}">${id}</a>` ;
-            
-            // 注意：這裡移除了原本錯誤直接呼叫 initYouTubePlayer() 的邏輯
+            document.getElementById("uID").innerHTML = `<a href="${nUrl}" style="color: #0A84FF;">Link: ${id}</a>` ;
             
         }else {
-            document.getElementById("allT").innerHTML = "Hello World" ;
-            document.getElementById("otherInfo").style.display = "none";
+            document.getElementById("allT").innerHTML = "<h3 style='padding:20px; text-align:center;'>Hello World</h3>" ;
         }   
-        document.getElementById("secretArea").style.display = "block";
     }
 
 function extractMiddle(str) {
@@ -138,16 +205,13 @@ function extractMiddle(str) {
 function checkUrlPara() {
         const lastPart = window.location.search.slice(1);
         if ( lastPart === ""){
-            document.getElementById("allT").innerHTML = "hello!";
-            document.getElementById("secretArea").style.display = "block";
-            document.getElementById("otherInfo").style.display = "none";
+            document.getElementById("allT").innerHTML = "<h3 style='padding:20px; text-align:center;'>hello!</h3>";
         }else{
             const pID = extractMiddle(lastPart);
             handleID(pID);
         }
     }
 
-// 執行網址檢查，這會同步把 iframe 塞進去 HTML 裡
 checkUrlPara();
 
 function startTimer() {
@@ -156,58 +220,48 @@ function startTimer() {
             window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
         }
         if (isNaN(minutes) || minutes <= 0) {
-            alert('請輸入正數！');
+            alert('Please enter a positive number!');
             return;
         }
-        document.getElementById('minutes').placeholder = "開始" + minutes;
+        document.getElementById('minutes').placeholder = "Timer: " + minutes + "m";
         document.getElementById('minutes').value = "";
         const ms = minutes * 60 * 1000;
         setTimeout(() => {
-            console.log('時間到了！');
+            console.log('Time is up!');
             window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
         }, ms);
     }
 
 // ----------------------------------------------------
-// YouTube API 控制邏輯 (修正版)
+// YouTube API 邏輯
 // ----------------------------------------------------
-
-// 當 YouTube API 腳本載入完成後，會自動呼叫這個函數
 function onYouTubeIframeAPIReady() {
-    console.log("YouTube API Loaded. Trying to bind to iframe...");
-    // 檢查網頁裡是不是真的已經有 id 為 Plys 的 iframe
+    console.log("YouTube API Loaded.");
     if (document.getElementById('Plys')) {
         player = new YT.Player('Plys', {
             events: {
                 'onReady': onPlayerReady
             }
         });
-    } else {
-        console.log("Error: Could not find iframe with id 'Plys'");
     }
 }
 
 function onPlayerReady(event) {
-    console.log("Player is perfectly bound and ready!");
+    console.log("Player bound.");
 }
 
-// 調整播放速度
 function setSpeed(speed) {
     if(player && player.setPlaybackRate) {
         player.setPlaybackRate(speed);
-    } else {
-        console.log("Player is not ready yet.");
     }
 }
 
-// 調整進度
 function seekVideo(seconds) {
     if(player && player.getCurrentTime) {
         var currentTime = player.getCurrentTime();
         player.seekTo(currentTime + seconds, true);
     }
 }
-
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
