@@ -72,12 +72,14 @@
         background-color: #333336;
         color: #fff;
         transition: background-color 0.1s;
+		/* 加入下面這行，阻止 iOS 雙擊放大，並提升點擊反應速度 */
+    	touch-action: manipulation;
     }
     button:active { background-color: #55555a; transform: scale(0.98); }
 
     /* 輸入框專屬設計 */
     #countdown {
-        display: flex;
+        display: none;
         gap: 10px;
     }
     input[type="number"] {
@@ -106,7 +108,7 @@
     
     <div class="control-group">
         <h4>⏩ Playback Speed</h4>
-        <div class="btn-grid-4">
+        <div class="btn-grid-5">
             <button onclick="setSpeed(0.4)">0.4x</button>
             <button onclick="setSpeed(0.5)">0.5x</button>
             <button onclick="setSpeed(0.55)">0.55x</button>
@@ -132,10 +134,10 @@
     <div class="control-group">
         <h4>⏳ Skip / Rewind</h4>
         <div class="btn-grid-4">
+            <button onclick="seekVideo(-120)">⏪ -2m</button>
             <button onclick="seekVideo(-30)">⏪ -30s</button>
-            <button onclick="seekVideo(-10)">⏪ -10s</button>
-            <button onclick="seekVideo(10)">⏩ +10s</button>
             <button onclick="seekVideo(30)">⏩ +30s</button>
+            <button onclick="seekVideo(120)">⏩ +2m</button>
         </div>
     </div>
 
@@ -147,10 +149,10 @@
         </div>
     </div>
 
-    <div class="control-group" id="countdown">
-		<h4>🔊 Countdown</h4>
-        <input type="number" id="minutes" placeholder="Mins">
-        <button onclick="startTimer()">Send</button>
+    <div id="countdown" >
+		<div><h4>🔊 Countdown</h4></div>
+        <div><input type="number" id="minutes" placeholder="Mins"></div>
+        <div><button onclick="startTimer()">Send</button></div>
     </div>
     
     <div class="control-group">
