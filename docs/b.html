@@ -141,9 +141,11 @@
         </div>
     </div>
 
-    <div class="control-group">
-        <h4>🔊 Audio</h4>
-        <div class="btn-grid-2">
+	<div class="control-group">
+        <h4>🔊 Audio / Volume</h4>
+        <div class="btn-grid-4">
+            <button onclick="changeVolume(-10)">🔉 -10%</button>
+            <button onclick="changeVolume(10)">🔊 +10%</button>
             <button onclick="player && player.mute()">Mute</button>
             <button onclick="player && player.unMute()">Unmute</button>
         </div>
@@ -273,6 +275,28 @@ function seekVideo(seconds) {
         player.seekTo(currentTime + seconds, true);
     }
 }
+
+function changeVolume(amount) {
+    if (player && player.getVolume && player.setVolume) {
+        // 取得目前音量 (0~100)
+        let currentVol = player.getVolume();
+        // 計算新音量
+        let newVol = currentVol + amount;
+        
+        // 確保音量不會超出 0 到 100 的範圍
+        if (newVol > 100) newVol = 100;
+        if (newVol < 0) newVol = 0;
+        
+        // 如果原本是靜音狀態，調整音量時自動解除靜音
+        if (player.isMuted()) {
+            player.unMute();
+        }
+        
+        // 設定新音量
+        player.setVolume(newVol);
+    }
+}
+
 </script>
 
 <script src="https://www.youtube.com/iframe_api"></script>
