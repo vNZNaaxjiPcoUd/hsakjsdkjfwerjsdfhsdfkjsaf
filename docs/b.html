@@ -107,31 +107,31 @@
 <div class="controls-container">
     
     <div class="control-group">
-        <!--h4>⏩ Playback Speed</h4-->
+        <!--h4>⏩ Playback</h4-->
         <div class="btn-grid-5">
             <button onclick="setSpeed(0.4)">0.4x</button>
             <button onclick="setSpeed(0.5)">0.5x</button>
             <button onclick="setSpeed(0.6)">0.6x</button>
             <button onclick="setSpeed(0.65)">0.65x</button>
             <button onclick="setSpeed(0.7)">0.7x</button>
+            <button onclick="player && player.playVideo()">Play</button>
             <button onclick="setSpeed(0.75)">0.75x</button>
             <button onclick="setSpeed(0.8)">0.8x</button>
             <button onclick="setSpeed(1)">1x</button>
-            <button onclick="player && player.playVideo()">Play</button>
             <button onclick="player && player.pauseVideo()">Pause</button>
         </div>
     </div>
 
-    <div class="control-group">
-        <!--h4>⏯ Playback Controls</h4-->
+    <!--div class="control-group">
+        <h4>⏯ Playback Controls</h4>
         <div class="btn-grid-2">
 
-            <!--button onclick="player && player.stopVideo()">Stop</button-->
+            <button onclick="player && player.stopVideo()">Stop</button>
         </div>
-    </div>
+    </div-->
 
     <div class="control-group">
-        <!--h4>⏳ Skip / Volume</h4-->
+        <!--h4>⏳ Skip / 🔊 Volume</h4-->
         <div class="btn-grid-4">
             <button onclick="seekVideo(-120)">⏪ -2m</button>
             <button onclick="seekVideo(-30)">⏪ -30s</button>
