@@ -87,7 +87,7 @@
             const screenMin = Math.min(window.innerWidth, window.innerHeight) - 40; // 留邊距
             // 假設每個格子大約 35px，計算合適的網格數
             let calculatedSize = Math.floor(screenMin / 35);
-            gridSize = Math.max(10, Math.min(20, calculatedSize)); // 限制在 10~20 之間
+            gridSize = Math.max(8, Math.min(20, calculatedSize)); // 限制在 10~20 之間
             cellSize = Math.floor(screenMin / gridSize);
             
             canvas.width = cellSize * gridSize;
