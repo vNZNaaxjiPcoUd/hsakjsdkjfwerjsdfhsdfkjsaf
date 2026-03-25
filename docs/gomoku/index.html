@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>極簡五子棋</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon.png"> <style>
+        :root {
+            --bg-color: #F7F7F7;
+            --board-color: #E2C28F;
+            --line-color: #6D4C41;
+            --text-color: #333;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            touch-action: manipulation; /* 防止雙擊縮放 */
+        }
+        #status {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            height: 24px;
+        }
+        #gameBoard {
+            background-color: var(--board-color);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border-radius: 4px;
+        }
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 20px;
+            background-color: #333;
+            color: #fff;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: transform 0.1s, background-color 0.2s;
+        }
+        button:active {
+            transform: scale(0.95);
+            background-color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="status">黑子回合</div>
+    <canvas id="gameBoard"></canvas>
+    
+    <div class="controls">
+        <button onclick="undo()">退回(兩步)</button>
+        <button onclick="initGame()">重新開始</button>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameBoard');
+        const ctx = canvas.getContext('2d');
+        const statusEl = document.getElementById('status');
+        
+        let gridSize = 15; // 預設，稍後會根據解析度計算
+        let cellSize = 0;
+        let board = [];
+        let history = []; // 紀錄下棋步驟 {x, y, player}
+        let currentPlayer = 1; // 1: 黑子, 2: 白子
+        let isGameOver = false;
+
+        // 初始化與設定棋盤大小 (10x10 到 20x20)
+        function calculateBoardSize() {
+            const screenMin = Math.min(window.innerWidth, window.innerHeight) - 40; // 留邊距
+            // 假設每個格子大約 35px，計算合適的網格數
+            let calculatedSize = Math.floor(screenMin / 35);
+            gridSize = Math.max(10, Math.min(20, calculatedSize)); // 限制在 10~20 之間
+            cellSize = Math.floor(screenMin / gridSize);
+            
+            canvas.width = cellSize * gridSize;
+            canvas.height = cellSize * gridSize;
+        }
+
+        function initGame() {
+            calculateBoardSize();
+            board = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+            history = [];
+            currentPlayer = 1;
+            isGameOver = false;
+            updateStatus();
+            drawBoard();
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 畫線
+            ctx.strokeStyle = '#6D4C41';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < gridSize; i++) {
+                // 橫線
+                ctx.beginPath();
+                ctx.moveTo(cellSize / 2, i * cellSize + cellSize / 2);
+                ctx.lineTo(canvas.width - cellSize / 2, i * cellSize + cellSize / 2);
+                ctx.stroke();
+                // 直線
+                ctx.beginPath();
+                ctx.moveTo(i * cellSize + cellSize / 2, cellSize / 2);
+                ctx.lineTo(i * cellSize + cellSize / 2, canvas.height - cellSize / 2);
+                ctx.stroke();
+            }
+
+            // 畫棋子
+            history.forEach(step => drawPiece(step.x, step.y, step.player));
+        }
+
+        function drawPiece(x, y, player) {
+            ctx.beginPath();
+            ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize * 0.4, 0, Math.PI * 2);
+            ctx.fillStyle = player === 1 ? '#000000' : '#FFFFFF';
+            ctx.fill();
+            if (player === 2) {
+                ctx.strokeStyle = '#CCC';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+            }
+        }
+
+        // 點擊事件處理
+        canvas.addEventListener('click', (e) => {
+            if (isGameOver) return;
+
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.floor((e.clientX - rect.left) / cellSize);
+            const y = Math.floor((e.clientY - rect.top) / cellSize);
+
+            if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && board[x][y] === 0) {
+                board[x][y] = currentPlayer;
+                history.push({ x, y, player: currentPlayer });
+                drawPiece(x, y, currentPlayer);
+
+                if (checkWin(x, y, currentPlayer)) {
+                    statusEl.innerText = (currentPlayer === 1 ? '黑子' : '白子') + ' 獲勝！';
+                    isGameOver = true;
+                    return;
+                }
+
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+                updateStatus();
+            }
+        });
+
+        // 檢查勝利 (八個方向)
+        function checkWin(x, y, player) {
+            const directions = [
+                [1, 0], [0, 1], [1, 1], [1, -1]
+            ];
+
+            for (let [dx, dy] of directions) {
+                let count = 1;
+                // 正向
+                for (let i = 1; i < 5; i++) {
+                    let nx = x + dx * i, ny = y + dy * i;
+                    if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && board[nx][ny] === player) count++;
+                    else break;
+                }
+                // 反向
+                for (let i = 1; i < 5; i++) {
+                    let nx = x - dx * i, ny = y - dy * i;
+                    if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && board[nx][ny] === player) count++;
+                    else break;
+                }
+                if (count >= 5) return true;
+            }
+            return false;
+        }
+
+        // 退回兩步 (讓剛剛下錯的玩家重新下)
+        function undo() {
+            if (history.length === 0 || isGameOver) return;
+            
+            // 退兩步，如果只剩一步則全退
+            const stepsToUndo = Math.min(2, history.length);
+            for (let i = 0; i < stepsToUndo; i++) {
+                const lastMove = history.pop();
+                board[lastMove.x][lastMove.y] = 0;
+            }
+            
+            // 若只退了一步，需要切換玩家
+            if (stepsToUndo === 1) {
+                currentPlayer = currentPlayer === 1 ? 2 : 1;
+            }
+            
+            drawBoard();
+            updateStatus();
+        }
+
+        function updateStatus() {
+            if (!isGameOver) {
+                statusEl.innerText = currentPlayer === 1 ? '黑子回合' : '白子回合';
+            }
+        }
+
+        // 註冊 Service Worker (PWA 支援)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(reg => {
+                    console.log('ServiceWorker registered');
+                }).catch(err => {
+                    console.log('ServiceWorker error: ', err);
+                });
+            });
+        }
+
+        // 啟動遊戲
+        window.addEventListener('resize', () => {
+            if(history.length === 0) initGame(); // 只有在還沒開始下棋時，轉向才會重繪大小
+        });
+        initGame();
+    </script>
+</body>
+</html>
