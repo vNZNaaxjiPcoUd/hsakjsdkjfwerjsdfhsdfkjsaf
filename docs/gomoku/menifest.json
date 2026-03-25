@@ -1,7 +1,7 @@
 {
-  "name": "極簡五子棋",
+  "name": "五子棋",
   "short_name": "五子棋",
-  "description": "本地雙人對戰的極簡五子棋",
+  "description": "本地雙人對戰的五子棋",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#F7F7F7",
