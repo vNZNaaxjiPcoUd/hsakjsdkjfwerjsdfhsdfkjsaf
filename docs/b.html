@@ -111,39 +111,32 @@
         <div class="btn-grid-5">
             <button onclick="setSpeed(0.4)">0.4x</button>
             <button onclick="setSpeed(0.5)">0.5x</button>
-            <button onclick="setSpeed(0.55)">0.55x</button>
             <button onclick="setSpeed(0.6)">0.6x</button>
             <button onclick="setSpeed(0.65)">0.65x</button>
             <button onclick="setSpeed(0.7)">0.7x</button>
             <button onclick="setSpeed(0.75)">0.75x</button>
             <button onclick="setSpeed(0.8)">0.8x</button>
-            <button onclick="setSpeed(0.85)">0.85x</button>
             <button onclick="setSpeed(1)">1x</button>
+            <button onclick="player && player.playVideo()">Play</button>
+            <button onclick="player && player.pauseVideo()">Pause</button>
         </div>
     </div>
 
     <div class="control-group">
         <!--h4>⏯ Playback Controls</h4-->
         <div class="btn-grid-2">
-            <button onclick="player && player.playVideo()">Play</button>
-            <button onclick="player && player.pauseVideo()">Pause</button>
+
             <!--button onclick="player && player.stopVideo()">Stop</button-->
         </div>
     </div>
 
     <div class="control-group">
-        <!--h4>⏳ Skip / Rewind</h4-->
+        <!--h4>⏳ Skip / Volume</h4-->
         <div class="btn-grid-4">
             <button onclick="seekVideo(-120)">⏪ -2m</button>
             <button onclick="seekVideo(-30)">⏪ -30s</button>
             <button onclick="seekVideo(30)">⏩ +30s</button>
             <button onclick="seekVideo(120)">⏩ +2m</button>
-        </div>
-    </div>
-
-	<div class="control-group">
-        <!--h4>🔊 Audio / Volume</h4-->
-        <div class="btn-grid-4">
             <button onclick="changeVolume(-10)">🔉 -10%</button>
             <button onclick="changeVolume(10)">🔊 +10%</button>
             <button onclick="player && player.mute()">Mute</button>
@@ -161,13 +154,10 @@
     
     <div class="control-group">
 		<!--h4>🔊 Video</h4-->
-		<div id="uID" style="text-align:center; padding: 10px; background: transparent;"></div> 
-	</div>
-    
-    <div class="control-group" >
-		<!--h4>🔊 Close player</h4-->
-		<div id="closeWindow" style="background: transparent; padding: 0;">
-        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close</button>
+		<div class="btn-grid-2">
+			<div id="uID" style="text-align:center; padding: 10px; background: transparent;"></div> 
+			<!--div id="closeWindow" style="background: transparent; padding: 0;"-->
+	        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close</button>
 		</div>
     </div>
 </div>
