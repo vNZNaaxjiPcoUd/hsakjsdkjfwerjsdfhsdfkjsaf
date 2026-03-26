@@ -22,7 +22,6 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            overscroll-behavior-y: none; 
         }
         /* 開始畫面 */
         #setup {
@@ -44,6 +43,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            touch-action: manipulation;
         }
         /* 遊戲畫面 */
         #game {
@@ -96,6 +96,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            touch-action: manipulation;
         }
         .ctrl-btn:active { background-color: #777; }
         #turn-indicator {
@@ -145,6 +146,7 @@
             border: none;
             border-radius: 8px;
             cursor: pointer;
+            touch-action: manipulation;
         }
     </style>
 </head>
