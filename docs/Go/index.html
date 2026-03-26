@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>本地圍棋</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --bg-color: #f4e4c1;
+            --btn-color: #4a3b32;
+        }
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden; /* 防止滾動 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        /* 開始畫面 */
+        #setup {
+            background-color: var(--bg-color);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        #setup h1 { margin-top: 0; color: #333; }
+        .size-btn {
+            display: block;
+            width: 100%;
+            margin: 15px 0;
+            padding: 15px;
+            font-size: 18px;
+            background-color: var(--btn-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        /* 遊戲畫面 */
+        #game {
+            display: none;
+            width: 100%; height: 100%;
+            flex-direction: column;
+            background-color: var(--bg-color);
+        }
+        #info-bar {
+            height: 60px;
+            padding: env(safe-area-inset-top) 15px 0 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+        }
+        #capture-info {
+            font-size: 14px;
+            margin-left: 15px;
+            font-weight: normal;
+            color: #555;
+        }
+        #board-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            touch-action: none; /* 禁用瀏覽器預設滑動手勢 */
+        }
+        canvas {
+            background-color: #DEB887;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        #controls {
+            height: 80px;
+            padding-bottom: env(safe-area-inset-bottom);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background-color: #2c2c2c;
+        }
+        .ctrl-btn {
+            padding: 12px 20px;
+            font-size: 16px;
+            background-color: #555;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        .ctrl-btn:active { background-color: #777; }
+        #turn-indicator {
+            display: inline-block;
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            margin-left: 10px;
+            vertical-align: middle;
+            border: 1px solid #999;
+        }
+
+        /* 結算畫面 (Modal) */
+        #score-modal {
+            display: none;
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: var(--bg-color);
+            padding: 25px;
+            border-radius: 12px;
+            width: 80%;
+            max-width: 320px;
+            text-align: center;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .modal-content h2 { margin-top: 0; margin-bottom: 20px; }
+        .score-text { font-size: 18px; font-weight: bold; margin: 10px 0; }
+        .score-details {
+            font-size: 13px;
+            text-align: left;
+            margin: 20px 0;
+            color: #555;
+            line-height: 1.5;
+        }
+        .close-btn {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            background-color: var(--btn-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="setup">
+        <h1>本地圍棋</h1>
+        <button class="size-btn" onclick="startGame(6)">6 × 6</button>
+        <button class="size-btn" onclick="startGame(9)">9 × 9</button>
+        <button class="size-btn" onclick="startGame(13)">13 × 13</button>
+        <button class="size-btn" onclick="startGame(19)">19 × 19</button>
+    </div>
+
+    <div id="game">
+        <div id="info-bar">
+            當前輪到: <span id="turn-indicator" style="background-color: black;"></span>
+            <span id="capture-info">黑提: 0 | 白提: 0</span>
+        </div>
+        <div id="board-container">
+            <canvas id="board"></canvas>
+        </div>
+        <div id="controls">
+            <button class="ctrl-btn" onclick="undo()">退一步</button>
+            <button class="ctrl-btn" onclick="calculateScore()">結算</button>
+            <button class="ctrl-btn" onclick="restart()">重開盤</button>
+        </div>
+    </div>
+
+    <div id="score-modal">
+        <div class="modal-content">
+            <h2>結算結果</h2>
+            <div id="score-black" class="score-text"></div>
+            <div id="score-white" class="score-text"></div>
+            <div class="score-details">
+                ※ 規則說明：<br>
+                1. 僅計算「圍住的空地」與「吃掉的敵子」，盤面上的活子不計分。<br>
+                2. 結算前，請務必將雙方同意的「死子」手動填滿或當作提子算入，否則系統會認為該區域同時碰到黑白兩色，導致無法計算該區域的空地。
+            </div>
+            <button class="close-btn" onclick="closeScoreModal()">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        // 註冊 Service Worker (PWA)
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.log('SW註冊失敗:', err));
+        }
+
+        const canvas = document.getElementById('board');
+        const ctx = canvas.getContext('2d');
+        const turnIndicator = document.getElementById('turn-indicator');
+        const captureInfo = document.getElementById('capture-info');
+        
+        let SIZE = 9;
+        let board = [];
+        let history = [];
+        let currentPlayer = 1; // 1: 黑, 2: 白
+        let captures = { 1: 0, 2: 0 };
+        let cellSize, padding;
+
+        function startGame(size) {
+            SIZE = size;
+            document.getElementById('setup').style.display = 'none';
+            document.getElementById('game').style.display = 'flex';
+            resetBoard();
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+        }
+
+        function resetBoard() {
+            board = Array.from({ length: SIZE }, () => Array(SIZE).fill(0));
+            history = [];
+            currentPlayer = 1;
+            captures = { 1: 0, 2: 0 };
+            updateTurnUI();
+        }
+
+        function restart() {
+            if(confirm('確定要重新開盤嗎？')) {
+                resetBoard();
+                drawBoard();
+            }
+        }
+
+        function resizeCanvas() {
+            const container = document.getElementById('board-container');
+            const maxSize = Math.min(container.clientWidth, container.clientHeight) * 0.95;
+            
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = maxSize * dpr;
+            canvas.height = maxSize * dpr;
+            canvas.style.width = maxSize + 'px';
+            canvas.style.height = maxSize + 'px';
+            
+            ctx.scale(dpr, dpr);
+            
+            cellSize = maxSize / SIZE;
+            padding = cellSize / 2;
+            
+            drawBoard();
+        }
+
+        function drawBoard() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 1;
+            
+            for (let i = 0; i < SIZE; i++) {
+                ctx.moveTo(padding, padding + i * cellSize);
+                ctx.lineTo(padding + (SIZE - 1) * cellSize, padding + i * cellSize);
+                ctx.moveTo(padding + i * cellSize, padding);
+                ctx.lineTo(padding + i * cellSize, padding + (SIZE - 1) * cellSize);
+            }
+            ctx.stroke();
+
+            if (SIZE >= 9) {
+                const stars = getStarPoints(SIZE);
+                ctx.fillStyle = '#000';
+                stars.forEach(([r, c]) => {
+                    ctx.beginPath();
+                    ctx.arc(padding + c * cellSize, padding + r * cellSize, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+            }
+
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (board[r][c] !== 0) {
+                        drawStone(r, c, board[r][c]);
+                    }
+                }
+            }
+        }
+
+        function getStarPoints(size) {
+            if (size === 9) return [[2,2], [2,6], [4,4], [6,2], [6,6]];
+            if (size === 13) return [[3,3], [3,9], [6,6], [9,3], [9,9]];
+            if (size === 19) return [[3,3], [3,9], [3,15], [9,3], [9,9], [9,15], [15,3], [15,9], [15,15]];
+            return [];
+        }
+
+        function drawStone(r, c, color) {
+            ctx.beginPath();
+            const x = padding + c * cellSize;
+            const y = padding + r * cellSize;
+            ctx.arc(x, y, cellSize * 0.45, 0, Math.PI * 2);
+            ctx.fillStyle = color === 1 ? '#111' : '#f9f9f9';
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#666';
+            ctx.stroke();
+        }
+
+        canvas.addEventListener('pointerdown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            
+            const c = Math.round((x - padding) / cellSize);
+            const r = Math.round((y - padding) / cellSize);
+            
+            if (r >= 0 && r < SIZE && c >= 0 && c < SIZE) {
+                playMove(r, c);
+            }
+        });
+
+        function playMove(r, c) {
+            if (board[r][c] !== 0) return;
+
+            history.push({
+                board: board.map(row => [...row]),
+                player: currentPlayer,
+                captures: { ...captures }
+            });
+
+            let tempBoard = board.map(row => [...row]);
+            tempBoard[r][c] = currentPlayer;
+
+            let enemyColor = currentPlayer === 1 ? 2 : 1;
+            let capturedAny = false;
+            let stonesCapturedThisTurn = 0;
+
+            const neighbors = [[-1,0], [1,0], [0,-1], [0,1]];
+            for (let [dr, dc] of neighbors) {
+                let nr = r + dr, nc = c + dc;
+                if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && tempBoard[nr][nc] === enemyColor) {
+                    if (!hasLiberties(tempBoard, nr, nc, enemyColor)) {
+                        let count = removeGroup(tempBoard, nr, nc, enemyColor);
+                        stonesCapturedThisTurn += count;
+                        capturedAny = true;
+                    }
+                }
+            }
+
+            if (!capturedAny && !hasLiberties(tempBoard, r, c, currentPlayer)) {
+                history.pop(); 
+                return; 
+            }
+
+            captures[currentPlayer] += stonesCapturedThisTurn;
+            board = tempBoard;
+            currentPlayer = enemyColor;
+            updateTurnUI();
+            drawBoard();
+        }
+
+        function hasLiberties(brd, r, c, color) {
+            let visited = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
+            let queue = [[r, c]];
+            visited[r][c] = true;
+
+            while (queue.length > 0) {
+                let [currR, currC] = queue.shift();
+                const neighbors = [[-1,0], [1,0], [0,-1], [0,1]];
+                
+                for (let [dr, dc] of neighbors) {
+                    let nr = currR + dr, nc = currC + dc;
+                    if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && !visited[nr][nc]) {
+                        if (brd[nr][nc] === 0) return true;
+                        if (brd[nr][nc] === color) {
+                            visited[nr][nc] = true;
+                            queue.push([nr, nc]);
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function removeGroup(brd, r, c, color) {
+            let queue = [[r, c]];
+            brd[r][c] = 0;
+            let removedCount = 1;
+            
+            while (queue.length > 0) {
+                let [currR, currC] = queue.shift();
+                const neighbors = [[-1,0], [1,0], [0,-1], [0,1]];
+                for (let [dr, dc] of neighbors) {
+                    let nr = currR + dr, nc = currC + dc;
+                    if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE && brd[nr][nc] === color) {
+                        brd[nr][nc] = 0;
+                        removedCount++;
+                        queue.push([nr, nc]);
+                    }
+                }
+            }
+            return removedCount;
+        }
+
+        function undo() {
+            if (history.length > 0) {
+                let lastState = history.pop();
+                board = lastState.board;
+                currentPlayer = lastState.player;
+                captures = lastState.captures;
+                updateTurnUI();
+                drawBoard();
+            }
+        }
+
+        function updateTurnUI() {
+            turnIndicator.style.backgroundColor = currentPlayer === 1 ? 'black' : 'white';
+            captureInfo.textContent = `黑提: ${captures[1]} | 白提: ${captures[2]}`;
+        }
+
+        function calculateScore() {
+            let blackTerritory = 0;
+            let whiteTerritory = 0;
+            
+            let visited = Array.from({ length: SIZE }, () => Array(SIZE).fill(false));
+
+            for (let r = 0; r < SIZE; r++) {
+                for (let c = 0; c < SIZE; c++) {
+                    if (board[r][c] === 0 && !visited[r][c]) {
+                        let emptyGroup = [];
+                        let queue = [[r, c]];
+                        visited[r][c] = true;
+                        emptyGroup.push([r, c]);
+                        
+                        let touchesBlack = false;
+                        let touchesWhite = false;
+
+                        while (queue.length > 0) {
+                            let [currR, currC] = queue.shift();
+                            const neighbors = [[-1,0], [1,0], [0,-1], [0,1]];
+                            
+                            for (let [dr, dc] of neighbors) {
+                                let nr = currR + dr, nc = currC + dc;
+                                if (nr >= 0 && nr < SIZE && nc >= 0 && nc < SIZE) {
+                                    if (board[nr][nc] === 1) touchesBlack = true;
+                                    else if (board[nr][nc] === 2) touchesWhite = true;
+                                    else if (board[nr][nc] === 0 && !visited[nr][nc]) {
+                                        visited[nr][nc] = true;
+                                        queue.push([nr, nc]);
+                                        emptyGroup.push([nr, nc]);
+                                    }
+                                }
+                            }
+                        }
+
+                        if (touchesBlack && !touchesWhite) blackTerritory += emptyGroup.length;
+                        if (touchesWhite && !touchesBlack) whiteTerritory += emptyGroup.length;
+                    }
+                }
+            }
+
+            let blackTotal = blackTerritory + captures[1];
+            let whiteTotal = whiteTerritory + captures[2];
+
+            document.getElementById('score-black').innerText = `黑方: ${blackTotal} 目 (空地: ${blackTerritory} + 提子: ${captures[1]})`;
+            document.getElementById('score-white').innerText = `白方: ${whiteTotal} 目 (空地: ${whiteTerritory} + 提子: ${captures[2]})`;
+            document.getElementById('score-modal').style.display = 'flex';
+        }
+
+        function closeScoreModal() {
+            document.getElementById('score-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
