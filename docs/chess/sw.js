@@ -8,6 +8,7 @@ const urlsToCache = [
   './manifest.json',
   './lobby.html',
   './chessOne.html',
+  './localChess.html',
   './icon-192.png',
   './icon-512.png'
 ];
