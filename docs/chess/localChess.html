@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>象棋</title>
+  
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="象棋">
+
+  <style>
+    /* 針對 iPhone 最佳化：禁止反白、禁止長按選單、禁止雙擊縮放 */
+    *, *::before, *::after { 
+      box-sizing: border-box; 
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    ::-webkit-scrollbar { display: none; }
+    html { -ms-overflow-style: none; scrollbar-width: none; }
+
+    :root {
+      /* 計算最大可用空間 (扣除底部控制列約 65px 與 安全邊距) */
+      --board-max-width: 98vw;
+      --board-max-height: calc(100dvh - 70px - env(safe-area-inset-bottom, 0px));
+      /* 自動取寬度或高度的極限來決定格子大小 */
+      --cell-size: min(calc(var(--board-max-width) / 9.5), calc(var(--board-max-height) / 10.5)); 
+      --piece-size: calc(var(--cell-size) * 0.88); 
+      --font-size: calc(var(--piece-size) * 0.55);
+      --board-color: #e4c695;
+    }
+
+    /* 滿版設定，不允許滑動 */
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+      background: #f0f0f0; 
+      margin: 0; 
+      padding: 0; 
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      touch-action: manipulation; 
+      overflow-x: hidden; 
+      overflow-y: hidden; /* 防止任何不必要的滾動 */
+    }
+    
+    /* 棋盤主區塊 (置中且撐滿剩餘空間) */
+    #main-content {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      width: 100%;
+    }
+
+    #board-container {
+      background: var(--board-color); 
+      border: 3px solid #333;
+      padding: calc(var(--cell-size) / 2.2); 
+      box-shadow: 2px 5px 15px rgba(0,0,0,0.3);
+      border-radius: 6px; 
+    }
+    
+    #board-relative-wrapper { position: relative; }
+    #board-svg-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
+    #board-grid { 
+      display: grid; 
+      position: relative; 
+      z-index: 2; 
+      grid-template-columns: repeat(9, var(--cell-size)); 
+      grid-template-rows: repeat(10, var(--cell-size)); 
+    }
+    
+    .cell { position: relative; display: flex; justify-content: center; align-items: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+
+    .piece {
+      width: var(--piece-size); 
+      height: var(--piece-size); 
+      border-radius: 50%; 
+      position: absolute; 
+      z-index: 10;
+      display: flex; justify-content: center; align-items: center; 
+      font-weight: bold; font-size: var(--font-size); 
+      box-shadow: 2px 2px 5px rgba(0,0,0,0.4); 
+      background: #fdf6e3; 
+      border: 2px solid #333; 
+    }
+    .piece.red { color: #d32f2f; border-color: #d32f2f; }
+    .piece.black { color: #212121; border-color: #212121; }
+    .piece.selected { box-shadow: 0 0 10px 4px #00BCD4; transform: scale(1.15); z-index: 15; } 
+    .cell.valid-move::after { content: ''; position: absolute; width: calc(var(--cell-size) * 0.3); height: calc(var(--cell-size) * 0.3); background: rgba(0, 188, 212, 0.7); border-radius: 50%; z-index: 12; }
+    .cell.last-move-origin::before { content: ''; position: absolute; width: calc(var(--cell-size) * 0.4); height: calc(var(--cell-size) * 0.4); background-color: rgba(255, 152, 0, 0.5); border-radius: 50%; z-index: 5; }
+    .piece.last-moved { box-shadow: 0 0 0 3px #FF9800, 0 0 15px 4px rgba(255, 152, 0, 0.7); z-index: 14; }
+
+    /* 底部控制列 (包含回合提示與所有按鈕) */
+    .bottom-bar {
+      display: flex;
+      justify-content: space-evenly;
+      align-items: center;
+      width: 100%;
+      background: #ffffff;
+      padding: 10px 5px calc(10px + env(safe-area-inset-bottom, 0px)) 5px;
+      box-shadow: 0 -3px 10px rgba(0,0,0,0.1);
+      z-index: 50;
+    }
+    
+    .bottom-bar > div, .bottom-bar > button {
+      padding: 8px 15px;
+      font-size: clamp(16px, 4vw, 20px);
+      border-radius: 8px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    #turn-info {
+      background: #eee;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .btn { color: white; border: none; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+    .btn:active { transform: scale(0.95); box-shadow: 0 0 2px rgba(0,0,0,0.2); }
+    .btn-undo { background-color: #ff9800; } 
+    .btn-restart { background-color: #4CAF50; }
+
+    /* 將軍警告 (浮動在棋盤上方) */
+    .check-alert { 
+      position: absolute;
+      top: 15px;
+      color: red; 
+      font-size: 24px; 
+      font-weight: bold; 
+      animation: blink 1s infinite; 
+      display: none; 
+      background: rgba(255,255,255,0.85);
+      padding: 5px 20px;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(255,0,0,0.5);
+      z-index: 100;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+  </style>
+</head>
+<body>
+
+  <div id="main-content">
+    <div id="check-msg" class="check-alert">將軍！</div>
+    
+    <div id="board-container">
+      <div id="board-relative-wrapper">
+        <div id="board-svg-layer"></div>
+        <div id="board-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-bar">
+    <div id="turn-info">紅方</div>
+    <button class="btn btn-undo" onclick="undoMove(1)">退一步</button>
+    <button class="btn btn-restart" onclick="restartGame()">重開</button>
+  </div>
+
+  <script>
+    // 註冊 Service Worker
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(e => {});
+      });
+    }
+
+    // --- 遊戲邏輯 ---
+    const piecesText = { 'k':'將', 'a':'士', 'e':'象', 'h':'馬', 'r':'車', 'c':'砲', 'p':'卒', 'K':'帥', 'A':'仕', 'E':'相', 'H':'傌', 'R':'俥', 'C':'炮', 'P':'兵' };
+
+    const initialBoard = [
+      ['r','h','e','a','k','a','e','h','r'],
+      ['','','','','','','','',''],
+      ['','c','','','','','','c',''],
+      ['p','','p','','p','','p','','p'],
+      ['','','','','','','','',''],
+      ['','','','','','','','',''],
+      ['P','','P','','P','','P','','P'],
+      ['','C','','','','','','C',''],
+      ['','','','','','','','',''],
+      ['R','H','E','A','K','A','E','H','R']
+    ];
+
+    let gameState = { board: [], turn: 'r', history: [], lastMove: null };
+    let selectedCell = null;
+
+    function restartGame() {
+      if (gameState.history.length > 0 && !confirm("確定要重新開局嗎？")) return;
+      gameState.board = JSON.parse(JSON.stringify(initialBoard));
+      gameState.turn = 'r'; gameState.history = []; gameState.lastMove = null; selectedCell = null;
+      updateUI();
+    }
+
+    function undoMove(steps) {
+      for (let i = 0; i < steps; i++) {
+        if (gameState.history.length === 0) break;
+        let last = gameState.history.pop();
+        gameState.board[last.r1][last.c1] = gameState.board[last.r2][last.c2];
+        gameState.board[last.r2][last.c2] = last.eaten;
+        gameState.turn = last.turn; gameState.lastMove = last.prevMove;
+      }
+      selectedCell = null; updateUI();
+    }
+
+    function handleCellClick(r, c) {
+      let clickedPiece = gameState.board[r][c]; 
+      let isMyPiece = clickedPiece && (gameState.turn === 'b' ? clickedPiece === clickedPiece.toLowerCase() : clickedPiece === clickedPiece.toUpperCase());
+      
+      if (selectedCell) {
+        if (selectedCell.r === r && selectedCell.c === c) selectedCell = null; 
+        else if (isMyPiece) selectedCell = { r: r, c: c }; 
+        else { 
+          if (isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) { 
+            if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, gameState.turn)) {
+              commitMove(selectedCell.r, selectedCell.c, r, c); 
+            } else { alert("不能送將！"); }
+          } 
+        }
+      } else { if (isMyPiece) selectedCell = { r: r, c: c }; } 
+      renderBoard();
+    }
+
+    function commitMove(r1, c1, r2, c2) {
+      let eatenPiece = gameState.board[r2][c2];
+      gameState.history.push({ r1: r1, c1: c1, r2: r2, c2: c2, eaten: eatenPiece, turn: gameState.turn, prevMove: gameState.lastMove ? { ...gameState.lastMove } : null });
+      gameState.board[r2][c2] = gameState.board[r1][c1]; gameState.board[r1][c1] = '';
+      gameState.turn = gameState.turn === 'b' ? 'r' : 'b'; gameState.lastMove = { r1: r1, c1: c1, r2: r2, c2: c2 }; selectedCell = null; 
+      updateUI(); 
+    }
+
+    function updateUI() {
+      let turnInfo = document.getElementById('turn-info');
+      if (gameState.turn === 'r') { 
+        turnInfo.textContent = "紅方"; 
+        turnInfo.style.color = "#d32f2f"; 
+        turnInfo.style.borderColor = "#d32f2f";
+      } else { 
+        turnInfo.textContent = "黑方"; 
+        turnInfo.style.color = "#212121"; 
+        turnInfo.style.borderColor = "#212121";
+      }
+
+      let checkMsg = document.getElementById('check-msg');
+      if (isKingAttacked(gameState.board, gameState.turn)) checkMsg.style.display = 'block'; else checkMsg.style.display = 'none'; 
+      
+      renderBoard();
+    }
+
+    function renderBoard() {
+      const grid = document.getElementById('board-grid'); grid.innerHTML = ''; 
+      for (let r = 0; r < 10; r++) {
+        for (let c = 0; c < 9; c++) {
+          let cellDiv = document.createElement('div'); cellDiv.className = 'cell'; cellDiv.dataset.r = r; cellDiv.dataset.c = c; cellDiv.onclick = () => handleCellClick(r, c);
+          if (gameState.lastMove && gameState.lastMove.r1 === r && gameState.lastMove.c1 === c) cellDiv.classList.add('last-move-origin');
+
+          let p = gameState.board[r][c];
+          if (p) {
+            let pieceDiv = document.createElement('div'); pieceDiv.className = 'piece ' + (p === p.toLowerCase() ? 'black' : 'red');
+            if (selectedCell && selectedCell.r === r && selectedCell.c === c) pieceDiv.classList.add('selected');
+            if (gameState.lastMove && gameState.lastMove.r2 === r && gameState.lastMove.c2 === c) pieceDiv.classList.add('last-moved');
+            pieceDiv.textContent = piecesText[p]; cellDiv.appendChild(pieceDiv);
+          }
+          if (selectedCell && isMoveLegal(gameState.board, selectedCell.r, selectedCell.c, r, c)) {
+             if (!leavesKingInCheck(gameState.board, selectedCell.r, selectedCell.c, r, c, gameState.turn)) cellDiv.classList.add('valid-move');
+          }
+          grid.appendChild(cellDiv);
+        }
+      }
+    }
+
+    function drawSVGBoard() {
+      let getX = c => (c + 0.5) * (100 / 9) + '%'; let getY = r => (r + 0.5) * (100 / 10) + '%';
+      let svg = `<svg width="100%" height="100%" overflow="visible">`; const stroke = `stroke="#333" stroke-width="1.5"`;
+      for (let c = 0; c < 9; c++) {
+        if (c === 0 || c === 8) { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; } 
+        else { svg += `<line x1="${getX(c)}" y1="${getY(0)}" x2="${getX(c)}" y2="${getY(4)}" ${stroke} />`; svg += `<line x1="${getX(c)}" y1="${getY(5)}" x2="${getX(c)}" y2="${getY(9)}" ${stroke} />`; }
+      }
+      for (let r = 0; r < 10; r++) { svg += `<line x1="${getX(0)}" y1="${getY(r)}" x2="${getX(8)}" y2="${getY(r)}" ${stroke} />`; }
+      svg += `<line x1="${getX(3)}" y1="${getY(0)}" x2="${getX(5)}" y2="${getY(2)}" ${stroke} />`; svg += `<line x1="${getX(5)}" y1="${getY(0)}" x2="${getX(3)}" y2="${getY(2)}" ${stroke} />`;
+      svg += `<line x1="${getX(3)}" y1="${getY(7)}" x2="${getX(5)}" y2="${getY(9)}" ${stroke} />`; svg += `<line x1="${getX(5)}" y1="${getY(7)}" x2="${getX(3)}" y2="${getY(9)}" ${stroke} />`;
+      
+      // 使用 var(--font-size) 讓楚河漢界的字體大小完全與棋子字體連動
+      const textStyle = `font-size: var(--font-size); font-weight: bold; fill: #333; text-anchor: middle; dominant-baseline: central;`;
+      svg += `<text x="27.7%" y="50.5%" style="${textStyle}">楚</text>`;
+      svg += `<text x="38.8%" y="50.5%" style="${textStyle}">河</text>`;
+      svg += `<text x="61.1%" y="50.5%" style="${textStyle}">漢</text>`;
+      svg += `<text x="72.2%" y="50.5%" style="${textStyle}">界</text>`;
+      svg += `</svg>`; document.getElementById('board-svg-layer').innerHTML = svg;
+    } 
+
+    function getColor(p) { return p === '' ? '' : (p === p.toLowerCase() ? 'b' : 'r'); }
+    function isMoveLegal(board, r1, c1, r2, c2) {
+      let p = board[r1][c1]; let target = board[r2][c2]; if (p === '') return false; if (target !== '' && getColor(p) === getColor(target)) return false; 
+      let dr = r2 - r1; let dc = c2 - c1; let adr = Math.abs(dr), adc = Math.abs(dc); let pType = p.toLowerCase(), color = getColor(p);
+      switch (pType) {
+        case 'p': if (color === 'b') return (dr === 1 && dc === 0) || (r1 >= 5 && dr === 0 && adc === 1); else return (dr === -1 && dc === 0) || (r1 <= 4 && dr === 0 && adc === 1);
+        case 'r': if (adr > 0 && adc > 0) return false; return countPiecesBetween(board, r1, c1, r2, c2) === 0;
+        case 'h': if (adr === 2 && adc === 1) return board[r1 + dr/2][c1] === ''; if (adr === 1 && adc === 2) return board[r1][c1 + dc/2] === ''; return false;
+        case 'e': if (adr !== 2 || adc !== 2) return false; if (color === 'b' && r2 > 4) return false; if (color === 'r' && r2 < 5) return false; return board[r1 + dr/2][c1 + dc/2] === ''; 
+        case 'a': if (adr !== 1 || adc !== 1) return false; if (c2 < 3 || c2 > 5) return false; if (color === 'b' && r2 > 2) return false; if (color === 'r' && r2 < 7) return false; return true;
+        case 'k': if (adr + adc !== 1) return false; if (c2 < 3 || c2 > 5) return false; if (color === 'b' && r2 > 2) return false; if (color === 'r' && r2 < 7) return false; return true;
+        case 'c': if (adr > 0 && adc > 0) return false; let between = countPiecesBetween(board, r1, c1, r2, c2); if (target === '') return between === 0; else return between === 1; 
+      } return false;
+    }
+    function countPiecesBetween(board, r1, c1, r2, c2) { let count = 0; if (r1 === r2) { let minC = Math.min(c1, c2), maxC = Math.max(c1, c2); for (let c = minC + 1; c < maxC; c++) if (board[r1][c] !== '') count++; } else { let minR = Math.min(r1, r2), maxR = Math.max(r1, r2); for (let r = minR + 1; r < maxR; r++) if (board[r][c1] !== '') count++; } return count; }
+    function isKingAttacked(board, kingColor) { let kr = -1, kc = -1, targetKing = kingColor === 'b' ? 'k' : 'K'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (board[r][c] === targetKing) { kr = r; kc = c; break; } } if (kr !== -1) break; } if (kr === -1) return true; let oppColor = kingColor === 'b' ? 'r' : 'b'; for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (getColor(board[r][c]) === oppColor) { if (isMoveLegal(board, r, c, kr, kc)) return true; } } } return false; }
+    function leavesKingInCheck(board, r1, c1, r2, c2, color) { let p = board[r1][c1]; let target = board[r2][c2]; board[r2][c2] = p; board[r1][c1] = ''; let inCheck = isKingAttacked(board, color); let bkR=-1, bkC=-1, rkR=-1, rkC=-1; if (!inCheck) { for (let r=0; r<10; r++) { for (let c=0; c<9; c++) { if (board[r][c] === 'k') { bkR = r; bkC = c; } if (board[r][c] === 'K') { rkR = r; rkC = c; } } } if (bkC === rkC && bkC !== -1) { if (countPiecesBetween(board, bkR, bkC, rkR, rkC) === 0) inCheck = true; } } board[r1][c1] = p; board[r2][c2] = target; return inCheck; }
+
+    window.onload = () => { drawSVGBoard(); restartGame(); };
+  </script>
+</body>
+</html>
