@@ -222,9 +222,11 @@
         }
 
         function restart() {
-            if(confirm('確定要重新開盤嗎？')) {
-                resetBoard();
-                drawBoard();
+            if(confirm('確定要結束當前對局，並重新選擇棋盤嗎？')) {
+                // 隱藏遊戲畫面
+                document.getElementById('game').style.display = 'none';
+                // 顯示選擇棋盤畫面
+                document.getElementById('setup').style.display = 'block';
             }
         }
 
