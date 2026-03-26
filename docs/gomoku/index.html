@@ -7,7 +7,8 @@
     <link rel="manifest" href="manifest.json">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="icon.png"> <style>
+    <link rel="apple-touch-icon" href="icon.png"> 
+    <style>
         :root {
             --bg-color: #F7F7F7;
             --board-color: #E2C28F;
@@ -24,74 +25,167 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            touch-action: manipulation; /* 防止雙擊縮放 */
+            height: 100dvh; 
+            touch-action: manipulation;
+            overflow: hidden;
+        }
+
+        /* === 主選單樣式 === */
+        #menu {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 100%;
+        }
+        #menu h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.2rem;
+            color: #333;
+        }
+        #menu p {
+            margin: 0 0 25px 0;
+            font-size: 1rem;
+            color: #666;
+        }
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 60%;
+            max-width: 220px;
+        }
+        .menu-buttons button {
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            border-radius: 25px;
+        }
+
+        /* === 遊戲區與迷你按鈕樣式 === */
+        #gameUI {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
         }
         #status {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
-            margin-bottom: 15px;
-            height: 24px;
+            margin-bottom: 8px;
+            height: 20px;
         }
         #gameBoard {
             background-color: var(--board-color);
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             border-radius: 4px;
+            -webkit-tap-highlight-color: transparent; 
         }
         .controls {
-            margin-top: 20px;
+            margin-top: 10px;
             display: flex;
-            gap: 15px;
+            gap: 10px;
         }
         button {
-            padding: 10px 20px;
-            font-size: 1rem;
+            padding: 6px 14px;
+            font-size: 0.85rem;
             border: none;
-            border-radius: 20px;
-            background-color: #333;
+            border-radius: 15px;
+            background-color: rgba(51, 51, 51, 0.8);
             color: #fff;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
             transition: transform 0.1s, background-color 0.2s;
         }
         button:active {
-            transform: scale(0.95);
-            background-color: #555;
+            transform: scale(0.92);
+            background-color: #333;
         }
     </style>
 </head>
 <body>
 
-    <div id="status">黑子回合</div>
-    <canvas id="gameBoard"></canvas>
-    
-    <div class="controls">
-        <button onclick="undo()">退回</button>
-        <button onclick="initGame()">重新開始</button>
+    <div id="menu">
+        <h1>五子棋</h1>
+        <p>請選擇棋盤大小</p>
+        <div class="menu-buttons">
+            <button onclick="startGame(7)">7 × 7</button>
+            <button onclick="startGame(10)">10 × 10</button>
+            <button onclick="startGame(12)">12 × 12</button>
+            <button onclick="startGame(15)">15 × 15</button>
+            <button onclick="startGame(19)">19 × 19</button>
+        </div>
+    </div>
+
+    <div id="gameUI">
+        <div id="status">黑子回合</div>
+        <canvas id="gameBoard"></canvas>
+        
+        <div class="controls">
+            <button onclick="undo()">退回</button>
+            <button onclick="backToMenu()">重局</button>
+        </div>
     </div>
 
     <script>
+        const menuEl = document.getElementById('menu');
+        const gameUIEl = document.getElementById('gameUI');
         const canvas = document.getElementById('gameBoard');
         const ctx = canvas.getContext('2d');
         const statusEl = document.getElementById('status');
         
-        let gridSize = 15; // 預設，稍後會根據解析度計算
+        let gridSize = 15; 
         let cellSize = 0;
         let board = [];
-        let history = []; // 紀錄下棋步驟 {x, y, player}
-        let currentPlayer = 1; // 1: 黑子, 2: 白子
+        let history = []; 
+        let currentPlayer = 1; 
         let isGameOver = false;
 
-        // 初始化與設定棋盤大小 (10x10 到 20x20)
-        function calculateBoardSize() {
-            const screenMin = Math.min(window.innerWidth, window.innerHeight) - 40; // 留邊距
-            // 假設每個格子大約 35px，計算合適的網格數
-            let calculatedSize = Math.floor(screenMin / 35);
-            gridSize = Math.max(8, Math.min(20, calculatedSize)); // 限制在 10~20 之間
-            cellSize = Math.floor(screenMin / gridSize);
+        // 啟動遊戲並設定大小
+        function startGame(size) {
+            gridSize = size;
+            menuEl.style.display = 'none';
+            gameUIEl.style.display = 'flex';
+            initGame();
+        }
+
+        // 返回主選單 (即原本的重局功能)
+        function backToMenu() {
+            // 如果已經有下棋紀錄，且遊戲尚未結束，則跳出確認視窗
+            if (history.length > 0 && !isGameOver) {
+                const confirmRestart = confirm("遊戲尚在進行中，確定要放棄當前對局並重新開始嗎？");
+                if (!confirmRestart) {
+                    return; // 若使用者點擊「取消」，則直接中斷，留在原棋局
+                }
+            }
             
-            canvas.width = cellSize * gridSize;
-            canvas.height = cellSize * gridSize;
+            // 執行退回選單的動作
+            gameUIEl.style.display = 'none';
+            menuEl.style.display = 'flex';
+            history = []; 
+        }
+
+        // 計算並最大化棋盤大小
+        function calculateBoardSize() {
+            if (gameUIEl.style.display === 'none') return;
+
+            const maxWidth = window.innerWidth - 20;
+            const maxHeight = window.innerHeight - 75; 
+            
+            const screenMin = Math.min(maxWidth, maxHeight);
+            
+            cellSize = screenMin / gridSize;
+            const displaySize = cellSize * gridSize;
+            
+            const dpr = window.devicePixelRatio || 1;
+            
+            canvas.style.width = `${displaySize}px`;
+            canvas.style.height = `${displaySize}px`;
+            
+            canvas.width = displaySize * dpr;
+            canvas.height = displaySize * dpr;
+            
+            ctx.resetTransform(); 
+            ctx.scale(dpr, dpr);
         }
 
         function initGame() {
@@ -105,31 +199,29 @@
         }
 
         function drawBoard() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const displaySize = cellSize * gridSize;
+            ctx.clearRect(0, 0, displaySize, displaySize);
             
-            // 畫線
             ctx.strokeStyle = '#6D4C41';
             ctx.lineWidth = 1;
             for (let i = 0; i < gridSize; i++) {
-                // 橫線
                 ctx.beginPath();
                 ctx.moveTo(cellSize / 2, i * cellSize + cellSize / 2);
-                ctx.lineTo(canvas.width - cellSize / 2, i * cellSize + cellSize / 2);
+                ctx.lineTo(displaySize - cellSize / 2, i * cellSize + cellSize / 2);
                 ctx.stroke();
-                // 直線
+                
                 ctx.beginPath();
                 ctx.moveTo(i * cellSize + cellSize / 2, cellSize / 2);
-                ctx.lineTo(i * cellSize + cellSize / 2, canvas.height - cellSize / 2);
+                ctx.lineTo(i * cellSize + cellSize / 2, displaySize - cellSize / 2);
                 ctx.stroke();
             }
 
-            // 畫棋子
             history.forEach(step => drawPiece(step.x, step.y, step.player));
         }
 
         function drawPiece(x, y, player) {
             ctx.beginPath();
-            ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize * 0.4, 0, Math.PI * 2);
+            ctx.arc(x * cellSize + cellSize / 2, y * cellSize + cellSize / 2, cellSize * 0.42, 0, Math.PI * 2);
             ctx.fillStyle = player === 1 ? '#000000' : '#FFFFFF';
             ctx.fill();
             if (player === 2) {
@@ -139,13 +231,14 @@
             }
         }
 
-        // 點擊事件處理
         canvas.addEventListener('click', (e) => {
             if (isGameOver) return;
 
             const rect = canvas.getBoundingClientRect();
-            const x = Math.floor((e.clientX - rect.left) / cellSize);
-            const y = Math.floor((e.clientY - rect.top) / cellSize);
+            const actualCellSize = rect.width / gridSize;
+            
+            const x = Math.floor((e.clientX - rect.left) / actualCellSize);
+            const y = Math.floor((e.clientY - rect.top) / actualCellSize);
 
             if (x >= 0 && x < gridSize && y >= 0 && y < gridSize && board[x][y] === 0) {
                 board[x][y] = currentPlayer;
@@ -163,21 +256,16 @@
             }
         });
 
-        // 檢查勝利 (八個方向)
         function checkWin(x, y, player) {
-            const directions = [
-                [1, 0], [0, 1], [1, 1], [1, -1]
-            ];
+            const directions = [[1, 0], [0, 1], [1, 1], [1, -1]];
 
             for (let [dx, dy] of directions) {
                 let count = 1;
-                // 正向
                 for (let i = 1; i < 5; i++) {
                     let nx = x + dx * i, ny = y + dy * i;
                     if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && board[nx][ny] === player) count++;
                     else break;
                 }
-                // 反向
                 for (let i = 1; i < 5; i++) {
                     let nx = x - dx * i, ny = y - dy * i;
                     if (nx >= 0 && nx < gridSize && ny >= 0 && ny < gridSize && board[nx][ny] === player) count++;
@@ -188,18 +276,15 @@
             return false;
         }
 
-        // 退回兩步 (讓剛剛下錯的玩家重新下)
         function undo() {
             if (history.length === 0 || isGameOver) return;
             
-            // 退兩步，如果只剩一步則全退
             const stepsToUndo = Math.min(2, history.length);
             for (let i = 0; i < stepsToUndo; i++) {
                 const lastMove = history.pop();
                 board[lastMove.x][lastMove.y] = 0;
             }
             
-            // 若只退了一步，需要切換玩家
             if (stepsToUndo === 1) {
                 currentPlayer = currentPlayer === 1 ? 2 : 1;
             }
@@ -214,7 +299,6 @@
             }
         }
 
-        // 註冊 Service Worker (PWA 支援)
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(reg => {
@@ -225,11 +309,12 @@
             });
         }
 
-        // 啟動遊戲
         window.addEventListener('resize', () => {
-            if(history.length === 0) initGame(); // 只有在還沒開始下棋時，轉向才會重繪大小
+            if (gameUIEl.style.display !== 'none') {
+                calculateBoardSize();
+                drawBoard();
+            }
         });
-        initGame();
     </script>
 </body>
 </html>
