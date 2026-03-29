@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+	<meta charset="UTF-8">
+	<base target="_blank">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>走！</title>
+<style>
+
+body {
+    font-family: 'Inter', sans-serif;
+    font-size: 23px; /* 基礎文字大小 */
+    color: #f0f0f0; /* 淺灰文字，適應黑底 */
+    background-color: #000000; /* 純黑背景 */
+}
+a,
+a.visited {
+	color: inherit;
+	text-decoration: none;
+}
+
+.glass-btn {
+  padding: 12px 30px;
+  font-size: 16px;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.glass-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+#secretArea { display: none; }
+#countdown {display: none;}
+#showID {display: none;}
+.hint { color: #888; font-size: 14px; }
+#helloWorld { display: block; }
+/*#helloWorld:hover { transform: scale(1.1); }
+*/
+#passwordOverlay {
+	position: fixed;
+	top: 0; left: 0; right: 0; bottom: 0;
+	background: rgba(0,0,0,0.95);
+	display: block;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	z-index: 999;
+}
+#passwordInput {
+	font-size: 28px;
+	padding: 15px 20px;
+	width: 300px;
+	text-align: center;
+	border: none;
+	border-bottom: 3px solid #00ff88;
+	background: transparent;
+	color: #fff;
+	outline: none;
+}
+#passwordInput:focus { border-bottom-color: #00ff88; }
+.tip {
+	margin-top: 20px;
+	color: #888;
+	font-size: 14px;
+}
+
+#startButton {
+	margin-top: 20px;
+	padding: 10px 20px;
+	font-size: 18px;
+	color: #fff;
+	background: #00ff88;
+	border: none;
+	border-radius: 5px;
+	cursor: pointer;
+	transition: background 0.3s;
+}
+</style>
+
+</head>
+<body>
+<br><br>
+
+<div id="helloWorld">按這裡，貼上去，走！</div>
+<br>
+<div id="showID">
+	<div id="uID"></div>
+</div>
+
+<div id="passwordOverlay">
+	<input type="text" id="passwordInput" placeholder="貼" autocomplete="off">
+	<button id="startButton" onclick="bntStart()">走！</button>
+</div>
+
+
+<script defer>
+
+function closeMsgInput(){
+	document.getElementById("passwordOverlay").style.display = "none";
+	document.getElementById("helloWorld").style.display = "block";
+}
+
+function ShowMsgInput(){
+	document.getElementById("passwordOverlay").style.display = "flex";
+	document.getElementById("passwordInput").focus();
+	document.getElementById('passwordInput').value = "";
+	document.getElementById("helloWorld").style.display = "none";
+}
+
+document.getElementById("helloWorld").onclick = function() {
+		ShowMsgInput();
+	};
+
+const IDL = 11;
+
+function getID(url) {
+		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})|\/live\/([A-Za-z0-9_-]{11})/;
+		const match = url.match(regex);
+		return match ? (match[1] || match[2] || match[3]|| match[4]) : "no";
+	}
+
+let jumpA = "";
+let jumpB = "";
+
+function handleID(id){
+	    const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
+        const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
+
+
+		const idMap = {
+		  "test": "wM0g8EoUZ_E",   // 華視
+		  "news": "wM0g8EoUZ_E",   // 華視
+		  "abc":  "iipR5yUp36o",   // ABC news
+		  "sea":  "NSXavEj1R9E",   // 海 聲
+		  "500":  "Uk3aOuBV6i0",   // 500
+		  "sing": "fzyO3fLV5O0",   // 貝多芬合唱
+		  "run":  "KyT4qSK8lJo",   // 地震
+		  "eng":  "rpDgKy_KnEM",   // 英文
+		  "qin":  "XWmb1BYNOLg",   // 蜀中琴韻
+		  "dong": "t8hTKQeLHqk",   // 東海漁歌
+		};
+		
+		// 使用方式
+		id = idMap[id?.toLowerCase()] || id;  // 如果沒找到就保持原值
+
+		if(id.length > IDL){
+			id = getID(id);
+		}
+		if (id.length === IDL){
+
+            let nUrl= "";
+			nUrl=  "https://h.jwint.net/?"+prefix+id+suffix;
+			const b = `<a href="${nUrl}">一回看</a>`;
+			jumpA = nUrl;
+			
+			nUrl= "https://h.jwint.net/c?"+prefix+id+suffix;
+			const c = `<a href="${nUrl}">重複看</a>`;
+			jumpB = nUrl;
+			
+			const bc= b+"<br><br>"+c;
+			document.getElementById("uID").innerHTML = bc;
+            document.getElementById("showID").style.display = "block";
+
+			document.getElementById("helloWorld").style.display = "block";
+			document.getElementById('passwordInput').value = "";
+
+
+			ShowMsgInput();
+
+			window.open(jumpA, '_blank');
+		}else {
+
+			document.getElementById("helloWorld").style.display = "block";
+			document.getElementById('passwordInput').value = "";
+			//document.getElementById("passwordOverlay").style.display = "none";
+
+			document.getElementById("uID").innerHTML = "?????????";
+            document.getElementById("showID").style.display = "block";
+
+			ShowMsgInput();
+        }	
+	}
+  
+function checkUrlPara() {
+		const lastPart = window.location.search.slice(1);
+		if ( lastPart === ""){
+		}else{
+			handleID(lastPart);
+		}
+	}
+	
+document.getElementById("passwordInput").onkeydown = async function(e) {
+	    if (e.key === "Enter") {
+			if (this.value !=="url" && this.value.length > 0) {
+				let id = this.value;
+				handleID(id);
+				return;
+			}else{
+				closeMsgInput();
+				return;
+			}
+
+	    }else{
+
+		}
+	};
+
+function bntStart(){
+		const id = document.getElementById("passwordInput").value;
+		if (id !=="url" && id.length > 0) {
+			handleID(id);
+			return;
+		}else{
+			closeMsgInput();
+			return;
+		}
+	}
+
+ShowMsgInput();
+
+</script>
+
+<script>
+
+</script>
+
+</body>
+</html>
