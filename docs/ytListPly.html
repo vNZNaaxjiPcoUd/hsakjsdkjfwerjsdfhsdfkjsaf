@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>YouTube 自動同步播放器</title>
+    <style>
+        * { box-sizing: border-box; } 
+
+        body { 
+            font-family: "Microsoft JhengHei", sans-serif; 
+            width: 100vw; 
+            height: 100dvh; 
+            margin: 0; 
+            padding: 0; 
+            background-color: black; 
+            color: gray; 
+            display: flex; 
+            flex-direction: column; 
+            overflow: hidden; 
+        }
+
+        #player-container { 
+            width: 100%; 
+            flex-grow: 1; 
+            transition: all 0.3s ease; /* 讓視窗縮放的過程平滑過渡 */
+        }
+
+        /* 網頁內子母畫面 (懸浮視窗) 的樣式 */
+        #player-container.pip-mode {
+            position: fixed;
+            bottom: 80px; /* 避開底部的控制列 */
+            right: 20px;
+            width: 320px;
+            height: 180px;
+            flex-grow: 0;
+            z-index: 9999;
+            border: 2px solid #9aff9b;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.8);
+            overflow: hidden;
+            background: black;
+        }
+
+        #player { 
+            width: 100%; 
+            height: 100%; 
+        }
+
+        .controls { 
+            width: 100%; 
+            background: #111; 
+            padding: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px;
+            flex-wrap: wrap; 
+            z-index: 10000; /* 確保控制列永遠在最上層 */
+        }
+
+        select { 
+            padding: 5px; 
+            flex-grow: 1; 
+            max-width: 350px; 
+            border: 1px solid #ccc; 
+            border-radius: 4px; 
+            background: #333;
+            color: white;
+        }
+
+        button { 
+            padding: 8px 15px; 
+            cursor: pointer; 
+            background: rgba(128, 128, 128, 0.658); 
+            color: rgba(255, 255, 255, 0.875); 
+            border: none; 
+            border-radius: 4px; 
+            font-weight: bold; 
+            white-space: nowrap; 
+        }
+
+        button:hover { background: #0058cc; color: white; }
+
+        .info { color: #888; font-size: 14px; margin-left: auto; }
+    </style>
+</head>
+<body>
+
+    <div id="player-container">
+        <div id="player"></div>
+    </div>
+
+    <div class="controls">
+        <select id="videoSelector" onchange="jumpToVideo(this.value)">
+            <option>正在載入清單內容...</option>
+        </select>
+        <button onclick="shuffleAndPlay()">🔀 隨機播放</button>
+        <button onclick="player.previousVideo()">⏮️ 上一部</button>
+        <button onclick="player.nextVideo()">⏭️ 下一部</button>
+        <button onclick="togglePiP()" id="pipBtn">🔲 子母畫面</button>
+        
+        <div class="info" id="statusText">系統準備中...</div>
+    </div>
+
+    <script>
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+
+        // 【修改部分開始】取得網址中的 Playlist ID
+        // window.location.search 會抓到 "?xxxxx" 的字串，.substring(1) 用來去掉前面的問號
+        // .trim() 確保不會因為誤打空白鍵而出錯
+        var queryStr = window.location.search.substring(1).trim();
+        
+        // 如果網址有給參數就使用參數，沒給參數就預設使用原本的 ID
+        var playlistId = queryStr ? queryStr : 'PL9P9juNnx4d6NBRqhq1dxwqHhrLk-EfTY';
+        // 【修改部分結束】
+
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '100%', 
+                width: '100%',  
+                playerVars: {
+                    'listType': 'playlist',
+                    'list': playlistId,
+                },
+                events: {
+                    'onReady': onPlayerReady,
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // 開啟播放清單自動循環功能
+            player.setLoop(true);
+            
+            updateSelector();
+            document.getElementById('statusText').innerText = "播放器就緒";
+        }
+
+        function updateSelector() {
+            var playlist = player.getPlaylist();
+            var selector = document.getElementById('videoSelector');
+            selector.innerHTML = ""; 
+
+            if (playlist) {
+                playlist.forEach(function(videoId, index) {
+                    var option = document.createElement('option');
+                    option.value = index;
+                    option.text = "影片 " + (index + 1) + " (ID: " + videoId + ")";
+                    selector.appendChild(option);
+                });
+            } else {
+                // 如果找不到清單（可能是無效的 ID）
+                var option = document.createElement('option');
+                option.text = "無法載入清單，請確認網址 ID 是否正確";
+                selector.appendChild(option);
+            }
+        }
+
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.PLAYING) {
+                var currentIndex = player.getPlaylistIndex();
+                document.getElementById('videoSelector').value = currentIndex;
+                document.getElementById('statusText').innerText = "正在播放第 " + (currentIndex + 1) + " 部";
+            }
+        }
+
+        function jumpToVideo(index) {
+            player.playVideoAt(parseInt(index));
+        }
+
+        function shuffleAndPlay() {
+            player.setShuffle(true);
+            player.playVideoAt(0); 
+            document.getElementById('statusText').innerText = "隨機模式已啟動";
+        }
+
+        // 子母畫面切換邏輯
+        function togglePiP() {
+            var container = document.getElementById('player-container');
+            var btn = document.getElementById('pipBtn');
+            container.classList.toggle('pip-mode');
+
+            // 根據狀態切換按鈕外觀與文字
+            if (container.classList.contains('pip-mode')) {
+                btn.innerText = "🔳 結束子母畫面";
+                btn.style.background = "#ff9b9b"; // 變成紅色提示可關閉
+            } else {
+                btn.innerText = "🔲 子母畫面";
+                btn.style.background = "#9aff9b"; // 恢復原本的綠色
+            }
+        }
+    </script>
+</body>
+</html>
