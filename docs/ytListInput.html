@@ -25,7 +25,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
             text-align: center;
             width: 100%;
-            max-width: 400px;
+            max-width: 420px;
         }
 
         h2 {
@@ -76,36 +76,48 @@
         }
         
         .hint {
-            font-size: 12px;
+            font-size: 13px;
             color: #888;
             margin-top: 15px;
+            line-height: 1.5;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>🎵 播放清單</h2>
+        <h2>🎵 播放清單啟動</h2>
         <div class="input-group">
-            <input type="text" id="playlistIdInput" placeholder="貼上 Playlist" autocomplete="off">
+            <input type="text" id="playlistIdInput" placeholder="貼上 ID 或 YouTube 清單完整網址..." autocomplete="off">
             <button onclick="openPlaylist()">開啟播放器</button>
         </div>
-        <div class="hint">輸入 ID 後點擊按鈕，或直接按 Enter 鍵</div>
+        <div class="hint">支援直接貼上完整網址<br>(例如: https://www.youtube.com/playlist?list=PL...)</div>
     </div>
 
     <script>
         function openPlaylist() {
             // 取得輸入框的值，並用 trim() 去除前後多餘的空白
-            var playlistId = document.getElementById('playlistIdInput').value.trim();
+            var inputVal = document.getElementById('playlistIdInput').value.trim();
 
-            if (playlistId) {
+            if (inputVal) {
+                var playlistId = inputVal;
+
+                // 【新增核心邏輯】使用正規表達式抓取網址中的 list ID
+                // 尋找 "?list=" 或 "&list=" 後面的字串，直到遇到下一個 "&" 或 "#" 結束
+                var match = inputVal.match(/[?&]list=([^&#]+)/);
+                
+                if (match && match[1]) {
+                    // 如果有找到配對，就將 ID 替換為抓取出來的字串
+                    playlistId = match[1];
+                }
+
                 // 組合網址，並使用 encodeURIComponent 確保特殊字元不會破壞網址結構
                 var targetUrl = 'https://h.jwint.net/ytListPly?' + encodeURIComponent(playlistId);
                 
                 // 使用 window.open 在新分頁開啟網址
                 window.open(targetUrl, '_blank');
             } else {
-                alert('請先輸入 Playlist ID 喔！');
+                alert('請先輸入 Playlist ID 或 YouTube 播放清單網址喔！');
             }
         }
 
