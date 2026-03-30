@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>開啟播放清單</title>
+    <title>開啟清單</title>
     <style>
         * { box-sizing: border-box; }
 
@@ -86,12 +86,12 @@
 <body>
 
     <div class="container">
-        <h2>🎵 播放清單啟動</h2>
+        <!--h2>🎵 播放清單啟動</h2-->
         <div class="input-group">
-            <input type="text" id="playlistIdInput" placeholder="貼上 ID 或 YouTube 清單完整網址..." autocomplete="off">
-            <button onclick="openPlaylist()">開啟播放器</button>
+            <input type="text" id="playlistIdInput" placeholder="貼" autocomplete="off">
+            <button onclick="openPlaylist()">開啟清單</button>
         </div>
-        <div class="hint">支援直接貼上完整網址<br>(例如: https://www.youtube.com/playlist?list=PL...)</div>
+        <!--div class="hint">支援直接貼上完整網址<br>(例如: https://www.youtube.com/playlist?list=PL...)</div-->
     </div>
 
     <script>
@@ -117,7 +117,7 @@
                 // 使用 window.open 在新分頁開啟網址
                 window.open(targetUrl, '_blank');
             } else {
-                alert('請先輸入 Playlist ID 或 YouTube 播放清單網址喔！');
+                alert('貼上正常ID！');
             }
         }
 
