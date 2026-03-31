@@ -1,87 +1,206 @@
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
-	<meta charset="UTF-8">
-	<base target="_blank">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>Show</title>
-	<style>
-	body {
-	    font-family: 'Inter', sans-serif;
-	    font-size: 16px; /* 基礎文字大小 */
-	    color: #f0f0f0; /* 淺灰文字，適應黑底 */
-	    background-color: #000000; /* 純黑背景 */
-	}
-	a,
-	a.visited {
-		color: inherit;
-		text-decoration: none;
-	}
-	</style>
+    <meta charset="UTF-8">
+    <base target="_blank">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Show</title>
+    <style>
+    /* 基礎重置與 iPhone 最佳化 */
+    * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent; /* 移除 iOS 點擊灰色閃爍 */
+    }
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 16px;
+        color: #f0f0f0;
+        background-color: #000000;
+        margin: 0;
+        padding: 0;
+        /* 避免橡皮筋捲動效應過度干擾 */
+        overscroll-behavior-y: none; 
+    }
+    a, a.visited {
+        color: inherit;
+        text-decoration: none;
+    }
+    
+    /* 影片區塊與控制區塊的容器 */
+    #secretArea {
+        width: 100%;
+        background: #000;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+    .controls-container {
+        padding: 15px;
+        padding-bottom: env(safe-area-inset-bottom); /* 適配 iPhone 底部橫條 */
+    }
+
+    /* 控制面板樣式 */
+    .control-group { 
+        margin-bottom: 15px; 
+        padding: 15px; 
+        background: #1c1c1e; /* 蘋果風格的深灰色 */
+        border-radius: 12px; 
+    }
+    h4 { 
+        margin: 0 0 12px 0; 
+        color: #fff; 
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+
+    /* 按鈕使用 Grid 系統，自動適應螢幕 */
+    .btn-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+    .btn-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .btn-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .btn-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+
+    button { 
+        padding: 12px 5px; 
+        font-size: 15px; 
+        font-weight: 500;
+        cursor: pointer; 
+        border: none;
+        border-radius: 8px;
+        background-color: #333336;
+        color: #fff;
+        transition: background-color 0.1s;
+		/* 加入下面這行，阻止 iOS 雙擊放大，並提升點擊反應速度 */
+    	touch-action: manipulation;
+    }
+    button:active { background-color: #55555a; transform: scale(0.98); }
+
+    /* 輸入框專屬設計 */
+    #countdown {
+        display: none;
+        gap: 10px;
+    }
+    input[type="number"] {
+        flex: 1;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #444;
+        background: #000;
+        color: #fff;
+        font-size: 16px; /* 關鍵：避免 iOS Safari 自動放大畫面 */
+        outline: none;
+    }
+    input[type="number"]::placeholder { color: #888; }
+    #countdown button { padding: 12px 20px; background-color: #0A84FF; color: white; }
+    #countdown button:active { background-color: #006ee6; }
+
+    /* 隱藏/顯示區塊 */
+    #otherInfo { display: none; }
+    </style>
 </head>
 <body>
+
 <div id="secretArea"><div id="allT">.</div></div>
-<div id="otherInfo">
-<br><br>
-. 
-<br><br>
-.  
-<br><br>
-<div id="countdown">
-<input type="number" id="minutes" placeholder="訊息內容">
-<button onclick="startTimer()">發送</button>
-</div>
-<br><br>
-. .  
-<br><br>
-<div id="uID"></div>
-<br><br>
-<div id="closeWindow">
-	<button id="closeWindowBnt" onclick="window.close()">Close</button>
-</div>
-<br><br>
+
+<div class="controls-container">
+    
+    <div class="control-group">
+        <!--h4>⏩ Playback</h4-->
+        <div class="btn-grid-5">
+            <button onclick="setSpeed(0.4)">0.4x</button>
+            <button onclick="setSpeed(0.5)">0.5x</button>
+            <button onclick="setSpeed(0.6)">0.6x</button>
+            <button onclick="setSpeed(0.65)">0.65x</button>
+            <button onclick="setSpeed(0.7)">0.7x</button>
+            <button onclick="player && player.playVideo()">Play</button>
+            <button onclick="setSpeed(0.75)">0.75x</button>
+            <button onclick="setSpeed(0.8)">0.8x</button>
+            <button onclick="setSpeed(1)">1x</button>
+            <button onclick="player && player.pauseVideo()">Pause</button>
+        </div>
+    </div>
+
+    <!--div class="control-group">
+        <h4>⏯ Playback Controls</h4>
+        <div class="btn-grid-2">
+
+            <button onclick="player && player.stopVideo()">Stop</button>
+        </div>
+    </div-->
+
+    <div class="control-group">
+        <!--h4>⏳ Skip / 🔊 Volume</h4-->
+        <div class="btn-grid-4">
+            <button onclick="seekVideo(-120)">⏪ -2m</button>
+            <button onclick="seekVideo(-30)">⏪ -30s</button>
+            <button onclick="seekVideo(30)">⏩ +30s</button>
+            <button onclick="seekVideo(120)">⏩ +2m</button>
+            <!--button onclick="changeVolume(-10)">🔉 -10%</button>
+            <button onclick="changeVolume(10)">🔊 +10%</button-->
+            <button onclick="changeVolume(-10)">-10%</button>
+            <button onclick="changeVolume(10)">+10%</button>
+            <button onclick="player && player.mute()">Mute</button>
+            <button onclick="player && player.unMute()">Unmute</button>
+        </div>
+    </div>
+
+    <div id="countdown" >
+		<!--div><h4>🔊 Countdown</h4></div-->
+		<div class="btn-grid-2">
+        <div><input type="number" id="minutes" placeholder="Mins"></div>
+        <div><button onclick="startTimer()">Send</button></div>
+		</div>
+    </div>
+    
+    <div class="control-group">
+		<!--h4>🔊 Video</h4-->
+		<div class="btn-grid-2">
+			<div id="uID" style="text-align:center; padding: 10px; background: transparent;"></div> 
+			<!--div id="closeWindow" style="background: transparent; padding: 0;"-->
+	        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close</button>
+		</div>
+    </div>
 </div>
 
-<script defer>
-// get url, replace and show page
-const allText = `<iframe style="width:100%; height:90vh; border:none; margin:0; padding:0; display:block;" 
-src="https://www.youtube.com/embed/AAURL?playlist=AAURL" 
-title="titleName" frameborder="0" 
-allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture;" 
+<script>
+// 注意：這裡將 iframe 修改為 aspect-ratio: 16/9，取代 100dvh
+const allText = `<iframe id="Plys" style="width:100%; aspect-ratio:16/9; border:none; margin:0; padding:0; display:block; object-fit: cover;" 
+src="https://www.youtube.com/embed/AAURL?loop=1&playlist=AAURL&autoplay=1&enablejsapi=1&playsinline=1" 
+title="" frameborder="0" 
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
 referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>`;
 
 let nowID = ""; 
-	
+var player; 
+    
 function getID(url) {
-		const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
-		const match = url.match(regex);
-		return match ? (match[1] || match[2] || match[3]) : "no";
-	}
-	
+        const regex = /[?&]v=([A-Za-z0-9_-]{11})|youtu\.be\/([A-Za-z0-9_-]{11})|\/shorts\/([A-Za-z0-9_-]{11})/;
+        const match = url.match(regex);
+        return match ? (match[1] || match[2] || match[3]) : "no";
+    }
+    
 function handleID(id){
-		if(id.length > 11){
-			id = getID(id);
-		}
-		if (id.length === 11){
-			const updateURL = allText.replaceAll('AAURL',id);
-			document.getElementById("allT").innerHTML = updateURL ;
-			nUrl = "https://h.jwint.net/b?"+nowID;
-			document.getElementById("uID").innerHTML = `<a href="${nUrl}">${id}</a>` ;
-		}else {
-			document.getElementById("allT").innerHTML = "Hello World" ;
-			document.getElementById("otherInfo").style.display = "none";
-        }	
-    	document.getElementById("secretArea").style.display = "block";
-	}
+        if(id.length > 11){
+            id = getID(id);
+        }
+        if (id.length === 11){
+            const updateURL = allText.replaceAll('AAURL',id);
+            document.getElementById("allT").innerHTML = updateURL ;
+            nUrl = "https://h.jwint.net/b?"+nowID;
+            document.getElementById("uID").innerHTML = `<a href="${nUrl}" style="color: #0A84FF;">${id}</a>` ;
+        }else {
+            document.getElementById("allT").innerHTML = "<h3 style='padding:20px; text-align:center;'>Hello World</h3>" ;
+        }   
+    }
+
 function extractMiddle(str) {
         const prefix = "FsdGVkX19JAx6y6XDUsl0czQsdOahaolUSW";
         const suffix = "TiT62peYwEcQqvk4bBB7Kb5cBGVAW";
         
-        // 檢查是否以 prefix 開頭、以 suffix 結尾
         if (str.startsWith(prefix) && str.endsWith(suffix)) {
-            // 取出中間部分
-			nowID = str;
+            nowID = str;
             const middle = str.slice(prefix.length, -suffix.length);
             return middle;
         } else {
@@ -91,48 +210,90 @@ function extractMiddle(str) {
     }
 
 function checkUrlPara() {
-		const lastPart = window.location.search.slice(1);
-		if ( lastPart === ""){
-			document.getElementById("allT").innerHTML = "hello!";
-            document.getElementById("secretArea").style.display = "block";
-			document.getElementById("otherInfo").style.display = "none";
-		}else{
-			console.log(lastPart);
+        const lastPart = window.location.search.slice(1);
+        if ( lastPart === ""){
+            document.getElementById("allT").innerHTML = "<h3 style='padding:20px; text-align:center;'>hello!</h3>";
+        }else{
             const pID = extractMiddle(lastPart);
-            console.log(pID);
-			handleID(pID);
-		}
-	}
+            handleID(pID);
+        }
+    }
 
 checkUrlPara();
 
 function startTimer() {
-		const minutes = parseFloat(document.getElementById('minutes').value);
-		if ( minutes === 0){
-			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
-		}
-		if (isNaN(minutes) || minutes <= 0) {
-			alert('請輸入正數！');
-			return;
-		}
-		document.getElementById('minutes').placeholder = "開始" + minutes;
-		document.getElementById('minutes').value = "";
-		const ms = minutes * 60 * 1000;
-		setTimeout(() => {
-			console.log('時間到了！');
-			//location.reload();
-			window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
-		}, ms);
-	}
+        const minutes = parseFloat(document.getElementById('minutes').value);
+        if ( minutes === 0){
+            window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+        }
+        if (isNaN(minutes) || minutes <= 0) {
+            alert('Please enter a positive number!');
+            return;
+        }
+        document.getElementById('minutes').placeholder = "Timer: " + minutes + "m";
+        document.getElementById('minutes').value = "";
+        const ms = minutes * 60 * 1000;
+        setTimeout(() => {
+            console.log('Time is up!');
+            window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
+        }, ms);
+    }
 
-	/*
-setTimeout(() => {
-	console.log('時間到了！');
-	//location.reload();
-	window.location.href = "https://h.jwint.net/HelloWorld?"+nowID;
-	}, 12*60*60*1000);
-	*/
+// ----------------------------------------------------
+// YouTube API 邏輯
+// ----------------------------------------------------
+function onYouTubeIframeAPIReady() {
+    console.log("YouTube API Loaded.");
+    if (document.getElementById('Plys')) {
+        player = new YT.Player('Plys', {
+            events: {
+                'onReady': onPlayerReady
+            }
+        });
+    }
+}
+
+function onPlayerReady(event) {
+    console.log("Player bound.");
+}
+
+function setSpeed(speed) {
+    if(player && player.setPlaybackRate) {
+        player.setPlaybackRate(speed);
+    }
+}
+
+function seekVideo(seconds) {
+    if(player && player.getCurrentTime) {
+        var currentTime = player.getCurrentTime();
+        player.seekTo(currentTime + seconds, true);
+    }
+}
+
+function changeVolume(amount) {
+    if (player && player.getVolume && player.setVolume) {
+        // 取得目前音量 (0~100)
+        let currentVol = player.getVolume();
+        // 計算新音量
+        let newVol = currentVol + amount;
+        
+        // 確保音量不會超出 0 到 100 的範圍
+        if (newVol > 100) newVol = 100;
+        if (newVol < 0) newVol = 0;
+        
+        // 如果原本是靜音狀態，調整音量時自動解除靜音
+        if (player.isMuted()) {
+            player.unMute();
+        }
+        
+        // 設定新音量
+        player.setVolume(newVol);
+    }
+}
+
 </script>
+
+<script src="https://www.youtube.com/iframe_api"></script>
 
 </body>
 </html>
