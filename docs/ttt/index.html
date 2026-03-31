@@ -11,8 +11,8 @@
             --bg-color: #03030d;
             --board-color: #133a45;
             --line-color: #2cb000;
-            --p1-color: #f1c40f; /* X 的顏色，稍微調亮一點 */
-            --p2-color: #00a8ff; /* O 的顏色 */
+            --p1-color: #f1c40f; 
+            --p2-color: #00a8ff; 
             --text-color: #eeff81;
         }
         body {
@@ -85,23 +85,23 @@
         .cell:nth-child(1), .cell:nth-child(4), .cell:nth-child(7) { border-left: none; }
         .cell:nth-child(3), .cell:nth-child(6), .cell:nth-child(9) { border-right: none; }
 
-        /* 修改棋子外觀為文字符號 */
+        /* 棋子外觀 */
         .piece {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100%; 
             height: 100%;
-            font-size: 60px; /* 符號大小 */
+            font-size: 60px; 
             font-weight: bold;
-            font-family: 'Comic Sans MS', 'Arial', sans-serif; /* 讓叉跟圈看起來稍微活潑一點 */
+            font-family: 'Comic Sans MS', 'Arial', sans-serif; 
             transition: all 0.3s ease;
             transform: scale(1);
         }
         .piece.X { color: var(--p1-color); }
         .piece.O { color: var(--p2-color); }
         
-        /* 虛化效果：半透明並且稍微縮小 */
+        /* 虛化效果 */
         .piece.fading {
             opacity: 0.3;
             transform: scale(0.7);
@@ -117,7 +117,7 @@
 </head>
 <body>
 
-    <h1>無限井字棋</h1>
+    <h1>井字棋</h1>
     
     <div class="controls">
         <select id="mode">
@@ -137,7 +137,7 @@
     <button id="installBtn" class="install-btn">安裝遊戲到桌面</button>
 
 <script>
-    // --- PWA Service Worker 註冊 ---
+    // --- PWA 邏輯省略 (與之前相同) ---
     let newWorker;
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').then(reg => {
@@ -203,7 +203,6 @@
     let currentPlayer = 'X'; 
     let gameOver = false;
     
-    // 紀錄雙方下棋的位置順序，陣列長度最多為 3
     let pieceHistory = {
         'X': [],
         'O': []
@@ -243,11 +242,8 @@
             if (board[i]) {
                 const piece = document.createElement('div');
                 piece.className = `piece ${board[i]}`;
-                
-                // 加入對應的文字符號
                 piece.textContent = board[i] === 'X' ? '✕' : '◯';
                 
-                // 檢查這顆棋子是不是該玩家的「第一子」(且已經滿 3 顆了)，若是則加上虛化效果
                 let playerHistory = pieceHistory[board[i]];
                 if (playerHistory.length === 3 && playerHistory[0] === i) {
                     piece.classList.add('fading');
@@ -268,7 +264,6 @@
         const mode = modeSelect.value;
         if (mode === 'pvc' && currentPlayer === 'O') return; 
 
-        // 只能下在空格
         if (board[index] === null) {
             executeMove(currentPlayer, index);
             finishTurn();
@@ -276,15 +271,12 @@
     }
 
     function executeMove(player, index) {
-        // 如果該玩家已經有 3 顆棋子，移除最舊的那顆
         if (pieceHistory[player].length === 3) {
-            let oldestIndex = pieceHistory[player].shift(); // 取出並移除第一子
-            board[oldestIndex] = null; // 從棋盤上清除
+            let oldestIndex = pieceHistory[player].shift(); 
+            board[oldestIndex] = null; 
         }
-        
-        // 放置新棋子
         board[index] = player;
-        pieceHistory[player].push(index); // 記錄新棋子的位置
+        pieceHistory[player].push(index); 
     }
 
     function finishTurn() {
@@ -299,7 +291,7 @@
         updateStatus();
 
         if (modeSelect.value === 'pvc' && currentPlayer === 'O' && !gameOver) {
-            setTimeout(cpuPlay, 600);
+            setTimeout(cpuPlay, 600); // 延遲讓 AI 假裝在思考
         }
     }
 
@@ -309,7 +301,7 @@
         );
     }
 
-    // --- 電腦 AI ---
+    // --- 【全新升級的電腦 AI】 ---
     function cpuPlay() {
         let availableMoves = [];
         for (let i = 0; i < 9; i++) {
@@ -319,23 +311,44 @@
 
         let bestMove = null;
 
-        // 1. 檢查電腦自己能不能贏
+        // 1. 殺招：如果自己能贏，直接下
         bestMove = findWinningMove('O', availableMoves);
+        if (bestMove !== null) {
+            executeMove('O', bestMove);
+            return finishTurn();
+        }
         
-        // 2. 檢查需不需要阻擋玩家 X 贏
-        if (bestMove === null) {
-            bestMove = findWinningMove('X', availableMoves); 
+        // 2. 防守：如果對手下一步會贏，必須擋
+        bestMove = findWinningMove('X', availableMoves);
+        if (bestMove !== null) {
+            executeMove('O', bestMove);
+            return finishTurn();
         }
 
-        // 3. 隨機選擇合法步
+        // 3. 預判：過濾掉「下完之後會讓對手下一步直接贏」的自殺步
+        let safeMoves = [];
+        for (let move of availableMoves) {
+            if (!willCauseLoss(move, 'O', 'X')) {
+                safeMoves.push(move);
+            }
+        }
+        
+        // 如果全部都是死路，那就只好隨便下了 (退回 availableMoves)
+        let candidateMoves = safeMoves.length > 0 ? safeMoves : availableMoves;
+
+        // 4. 戰略：在安全步中，優先搶佔好位置 (中心 > 角落 > 邊緣)
+        bestMove = findPositionalMove(candidateMoves);
+
+        // 5. 兜底：隨機選擇
         if (bestMove === null) {
-            bestMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
+            bestMove = candidateMoves[Math.floor(Math.random() * candidateMoves.length)];
         }
 
         executeMove('O', bestMove);
         finishTurn();
     }
 
+    // 模擬下棋，看能不能立刻贏
     function findWinningMove(player, moves) {
         for (let move of moves) {
             let originalHistory = [...pieceHistory[player]];
@@ -350,14 +363,58 @@
             let isWin = checkWin(player);
             
             board[move] = null;
-            if (oldestIndex !== null) {
-                board[oldestIndex] = player;
-            }
+            if (oldestIndex !== null) board[oldestIndex] = player;
             
-            if (isWin) {
-                return move;
-            }
+            if (isWin) return move;
         }
+        return null;
+    }
+
+    // AI 預判核心：檢查「如果我下這步，對手下回合會不會直接連成三線？」
+    function willCauseLoss(myMove, myPlayer, oppPlayer) {
+        // 模擬我方下這步
+        let myHistory = [...pieceHistory[myPlayer]];
+        let myOldest = null;
+        if (myHistory.length === 3) {
+            myOldest = myHistory.shift();
+            board[myOldest] = null;
+        }
+        board[myMove] = myPlayer;
+        myHistory.push(myMove);
+
+        // 找出對手所有可以下的空格
+        let oppAvailable = [];
+        for (let i = 0; i < 9; i++) {
+            if (board[i] === null) oppAvailable.push(i);
+        }
+
+        // 檢查對手有沒有任何一步能贏
+        let causesLoss = findWinningMove(oppPlayer, oppAvailable) !== null;
+
+        // 復原我方棋盤狀態
+        board[myMove] = null;
+        if (myOldest !== null) board[myOldest] = myPlayer;
+
+        return causesLoss;
+    }
+
+    // 依據重要性選擇位置
+    function findPositionalMove(moves) {
+        const center = 4;
+        const corners = [0, 2, 6, 8];
+        const edges = [1, 3, 5, 7];
+
+        // 優先拿中心
+        if (moves.includes(center)) return center;
+
+        // 隨機選一個角落 (打亂順序，避免 AI 每次走法都一樣)
+        let availableCorners = corners.filter(c => moves.includes(c)).sort(() => Math.random() - 0.5);
+        if (availableCorners.length > 0) return availableCorners[0];
+
+        // 隨機選一個邊緣
+        let availableEdges = edges.filter(e => moves.includes(e)).sort(() => Math.random() - 0.5);
+        if (availableEdges.length > 0) return availableEdges[0];
+
         return null;
     }
 
