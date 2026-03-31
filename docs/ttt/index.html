@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>無限三子棋</title>
+    <title>井字棋</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#2c3e50">
     <style>
@@ -11,8 +11,8 @@
             --bg-color: #03030d;
             --board-color: #133a45;
             --line-color: #2cb000;
-            --p1-color: #c1a93f;
-            --p2-color: #00a8ff;
+            --p1-color: #f1c40f; /* X 的顏色，稍微調亮一點 */
+            --p2-color: #00a8ff; /* O 的顏色 */
             --text-color: #eeff81;
         }
         body {
@@ -85,22 +85,26 @@
         .cell:nth-child(1), .cell:nth-child(4), .cell:nth-child(7) { border-left: none; }
         .cell:nth-child(3), .cell:nth-child(6), .cell:nth-child(9) { border-right: none; }
 
+        /* 修改棋子外觀為文字符號 */
         .piece {
-            width: 60px; height: 60px;
-            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%; 
+            height: 100%;
+            font-size: 60px; /* 符號大小 */
+            font-weight: bold;
+            font-family: 'Comic Sans MS', 'Arial', sans-serif; /* 讓叉跟圈看起來稍微活潑一點 */
             transition: all 0.3s ease;
-            box-shadow: 0 3px 6px rgba(0,0,0,0.3);
             transform: scale(1);
         }
-        .piece.X { background-color: var(--p1-color); }
-        .piece.O { background-color: var(--p2-color); }
+        .piece.X { color: var(--p1-color); }
+        .piece.O { color: var(--p2-color); }
         
         /* 虛化效果：半透明並且稍微縮小 */
         .piece.fading {
-            opacity: 0.35;
-            transform: scale(0.8);
-            box-shadow: none;
-            border: 3px dashed rgba(255, 255, 255, 0.5);
+            opacity: 0.3;
+            transform: scale(0.7);
         }
 
         .install-btn {
@@ -112,7 +116,7 @@
 </head>
 <body>
 
-    <h1>無限三子棋</h1>
+    <h1>無限井字棋</h1>
     
     <div class="controls">
         <select id="mode">
@@ -239,6 +243,9 @@
                 const piece = document.createElement('div');
                 piece.className = `piece ${board[i]}`;
                 
+                // 加入對應的文字符號
+                piece.textContent = board[i] === 'X' ? '✕' : '◯';
+                
                 // 檢查這顆棋子是不是該玩家的「第一子」(且已經滿 3 顆了)，若是則加上虛化效果
                 let playerHistory = pieceHistory[board[i]];
                 if (playerHistory.length === 3 && playerHistory[0] === i) {
@@ -328,24 +335,19 @@
         finishTurn();
     }
 
-    // 模擬下棋來判斷勝負
     function findWinningMove(player, moves) {
         for (let move of moves) {
-            // 暫存目前的歷史紀錄與棋盤狀態
             let originalHistory = [...pieceHistory[player]];
             let oldestIndex = null;
             
-            // 模擬：如果滿 3 顆，第一顆會消失
             if (pieceHistory[player].length === 3) {
                 oldestIndex = originalHistory[0];
                 board[oldestIndex] = null;
             }
             
-            // 模擬下這步棋
             board[move] = player;
             let isWin = checkWin(player);
             
-            // 復原棋盤狀態
             board[move] = null;
             if (oldestIndex !== null) {
                 board[oldestIndex] = player;
