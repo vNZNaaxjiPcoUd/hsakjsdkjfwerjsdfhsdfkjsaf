@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Markdown 轉 Mindmap 工具</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f9f9f9;
+        }
+        
+        /* 左側輸入區 */
+        #input-container {
+            width: 30%;
+            min-width: 300px;
+            padding: 20px;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
+            z-index: 10;
+        }
+
+        h2 {
+            margin-top: 0;
+            font-size: 1.2rem;
+            color: #333;
+        }
+
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+            resize: none;
+            padding: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        textarea:focus {
+            border-color: #4CAF50;
+        }
+
+        /* 右側心智圖顯示區 */
+        #mindmap-container {
+            width: 70%;
+            flex-grow: 1;
+            height: 100%;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* 提示文字 */
+        .hint {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 10px;
+        }
+    </style>
+    
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-lib"></script>
+    <script src="https://cdn.jsdelivr.net/npm/markmap-view"></script>
+</head>
+<body>
+
+    <div id="input-container">
+        <h2>Markdown 輸入區</h2>
+        <p class="hint">請使用 `#` 標題或 `-` 列表來建立階層結構。右側會即時更新。</p>
+        <textarea id="markdown-input">
+# 中心主題
+## 第一分支
+### 子節點 1
+### 子節點 2
+## 第二分支
+- 項目 A
+- 項目 B
+  - 細項 B1
+  - 細項 B2
+## 第三分支
+您可以**加粗文字**
+或使用 *斜體*
+</textarea>
+    </div>
+
+    <div id="mindmap-container">
+        <svg id="markmap"></svg>
+    </div>
+
+    <script>
+        // 初始化 Markmap 的轉換器
+        const { Transformer } = window.markmap;
+        const transformer = new Transformer();
+        const { Markmap } = window.markmap;
+
+        // 獲取 DOM 元素
+        const inputEl = document.getElementById('markdown-input');
+        const svgEl = document.getElementById('markmap');
+
+        // 宣告心智圖實例
+        let mm;
+
+        function updateMindmap() {
+            const markdown = inputEl.value;
+            
+            // 1. 將 Markdown 文字轉換為 Markmap 可識別的節點數據樹 (root)
+            const { root } = transformer.transform(markdown);
+            
+            // 2. 渲染心智圖
+            if (!mm) {
+                // 初次建立
+                mm = Markmap.create(svgEl, null, root);
+            } else {
+                // 更新數據
+                mm.setData(root);
+                // mm.fit(); // 若取消註解，每次輸入都會自動縮放置中（有時會影響使用者的拖曳體驗，可視需求開啟）
+            }
+        }
+
+        // 網頁載入時的初次渲染
+        updateMindmap();
+
+        // 監聽鍵盤輸入事件，達到「即時預覽」效果
+        inputEl.addEventListener('input', updateMindmap);
+    </script>
+
+</body>
+</html>
