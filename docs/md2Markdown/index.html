@@ -3,144 +3,192 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Markdown 轉 Mindmap 工具</title>
+    <title>Markdown Mindmap 專業工具</title>
     <style>
-        body {
+        :root {
+            --primary: #2563eb;
+            --success: #16a34a;
+            --bg: #f8fafc;
+        }
+
+        body, html {
             margin: 0;
             padding: 0;
-            display: flex;
             height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f9f9f9;
-        }
-        
-        /* 左側輸入區 */
-        #input-container {
-            width: 30%;
-            min-width: 300px;
-            padding: 20px;
-            box-sizing: border-box;
-            background-color: #ffffff;
-            border-right: 1px solid #e0e0e0;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-            z-index: 10;
-        }
-
-        h2 {
-            margin-top: 0;
-            font-size: 1.2rem;
-            color: #333;
-        }
-
-        textarea {
-            flex-grow: 1;
-            width: 100%;
-            resize: none;
-            padding: 15px;
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 14px;
-            line-height: 1.5;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            box-sizing: border-box;
-            outline: none;
-            transition: border-color 0.3s;
-        }
-
-        textarea:focus {
-            border-color: #4CAF50;
-        }
-
-        /* 右側心智圖顯示區 */
-        #mindmap-container {
-            width: 70%;
-            flex-grow: 1;
-            height: 100%;
-            padding: 0;
-            box-sizing: border-box;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--bg);
             overflow: hidden;
         }
 
-        svg {
+        #main-wrapper {
+            display: flex;
             width: 100%;
             height: 100%;
+            transition: all 0.3s ease-in-out;
         }
 
-        /* 提示文字 */
-        .hint {
-            font-size: 0.85rem;
-            color: #666;
-            margin-bottom: 10px;
+        /* 左側：編輯器 (預設 50%) */
+        #editor-container {
+            width: 50%;
+            height: 100%;
+            background: white;
+            border-right: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: width 0.3s ease, opacity 0.2s;
         }
+
+        /* 全螢幕模式隱藏 */
+        .full-mindmap #editor-container {
+            width: 0;
+            padding: 0;
+            opacity: 0;
+            border: none;
+            overflow: hidden;
+        }
+
+        textarea {
+            flex: 1;
+            width: 100%;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            outline: none;
+            resize: none;
+        }
+
+        /* 右側：心智圖 */
+        #mindmap-container {
+            flex: 1;
+            height: 100%;
+            position: relative;
+            background: white;
+        }
+
+        svg#markmap {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        /* 工具欄 */
+        .toolbar {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        #btn-layout { background-color: var(--primary); }
+        #btn-zoom { background-color: var(--success); }
+
+        button:hover { opacity: 0.9; }
+        button:active { transform: translateY(1px); }
     </style>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
     <script src="https://cdn.jsdelivr.net/npm/markmap-lib"></script>
     <script src="https://cdn.jsdelivr.net/npm/markmap-view"></script>
 </head>
 <body>
 
-    <div id="input-container">
-        <h2>Markdown 輸入區</h2>
-        <p class="hint">請使用 `#` 標題或 `-` 列表來建立階層結構。右側會即時更新。</p>
-        <textarea id="markdown-input">
-# 中心主題
-## 第一分支
-### 子節點 1
-### 子節點 2
-## 第二分支
-- 項目 A
-- 項目 B
-  - 細項 B1
-  - 細項 B2
-## 第三分支
-您可以**加粗文字**
-或使用 *斜體*
-</textarea>
-    </div>
+    <div id="main-wrapper">
+        <div id="editor-container">
+            <h2>Markdown 編輯</h2>
+            <textarea id="md-input">
+# 🎯 最終測試
+## 測試按鈕功能
+- 點擊左邊藍色按鈕：切換平分/全螢幕
+- 點擊右邊綠色按鈕：切換 1:1/全貌
+## 1:1 模式
+- 文字應該會變成原始大小
+- 適合閱讀細節
+## 全貌模式
+- 自動縮放以看見全部節點
+- 適合掌握整體架構
+            </textarea>
+        </div>
 
-    <div id="mindmap-container">
-        <svg id="markmap"></svg>
+        <div id="mindmap-container">
+            <div class="toolbar">
+                <button id="btn-layout">🌗 切換佈局</button>
+                <button id="btn-zoom">🔍 切換縮放 (1:1 / 全貌)</button>
+            </div>
+            <svg id="markmap"></svg>
+        </div>
     </div>
 
     <script>
-        // 初始化 Markmap 的轉換器
         const { Transformer } = window.markmap;
-        const transformer = new Transformer();
         const { Markmap } = window.markmap;
+        const transformer = new Transformer();
 
-        // 獲取 DOM 元素
-        const inputEl = document.getElementById('markdown-input');
-        const svgEl = document.getElementById('markmap');
-
-        // 宣告心智圖實例
+        const mdInput = document.getElementById('md-input');
+        const svgElement = document.getElementById('markmap');
+        const wrapper = document.getElementById('main-wrapper');
+        
         let mm;
+        let isFullSize = false; // 追蹤目前是否為 1:1
 
-        function updateMindmap() {
-            const markdown = inputEl.value;
-            
-            // 1. 將 Markdown 文字轉換為 Markmap 可識別的節點數據樹 (root)
-            const { root } = transformer.transform(markdown);
-            
-            // 2. 渲染心智圖
+        function render() {
+            const { root } = transformer.transform(mdInput.value);
             if (!mm) {
-                // 初次建立
-                mm = Markmap.create(svgEl, null, root);
+                mm = Markmap.create(svgElement, { autoFit: true }, root);
             } else {
-                // 更新數據
                 mm.setData(root);
-                // mm.fit(); // 若取消註解，每次輸入都會自動縮放置中（有時會影響使用者的拖曳體驗，可視需求開啟）
             }
         }
 
-        // 網頁載入時的初次渲染
-        updateMindmap();
+        // 按鈕 1：佈局切換 (平分 50% / 全螢幕 100%)
+        document.getElementById('btn-layout').onclick = () => {
+            wrapper.classList.toggle('full-mindmap');
+            // 等待 CSS 動畫結束後重新校正位置
+            setTimeout(() => {
+                if (isFullSize) mm.rescale(1); else mm.fit();
+            }, 350);
+        };
 
-        // 監聽鍵盤輸入事件，達到「即時預覽」效果
-        inputEl.addEventListener('input', updateMindmap);
+        // 按鈕 2：縮放切換 (1:1 <-> 全貌)
+        document.getElementById('btn-zoom').onclick = () => {
+            if (!isFullSize) {
+                // 如果目前是全貌，切換到 1:1
+                mm.rescale(1);
+                isFullSize = true;
+                console.log("切換至 1:1");
+            } else {
+                // 如果目前是 1:1，切換到全貌
+                mm.fit();
+                isFullSize = false;
+                console.log("切換至全貌");
+            }
+        };
+
+        mdInput.oninput = render;
+        window.onload = render;
+
+        window.onresize = () => {
+            if (mm) {
+                if (isFullSize) mm.rescale(1); else mm.fit();
+            }
+        };
     </script>
-
 </body>
 </html>
