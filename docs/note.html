@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-<style>
+<!--style>
     html, body {
         height: 100%;
         margin: 0;
@@ -616,9 +616,17 @@ footer {
 /* end of special markdown syntax -----------------------------------------------------------------------------------*/
 
 }
-</style>
+</style-->
 
 <link rel="stylesheet" href="https://n.jwint.net/style_black.css">
+
+<style>
+
+.control-btn {
+    background-color: #a400c1;
+}
+
+</style>
 </head>
 <body>
 
@@ -636,33 +644,33 @@ footer {
             </div>
             
             <div class="control-row">
-                <button id="saveDBBtn" title="保存書冊">存</button>
-                <button id="readDBBtn" title="讀取保存書冊">提</button>
+                <button class="control-btn" id="saveDBBtn" title="保存書冊">存</button>
+                <button class="control-btn" id="readDBBtn" title="讀取保存書冊">提</button>
 
-                <button id="encryptBtn" title="加密文本">封</button>
-                <button id="decryptBtn" title="解密密文">解</button>
-                <button id="copyBtn" title="複製密文">謄</button>
+                <button class="control-btn" id="encryptBtn" title="加密文本">封</button>
+                <button class="control-btn" id="decryptBtn" title="解密密文">解</button>
+                <button class="control-btn" id="copyBtn" title="複製密文">謄</button>
                 
-                <button id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
+                <button class="control-btn" id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
                 <input type="text" id="keyNameDef" title="本冊名稱"value="SSS" placeholder="本冊名稱">
-                <button id="listBtn" title="列出所有書冊" onclick = "listKeyNames()">列</button>
-                <button id="delBtn" title="刪除書冊" onclick = "deleteKeyName()">刪</button>
+                <button class="control-btn" id="listBtn" title="列出所有書冊" onclick = "listKeyNames()">列</button>
+                <button class="control-btn" id="delBtn" title="刪除書冊" onclick = "deleteKeyName()">刪</button>
                 <input type="text" id="delNameDef" title="刪除書冊的名稱" value="" placeholder="欲刪書本名稱">
 
-                <button id="exportBtn" title="下載書冊檔案">出</button>
-                <button id="importBtnTrigger" title="載入書冊檔案">入</button>
+                <button class="control-btn" id="exportBtn" title="下載書冊檔案">出</button>
+                <button class="control-btn" id="importBtnTrigger" title="載入書冊檔案">入</button>
                 <input type="file" id="importFile" title="載入書冊名稱" placeholder="載入書冊名稱.txt" accept=".txt" style="display: none;">
 
-                <button class="tab-button" id="markdownViewBtn" title="Markdown View" onclick="showMarkdownView()">拓</button>
+                <button class="control-btn" id="markdownViewBtn" title="Markdown View" onclick="showMarkdownView()">拓</button>
 
-                <button id="aesKeyBtn" title="修改密鑰" onclick = "changeAesKey()">密</button>
+                <button class="control-btn" id="aesKeyBtn" title="修改密鑰" onclick = "changeAesKey()">密</button>
                 <input type="password" id="aesKey" title="密鑰" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="密鑰">
 
 
                 <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
                 <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
             </div>
-            <div id="markdownView"></div>
+            <div id="mdShowArea"></div>
             <textarea id="encryptedContent" placeholder=""></textarea>
         </div>
 
@@ -1505,7 +1513,7 @@ function getTextFromTabB() {
 
 function showMarkdownView() {
     const content = getTextFromTabB();
-    const mdArea = document.getElementById('markdownView');
+    const mdArea = document.getElementById('mdShowArea');
     if (content.trim() === "") {
         mdArea.value = "沒有內容可顯示";
         return;
