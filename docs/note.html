@@ -1256,7 +1256,10 @@ async function readDBBtnHandler() {
         await readDataFromDB(); // 這裡會等到 resolve() 呼叫才繼續
         //console.log("DB 讀取完成");
         
-        decData(); // 此時畫面上已經有值了，解密才會成功
+        while(!decData()){
+            aesKey = prompt("輸入書本密碼");
+            keyInput.value = aesKey;
+        }// 此時畫面上已經有值了，解密才會成功
         //console.log("解密完成");
     } catch (error) {
         //console.error("執行過程中出錯:", error);
