@@ -637,7 +637,7 @@ footer {
             <button class="tab-button" id="addSubPageBtn" title="新增小冊">增</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存書冊" onclick="saveDBBtnHandler()">存</button>
         </div>
-
+        <div id="mdShowArea"></div>
         <div id="TabA" class="tab-content">
             <div class="control-row">
                 <!--input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰"-->
@@ -670,7 +670,7 @@ footer {
                 <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
                 <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
             </div>
-            <div id="mdShowArea"></div>
+            <!--div id="mdShowArea"></div-->
             <textarea id="encryptedContent" placeholder=""></textarea>
         </div>
 
@@ -688,8 +688,8 @@ footer {
             <!--div id="markdownView"></div-->
         </div>
     </div>
-
-    <div id="statusMessage" class="status-info">待...</div>
+    
+    <div id="statusMessage" class="status-info"  onclick="showMarkdownView()">待...</div>
 
     <script>
 
