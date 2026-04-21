@@ -626,6 +626,9 @@ footer {
     background-color: #a400c1;
 }
 
+#mdShowArea {
+    height: 160vh;
+}
 </style>
 </head>
 <body>
@@ -637,7 +640,7 @@ footer {
             <button class="tab-button" id="addSubPageBtn" title="新增小冊">增</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存書冊" onclick="saveDBBtnHandler()">存</button>
         </div>
-        <div id="mdShowArea"></div>
+        <div id="mdShowArea" style="display:none"></div>
         <div id="TabA" class="tab-content">
             <div class="control-row">
                 <!--input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰"-->
@@ -858,6 +861,7 @@ async function readDataFromDB() {
     }
 }
 
+let nowTab = "";
 
 // --- 主分頁切換邏輯 ---
 function openTab(evt, tabName) {
@@ -883,6 +887,24 @@ function openTab(evt, tabName) {
     }else{
         //keyInput.style.display = "none";
     }
+
+    nowTab = tabName;
+}
+
+function disableTab(){
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+        console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
+    }
+}
+
+function showNowTab(){
+
+    //document.getElementById('TabA').style.display = "block";
+    //document.getElementById('TabB').style.display = "block";
+    openTab({ currentTarget: document.querySelector('.tab-button') }, nowTab);
 }
 
 // --- 子分頁切換與編輯邏輯 ---
@@ -1524,8 +1546,12 @@ function showMarkdownView() {
     if(mdArea.innerHTML === ""){
         console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
         mdArea.innerHTML = marked.parse(content);
+        mdArea.style.display = "block";
+        disableTab();
     }else{
         mdArea.innerHTML = "";
+        mdArea.style.display = "none";
+        showNowTab();
     }
 
     //openTab(null, 'TabC');
