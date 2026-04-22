@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>短網址產生器</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      font-family: sans-serif;
+      background-color: #f4f4f9;
+    }
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      width: 100%;
+      max-width: 400px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover { background-color: #0056b3; }
+    #status { text-align: center; font-size: 14px; color: #333; }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>建立跳轉網址</h2>
+    <input type="text" id="pathInput" placeholder="輸入名稱 (例如: A)">
+    <input type="url" id="urlInput" placeholder="輸入目標 URL (例如: https://goA.url.com)">
+    <button onclick="saveUrl()">儲存 / 更新</button>
+    <div id="status"></div>
+  </div>
+
+  <script>
+    // 替換成你的 Google Apps Script Web App URL
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx-zZPCI9kLiW7JbQ6gz10ey1b4f1d1EQlAVSd6zdC2DrAszbELQReOC93nND2WnF7S/exec';
+
+    async function saveUrl() {
+      const path = document.getElementById('pathInput').value.trim();
+      const url = document.getElementById('urlInput').value.trim();
+      const statusDiv = document.getElementById('status');
+
+      if (!path || !url) {
+        statusDiv.innerText = "請填寫完整資訊！";
+        statusDiv.style.color = "red";
+        return;
+      }
+
+      statusDiv.innerText = "儲存中...";
+      statusDiv.style.color = "black";
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          // 為了避免複雜的 CORS Preflight，GAS 建議送 text/plain
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ path: path, url: url })
+        });
+        
+        const result = await response.json();
+        if (result.status === 'success') {
+          statusDiv.innerText = "儲存成功！測試連結: https://me.go/" + path;
+          statusDiv.style.color = "green";
+        } else {
+          statusDiv.innerText = "儲存失敗：" + result.message;
+          statusDiv.style.color = "red";
+        }
+      } catch (error) {
+        statusDiv.innerText = "連線錯誤，請檢查網路狀態。";
+        statusDiv.style.color = "red";
+      }
+    }
+  </script>
+</body>
+</html>
