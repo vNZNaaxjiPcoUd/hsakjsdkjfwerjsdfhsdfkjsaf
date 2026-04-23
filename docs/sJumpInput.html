@@ -82,7 +82,7 @@
         
         const result = await response.json();
         if (result.status === 'success') {
-          statusDiv.innerText = "儲存成功！測試連結: https://s.jwint.net/" + path;
+          statusDiv.innerHTML = '儲存成功！連結: <br> <a href="https://s.jwint.net/' + path+'" target="_blank" >https://s.jwint.net/'+path+'</a>';
           statusDiv.style.color = "green";
         } else {
           statusDiv.innerText = "儲存失敗：" + result.message;
