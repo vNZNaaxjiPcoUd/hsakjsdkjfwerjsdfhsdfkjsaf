@@ -12,84 +12,96 @@
       height: 100vh;
       margin: 0;
       font-family: sans-serif;
-      background-color: #f4f4f9;
+      background-color: #f0f2f5;
     }
     .container {
       background: white;
       padding: 30px;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
       width: 100%;
       max-width: 400px;
       display: flex;
       flex-direction: column;
       gap: 15px;
     }
+    h2 { margin-top: 0; color: #1c1e21; text-align: center; }
     input {
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      outline: none;
     }
+    input:focus { border-color: #007bff; }
     button {
       padding: 12px;
       font-size: 16px;
       background-color: #007bff;
       color: white;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover { background-color: #0056b3; }
-    #status { text-align: center; font-size: 14px; color: #333; }
+    #status { text-align: center; font-size: 14px; min-height: 20px; }
   </style>
 </head>
 <body>
 
   <div class="container">
     <h2>建立跳轉網址</h2>
-    <input type="text" id="pathInput" placeholder="輸入名稱 (例如: A)">
-    <input type="url" id="urlInput" placeholder="輸入目標 URL (例如: https://goA.url.com)">
-    <button onclick="saveUrl()">儲存 / 更新</button>
+    <input type="password" id="passwordInput" placeholder="請輸入管理密碼">
+    <hr style="width:100%; border:0; border-top:1px solid #eee;">
+    <input type="text" id="pathInput" placeholder="名稱 (例如: A)">
+    <input type="url" id="urlInput" placeholder="目標 URL (https://...)">
+    <button onclick="saveUrl()">儲存資料</button>
     <div id="status"></div>
   </div>
 
   <script>
-    // 替換成你的 Google Apps Script Web App URL
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbx-zZPCI9kLiW7JbQ6gz10ey1b4f1d1EQlAVSd6zdC2DrAszbELQReOC93nND2WnF7S/exec';
 
     async function saveUrl() {
+      const password = document.getElementById('passwordInput').value;
       const path = document.getElementById('pathInput').value.trim();
       const url = document.getElementById('urlInput').value.trim();
       const statusDiv = document.getElementById('status');
 
-      if (!path || !url) {
-        statusDiv.innerText = "請填寫完整資訊！";
+      if (!password || !path || !url) {
+        statusDiv.innerText = "所有欄位皆為必填！";
         statusDiv.style.color = "red";
         return;
       }
 
-      statusDiv.innerText = "儲存中...";
-      statusDiv.style.color = "black";
+      statusDiv.innerText = "驗證中...";
+      statusDiv.style.color = "#555";
 
       try {
         const response = await fetch(GAS_URL, {
           method: 'POST',
-          // 為了避免複雜的 CORS Preflight，GAS 建議送 text/plain
           headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ path: path, url: url })
+          body: JSON.stringify({ 
+            password: password, 
+            path: path, 
+            url: url 
+          })
         });
         
         const result = await response.json();
         if (result.status === 'success') {
           statusDiv.innerHTML = '儲存成功！連結: <br> <a href="https://s.jwint.net/' + path+'" target="_blank" >https://s.jwint.net/'+path+'</a>';
           statusDiv.style.color = "green";
+          // 清空部分輸入框，保留密碼方便連續輸入
+          document.getElementById('pathInput').value = '';
+          document.getElementById('urlInput').value = '';
         } else {
-          statusDiv.innerText = "儲存失敗：" + result.message;
+          statusDiv.innerText = "錯誤：" + result.message;
           statusDiv.style.color = "red";
         }
       } catch (error) {
-        statusDiv.innerText = "連線錯誤，請檢查網路狀態。";
+        statusDiv.innerText = "連線失敗，請檢查網路或 GAS 設定。";
         statusDiv.style.color = "red";
       }
     }
