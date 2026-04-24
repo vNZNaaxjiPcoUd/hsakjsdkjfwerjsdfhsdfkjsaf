@@ -9,6 +9,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-gfm-heading-id/lib/index.umd.js"></script>
 
     <link rel="stylesheet" href="https://n.jwint.net/style_black.css">
 
@@ -929,6 +930,39 @@ function getTextFromTabB() {
     return contents.join('\n');
 }
 // show markdown in TabC
+
+
+const gfmHeadingId = window.markedGfmHeadingId.gfmHeadingId;
+// 使用插件 markdown-it-anchor 的 gfmHeadingId 功能，讓 Markdown 預覽中的標題自動生成對應的 id，並且支援中文等特殊字元的正確處理，確保在點擊目錄或使用 URL hash 跳轉時能正確定位到對應的標題位置。
+marked.use(gfmHeadingId());
+// 1. 設定 Marked.js 的自訂渲染行為
+marked.use({
+    renderer: {
+        // 第一個參數現在可能是 token 物件 (新版) 或 href 字串 (舊版)
+        link(token) {
+            // 1. 判斷傳入的是新版的物件還是舊版的字串，並取出真正的 href
+            const isNewVersion = typeof token === 'object';
+            const href = isNewVersion ? token.href : token;
+
+            // 2. 判斷 href 是否存在，且以 '#' 開頭
+            if (href && href.startsWith('#')) {
+                // 取出 title 與 text
+                const title = isNewVersion ? token.title : arguments[1];
+                const text = isNewVersion ? token.text : arguments[2];
+                
+                // 組合 title 屬性 (如果有設定的話)
+                const titleAttr = title ? ` title="${title}"` : '';
+                
+                // 強制輸出 target="_self"
+                return `<a href="${href}" target="_self"${titleAttr}>${text}</a>`;
+            }
+
+            // 3. 如果不是 '#' 開頭，回傳 false 交給 Marked.js 的預設渲染器處理
+            return false; 
+        }
+    }
+});
+
 
 function showMarkdownView() {
     const content = getTextFromTabB();
