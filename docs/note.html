@@ -9,6 +9,7 @@
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked-gfm-heading-id/lib/index.umd.js"></script>
 
     <link rel="stylesheet" href="https://n.jwint.net/style_black.css">
@@ -262,17 +263,17 @@ function openTab(evt, tabName) {
     tabcontent = document.getElementsByClassName("tab-content");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
-        console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
+        //console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
     }
     tablinks = document.getElementsByClassName("tab-button");
     for (i = 0; i < tablinks.length; i++) {
         tablinks[i].className = tablinks[i].className.replace(" active", "");
-        console.log(`重置分頁按鈕狀態: ${tablinks[i].textContent}`);
+        //console.log(`重置分頁按鈕狀態: ${tablinks[i].textContent}`);
     }
     document.getElementById(tabName).classList.add("active");
     if (evt && evt.currentTarget) {
         evt.currentTarget.className += " active";
-        console.log(`切換到分頁: ${tabName}, 按鈕: ${evt.currentTarget.textContent}`);
+        //console.log(`切換到分頁: ${tabName}, 按鈕: ${evt.currentTarget.textContent}`);
     }
     
     if(tabName === 'TabA'){
@@ -289,7 +290,7 @@ function disableTab(){
     tabcontent = document.getElementsByClassName("tab-content");
     for (i = 0; i < tabcontent.length; i++) {
         tabcontent[i].classList.remove("active");
-        console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
+        //console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
     }
     
 }
@@ -458,7 +459,7 @@ function setContentToTabB(fullContent) {
     blockStrings.forEach(blockStr => {
         const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
         const match = blockStr.match(regex);
-        console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
+        //console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
         if (match) {
             const safeTitle = match[1].trim();
             const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
@@ -929,42 +930,175 @@ function getTextFromTabB() {
     });
     return contents.join('\n');
 }
-// show markdown in TabC
 
 
+
+
+// show markdown in TabC -----------------
+const myMarked = new marked.Marked();
+
+// 1. 處理標題 ID
 const gfmHeadingId = window.markedGfmHeadingId.gfmHeadingId;
-// 使用插件 markdown-it-anchor 的 gfmHeadingId 功能，讓 Markdown 預覽中的標題自動生成對應的 id，並且支援中文等特殊字元的正確處理，確保在點擊目錄或使用 URL hash 跳轉時能正確定位到對應的標題位置。
-marked.use(gfmHeadingId());
-// 1. 設定 Marked.js 的自訂渲染行為
-marked.use({
-    renderer: {
-        // 第一個參數現在可能是 token 物件 (新版) 或 href 字串 (舊版)
-        link(token) {
-            // 1. 判斷傳入的是新版的物件還是舊版的字串，並取出真正的 href
-            const isNewVersion = typeof token === 'object';
-            const href = isNewVersion ? token.href : token;
+myMarked.use(gfmHeadingId());
 
-            // 2. 判斷 href 是否存在，且以 '#' 開頭
-            if (href && href.startsWith('#')) {
-                // 取出 title 與 text
-                const title = isNewVersion ? token.title : arguments[1];
-                const text = isNewVersion ? token.text : arguments[2];
-                
-                // 組合 title 屬性 (如果有設定的話)
-                const titleAttr = title ? ` title="${title}"` : '';
-                
-                // 強制輸出 target="_self"
-                return `<a href="${href}" target="_self"${titleAttr}>${text}</a>`;
-            }
+// 2. 定義 Mermaid 邏輯
+/*
+const rendererMermaid = {
+  // 這裡我們把參數寫成 (token, infostring)，以相容新舊版
+  code(token, infostring) {
+    // 1. 判斷是新版 token 物件還是舊版字串
+    const isNewVersion = typeof token === 'object';
+    
+    // 2. 取出真正的 code 內容與語言標籤
+    const actualCode = isNewVersion ? token.text : token;
+    const lang = (isNewVersion ? token.lang : infostring) || "";
+    
+    console.log("偵測到的語言:", `[${lang}]`); 
 
-            // 3. 如果不是 '#' 開頭，回傳 false 交給 Marked.js 的預設渲染器處理
-            return false; 
-        }
+    // 3. 執行判斷 (使用 trim() 並轉小寫)
+    if (lang.trim().toLowerCase() === 'mermaid') {
+      console.log("成功進入 Mermaid 渲染");
+      return `<div class="mermaid">${actualCode}</div>`;
     }
+
+    // 4. 如果不是 mermaid，回傳 false
+    return false; 
+  }
+};*/
+
+/*
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    start(src) { 
+        // 加上 [^] 確保它能從任何位置偵測到 mermaid 的開始
+        const match = src.match(/```mermaid/);
+        return match ? match.index : undefined;
+    },
+    tokenizer(src) {
+        // 關鍵修正 1：移除結尾的 \n，因為 Marked 會切分字串，結尾不一定有換行
+        // 關鍵修正 2：移除 /g 標籤。在 tokenizer 中使用 exec + /g 會導致索引移位
+        const rule = /^```mermaid[\s\u200B]*\r?\n([\s\S]*?)\r?\n[\s\u200B]*```/;
+        
+        const match = rule.exec(src);
+        if (match) {
+            return {
+                type: 'mermaid',
+                raw: match[0], // 包含 ``` 的完整字串，讓 Marked 知道這段已經處理完
+                text: match[1].trim() // 純粹的 Mermaid 語法內容
+            };
+        }
+    },
+    renderer(token) {
+        // 渲染成 mermaid 預設的 class，之後呼叫 mermaid.run() 即可
+        return `<div class="mermaid">${token.text}</div>`;
+    }
+};*/
+
+/*
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    // 判斷是否為 mermaid 區塊的起手式
+    start(src) { 
+        //console.log("start", src.match(/^```mermaid/)?.index);
+        return src.match(/^```mermaid/)?.index;
+    },
+    tokenizer(src) {
+        //console.log(JSON.stringify(src));
+        const rule = /^```mermaid[\s\u200B]*\n([\s\S]*?)\n[\s\u200B]*```\n/g;
+        const match = rule.exec(src);
+        if (match) {
+            //console.log("match", match[0])
+            return {
+                type: 'mermaid',
+                raw: match[0],
+                text: match[1]
+            };
+        }
+    },
+    renderer(token) {
+        return `<div class="mermaid">${token.text}</div>`;
+    }
+};
+*/
+
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    start(src) { 
+        // 加上 [^] 確保它能從任何位置偵測到 mermaid 的開始
+        const match = src.match(/```mermaid/);
+        return match ? match.index : undefined;
+    },
+    tokenizer(src) {
+        // 關鍵修正 1：移除結尾的 \n，因為 Marked 會切分字串，結尾不一定有換行
+        // 關鍵修正 2：移除 /g 標籤。在 tokenizer 中使用 exec + /g 會導致索引移位
+        const rule = /^```mermaid[\s\u200B]*\r?\n([\s\S]*?)\r?\n[\s\u200B]*```/;
+        
+        const match = rule.exec(src);
+        if (match) {
+            console.log("match 0:\n",match[0]);
+            console.log("match 1:\n",match[1]);
+            return {
+                type: 'mermaid',
+                raw: match[0], // 包含 ``` 的完整字串
+                // 關鍵修正 3：強制移除所有 \r 字元。Mindmap 對 CRLF 極度敏感，這能解決找不到 parent 的問題
+                //text: match[1].replace(/\r/g, '').trim() 
+                //text: match[1].trim()
+                text: match[1]
+            };
+        }
+    },
+    
+    renderer(token) {
+        // 關鍵修正 4：將 <div> 改為 <pre> 標籤。
+        // <pre> 能確保瀏覽器在 Mermaid 介入前，原封不動地保留所有的空白縮排
+        const cleanContent = token.text.replace(/\r\n/g, '\n');
+        //console.log("交給 Mermaid 的最終內容：\n", JSON.stringify(cleanContent));
+        console.log("交給 Mermaid 的最終內容：\n", cleanContent);
+        return `<pre class="mermaid">${cleanContent}</pre>`;
+    }
+   /*
+    renderer(token) {
+        // 1. 強制將內容中的全形空白 (NBSP) 轉為半形空格
+        // 2. 移除每一行開頭可能多出來的雜質
+        const cleanText = token.text
+            .replace(/\u00A0/g, ' ')  // 處理隱形字元
+            .replace(/^[\s\t]+/gm, (m) => m.replace(/\t/g, '  ')); // 將 Tab 轉為空格 (Mermaid 較偏好空格)
+
+        console.log("交給 Mermaid 的最終內容：\n", cleanText);
+        return `<div class="mermaid">${cleanText}</div>`;
+    }*/
+};
+
+// 注入擴展
+myMarked.use({ extensions: [mermaidExtension] });
+
+
+const rendererHrefCheck = {
+  link(token) {
+    const isNewVersion = typeof token === 'object';
+    const href = isNewVersion ? token.href : arguments[0];
+
+    if (href && href.startsWith('#')) {
+      const title = isNewVersion ? token.title : arguments[1];
+      const text = isNewVersion ? token.text : arguments[2];
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<a href="${href}" target="_self"${titleAttr}>${text}</a>`;
+    }
+    return false; 
+  }
+};
+
+myMarked.use({ 
+  renderer: {
+    ...rendererHrefCheck
+  } 
 });
 
 
-function showMarkdownView() {
+async function showMarkdownView() {
     const content = getTextFromTabB();
     const mdArea = document.getElementById('mdShowArea');
     if (content.trim() === "") {
@@ -972,10 +1106,25 @@ function showMarkdownView() {
         return;
     }
     if(mdArea.innerHTML === ""){
-        console.log("解析 Markdown 內容...\n",content,"\n--- End of content ---");
-        mdArea.innerHTML = marked.parse(content);
+
+        // 確保 content 本身是乾淨的
+        //const cleanContent = content.replace(/[\u00A0\u200B\uFEFF\u200C\u200D]/g, ' ').trim();
+        const cleanContent = content;
+        // 為了保險，處理每一行開頭可能出現的特殊空白 (Non-breaking space)
+        //const sanitizedContent = cleanContent.replace(/^\s+/gm, '');
+        const sanitizedContent = content;
+
+        mdArea.innerHTML = myMarked.parse(sanitizedContent);
+
         mdArea.style.display = "block";
-        disableTab();
+        disableTab();        
+
+        // 執行 Mermaid 渲染
+        await mermaid.run({
+            nodes: document.querySelectorAll('.mermaid'),
+        });
+
+
         updateStatus(`呈現markdown畫面`, 'info');
     }else{
         mdArea.innerHTML = "";
@@ -984,7 +1133,6 @@ function showMarkdownView() {
         updateStatus(`關閉markdown`, 'info');
     }
 
-    //openTab(null, 'TabC');
 }   
 
 // --- 初始化 ---
