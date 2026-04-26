@@ -98,6 +98,26 @@
 
     /* 隱藏/顯示區塊 */
     #otherInfo { display: none; }
+
+iframe {
+    /* 基礎設定 */
+    border: none;
+    display: block;
+    margin: 0 auto; /* 居中 */
+
+    /* 核心邏輯 */
+    width: 100%;            /* 預設寬度最大 */
+    max-width: 177.78vh;    /* 關鍵：16:9 比例下，寬度最多只能是高度的 1.77 倍 */
+    aspect-ratio: 16 / 9;   /* 保持比例 */
+    
+    /* 限制最大高度，避免超出螢幕 */
+    max-height: 100dvh; 
+    
+    /* 確保內容適應 */
+    object-fit: contain;
+}
+
+
     </style>
 </head>
 <body>
@@ -166,7 +186,7 @@
 
 <script>
 // 注意：這裡將 iframe 修改為 aspect-ratio: 16/9，取代 100dvh
-const allText = `<iframe id="Plys" style="width:100%; aspect-ratio:16/9; border:none; margin:0; padding:0; display:block; object-fit: cover;" 
+const allText = `<iframe id="Plys" 
 src="https://www.youtube.com/embed/AAURL?loop=0&playlist=AAURL&autoplay=1&enablejsapi=1&playsinline=1" 
 title="" frameborder="0" 
 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
