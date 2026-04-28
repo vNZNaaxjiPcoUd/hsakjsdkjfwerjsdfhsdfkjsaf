@@ -23,6 +23,30 @@
 #mdShowArea {
     height: 160vh;
 }
+
+        #backToTopBtn {
+            position: fixed;      /* 固定在畫面上，不隨捲軸移動 */
+            top: 2dvw;         /* 距離底部 30px */
+            right: 3dvw;           /* 距離左邊 30px */
+            width: 30px;          /* 寬度 50px */
+            height: 20px;         /* 高度 50px */
+            border-radius: 50%;   /* 讓按鈕變成正圓形 */
+            background-color: #26ff003f; /* 按鈕背景顏色 (藍色) */
+            color: white;         /* 箭頭顏色 (白色) */
+            border: none;         /* 移除預設邊框 */
+            font-size: 14px;      /* 箭頭大小 */
+            cursor: pointer;      /* 滑鼠移過去變成手指形狀 */
+            z-index: 1000;        /* 確保按鈕不會被其他元素蓋住 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 加上一點陰影增加立體感 */
+            transition: all 0.3s; /* 讓 hover 動畫更順暢 */
+        }
+
+        /* 滑鼠移到按鈕上方時的特效 */
+        #backToTopBtn:hover {
+            background-color: #0056b3; /* 顏色變深 */
+            transform: scale(1.1);     /* 按鈕稍微放大 */
+        }
+
 </style>
 </head>
 <body>
@@ -88,6 +112,7 @@
     
     <div id="statusMessage" class="status-info"  onclick="showMarkdownView()">待...</div>
 
+    <button id="backToTopBtn" title="回到最前面">^</button>
     <script>
 
 // --- 全局變數 ---
@@ -1138,6 +1163,17 @@ async function showMarkdownView() {
     }
 
 }   
+
+backToTopBtn.addEventListener("click", function() {
+
+        mdShowArea.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+        window.location.href = "#";
+
+});
+
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
