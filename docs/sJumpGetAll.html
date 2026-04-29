@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>列表</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      max-width: 1200px;
+      margin: 40px auto;
+      padding: 20px;
+    }
+    .login-container {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    input[type="password"] {
+      padding: 10px;
+      font-size: 16px;
+      width: 80%;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .message {
+      color: red;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+    #link-list-container {
+      display: none;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .link-item {
+      display: block;
+      padding: 10px 0;
+      border-bottom: 1px solid #eee;
+      text-decoration: none;
+      color: #007bff;
+      font-size: 18px;
+    }
+    .link-item:hover {
+      text-decoration: underline;
+    }
+    .link-item:last-child {
+      border-bottom: none;
+    }
+    .path-text {
+      font-size: 8px;
+      color: #888;
+      margin-left: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container" id="login-section">
+    <h2>輸入密碼</h2>
+    <input type="password" id="password-input" placeholder="請輸入密碼">
+    <br>
+    <button onclick="fetchList()">確認</button>
+    <div id="status-message" class="message"></div>
+  </div>
+
+  <div id="link-list-container">
+    <h2>連結列表</h2>
+    <div id="links-wrapper"></div>
+  </div>
+
+  <script>
+    // ⚠️ 請替換為你最新佈署的 GAS 網址
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbx-zZPCI9kLiW7JbQ6gz10ey1b4f1d1EQlAVSd6zdC2DrAszbELQReOC93nND2WnF7S/exec';
+
+    async function fetchList() {
+      const password = document.getElementById('password-input').value;
+      const statusMsg = document.getElementById('status-message');
+      const loginSection = document.getElementById('login-section');
+      const listContainer = document.getElementById('link-list-container');
+      const linksWrapper = document.getElementById('links-wrapper');
+
+      if (!password) {
+        statusMsg.textContent = '密碼不能為空！';
+        return;
+      }
+
+      statusMsg.style.color = '#333';
+      statusMsg.textContent = '驗證中，請稍候...';
+
+      try {
+        const response = await fetch(GAS_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          // 使用 text/plain 避免觸發複雜的 CORS preflight
+          headers: {
+            'Content-Type': 'text/plain;charset=utf-8',
+          },
+          body: JSON.stringify({
+            action: 'list',
+            password: password
+          })
+        });
+
+        const result = await response.json();
+
+        if (result.status === 'success') {
+          // 隱藏登入區，顯示列表區
+          loginSection.style.display = 'none';
+          listContainer.style.display = 'block';
+          
+          // 清空現有內容
+          linksWrapper.innerHTML = '';
+
+          // 產生 <a> 標籤
+          result.data.forEach(item => {
+            const a = document.createElement('a');
+            //a.href = item.url;
+            a.href = "https://s.jwint.net/"+item.path;
+            a.target = '_blank'; // 開啟新分頁
+            a.className = 'link-item';
+            
+            // 顯示 note，並在旁邊小字顯示 path 方便辨識
+            //a.innerHTML = `${item.note} <span class="path-text">(${item.path})</span>`;
+            a.innerHTML = `${item.note} <span class="path-text">(${item.url})</span>`;
+            
+            linksWrapper.appendChild(a);
+          });
+
+        } else {
+          statusMsg.style.color = 'red';
+          statusMsg.textContent = result.message || '驗證失敗';
+        }
+      } catch (error) {
+        statusMsg.style.color = 'red';
+        statusMsg.textContent = '網路請求錯誤，請檢查主控台。';
+        console.error('Fetch error:', error);
+      }
+    }
+  </script>
+</body>
+</html>
