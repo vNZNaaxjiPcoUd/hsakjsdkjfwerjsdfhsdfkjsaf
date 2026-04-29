@@ -262,7 +262,8 @@ async function readDataFromDB() {
                     resolve(result.content); // 成功讀取，通知外部已完成
                 } else {
                     updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
-                    resolve(null); // 找不到資料也算完成任務，但結果為 null
+                    //resolve(null); // 找不到資料也算完成任務，但結果為 null
+                    reject("NoBookInDB");
                 }
             };
 
@@ -702,10 +703,20 @@ async function readDBBtnHandler() {
         while(!decData()){
             aesKey = prompt("輸入書本密碼");
             keyInput.value = aesKey;
+            console.log("no key");
+            updateStatus("無法解譯，重新輸入密碼", 'error');
         }// 此時畫面上已經有值了，解密才會成功
         //console.log("解密完成");
+        updateStatus("書本開啟", 'success');
     } catch (error) {
         //console.error("執行過程中出錯:", error);
+        if (error === "NoBookInDB") {
+            console.log("資料庫裡面沒有這本書喔！");
+            updateStatus("新書開啟！", 'info');
+        } else {
+            console.error("發生其他讀取錯誤：", error);
+            updateStatus("發生其他讀取錯誤：", 'error');
+        }
     }
 }
 
