@@ -52,7 +52,7 @@
 <body>
 
     <div class="main-container">
-        <div class="tabs">
+        <div class="tabs" id="TAB-BTN">
             <button class="tab-button" title="查看書冊本文" onclick="openTab(event, 'TabB')">筆記</button>
             <button class="tab-button" title="查看各指令" onclick="openTab(event, 'TabA')">指令</button>
             <button class="tab-button" id="addSubPageBtn" title="新增小冊">增</button>
@@ -694,6 +694,14 @@ subTabContentContainer.addEventListener('keydown', function(e) {
 
 // 按鈕事件 - 讀取 DB
 
+function noShow(){
+    disableTab();   
+    let TabBtn = document.getElementById("TAB-BTN");
+    TabBtn.style.display="none";
+    let backToTopBtn = document.getElementById("backToTopBtn");
+    backToTopBtn.style.display="none";
+}
+
 
 async function readDBBtnHandler() {
     try {
@@ -702,7 +710,18 @@ async function readDBBtnHandler() {
         
         while(!decData()){
             aesKey = prompt("輸入書本密碼");
-            keyInput.value = aesKey;
+            if (aesKey === null) {
+                // 使用者點擊了「取消」
+                console.log("使用者取消了輸入。");
+                throw("noKeyIn");
+            } else if (aesKey === "") {
+                // 使用者沒有輸入任何內容，但點擊了「確定」
+                console.log("使用者點擊了確定，但內容是空的。");
+                keyInput.value = "";
+            } else {
+                keyInput.value = aesKey;
+            }
+
             console.log("no key");
             updateStatus("無法解譯，重新輸入密碼", 'error');
         }// 此時畫面上已經有值了，解密才會成功
@@ -713,6 +732,10 @@ async function readDBBtnHandler() {
         if (error === "NoBookInDB") {
             console.log("資料庫裡面沒有這本書喔！");
             updateStatus("新書開啟！", 'info');
+        } else if( error === "noKeyIn"){
+            noShow();
+            console.error("使用者取消輸入密碼", error);
+            updateStatus("使用者取消輸入密碼", 'error');
         } else {
             console.error("發生其他讀取錯誤：", error);
             updateStatus("發生其他讀取錯誤：", 'error');
