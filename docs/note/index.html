@@ -641,6 +641,23 @@ function saveDBBtnHandler() {
 
 document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
 
+document.addEventListener('keydown', function(e) {
+    //console.log("document:", e);
+    if (e.ctrlKey && e.code === 'KeyM' || e.metaKey && e.code === 'KeyM'  ) {
+        e.preventDefault();
+        showMarkdownView();
+        //console.log("Ctrl+M 偵測到，已觸發存檔功能");
+        return;
+    }
+
+    if (e.ctrlKey && e.code === 'KeyS' || e.metaKey && e.code === 'KeyS'  ) {
+        e.preventDefault();
+        saveDBBtnHandler();
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+});
+
 //document.getElementById('TabB').addEventListener('keydown', function(e) {
 subTabContentContainer.addEventListener('keydown', function(e) {
     //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
@@ -1204,6 +1221,7 @@ async function showMarkdownView() {
     }
 
 }   
+
 
 backToTopBtn.addEventListener("click", function() {
 
