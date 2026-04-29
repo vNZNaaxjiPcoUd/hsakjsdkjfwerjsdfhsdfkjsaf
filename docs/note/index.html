@@ -1,0 +1,1204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <base target="_blank">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="manifest" href="https://h.jwint.net/manifest.note.json">
+    <title>Note</title>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked-gfm-heading-id/lib/index.umd.js"></script>
+
+    <link rel="stylesheet" href="https://n.jwint.net/style_black.css">
+
+<style>
+
+.control-btn {
+    background-color: #a400c1;
+}
+
+#mdShowArea {
+    height: 160vh;
+}
+
+        #backToTopBtn {
+            position: fixed;      /* 固定在畫面上，不隨捲軸移動 */
+            top: 2dvw;         /* 距離底部 30px */
+            right: 3dvw;           /* 距離左邊 30px */
+            width: 30px;          /* 寬度 50px */
+            height: 20px;         /* 高度 50px */
+            border-radius: 50%;   /* 讓按鈕變成正圓形 */
+            background-color: #26ff003f; /* 按鈕背景顏色 (藍色) */
+            color: white;         /* 箭頭顏色 (白色) */
+            border: none;         /* 移除預設邊框 */
+            font-size: 14px;      /* 箭頭大小 */
+            cursor: pointer;      /* 滑鼠移過去變成手指形狀 */
+            z-index: 1000;        /* 確保按鈕不會被其他元素蓋住 */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 加上一點陰影增加立體感 */
+            transition: all 0.3s; /* 讓 hover 動畫更順暢 */
+        }
+
+        /* 滑鼠移到按鈕上方時的特效 */
+        #backToTopBtn:hover {
+            background-color: #0056b3; /* 顏色變深 */
+            transform: scale(1.1);     /* 按鈕稍微放大 */
+        }
+
+</style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div class="tabs">
+            <button class="tab-button" title="查看書冊本文" onclick="openTab(event, 'TabB')">筆記</button>
+            <button class="tab-button" title="查看各指令" onclick="openTab(event, 'TabA')">指令</button>
+            <button class="tab-button" id="addSubPageBtn" title="新增小冊">增</button>
+            <button class="tab-button" id="saveDBBtn2" title="儲存書冊" onclick="saveDBBtnHandler()">存</button>
+        </div>
+        <div id="mdShowArea" style="display:none"></div>
+        <div id="TabA" class="tab-content">
+            <div class="control-row">
+                <!--input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰"-->
+            </div>
+            
+            <div class="control-row">
+                <button class="control-btn" id="saveDBBtn" title="保存書冊">存</button>
+                <button class="control-btn" id="readDBBtn" title="讀取保存書冊">提</button>
+
+                <button class="control-btn" id="encryptBtn" title="加密文本">封</button>
+                <button class="control-btn" id="decryptBtn" title="解密密文">解</button>
+                <button class="control-btn" id="copyBtn" title="複製密文">謄</button>
+                
+                <button class="control-btn" id="nameBtn" title="更改本冊名稱" onclick = "changeKeyName()">名</button>
+                <input type="text" id="keyNameDef" title="本冊名稱"value="SSS" placeholder="本冊名稱">
+                <button class="control-btn" id="listBtn" title="列出所有書冊" onclick = "listKeyNames()">列</button>
+                <button class="control-btn" id="delBtn" title="刪除書冊" onclick = "deleteKeyName()">刪</button>
+                <input type="text" id="delNameDef" title="刪除書冊的名稱" value="" placeholder="欲刪書本名稱">
+
+                <button class="control-btn" id="exportBtn" title="下載書冊檔案">出</button>
+                <button class="control-btn" id="importBtnTrigger" title="載入書冊檔案">入</button>
+                <input type="file" id="importFile" title="載入書冊名稱" placeholder="載入書冊名稱.txt" accept=".txt" style="display: none;">
+
+                <button class="control-btn" id="markdownViewBtn" title="Markdown View" onclick="showMarkdownView()">拓</button>
+
+                <button class="control-btn" id="aesKeyBtn" title="修改密鑰" onclick = "changeAesKey()">密</button>
+                <input type="password" id="aesKey" title="密鑰" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="密鑰">
+
+
+                <!--button class="external-link-btn" onclick="window.open('https://docs.google.com/forms/d/e/1FAIpQLSfeuE18UeYpKIAhayFX9PCrIyQaYxpt985WrB_AYIb1V-dx3A/viewform', '_blank')">庫</button>
+                <button class="external-link-btn" onclick="window.open('https://h.jwint.net/cipherEncryptionData', '_blank')">核</button-->
+            </div>
+            <!--div id="mdShowArea"></div-->
+            <textarea id="encryptedContent" placeholder=""></textarea>
+        </div>
+
+        <div id="TabB" class="tab-content">
+            <!-- 修改結構：移除 inline style，改用 class -->
+            <div class="sub-tabs-header">
+                <div id="subTabNav" class="sub-tabs"></div>
+                <!--button id="addSubPageBtn">增</button-->
+            </div>
+            
+            <div id="subTabContentContainer" class="sub-tab-content-container"></div>
+        </div>
+        
+        <div id="TabC" class="tab-content">
+            <!--div id="markdownView"></div-->
+        </div>
+    </div>
+    
+    <div id="statusMessage" class="status-info"  onclick="showMarkdownView()">待...</div>
+
+    <button id="backToTopBtn" title="回到最前面">^</button>
+    <script>
+
+// --- 全局變數 ---
+const keyInput = document.getElementById('aesKey');
+const encryptedContentArea = document.getElementById('encryptedContent');
+const subTabNav = document.getElementById('subTabNav'); 
+const subTabContentContainer = document.getElementById('subTabContentContainer');
+const statusMessage = document.getElementById('statusMessage');
+let blockCounter = 0;
+
+// --- IndexedDB 配置 ---
+const DB_NAME = "hDB";
+const DB_VERSION = 1;
+const STORE_NAME = "notes";
+let dbInstance = null;
+let gKeyName = "";
+const defaultAesKey = "YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!";
+
+// --- 取得 URL 參數 (作為 Key) ---
+function getDynamicKeyName() {
+    const search = window.location.search;
+    if( gKeyName !== ""){
+        return gKeyName;
+    }
+    /*
+    if (search && search.length > 1) {
+        const param = search.substring(1).split('=')[0];
+        return param || "A";
+    }*/
+
+    // getDynamicKeyName 的新版本：更完整的 URL 參數解析，並保留第一個參數的 key 和 value
+    // ex: https://url.com/?id=123&foo=bar -> key: id, value: 123
+    let firstKey = "";
+    let firstValue = "";
+    const paramsFromURL = new URLSearchParams(window.location.search);
+    //const entries = Object.fromEntries(paramsFromURL.entries());
+    //console.log(result, entries); 
+    const firstEntry = paramsFromURL.entries().next().value; 
+    if (firstEntry) {
+        const [key, value] = firstEntry;
+        //console.log("第一個參數名稱:", key);   // "id"
+        //console.log("第一個參數數值:", value); // "123"
+        firstKey = key;
+        firstValue = value;
+        if(firstKey) {
+            gKeyName = firstKey;
+        } else {
+            gKeyName = "A";
+        }
+        if(firstValue) {
+            keyInput.value = firstValue;
+        } else {
+            keyInput.value = "";
+        }
+    }else {
+        firstKey = "A";
+        gKeyName = "A";
+        keyInput.value = defaultAesKey;
+    }
+    //const firstKey = paramsFromURL.keys().next().value;
+    //console.log(firstKey); // "id"
+    //const firstValue = paramsFromURL.get(firstKey);
+    //console.log(firstValue); // "123"
+    return firstKey;
+}
+
+// --- 狀態訊息顯示函式 ---
+function updateStatus(message, type = 'info') {
+    statusMessage.textContent = message;
+    
+    statusMessage.style.backgroundColor = '#eee';
+    statusMessage.style.color = '#333';
+
+    if (type === 'success') {
+        statusMessage.style.backgroundColor = '#d4edda';
+        statusMessage.style.color = '#155724';
+    } else if (type === 'error') {
+        statusMessage.style.backgroundColor = '#f8d7da';
+        statusMessage.style.color = '#721c24';
+    }
+
+    // 取消自動重置計時器 
+    /*
+    setTimeout(() => {
+        statusMessage.textContent = "待...";
+        statusMessage.style.backgroundColor = '#eee';
+        statusMessage.style.color = '#333';
+    }, 5000);*/ 
+}
+
+// --- IndexedDB 操作邏輯 ---
+
+function initDB() {
+    return new Promise((resolve, reject) => {
+        if (dbInstance) {
+            resolve(dbInstance);
+            return;
+        }
+        const request = indexedDB.open(DB_NAME, DB_VERSION);
+        request.onupgradeneeded = (event) => {
+            const db = event.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "id" });
+            }
+        };
+        request.onsuccess = (event) => {
+            dbInstance = event.target.result;
+            resolve(dbInstance);
+        };
+        request.onerror = (event) => {
+            console.error("IndexedDB error:", event.target.errorCode);
+            reject("資料庫開啟失敗");
+        };
+    });
+}
+
+async function saveDataToDB(content) {
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const keyName = getDynamicKeyName();
+        const request = store.put({ id: keyName, content: content, timestamp: new Date() });
+        request.onsuccess = () => updateStatus(`已存入 ${keyName}`, 'success');
+        request.onerror = (e) => updateStatus("儲存失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}
+
+async function readDataFromDB() {
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const keyName = getDynamicKeyName();
+        const request = store.get(keyName);
+        encryptedContentArea.value = "";
+        //console.log("從 DB 讀取內容...", keyName);
+
+        // --- 核心修改：回傳並等待一個 Promise ---
+        return new Promise((resolve, reject) => {
+            request.onsuccess = (event) => {
+                const result = event.target.result;
+                if (result && result.content) {
+                    encryptedContentArea.value = result.content;
+                    updateStatus(`已讀取 ${keyName}`, 'success');
+                    //console.log("讀取內容:", encryptedContentArea.value);
+                    resolve(result.content); // 成功讀取，通知外部已完成
+                } else {
+                    updateStatus(`DB 中找不到 [${keyName}] 的資料`, 'error');
+                    resolve(null); // 找不到資料也算完成任務，但結果為 null
+                }
+            };
+
+            request.onerror = (e) => {
+                const errorMsg = "讀取失敗: " + e.target.error;
+                updateStatus(errorMsg, 'error');
+                reject(errorMsg); // 發生錯誤，通知外部失敗
+            };
+        });
+        // ---------------------------------------
+
+    } catch (err) {
+        updateStatus("DB 錯誤: " + err, 'error');
+        throw err; // 丟出錯誤讓外部 catch
+    }
+}
+
+let nowTab = "";
+
+// --- 主分頁切換邏輯 ---
+function openTab(evt, tabName) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+        //console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
+    }
+    tablinks = document.getElementsByClassName("tab-button");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+        //console.log(`重置分頁按鈕狀態: ${tablinks[i].textContent}`);
+    }
+    document.getElementById(tabName).classList.add("active");
+    if (evt && evt.currentTarget) {
+        evt.currentTarget.className += " active";
+        //console.log(`切換到分頁: ${tabName}, 按鈕: ${evt.currentTarget.textContent}`);
+    }
+    
+    if(tabName === 'TabA'){
+        //keyInput.style.display = "block";
+    }else{
+        //keyInput.style.display = "none";
+    }
+
+    nowTab = tabName;
+}
+
+function disableTab(){
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tab-content");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+        //console.log(`隱藏分頁內容: ${tabcontent[i].id}`);
+    }
+    
+}
+
+function showNowTab(){
+
+    //document.getElementById('TabA').style.display = "block";
+    //document.getElementById('TabB').style.display = "block";
+    openTab({ currentTarget: document.querySelector('.tab-button') }, nowTab);
+    
+}
+
+// --- 子分頁切換與編輯邏輯 ---
+function switchSubTab(blockId, enterEditMode = false) {
+    document.querySelectorAll('.sub-tab-button').forEach(btn => btn.classList.remove('active'));
+    const targetBtn = document.getElementById('sub-btn-' + blockId);
+    if (targetBtn) targetBtn.classList.add('active');
+
+    document.querySelectorAll('.sub-tab-content').forEach(content => content.classList.remove('active'));
+    const targetContent = document.getElementById('sub-content-' + blockId);
+    if (targetContent) {
+        targetContent.classList.add('active');
+        const nameInput = targetContent.querySelector('.block-name');
+        if (enterEditMode) {
+            nameInput.style.display = 'block';
+            nameInput.focus();
+        } else {
+            nameInput.style.display = 'none';
+        }
+    }
+}
+
+function handleSubTabClick(blockId) {
+    const btn = document.getElementById('sub-btn-' + blockId);
+    if (btn && btn.classList.contains('active')) {
+        switchSubTab(blockId, true);
+    } else {
+        switchSubTab(blockId, false);
+    }
+}
+
+function deleteSubTab(event, blockId) {
+    event.stopPropagation();
+    if (!confirm("確定要刪除這個分頁嗎？")) return;
+
+    const btn = document.getElementById(`sub-btn-${blockId}`);
+    const content = document.getElementById(`sub-content-${blockId}`);
+    const wasActive = btn.classList.contains('active');
+
+    btn.remove();
+    content.remove();
+
+    if (wasActive) {
+        const remainingBtns = document.querySelectorAll('.sub-tab-button');
+        if (remainingBtns.length > 0) {
+            const lastBtnId = remainingBtns[remainingBtns.length - 1].id.replace('sub-btn-', '');
+            switchSubTab(lastBtnId);
+        }
+    }
+    updateStatus("分頁已刪除", "info");
+}
+
+function addEditableBlock(title = null, content = "") {
+    blockCounter++;
+    const currentId = blockCounter;
+    const blockIdString = `block-${currentId}`;
+    const displayTitle = title || (currentId === 1 ? "封面" : `${currentId}`);
+
+    const newBtn = document.createElement('button');
+    newBtn.id = `sub-btn-${blockIdString}`;
+    newBtn.className = 'sub-tab-button';
+    newBtn.innerHTML = `
+        <span class="btn-text">${displayTitle}</span>
+        <span class="delete-sub-btn" title="刪除分頁">×</span>
+    `;
+    newBtn.onclick = () => handleSubTabClick(blockIdString);
+    
+    const delBtn = newBtn.querySelector('.delete-sub-btn');
+    delBtn.onclick = (e) => deleteSubTab(e, blockIdString);
+    
+    subTabNav.appendChild(newBtn);
+
+    const newContentDiv = document.createElement('div');
+    newContentDiv.id = `sub-content-${blockIdString}`;
+    newContentDiv.className = 'sub-tab-content';
+    newContentDiv.innerHTML = `
+        <input type="text" class="block-name" value="${displayTitle}" data-target-btn="sub-btn-${blockIdString}">
+        <textarea class="editable-text" placeholder="在此輸入筆記...">${content}</textarea>
+    `;
+    subTabContentContainer.appendChild(newContentDiv);
+
+    const nameInput = newContentDiv.querySelector('.block-name');
+    nameInput.addEventListener('input', function() {
+        const btnId = this.getAttribute('data-target-btn');
+        const btn = document.getElementById(btnId);
+        if (btn) {
+            const textSpan = btn.querySelector('.btn-text');
+            if (textSpan) textSpan.textContent = this.value;
+        }
+    });
+
+    nameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.blur();
+        }
+    });
+
+    nameInput.addEventListener('blur', function() {
+        this.style.display = 'none';
+        const parent = this.closest('.sub-tab-content');
+        if (parent) {
+             const area = parent.querySelector('.editable-text');
+             if(area) area.focus();
+        }
+    });
+
+    switchSubTab(blockIdString, false);
+}
+
+// --- 加密/解密 核心邏輯 (SHA512 + AES) ---
+// new one to fit with vp, support multiple blocks with structure
+function getContentFromTabB() {
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const nameInput = block.querySelector('.block-name');
+        const textarea = block.querySelector('.editable-text');
+        const title = nameInput.value || "_";
+        const text = textarea.value || "";
+        const safeTitle = btoa(unescape(encodeURIComponent(title))); 
+        const safeText = btoa(unescape(encodeURIComponent(text)));
+        const struct = `<<<<BLOCK_START_v2>>>>\n${safeTitle}\n<<<<TITLE_END>>>>\n${safeText}\n<<<<BLOCK_END>>>>`;
+        contents.push(struct);
+    });
+    //console.log(`從分頁 B 取得內容，總長度: ${contents.join('\n').length}, 區塊數: ${contents.length}, 預覽: ${contents.join('\n').substring(0, 100)}`);
+    return contents.join('\n');
+}
+
+function setContentToTabB(fullContent) {
+    subTabNav.innerHTML = '';
+    subTabContentContainer.innerHTML = '';
+    blockCounter = 0;
+
+    let parseType = "v2";
+    let blockStrings = fullContent.split('<<<<BLOCK_START_v2>>>>').filter(s => s.trim() !== "");
+    //console.log("使用新版解析方式...",blockStrings);
+    //console.log("org length:", fullContent.length, "blocks found:", blockStrings.length);
+    //console.log(`blockStrings length: ${blockStrings.length}, content preview: ${fullContent.substring(0, 999999)}, blockStrings[0].indexOf('<<<<TITLE_END>>>>'): ${blockStrings.length > 0 ? blockStrings[0].indexOf('<<<<TITLE_END>>>>') : 'N/A'}`); 
+
+    if (blockStrings.length === 0 || blockStrings[0].indexOf('<<<<TITLE_END>>>>') === -1) {   
+        console.log("使用舊版解析方式...");
+        const blockStrings2 = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
+        console.log("org length:", fullContent.length, "blocks found:", blockStrings2.length);
+        if (blockStrings2.length === 0) {
+            console.log("解密內容", fullContent);
+            return;
+        }
+        parseType = "v1";
+        blockStrings = blockStrings2;
+    }
+
+
+    //console.log(`parseType: ${parseType}, blocks to process: ${blockStrings.length}`);
+
+    blockStrings.forEach(blockStr => {
+        const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
+        const match = blockStr.match(regex);
+        //console.log(`parseType: ${parseType}, processing block, regex match: ${match !== null}, block length: ${blockStr.length}`);
+        if (match) {
+            const safeTitle = match[1].trim();
+            const title = parseType === "v2" ? decodeURIComponent(escape(atob(safeTitle))) : safeTitle;
+            const safeText = match[2].trim();
+            const text = parseType === "v2" ? decodeURIComponent(escape(atob(safeText))) : safeText;
+            addEditableBlock(title, text);
+        } else {
+            addEditableBlock("解析錯誤", blockStr);
+        }
+    });
+
+    if (blockCounter > 0) {
+        const firstId = document.querySelector('.sub-tab-button').id.replace('sub-btn-', '');
+        switchSubTab(firstId, false);
+    }
+}
+
+
+
+/* old one
+function getContentFromTabB() {
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const nameInput = block.querySelector('.block-name');
+        const textarea = block.querySelector('.editable-text');
+        const title = nameInput.value || "未命名";
+        const text = textarea.value || "";
+        const struct = `<<<<BLOCK_START>>>>\n${title}\n<<<<TITLE_END>>>>\n${text}\n<<<<BLOCK_END>>>>`;
+        contents.push(struct);
+    });
+    return contents.join('\n');
+}
+
+function setContentToTabB(fullContent) {
+    subTabNav.innerHTML = '';
+    subTabContentContainer.innerHTML = '';
+    blockCounter = 0;
+
+    const blockStrings = fullContent.split('<<<<BLOCK_START>>>>').filter(s => s.trim() !== "");
+    if (blockStrings.length === 0) {
+        addEditableBlock("解密內容", fullContent);
+        return;
+    }
+
+    blockStrings.forEach(blockStr => {
+        const regex = new RegExp(`(.*?)\n<<<<TITLE_END>>>>\n(.*?)<<<<BLOCK_END>>>>`, 's');
+        const match = blockStr.match(regex);
+        if (match) {
+            const title = match[1].trim();
+            const text = match[2].trim();
+            addEditableBlock(title, text);
+        } else {
+            addEditableBlock("解析錯誤", blockStr);
+        }
+    });
+
+    if (blockCounter > 0) {
+        const firstId = document.querySelector('.sub-tab-button').id.replace('sub-btn-', '');
+        switchSubTab(firstId, false);
+    }
+}
+*/
+
+
+// 按鈕事件 - 加密
+function encData(){
+    const key = getKey();
+    encryptedContentArea.value = "";
+    const content = getContentFromTabB();
+    if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
+    if (!content.trim()) { updateStatus("筆記無內容", 'error'); return false; }
+    try {
+        const keyHash = CryptoJS.SHA512(key).toString();
+        const encrypted = CryptoJS.AES.encrypt(content, keyHash).toString();
+        encryptedContentArea.value = encrypted;
+        updateStatus("加密成功！", 'success');
+    } catch (e) { updateStatus("加密失敗: " + e.message, 'error'); return false;}
+    return true;
+}
+
+
+//document.getElementById('encryptBtn').addEventListener('click', () => {});
+document.getElementById('encryptBtn').addEventListener('click', encData);
+
+
+function getKey(){
+    // passwd+bookname+salt
+    //return keyInput.value+getDynamicKeyName()+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+
+    // fit with vp
+    // passwd+salt
+    return keyInput.value+"Sy8ai12PJ4EEX9DmHWabqZRCMJEInt1pQh";
+}
+
+// 按鈕事件 - 解密
+function decData(){
+    const key = getKey();
+    const encryptedText = encryptedContentArea.value;
+    //console.log("取得密文內容...",encryptedText,encryptedContentArea.value);
+    if (!key || key.trim() === "") { alert("請輸入密鑰", 'error'); return false; }
+    //console.log("開始解密...",encryptedText);
+    if (!encryptedText) { updateStatus("無密文內容", 'error'); return; }
+    //console.log("有密文內容，進行解密...",encryptedText);
+    try {
+        const keyHash = CryptoJS.SHA512(key).toString();
+        const bytes = CryptoJS.AES.decrypt(encryptedText, keyHash);
+        const originalText = bytes.toString(CryptoJS.enc.Utf8);
+        if (originalText) {
+            //console.log("解密成功，載入內容至筆記分頁...");
+            setContentToTabB(originalText);
+            openTab({currentTarget: document.querySelectorAll('.tab-button')[0]}, 'TabB');
+            updateStatus("解密成功！", 'success');
+            //console.log("解密內容已載入至筆記分頁");
+        } else { updateStatus("解密失敗：確認密碼正確", 'error'); /*updateStatus("解密失敗：密鑰或內容錯誤", 'error'); */return false;}
+    } catch (e) { updateStatus("解密發生錯誤", 'error'); return false; }    
+    return true;
+}
+
+
+
+//document.getElementById('decryptBtn').addEventListener('click', () => {});
+document.getElementById('decryptBtn').addEventListener('click', decData);
+
+// 按鈕事件 - 複製
+document.getElementById('copyBtn').addEventListener('click', () => {
+    if(!encData()) return;
+
+    if (!encryptedContentArea.value) return;
+    navigator.clipboard.writeText(encryptedContentArea.value)
+        .then(() => updateStatus("密文已複製", 'success'))
+        .catch(() => updateStatus("複製失敗", 'error'));
+});
+
+// 按鈕事件 - 存入 DB
+
+function saveDBBtnHandler() {
+    if(!encData()) return;
+
+    const content = encryptedContentArea.value;
+    if (!content) { updateStatus("無內容可存", 'error'); return; }
+    saveDataToDB(content);
+    document.getElementById('saveDBBtn2').style.color = "black";
+    //console.log("已觸發存檔功能");
+}   
+
+document.getElementById('saveDBBtn').addEventListener('click', saveDBBtnHandler);
+
+//document.getElementById('TabB').addEventListener('keydown', function(e) {
+subTabContentContainer.addEventListener('keydown', function(e) {
+    //console.log("Key pressed in TabB:", e.ctrlKey , "key ", e.key);
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸') {
+        e.preventDefault();
+        saveDBBtnHandler();
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+    if (document.getElementById('saveDBBtn2').style.color === "black") {
+        document.getElementById('saveDBBtn2').style.color = "white";  
+    }
+    if (e.key === 'Tab') {
+        const activeDiv = document.querySelector('.sub-tab-content.active');
+        if (!activeDiv) {
+            console.log('沒有找到 active 的 .sub-tab-content');
+            return;
+        }
+        const activeContent = activeDiv.querySelector('textarea.editable-text');
+
+        if (activeContent) {
+            //console.log('找到了：', activeContent);
+            // 可以在這裡對該元素進行操作
+            // 1. 阻止瀏覽器預設的切換欄位行為
+            e.preventDefault();
+
+            // 2. 獲取當前游標的位置
+            const start = activeContent.selectionStart;
+            const end = activeContent.selectionEnd;
+            //console.log("游標位置：", start, end);
+
+            // 3. 設定要插入的字元（可以改為兩個或四個空格 "  "）
+            const tabChar = "\t"; 
+
+            // 4. 更新文字框內容：前半段 + Tab + 後半段
+            nowContent = activeContent.value;
+            if(nowContent === undefined) {
+                nowContent = "";
+                console.log("內容為 undefined，已設為空字串");  
+            }
+
+            //console.log("原內容：", nowContent);
+            activeContent.value = nowContent.substring(0, start) + 
+                        tabChar + 
+                        nowContent.substring(end);
+
+            // 5. 將游標移動到插入的 Tab 之後（否則游標會跳到最後面）
+            activeContent.selectionStart = activeContent.selectionEnd = start + tabChar.length;       
+            //console.log("更新後內容：", activeContent.value);                          
+        } else {
+            console.log('目前沒有 active 的項目');
+        }
+
+    }
+
+    
+});
+
+// 按鈕事件 - 讀取 DB
+
+
+async function readDBBtnHandler() {
+    try {
+        await readDataFromDB(); // 這裡會等到 resolve() 呼叫才繼續
+        //console.log("DB 讀取完成");
+        
+        while(!decData()){
+            aesKey = prompt("輸入書本密碼");
+            keyInput.value = aesKey;
+        }// 此時畫面上已經有值了，解密才會成功
+        //console.log("解密完成");
+    } catch (error) {
+        //console.error("執行過程中出錯:", error);
+    }
+}
+
+document.getElementById('readDBBtn').addEventListener('click', readDBBtnHandler);
+
+// --- 新增功能：匯出 (下載為檔案，含時分秒) ---
+document.getElementById('exportBtn').addEventListener('click', () => {
+    if(!encData()) return;
+
+    const content = encryptedContentArea.value;
+    if (!content) { updateStatus("無內容可匯出", 'error'); return; }
+
+    const blob = new Blob([content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // 生成時間戳記: YYYY-MM-DD_HHmmss
+    const now = new Date();
+    const y = now.getFullYear();
+    const m = String(now.getMonth() + 1).padStart(2, '0');
+    const d = String(now.getDate()).padStart(2, '0');
+    const h = String(now.getHours()).padStart(2, '0');
+    const min = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    
+    //const timeString = `${y}-${m}-${d}_${h}${min}${s}`;
+    const timeString = `${y}${m}${d}${h}${min}${s}`;
+    
+    const keyName = getDynamicKeyName();
+    a.download = `cNote_${keyName}_${timeString}.txt`;
+    
+    document.body.appendChild(a);
+    a.click();
+    
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    updateStatus("已下載匯出檔案", 'success');
+});
+
+// --- 新增功能：匯入 (從檔案讀取) ---
+document.getElementById('importBtnTrigger').addEventListener('click', () => {
+    document.getElementById('importFile').click();
+});
+
+document.getElementById('importFile').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        encryptedContentArea.value = e.target.result;
+        updateStatus("檔案已匯入至密文區 (請解密或存DB)", 'success');
+        document.getElementById('importFile').value = '';
+    };
+    reader.readAsText(file);
+    decData();
+});
+
+
+document.getElementById('addSubPageBtn').addEventListener('click', () => {
+    addEditableBlock();
+});
+
+
+
+// --- 更改冊名按鈕邏輯 ---
+function changeKeyName(){
+    const keyNameInput = document.getElementById('keyNameDef');
+
+    if(keyNameInput.style.display === "none"){
+        keyNameInput.style.display = "block";
+        keyNameInput.value = getDynamicKeyName();
+        keyNameInput.focus();
+    }else{
+        const newName = keyNameInput.value.trim();
+        if(newName === ""){
+            alert("冊名不可為空！");
+            return;
+        }
+        gKeyName = newName;
+        keyNameInput.style.display = "none";
+        document.title = gKeyName;
+        updateStatus(`冊名已更改為: ${gKeyName}`, 'success');
+        //readDBBtnHandler();
+    }
+}   
+document.getElementById('keyNameDef').style.display = "none";
+document.getElementById('keyNameDef').addEventListener('keydown', function(e) {
+    //console.log("Key pressed in keyNameDef input");
+    if(e.key === 'Enter'){
+        changeKeyName();
+    }
+    
+});
+
+// --- 刪除冊名按鈕邏輯 ---
+async function deleteKeyName(){
+    const delNameInput = document.getElementById('delNameDef');
+    const delName = delNameInput.value.trim();
+    if(delNameInput.style.display === "none"){
+        delNameInput.style.display = "block";
+        delNameInput.focus();
+        return;
+    }else{  
+        delNameInput.style.display = "none";
+        delNameInput.value = "";
+    }
+    if(delName === ""){
+        alert("請輸入欲刪除的冊名！");
+        return;
+    }
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readwrite");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.delete(delName);
+        request.onsuccess = () => updateStatus(`已刪除冊名 ${delName}`, 'success');
+        request.onerror = (e) => updateStatus("刪除失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}   
+document.getElementById('delNameDef').style.display = "none";
+document.getElementById('delNameDef').value = "";
+/*document.getElementById('delNameDef').addEventListener('keydown', function(e) {
+    if(e.key === 'Enter'){
+        deleteKeyName();
+    }
+});
+*/
+
+
+// --- 列出所有冊名按鈕邏輯 ---
+async function listKeyNames(){
+    try {
+        const db = await initDB();
+        const transaction = db.transaction([STORE_NAME], "readonly");
+        const store = transaction.objectStore(STORE_NAME);
+        const request = store.getAllKeys();
+        request.onsuccess = (event) => {
+            const keys = event.target.result;
+            if (keys.length === 0) {
+                alert("資料庫中沒有任何冊名。");
+                return;
+            }
+            //alert("目前資料庫中的冊名：\n" + keys.join("\n"));
+            document.getElementById('encryptedContent').value = "目前資料庫中的冊名：\n" + keys.join("\n");
+            updateStatus(`已列出 ${keys.length} 個冊名`, 'success');
+        };
+        request.onerror = (e) => updateStatus("讀取冊名失敗: " + e.target.error, 'error');
+    } catch (err) { updateStatus("DB 錯誤: " + err, 'error'); }
+}   
+
+
+// change AES Key function
+function changeAesKey() {
+    const newKey = prompt("請輸入新的 AES 密鑰:", "");
+
+    if (newKey !== null) {
+        const confirmKey = prompt("請再次輸入新的 AES 密鑰以確認:", "");
+        if (confirmKey === null) {
+            updateStatus("密鑰更新取消", 'info');
+            return;
+        }else{
+            if (newKey === confirmKey) {
+                keyInput.value = newKey;
+                updateStatus("AES 密鑰已更新", 'success');
+                return;
+            } else {
+                updateStatus("兩次輸入的密鑰不一致，請重新輸入。", 'error');
+                return;
+            }
+        }
+    }else {
+        updateStatus("密鑰更新取消", 'info');
+        return;
+    }
+}
+
+
+// 編輯區鍵盤事件 - Ctrl+S 儲存
+subTabContentContainer.addEventListener('keydown', function(e) {
+    //console.log("Key pressed in TabB:", e);
+    //doTextChange();
+    // --- 偵測 Ctrl+S (包含大小寫 S 和中文輸入法下的 S) ---
+    if (e.ctrlKey && e.key === 's' || e.ctrlKey && e.key === 'S' || e.ctrlKey && e.key === '尸' || e.altKey && e.key === 's' || e.altKey && e.key === 'ß' || e.altKey && e.key === '尸' || e.metaKey && e.key === 's' || e.metaKey && e.key === 'S' || e.metaKey && e.key === '尸') {
+        e.preventDefault();
+        saveDBBtnHandler()
+        //console.log("Ctrl+S 偵測到，已觸發存檔功能");
+        return;
+    }
+
+  
+
+    // --- Tab 鍵插入 Tab 字元邏輯 ---
+    if (e.key === 'Tab') {
+        const activeDiv = document.querySelector('.sub-tab-content.active');
+        if (!activeDiv) {
+            console.log('沒有找到 active 的 .sub-tab-content');
+            return;
+        }
+        const activeContent = activeDiv.querySelector('textarea.editable-text');
+
+        if (activeContent) {
+            //console.log('找到了：', activeContent);
+            // 可以在這裡對該元素進行操作
+            // 1. 阻止瀏覽器預設的切換欄位行為
+            e.preventDefault();
+
+            // 2. 獲取當前游標的位置
+            const start = activeContent.selectionStart;
+            const end = activeContent.selectionEnd;
+            //console.log("游標位置：", start, end);
+
+            // 3. 設定要插入的字元（可以改為兩個或四個空格 "  "）
+            const tabChar = "\t"; 
+
+            // 4. 更新文字框內容：前半段 + Tab + 後半段
+            nowContent = activeContent.value;
+            if(nowContent === undefined) {
+                nowContent = "";
+                console.log("內容為 undefined，已設為空字串");  
+            }
+
+            //console.log("原內容：", nowContent);
+            activeContent.value = nowContent.substring(0, start) + 
+                        tabChar + 
+                        nowContent.substring(end);
+
+            // 5. 將游標移動到插入的 Tab 之後（否則游標會跳到最後面）
+            activeContent.selectionStart = activeContent.selectionEnd = start + tabChar.length;       
+            //console.log("更新後內容：", activeContent.value);                          
+        } else {
+            console.log('目前沒有 active 的項目');
+        }
+
+    }
+});
+
+// --- 取得 TabB 內容，準備顯示在 TabC 的 Markdown 預覽 --- 
+function getTextFromTabB() {
+    const contents = [];
+    const blocks = document.querySelectorAll('.sub-tab-content');
+    blocks.forEach(block => {
+        const textarea = block.querySelector('.editable-text');
+        const text = textarea.value || "";
+        contents.push(text);
+    });
+    return contents.join('\n');
+}
+
+
+
+
+// show markdown in TabC -----------------
+const myMarked = new marked.Marked();
+
+// 1. 處理標題 ID
+const gfmHeadingId = window.markedGfmHeadingId.gfmHeadingId;
+myMarked.use(gfmHeadingId());
+
+// 2. 定義 Mermaid 邏輯
+/*
+const rendererMermaid = {
+  // 這裡我們把參數寫成 (token, infostring)，以相容新舊版
+  code(token, infostring) {
+    // 1. 判斷是新版 token 物件還是舊版字串
+    const isNewVersion = typeof token === 'object';
+    
+    // 2. 取出真正的 code 內容與語言標籤
+    const actualCode = isNewVersion ? token.text : token;
+    const lang = (isNewVersion ? token.lang : infostring) || "";
+    
+    console.log("偵測到的語言:", `[${lang}]`); 
+
+    // 3. 執行判斷 (使用 trim() 並轉小寫)
+    if (lang.trim().toLowerCase() === 'mermaid') {
+      console.log("成功進入 Mermaid 渲染");
+      return `<div class="mermaid">${actualCode}</div>`;
+    }
+
+    // 4. 如果不是 mermaid，回傳 false
+    return false; 
+  }
+};*/
+
+/*
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    start(src) { 
+        // 加上 [^] 確保它能從任何位置偵測到 mermaid 的開始
+        const match = src.match(/```mermaid/);
+        return match ? match.index : undefined;
+    },
+    tokenizer(src) {
+        // 關鍵修正 1：移除結尾的 \n，因為 Marked 會切分字串，結尾不一定有換行
+        // 關鍵修正 2：移除 /g 標籤。在 tokenizer 中使用 exec + /g 會導致索引移位
+        const rule = /^```mermaid[\s\u200B]*\r?\n([\s\S]*?)\r?\n[\s\u200B]*```/;
+        
+        const match = rule.exec(src);
+        if (match) {
+            return {
+                type: 'mermaid',
+                raw: match[0], // 包含 ``` 的完整字串，讓 Marked 知道這段已經處理完
+                text: match[1].trim() // 純粹的 Mermaid 語法內容
+            };
+        }
+    },
+    renderer(token) {
+        // 渲染成 mermaid 預設的 class，之後呼叫 mermaid.run() 即可
+        return `<div class="mermaid">${token.text}</div>`;
+    }
+};*/
+
+/*
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    // 判斷是否為 mermaid 區塊的起手式
+    start(src) { 
+        //console.log("start", src.match(/^```mermaid/)?.index);
+        return src.match(/^```mermaid/)?.index;
+    },
+    tokenizer(src) {
+        //console.log(JSON.stringify(src));
+        const rule = /^```mermaid[\s\u200B]*\n([\s\S]*?)\n[\s\u200B]*```\n/g;
+        const match = rule.exec(src);
+        if (match) {
+            //console.log("match", match[0])
+            return {
+                type: 'mermaid',
+                raw: match[0],
+                text: match[1]
+            };
+        }
+    },
+    renderer(token) {
+        return `<div class="mermaid">${token.text}</div>`;
+    }
+};
+*/
+
+mermaid.initialize({
+  startOnLoad: true,
+  theme: 'dark', // 可選：'default', 'neutral', 'dark', 'forest', 'base'
+});
+const mermaidExtension = {
+    name: 'mermaid',
+    level: 'block',
+    start(src) { 
+        // 加上 [^] 確保它能從任何位置偵測到 mermaid 的開始
+        const match = src.match(/```mermaid/);
+        return match ? match.index : undefined;
+    },
+    tokenizer(src) {
+        // 關鍵修正 1：移除結尾的 \n，因為 Marked 會切分字串，結尾不一定有換行
+        // 關鍵修正 2：移除 /g 標籤。在 tokenizer 中使用 exec + /g 會導致索引移位
+        const rule = /^```mermaid[\s\u200B]*\r?\n([\s\S]*?)\r?\n[\s\u200B]*```/;
+        
+        const match = rule.exec(src);
+        if (match) {
+            console.log("match 0:\n",match[0]);
+            console.log("match 1:\n",match[1]);
+            return {
+                type: 'mermaid',
+                raw: match[0], // 包含 ``` 的完整字串
+                // 關鍵修正 3：強制移除所有 \r 字元。Mindmap 對 CRLF 極度敏感，這能解決找不到 parent 的問題
+                //text: match[1].replace(/\r/g, '').trim() 
+                //text: match[1].trim()
+                text: match[1]
+            };
+        }
+    },
+    
+    renderer(token) {
+        // 關鍵修正 4：將 <div> 改為 <pre> 標籤。
+        // <pre> 能確保瀏覽器在 Mermaid 介入前，原封不動地保留所有的空白縮排
+        const cleanContent = token.text.replace(/\r\n/g, '\n');
+        //console.log("交給 Mermaid 的最終內容：\n", JSON.stringify(cleanContent));
+        console.log("交給 Mermaid 的最終內容：\n", cleanContent);
+        return `<pre class="mermaid">${cleanContent}</pre>`;
+    }
+   /*
+    renderer(token) {
+        // 1. 強制將內容中的全形空白 (NBSP) 轉為半形空格
+        // 2. 移除每一行開頭可能多出來的雜質
+        const cleanText = token.text
+            .replace(/\u00A0/g, ' ')  // 處理隱形字元
+            .replace(/^[\s\t]+/gm, (m) => m.replace(/\t/g, '  ')); // 將 Tab 轉為空格 (Mermaid 較偏好空格)
+
+        console.log("交給 Mermaid 的最終內容：\n", cleanText);
+        return `<div class="mermaid">${cleanText}</div>`;
+    }*/
+};
+
+// 注入擴展
+myMarked.use({ extensions: [mermaidExtension] });
+
+
+const rendererHrefCheck = {
+  link(token) {
+    const isNewVersion = typeof token === 'object';
+    const href = isNewVersion ? token.href : arguments[0];
+
+    if (href && href.startsWith('#')) {
+      const title = isNewVersion ? token.title : arguments[1];
+      const text = isNewVersion ? token.text : arguments[2];
+      const titleAttr = title ? ` title="${title}"` : '';
+      return `<a href="${href}" target="_self"${titleAttr}>${text}</a>`;
+    }
+    return false; 
+  }
+};
+
+myMarked.use({ 
+  renderer: {
+    ...rendererHrefCheck
+  } 
+});
+
+
+async function showMarkdownView() {
+    const content = getTextFromTabB();
+    const mdArea = document.getElementById('mdShowArea');
+    if (content.trim() === "") {
+        mdArea.value = "沒有內容可顯示";
+        return;
+    }
+    if(mdArea.innerHTML === ""){
+
+        // 確保 content 本身是乾淨的
+        //const cleanContent = content.replace(/[\u00A0\u200B\uFEFF\u200C\u200D]/g, ' ').trim();
+        const cleanContent = content;
+        // 為了保險，處理每一行開頭可能出現的特殊空白 (Non-breaking space)
+        //const sanitizedContent = cleanContent.replace(/^\s+/gm, '');
+        const sanitizedContent = content;
+
+        mdArea.innerHTML = myMarked.parse(sanitizedContent);
+
+        mdArea.style.display = "block";
+        disableTab();        
+
+        // 執行 Mermaid 渲染
+        await mermaid.run({
+            nodes: document.querySelectorAll('.mermaid'),
+        });
+
+
+        updateStatus(`呈現markdown畫面`, 'info');
+    }else{
+        mdArea.innerHTML = "";
+        mdArea.style.display = "none";
+        showNowTab();
+        updateStatus(`關閉markdown`, 'info');
+    }
+
+}   
+
+backToTopBtn.addEventListener("click", function() {
+
+        mdShowArea.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+        window.location.href = "#";
+
+});
+
+
+// --- 初始化 ---
+document.addEventListener('DOMContentLoaded', () => {
+    openTab({ currentTarget: document.querySelector('.tab-button') }, 'TabB');
+    addEditableBlock();
+    initDB();
+    
+    // 根據 URL 參數設定初始 Key 名稱，並顯示在標題上
+    const currentKey = getDynamicKeyName();
+    document.title = currentKey; 
+    updateStatus(`使用 ID: ${currentKey}`, 'info');
+    
+    //開始時，讀取 DB 內容（如果有的話）
+    readDBBtnHandler();
+
+    // 定時存入 DB（每 5 分鐘）
+    setInterval(() => {
+        saveDBBtnHandler();
+    }, 5 * 60 * 1000);  
+
+    // 文字已存檔
+    document.getElementById('saveDBBtn2').style.color = "black";
+    keyInput.style.display = "none"
+});
+
+    </script>
+</body>
+</html>
