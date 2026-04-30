@@ -1308,7 +1308,7 @@ function generateTableOfContents() {
   
   // 抓取 content 區塊內所有的標題 (h1 ~ h6)
   //const headings = contentDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  const headings = contentDiv.querySelectorAll('h1, h2');
+  const headings = contentDiv.querySelectorAll('h1');
   
   if (headings.length === 0) return;
 // 改用一個簡單的容器包覆，加上 line-height 確保字體大小不同時換行不擁擠
