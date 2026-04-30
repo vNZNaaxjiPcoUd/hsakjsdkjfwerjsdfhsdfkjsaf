@@ -69,7 +69,7 @@ html {
   top: 20px;
   z-index: 1000;
   padding: 10px 15px;
-  background-color: #0056b3;
+  background-color: #0057b38c;
   color: white;
   border: none;
   cursor: pointer;
@@ -85,7 +85,7 @@ html {
   right: -250px;           /* 【修改】預設往右移 250px 把自己藏在螢幕右側外 */
   width: 250px;
   height: 100vh;
-  background-color: #f8f9fa;
+  background-color: #b9d68bf1;
   box-shadow: -2px 0 5px rgba(0,0,0,0.1);
   transition: right 0.3s ease; /* 【修改】動畫改成針對 right 屬性 */
   z-index: 999;
@@ -1316,13 +1316,18 @@ function generateTableOfContents() {
 
   headings.forEach(heading => {
     const id = heading.id; 
-    const text = heading.textContent;
+    const originalText = heading.textContent;
     const level = parseInt(heading.tagName.replace('H', '')); 
     
+    // 【重點修改】判斷字數，超過 10 個字就取前 10 個字並加上 '...'
+    const displayText = originalText.length > 10 
+      ? originalText.substring(0, 10) + '...' 
+      : originalText;
+
     // 【重點修改】計算字體大小
     // 假設基準為 24px (H1)，每降一級減 3px
     // H1=24px, H2=21px, H3=18px, H4=15px, H5=12px, H6=9px
-    const fontSize = 24 - (level - 1) * 3; 
+    const fontSize = 20 - (level - 1) * 2; 
 
     // 直接生成帶有樣式的 <a> 標籤，並用 margin-right 稍微隔開每個標題
     tocHTML += `
@@ -1336,14 +1341,14 @@ function generateTableOfContents() {
            display: inline-block;
          "
       >
-        ${text}
+        ${displayText}
       </a>
     `;
   });
 
   //tocHTML += `<button id="ddd" class="control-btn" title="回到最前面" onclick="gotoTop();">Top</button>`;
-  tocHTML += `<div style="
-           font-size: 24px; 
+  tocHTML += `<br><div style="
+           font-size: 20px; 
            margin-right: 12px; 
            text-decoration: none; 
            color: #0056b3;
