@@ -82,14 +82,14 @@ html {
   box-sizing: border-box;  /* 【加入這行】讓 padding 往內擠，維持總寬 250px */
   position: fixed;
   top: 0;
-  right: -250px;           /* 【修改】預設往右移 250px 把自己藏在螢幕右側外 */
-  width: 250px;
+  right: -350px;           /* 【修改】預設往右移 250px 把自己藏在螢幕右側外 */
+  width: 350px;
   height: 100vh;
   background-color: #b9d68bf1;
   box-shadow: -2px 0 5px rgba(0,0,0,0.1);
   transition: right 0.3s ease; /* 【修改】動畫改成針對 right 屬性 */
   z-index: 999;
-  padding: 60px 20px 20px;
+  padding: 30px 20px 20px;
   overflow-y: auto;
 }
 
@@ -1314,20 +1314,28 @@ function generateTableOfContents() {
 // 改用一個簡單的容器包覆，加上 line-height 確保字體大小不同時換行不擁擠
   let tocHTML = '<div style="line-height: 2; word-break: break-word;">';
 
+    tocHTML += `<div style="
+            font-size: 20px; 
+            margin-right: 12px; 
+            text-decoration: none; 
+            color: #0056b3;
+            display: inline-block;
+            " onclick="gotoTop();">Top</div><br>`;
+
   headings.forEach(heading => {
     const id = heading.id; 
     const originalText = heading.textContent;
     const level = parseInt(heading.tagName.replace('H', '')); 
     
     // 【重點修改】判斷字數，超過 10 個字就取前 10 個字並加上 '...'
-    const displayText = originalText.length > 10 
-      ? originalText.substring(0, 10) + '...' 
+    const displayText = originalText.length > 17 
+      ? originalText.substring(0, 17) + '.' 
       : originalText;
 
     // 【重點修改】計算字體大小
     // 假設基準為 24px (H1)，每降一級減 3px
     // H1=24px, H2=21px, H3=18px, H4=15px, H5=12px, H6=9px
-    const fontSize = 20 - (level - 1) * 2; 
+    const fontSize = 16 - (level - 1) * 1; 
 
     // 直接生成帶有樣式的 <a> 標籤，並用 margin-right 稍微隔開每個標題
     tocHTML += `
@@ -1335,25 +1343,18 @@ function generateTableOfContents() {
          target="_self"
          style="
            font-size: ${fontSize}px; 
-           margin-right: 12px; 
+           margin-right: 3px; 
            text-decoration: none; 
            color: #0056b3;
            display: inline-block;
          "
       >
         ${displayText}
-      </a>
+      </a><br>
     `;
   });
 
-  //tocHTML += `<button id="ddd" class="control-btn" title="回到最前面" onclick="gotoTop();">Top</button>`;
-  tocHTML += `<br><div style="
-           font-size: 20px; 
-           margin-right: 12px; 
-           text-decoration: none; 
-           color: #0056b3;
-           display: inline-block;
-         " onclick="gotoTop();">Top</div>`;
+
   tocHTML += '</div>';
   
   // 將生成的目錄渲染到畫面上
