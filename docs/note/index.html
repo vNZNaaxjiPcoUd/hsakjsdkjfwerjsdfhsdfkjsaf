@@ -16,17 +16,30 @@
 
 <style>
 
+html {
+  scroll-behavior: smooth;
+}
+
 .control-btn {
     background-color: #a400c1;
 }
 
 #mdShowArea {
-    height: 160vh;
+    /*height: 160vh;*/
+}
+#mkdwPage {
+    /*height: 160vh;*/
+    width: 100%;
+    max-width: 100%;      /* 確保絕對不會超過父層 */
+    overflow-y: auto;
+    overflow-x: hidden;   /* 強制隱藏水平捲軸，防止意外溢出 */
+    -webkit-overflow-scrolling: touch;     
+    height: 100dvh;
 }
 
         #backToTopBtn {
             position: fixed;      /* 固定在畫面上，不隨捲軸移動 */
-            top: 2dvw;         /* 距離底部 30px */
+            button: 2dvw;         /* 距離底部 30px */
             right: 3dvw;           /* 距離左邊 30px */
             width: 30px;          /* 寬度 50px */
             height: 20px;         /* 高度 50px */
@@ -47,6 +60,44 @@
             transform: scale(1.1);     /* 按鈕稍微放大 */
         }
 
+
+/* --- 按鈕樣式 --- */
+/* --- 按鈕樣式 (移到右上角) --- */
+#toc-btn {
+  position: fixed;
+  right: 0;                /* 【修改】靠右 */
+  top: 20px;
+  z-index: 1000;
+  padding: 10px 15px;
+  background-color: #0056b3;
+  color: white;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px 0 0 5px; /* 【修改】左邊圓角，右邊平的貼齊螢幕 */
+  box-shadow: -2px 2px 5px rgba(0,0,0,0.2); /* 陰影方向稍微往左下打 */
+}
+
+/* --- 目錄側邊欄樣式 (移到右側) --- */
+.toc-sidebar {
+  box-sizing: border-box;  /* 【加入這行】讓 padding 往內擠，維持總寬 250px */
+  position: fixed;
+  top: 0;
+  right: -250px;           /* 【修改】預設往右移 250px 把自己藏在螢幕右側外 */
+  width: 250px;
+  height: 100vh;
+  background-color: #f8f9fa;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  transition: right 0.3s ease; /* 【修改】動畫改成針對 right 屬性 */
+  z-index: 999;
+  padding: 60px 20px 20px;
+  overflow-y: auto;
+}
+
+/* --- 展開時的樣式 --- */
+.toc-sidebar.open {
+  right: 0;                 /* 【修改】變成 0，目錄就會從右邊滑進畫面內 */
+}
+
 </style>
 </head>
 <body>
@@ -59,7 +110,12 @@
             <button class="tab-button" id="addSubPageBtn" title="新增小冊">增</button>
             <button class="tab-button" id="saveDBBtn2" title="儲存書冊" onclick="saveDBBtnHandler()">存</button>
         </div>
-        <div id="mdShowArea" style="display:none"></div>
+        <div id="mkdwPage">
+            <button id="toc-btn">☰</button>
+            <button id="backToTopBtn" title="回到最前面">^</button>
+            <nav id="toc" class="toc-sidebar"></nav>
+            <div id="mdShowArea" style="display:none"></div>
+        </div>
         <div id="TabA" class="tab-content">
             <div class="control-row">
                 <!--input type="password" id="aesKey" value="YGG636zJCXhelP0SEpqN7h1xRGXOUtezGg2LSpcLWuNh8g8z!!" placeholder="輸入 AES 密鑰"-->
@@ -113,7 +169,7 @@
     
     <div id="statusMessage" class="status-info"  onclick="showMarkdownView()">待...</div>
 
-    <button id="backToTopBtn" title="回到最前面">^</button>
+
     <script>
 
 // --- 全局變數 ---
@@ -322,7 +378,7 @@ function disableTab(){
     let TabBtn = document.getElementById("TAB-BTN");
     TabBtn.style.display="none";
     let backToTopBtn = document.getElementById("backToTopBtn");
-    backToTopBtn.style.display="block";    
+    backToTopBtn.style.display="none";    
     
 }
 
@@ -1205,6 +1261,7 @@ async function showMarkdownView() {
         mdArea.innerHTML = myMarked.parse(sanitizedContent);
 
         mdArea.style.display = "block";
+        document.getElementById('mkdwPage').style.display = "block";
         disableTab();        
 
         // 執行 Mermaid 渲染
@@ -1212,11 +1269,13 @@ async function showMarkdownView() {
             nodes: document.querySelectorAll('.mermaid'),
         });
 
+        generateTableOfContents();
 
         updateStatus(`呈現markdown畫面`, 'info');
     }else{
         mdArea.innerHTML = "";
         mdArea.style.display = "none";
+        document.getElementById('mkdwPage').style.display = "none";
         showNowTab();
         updateStatus(`關閉markdown`, 'info');
     }
@@ -1226,7 +1285,7 @@ async function showMarkdownView() {
 
 backToTopBtn.addEventListener("click", function() {
 
-        mdShowArea.scrollTo({
+        mkdwPage.scrollTo({
             top: 0,
             behavior: "smooth"
         });
@@ -1234,6 +1293,96 @@ backToTopBtn.addEventListener("click", function() {
 
 });
 
+function gotoTop(){
+        mkdwPage.scrollTo({
+            top: 0,
+            behavior: "smooth"
+        });
+}
+
+
+
+function generateTableOfContents() {
+  const tocDiv = document.getElementById('toc');
+  const contentDiv = document.getElementById("mdShowArea");
+  
+  // 抓取 content 區塊內所有的標題 (h1 ~ h6)
+  //const headings = contentDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
+  const headings = contentDiv.querySelectorAll('h1, h2');
+  
+  if (headings.length === 0) return;
+// 改用一個簡單的容器包覆，加上 line-height 確保字體大小不同時換行不擁擠
+  let tocHTML = '<div style="line-height: 2; word-break: break-word;">';
+
+  headings.forEach(heading => {
+    const id = heading.id; 
+    const text = heading.textContent;
+    const level = parseInt(heading.tagName.replace('H', '')); 
+    
+    // 【重點修改】計算字體大小
+    // 假設基準為 24px (H1)，每降一級減 3px
+    // H1=24px, H2=21px, H3=18px, H4=15px, H5=12px, H6=9px
+    const fontSize = 24 - (level - 1) * 3; 
+
+    // 直接生成帶有樣式的 <a> 標籤，並用 margin-right 稍微隔開每個標題
+    tocHTML += `
+      <a href="#${id}" 
+         target="_self"
+         style="
+           font-size: ${fontSize}px; 
+           margin-right: 12px; 
+           text-decoration: none; 
+           color: #0056b3;
+           display: inline-block;
+         "
+      >
+        ${text}
+      </a>
+    `;
+  });
+
+  //tocHTML += `<button id="ddd" class="control-btn" title="回到最前面" onclick="gotoTop();">Top</button>`;
+  tocHTML += `<div style="
+           font-size: 24px; 
+           margin-right: 12px; 
+           text-decoration: none; 
+           color: #0056b3;
+           display: inline-block;
+         " onclick="gotoTop();">Top</div>`;
+  tocHTML += '</div>';
+  
+  // 將生成的目錄渲染到畫面上
+  tocDiv.innerHTML = tocHTML;
+}
+
+// 執行生成目錄的函式
+//generateTableOfContents();
+
+// 取得按鈕和目錄元素
+const tocBtn = document.getElementById('toc-btn');
+const tocSidebar = document.getElementById('toc');
+
+// 監聽按鈕點擊事件
+tocBtn.addEventListener('click', () => {
+  // toggle() 的作用是：如果沒有 'open' 就加上去，如果有就移除掉
+  tocSidebar.classList.toggle('open');
+  
+  // (可選) 讓按鈕文字跟著改變
+  if (tocSidebar.classList.contains('open')) {
+    tocBtn.innerHTML = '✖';
+  } else {
+    tocBtn.innerHTML = '☰';
+  }
+});
+
+// (可選進階體驗) 點擊目錄裡的任何一個連結後，自動收起側邊欄
+tocSidebar.addEventListener('click', (e) => {
+  // 檢查被點擊的是不是 <a> 標籤
+  //if (e.target.tagName.toLowerCase() === 'a') {
+    tocSidebar.classList.remove('open');
+    tocBtn.innerHTML = '☰';
+  //}
+});
 
 // --- 初始化 ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -1257,6 +1406,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 文字已存檔
     document.getElementById('saveDBBtn2').style.color = "black";
     keyInput.style.display = "none"
+    document.getElementById('mkdwPage').style.display = "none";
 });
 
     </script>
