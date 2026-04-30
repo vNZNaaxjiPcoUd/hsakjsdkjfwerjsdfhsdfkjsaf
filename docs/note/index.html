@@ -1328,8 +1328,15 @@ function generateTableOfContents() {
     const level = parseInt(heading.tagName.replace('H', '')); 
     
     // 【重點修改】判斷字數，超過 10 個字就取前 10 個字並加上 '...'
-    const displayText = originalText.length > 17 
-      ? originalText.substring(0, 17) + '.' 
+// 1. 檢查字串是否包含中文字 (Unicode 範圍)
+    const hasChinese = /[\u4e00-\u9fa5]/.test(originalText);
+    
+    // 2. 根據是否有中文，決定截斷的字數上限
+    const limit = hasChinese ? 17 : 30;
+
+    // 3. 套用限制 (這裡幫你加上 ... 讓視覺更清楚，如果你只要一個 . 可以自行改回)
+    const displayText = originalText.length > limit 
+      ? originalText.substring(0, limit) + '...' 
       : originalText;
 
     // 【重點修改】計算字體大小
