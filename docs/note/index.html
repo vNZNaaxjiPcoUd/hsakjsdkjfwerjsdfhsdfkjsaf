@@ -37,67 +37,6 @@ html {
     height: 100dvh;
 }
 
-        #backToTopBtn {
-            position: fixed;      /* 固定在畫面上，不隨捲軸移動 */
-            button: 2dvw;         /* 距離底部 30px */
-            right: 3dvw;           /* 距離左邊 30px */
-            width: 30px;          /* 寬度 50px */
-            height: 20px;         /* 高度 50px */
-            border-radius: 50%;   /* 讓按鈕變成正圓形 */
-            background-color: #26ff003f; /* 按鈕背景顏色 (藍色) */
-            color: white;         /* 箭頭顏色 (白色) */
-            border: none;         /* 移除預設邊框 */
-            font-size: 14px;      /* 箭頭大小 */
-            cursor: pointer;      /* 滑鼠移過去變成手指形狀 */
-            z-index: 1000;        /* 確保按鈕不會被其他元素蓋住 */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* 加上一點陰影增加立體感 */
-            transition: all 0.3s; /* 讓 hover 動畫更順暢 */
-        }
-
-        /* 滑鼠移到按鈕上方時的特效 */
-        #backToTopBtn:hover {
-            background-color: #0056b3; /* 顏色變深 */
-            transform: scale(1.1);     /* 按鈕稍微放大 */
-        }
-
-
-/* --- 按鈕樣式 --- */
-/* --- 按鈕樣式 (移到右上角) --- */
-#toc-btn {
-  position: fixed;
-  right: 0;                /* 【修改】靠右 */
-  top: 20px;
-  z-index: 1000;
-  padding: 10px 15px;
-  background-color: #0057b38c;
-  color: white;
-  border: none;
-  cursor: pointer;
-  border-radius: 5px 0 0 5px; /* 【修改】左邊圓角，右邊平的貼齊螢幕 */
-  box-shadow: -2px 2px 5px rgba(0,0,0,0.2); /* 陰影方向稍微往左下打 */
-}
-
-/* --- 目錄側邊欄樣式 (移到右側) --- */
-.toc-sidebar {
-  box-sizing: border-box;  /* 【加入這行】讓 padding 往內擠，維持總寬 250px */
-  position: fixed;
-  top: 0;
-  right: -350px;           /* 【修改】預設往右移 250px 把自己藏在螢幕右側外 */
-  width: 350px;
-  height: 100vh;
-  background-color: #b9d68bf1;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-  transition: right 0.3s ease; /* 【修改】動畫改成針對 right 屬性 */
-  z-index: 999;
-  padding: 30px 20px 20px;
-  overflow-y: auto;
-}
-
-/* --- 展開時的樣式 --- */
-.toc-sidebar.open {
-  right: 0;                 /* 【修改】變成 0，目錄就會從右邊滑進畫面內 */
-}
-
 </style>
 </head>
 <body>

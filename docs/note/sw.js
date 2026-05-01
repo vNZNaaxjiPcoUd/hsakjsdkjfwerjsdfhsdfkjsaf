@@ -1,4 +1,4 @@
-const CACHE_NAME = 'go-game-v1.1';
+const CACHE_NAME = 'local-note-v1.2';
 const urlsToCache = [
   './',
   './index.html',
