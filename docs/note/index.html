@@ -1271,11 +1271,11 @@ function generateTableOfContents() {
     const hasChinese = /[\u4e00-\u9fa5]/.test(originalText);
     
     // 2. 根據是否有中文，決定截斷的字數上限
-    const limit = hasChinese ? 17 : 30;
+    const limit = hasChinese ? 15 : 22;
 
     // 3. 套用限制 (這裡幫你加上 ... 讓視覺更清楚，如果你只要一個 . 可以自行改回)
     const displayText = originalText.length > limit 
-      ? originalText.substring(0, limit) + '...' 
+      ? originalText.substring(0, limit) + '..' 
       : originalText;
 
     // 【重點修改】計算字體大小
