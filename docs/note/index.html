@@ -1242,6 +1242,18 @@ function gotoTop(){
 }
 
 
+let maxLevel = 6;
+function incLevel() {
+    maxLevel = Math.min(maxLevel + 1, 6);
+    generateTableOfContents();
+    console.log(maxLevel);
+}
+function decLevel() {
+    maxLevel = Math.max(maxLevel - 1, 1);
+    generateTableOfContents();
+    console.log(maxLevel);
+}
+
 
 function generateTableOfContents() {
   const tocDiv = document.getElementById('toc');
@@ -1251,9 +1263,7 @@ function generateTableOfContents() {
   //const headings = contentDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
   
   // 改成可以設定h1 -> h6 的範圍，用進來時的網址，如 https://url.com/?bookname=passwd&h=3 , 這時，就可以呈現 h1 到 h3 , 預設是 h1.   const params = new URLSearchParams(window.location.search);
-  const params = new URLSearchParams(window.location.search);
-  const maxLevel = parseInt(params.get('h')) || 1; //params?const params = new URLSearchParams(window.location.search);
-  
+
   let selector = '';
   for (let i = 1; i <= maxLevel; i++) {
     selector += (selector ? ',' : '') + 'h' + i;
@@ -1273,7 +1283,19 @@ function generateTableOfContents() {
             text-decoration: none; 
             color: #0056b3;
             display: inline-block;
-            " onclick="gotoTop();">Top</div><br>`;
+            "><span style="cursor: pointer;" onclick="gotoTop();">Top</span></div>
+            
+            <div style="
+                font-size: 25px; 
+                color: #0056b3;
+                display: flex; 
+                justify-content: space-between; /* 讓裡面的元素自動靠左右兩側對齊 */
+                width: 180px; /* ⚠️ 必須要有寬度，空間才夠把 + 和 - 拉開 (請依你的需求調整數字) */
+                user-select: none;
+            ">
+                <span style="cursor: pointer;" onclick="incLevel();">+</span>
+                <span style="cursor: pointer;" onclick="decLevel();">-</span>
+            </div>`;
 
   headings.forEach(heading => {
     const id = heading.id; 
@@ -1341,6 +1363,10 @@ tocBtn.addEventListener('click', () => {
 
 // (可選進階體驗) 點擊目錄裡的任何一個連結後，自動收起側邊欄
 tocSidebar.addEventListener('click', (e) => {
+
+    if (e.target.tagName.toLowerCase() === 'span') {
+        return;
+    }
   // 檢查被點擊的是不是 <a> 標籤
   //if (e.target.tagName.toLowerCase() === 'a') {
     tocSidebar.classList.remove('open');
@@ -1371,6 +1397,9 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('saveDBBtn2').style.color = "black";
     keyInput.style.display = "none"
     document.getElementById('mkdwPage').style.display = "none";
+
+    const params = new URLSearchParams(window.location.search);
+    maxLevel = parseInt(params.get('h')) || 1; 
 });
 
     </script>
