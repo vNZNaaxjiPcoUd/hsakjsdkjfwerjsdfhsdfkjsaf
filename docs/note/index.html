@@ -146,23 +146,25 @@ function getDynamicKeyName() {
     const paramsFromURL = new URLSearchParams(window.location.search);
     //const entries = Object.fromEntries(paramsFromURL.entries());
     //console.log(result, entries); 
-    const firstEntry = paramsFromURL.entries().next().value; 
+    let firstEntry = paramsFromURL.entries().next().value; 
+
     if (firstEntry) {
         const [key, value] = firstEntry;
         //console.log("第一個參數名稱:", key);   // "id"
         //console.log("第一個參數數值:", value); // "123"
         firstKey = key;
         firstValue = value;
-        if(firstKey) {
+        if(firstKey !=='' && firstKey !=='h') {
             gKeyName = firstKey;
+            if(firstValue) {
+                keyInput.value = firstValue;
+            } else {
+                keyInput.value = "";
+            }            
         } else {
             gKeyName = "A";
         }
-        if(firstValue) {
-            keyInput.value = firstValue;
-        } else {
-            keyInput.value = "";
-        }
+
     }else {
         firstKey = "A";
         gKeyName = "A";
@@ -1247,7 +1249,19 @@ function generateTableOfContents() {
   
   // 抓取 content 區塊內所有的標題 (h1 ~ h6)
   //const headings = contentDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-  const headings = contentDiv.querySelectorAll('h1');
+  
+  // 改成可以設定h1 -> h6 的範圍，用進來時的網址，如 https://url.com/?bookname=passwd&h=3 , 這時，就可以呈現 h1 到 h3 , 預設是 h1.   const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(window.location.search);
+  const maxLevel = parseInt(params.get('h')) || 1; //params?const params = new URLSearchParams(window.location.search);
+  
+  let selector = '';
+  for (let i = 1; i <= maxLevel; i++) {
+    selector += (selector ? ',' : '') + 'h' + i;
+  }
+  const headings = contentDiv.querySelectorAll(selector);
+
+  
+  // const headings = contentDiv.querySelectorAll('h1');
   
   if (headings.length === 0) return;
 // 改用一個簡單的容器包覆，加上 line-height 確保字體大小不同時換行不擁擠
@@ -1284,8 +1298,10 @@ function generateTableOfContents() {
     const fontSize = 16 - (level - 1) * 1; 
 
     // 直接生成帶有樣式的 <a> 標籤，並用 margin-right 稍微隔開每個標題
-    tocHTML += `
-      <a href="#${id}" 
+    // 若是level 1 - 6, 就在名字前加上空格 0-5 個
+        const indent = "&nbsp;".repeat((level - 1) * 2);
+    
+    tocHTML += `<a href="#${id}" 
          target="_self"
          style="
            font-size: ${fontSize}px; 
@@ -1294,12 +1310,8 @@ function generateTableOfContents() {
            color: #0056b3;
            display: inline-block;
          "
-      >
-        ${displayText}
-      </a><br>
-    `;
+      >${indent}${displayText}</a><br>`;
   });
-
 
   tocHTML += '</div>';
   
