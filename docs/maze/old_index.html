@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>迷宮</title>
+<link rel="manifest" href="mazemanifest.json">
+<meta name="theme-color" content="#121212">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+    body {
+        background-color: #121212; color: #e0e0e0; font-family: "Courier New", Courier, monospace;
+        margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+        height: 100dvh; overscroll-behavior: none; padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+        box-sizing: border-box; -webkit-user-select: none; user-select: none; touch-action: none;
+    }
+    #header { text-align: center; margin-bottom: 5px; width: 100%; flex-shrink: 0; }
+    h1 { margin: 8px 0 4px 0; font-size: 18px; color: #ffffff; }
+    .stats-container { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; padding: 0 10px; }
+    .stat-badge { background-color: #333; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: bold; color: #4CAF50; border: 1px solid #4CAF50; }
+    .gem-badge { color: #FFEB3B; border-color: #FFEB3B; }
+    .total-gem-badge { color: #00BCD4; border-color: #00BCD4; } /* 累計星星樣式 */
+    
+    #maze-wrapper { padding: 8px; background-color: #1a1a1a; border: 3px solid #4CAF50; border-radius: 12px; margin-bottom: 10px; flex-shrink: 0; }
+    #maze-container { display: grid; gap: 0; background-color: #000; }
+    .cell { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; line-height: 1; }
+    .wall { color: #2E7D32; } .path { color: transparent; }
+    .player { color: #FFFFFF; background-color: #FF5722; border-radius: 4px; box-shadow: 0 0 5px #FF5722; z-index: 2; }
+    .goal { color: #FFEB3B; animation: blink 1s infinite; }
+    .gem { color: #00BCD4; font-size: 14px; }
+    .fog { background-color: #000; color: transparent; }
+    @keyframes blink { 50% { opacity: 0.4; } }
+    
+    #controls { display: grid; grid-template-columns: repeat(3, 80px); grid-template-rows: repeat(3, 60px); gap: 8px; flex-shrink: 0; }
+    .btn { background-color: #2a2a2a; color: #bbb; border: 2px solid #444; border-radius: 12px; font-size: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; -webkit-tap-highlight-color: transparent; }
+    .btn:active { background-color: #4CAF50; color: white; border-color: #4CAF50; }
+    #btn-up { grid-column: 2; grid-row: 1; }
+    #btn-left { grid-column: 1; grid-row: 2; }
+    #btn-reset { grid-column: 2; grid-row: 2; font-size: 14px; background-color: #4a2c2c; color: #ffcccc; }
+    #btn-right { grid-column: 3; grid-row: 2; }
+    #btn-down { grid-column: 2; grid-row: 3; }
+    @media (hover: hover) and (pointer: fine) { #controls { display: none; } }
+</style>
+</head>
+<body>
+<div id="header">
+    <div class="stats-container">
+        <div class="stat-badge">第 <span id="level-display">1</span> 關</div>
+        <div class="stat-badge gem-badge">本關 ✨: <span id="gem-display">0</span></div>
+        <div class="stat-badge total-gem-badge">累計 ✨: <span id="total-gem-display">0</span></div>
+    </div>
+</div>
+<div id="maze-wrapper"><div id="maze-container"></div></div>
+<div id="controls">
+    <button class="btn" id="btn-up">▲</button>
+    <button class="btn" id="btn-left">◄</button>
+    <button class="btn" id="btn-reset">重置</button>
+    <button class="btn" id="btn-right">►</button>
+    <button class="btn" id="btn-down">▼</button>
+</div>
+
+<script>
+    const mazeContainer = document.getElementById('maze-container');
+    const levelDisplay = document.getElementById('level-display');
+    const gemDisplay = document.getElementById('gem-display');
+    const totalGemDisplay = document.getElementById('total-gem-display');
+    const controls = document.getElementById('controls');
+
+    let maze = [], gridCells = [], gems = [], playerPos = { r: 1, c: 1 }, goalPos = { r: 1, c: 1 };
+    let level = 1, totalGems = 0, rows = 15, cols = 15; const CELL_SIZE = 18; 
+    let resetClickCount = 0;
+    
+    // --- 資料庫邏輯：增加 totalGems 儲存 ---
+    const DB_NAME = 'MazeGameDB', STORE_NAME = 'gameState'; let db;
+    function initDB() { return new Promise((res) => { const req = indexedDB.open(DB_NAME, 1); req.onsuccess = e => { db = e.target.result; res(db); }; req.onupgradeneeded = e => { db = e.target.result; db.createObjectStore(STORE_NAME); }; }); }
+    
+    function saveProgress() { 
+        if (!db) return;
+        const tx = db.transaction([STORE_NAME], 'readwrite');
+        const store = tx.objectStore(STORE_NAME);
+        store.put(level, 'savedLevel');
+        store.put(totalGems, 'totalGems'); // 儲存累計星星
+    }
+
+    function loadProgress() {
+        return new Promise(res => {
+            if (!db) return res({ lv: 1, gems: 0 });
+            const tx = db.transaction([STORE_NAME], 'readonly');
+            const store = tx.objectStore(STORE_NAME);
+            const reqLv = store.get('savedLevel');
+            const reqGems = store.get('totalGems');
+            reqLv.onsuccess = () => {
+                reqGems.onsuccess = () => {
+                    res({ lv: reqLv.result || 1, gems: reqGems.result || 0 });
+                };
+            };
+        });
+    }
+
+    function calculateDimensions() {
+        const isControlsVisible = window.getComputedStyle(controls).display !== 'none';
+        const reservedHeight = isControlsVisible ? 320 : 120;
+        const vW = window.visualViewport ? window.visualViewport.width : window.innerWidth;
+        const vH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+        let c = Math.floor((vW - 40) / CELL_SIZE); let r = Math.floor((vH - reservedHeight) / CELL_SIZE);
+        if (c % 2 === 0) c--; if (r % 2 === 0) r--;
+        cols = Math.max(11, c); rows = Math.max(11, r);
+    }
+
+    function generateMaze() {
+        maze = Array.from({ length: rows }, () => Array(cols).fill(1));
+        let branchProb = Math.min(0.75, (level - 1) * 0.04);
+        let activeCells = [{ r: 1, c: 1 }], pathCells = []; maze[1][1] = 0;
+        while (activeCells.length > 0) {
+            let index = (Math.random() < branchProb) ? Math.floor(Math.random() * activeCells.length) : activeCells.length - 1;
+            let cell = activeCells[index], neighbors = [];
+            [[0, 2], [2, 0], [0, -2], [-2, 0]].forEach(([dr, dc]) => {
+                let nr = cell.r + dr, nc = cell.c + dc;
+                if (nr > 0 && nr < rows - 1 && nc > 0 && nc < cols - 1 && maze[nr][nc] === 1) neighbors.push({ r: nr, c: nc, dr, dc });
+            });
+            if (neighbors.length > 0) {
+                let next = neighbors[Math.floor(Math.random() * neighbors.length)];
+                maze[cell.r + next.dr / 2][cell.c + next.dc / 2] = 0; maze[next.r][next.c] = 0;
+                activeCells.push({ r: next.r, c: next.c });
+            } else { pathCells.push(activeCells.splice(index, 1)[0]); }
+        }
+        playerPos = { r: 1, c: 1 }; goalPos = { r: rows - 2, c: cols - 2 }; maze[goalPos.r][goalPos.c] = 0;
+        gems = []; let gemCount = Math.floor((rows * cols) / 60);
+        let candidates = pathCells.filter(p => !(p.r === 1 && p.c === 1) && !(p.r === goalPos.r && p.c === goalPos.c));
+        for (let i = 0; i < gemCount && candidates.length > 0; i++) gems.push(candidates.splice(Math.floor(Math.random() * candidates.length), 1)[0]);
+    }
+
+    function initGrid() {
+        mazeContainer.style.gridTemplateColumns = `repeat(${cols}, ${CELL_SIZE}px)`;
+        mazeContainer.style.gridTemplateRows = `repeat(${rows}, ${CELL_SIZE}px)`;
+        mazeContainer.innerHTML = ''; gridCells = [];
+        for (let r = 0; r < rows; r++) {
+            let rowCells = [];
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div'); cell.className = 'cell';
+                mazeContainer.appendChild(cell); rowCells.push(cell);
+            }
+            gridCells.push(rowCells);
+        }
+    }
+
+    function drawMaze() {
+        let visRadius = 999;
+        if (level >= 10) {
+            let startRad = Math.floor(Math.min(rows, cols) -1);
+            visRadius = Math.max(1, startRad - (level - 10));
+        }
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                let cell = gridCells[r][c];
+                let dist = Math.max(Math.abs(r - playerPos.r), Math.abs(c - playerPos.c));
+                if (dist > visRadius) { cell.className = 'cell fog'; cell.textContent = ' '; continue; }
+                if (r === playerPos.r && c === playerPos.c) { cell.className = 'cell player'; cell.textContent = '＠'; }
+                else if (r === goalPos.r && c === goalPos.c) { cell.className = 'cell goal'; cell.textContent = '★'; }
+                else {
+                    let gem = gems.find(g => g.r === r && g.c === c);
+                    if (gem) { cell.className = 'cell gem'; cell.textContent = '✨'; }
+                    else { cell.className = maze[r][c] === 1 ? 'cell wall' : 'cell path'; cell.textContent = maze[r][c] === 1 ? '█' : ' '; }
+                }
+            }
+        }
+        levelDisplay.textContent = level; 
+        gemDisplay.textContent = gems.length;
+        totalGemDisplay.textContent = totalGems;
+    }
+
+    function movePlayer(dr, dc) {
+        resetClickCount = 0; // 只要玩家有嘗試移動，連續點擊重置的次數就歸零
+        let moved = false;
+        while (true) {
+            let nR = playerPos.r + dr, nC = playerPos.c + dc;
+            if (!maze[nR] || maze[nR][nC] !== 0) break;
+            playerPos.r = nR; playerPos.c = nC; moved = true;
+            
+            // 吃到星星的邏輯
+            let gIdx = gems.findIndex(g => g.r === playerPos.r && g.c === playerPos.c);
+            if (gIdx !== -1) {
+                gems.splice(gIdx, 1);
+                totalGems++; // 增加累計數量
+                saveProgress(); // 即時存檔
+            }
+
+            if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) break;
+            if (dr !== 0 ? (maze[playerPos.r][playerPos.c - 1] === 0 || maze[playerPos.r][playerPos.c + 1] === 0) : (maze[playerPos.r - 1][playerPos.c] === 0 || maze[playerPos.r + 1][playerPos.c] === 0)) break;
+        }
+        if (moved) { 
+            drawMaze(); 
+            if (playerPos.r === goalPos.r && playerPos.c === goalPos.c) {
+                setTimeout(() => { level++; saveProgress(); startNewLevel(); }, 150);
+            } 
+        }
+    }
+
+    window.addEventListener('keydown', e => { if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.code)) e.preventDefault(); switch(e.code){ case 'ArrowUp': case 'KeyW': movePlayer(-1,0); break; case 'ArrowDown': case 'KeyS': movePlayer(1,0); break; case 'ArrowLeft': case 'KeyA': movePlayer(0,-1); break; case 'ArrowRight': case 'KeyD': movePlayer(0,1); break; case 'KeyR': resetLevel(); break; } });
+    function bindBtn(id, dr, dc) { document.getElementById(id).addEventListener('pointerdown', e => { e.preventDefault(); movePlayer(dr, dc); }); }
+    bindBtn('btn-up', -1, 0); bindBtn('btn-down', 1, 0); bindBtn('btn-left', 0, -1); bindBtn('btn-right', 0, 1);
+    document.getElementById('btn-reset').addEventListener('pointerdown', e => { 
+        e.preventDefault(); 
+        
+        resetClickCount++; // 增加點擊次數
+
+        if (resetClickCount >= 5) {
+            // 觸發終極重置
+            if (confirm("確定要清除所有進度，從第 1 關重新開始嗎？")) {
+                const tx = db.transaction([STORE_NAME], 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                store.clear(); // 清除該 Store 所有資料 (包含關卡與累計星星)
+                
+                // 歸零變數並重新開始
+                level = 1;
+                totalGems = 0;
+                resetClickCount = 0;
+                startNewLevel();
+            } else {
+                resetClickCount = 0; // 如果點取消，也重置計數
+                resetLevel();
+            }
+        } else {
+            resetLevel(); // 一般的單次重置（只回起點，不刪關卡）
+        }
+    });
+    
+    function resetLevel() { playerPos = { r: 1, c: 1 }; drawMaze(); }
+    function startNewLevel() { calculateDimensions(); generateMaze(); initGrid(); drawMaze(); }
+    
+    initDB().then(loadProgress).then(data => { 
+        level = data.lv; 
+        totalGems = data.gems; 
+        startNewLevel(); 
+    });
+</script>
+</body>
+</html>
