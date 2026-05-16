@@ -89,35 +89,32 @@
     
     <button id="back-to-top" title="回到最上面">⬆️ 回頂端</button>
 
+    <script src="https://h.jwint.net/static/crypto-js.min.js"></script>
     <script>
         // ==========================================
         // 1. 密碼驗證機制 (包含電腦盲打與手機輸入)
         // ==========================================
-        const PASSWORD = "d0a4b3d376be0af335a4d748e48327cbc6a4fd9e12dbfef2cea690cf2393319f65ff1deef529a0bf49826c408ba4c757788bcf4cf9ad7b7a85ea018a57540087";
-        const SALT = "f862f1d08bf480f0a6c1f8db1914330976935c513eb154813220bad9fccad8a53f96d6ca0a12cead5d5fb2a65cbbd6e27d3b31d622f38c731e18de1d669df512d565ecea212aae";
+        const CONTENT = "U2FsdGVkX1+w2P4TRS9vBJ+QynMCROnORCh4WYfJ3+1nlDfwaX8XxsGIBGJ2/1Rc7oo0ga3AX7RQjQjJE9pqA0rIhEmq/2QLqtOu/fxe+1+KsFhXpwrSLR6GjWXLLFhJPtpjzumEGpdZRCiXymxoRQ";
         let buffer = [];        
         const MAX_BUFFER = 99;
         let statePsCheck = false;  
 
-        async function hashPassword(password, salt) {
-            const encoder = new TextEncoder(); 
-            const data = encoder.encode(password + salt); 
-            const hashBuffer = await crypto.subtle.digest('SHA-512', data);
-            const hashArray = new Uint8Array(hashBuffer);
-            const hashHex = Array.from(hashArray).map(byte => byte.toString(16).padStart(2, '0')).join(''); 
-            return hashHex;
-        }
-
-        async function checkPassword(inputPassword, storedSalt, storedHash) {
-            const inputHash = await hashPassword(inputPassword, storedSalt);
-            if (inputHash === storedHash) {
-                statePsCheck = true;
-                return true;
-            } else {
-                return false;
+        function decContent(content,pwd){
+            try{
+                const bytes = CryptoJS.AES.decrypt(content, pwd);
+                const originalHTML = bytes.toString(CryptoJS.enc.Utf8); 
+                //console.log("originalHTML",originalHTML);
+                const jsonData = JSON.parse(originalHTML);
+                jsonUrl= jsonData.src;
+                baseUrl= jsonData.base;
+                console.log("jsonUrl",jsonUrl);
+                console.log("baseUrl",baseUrl);
+                return jsonData;           
+            }catch(e){
+                console.log("error password");
+                return null;
             }
         }
-
         // --- 電腦版盲打監聽 ---
         document.addEventListener("keydown", async function(e) {
             if (statePsCheck) return;
@@ -133,7 +130,8 @@
                     e.preventDefault();
                     window.scrollTo({ top: 0, behavior: 'smooth' });
                     buffer = []; 
-                } else if (await checkPassword(buffer.join(""), SALT, PASSWORD)) {
+                    console.log("clean buffer");
+                } else if (decContent(CONTENT, buffer.join(""))) {
                     showContent();
                 }
             }
@@ -173,8 +171,8 @@
         // ==========================================
         // 2. 資料載入與渲染邏輯
         // ==========================================
-        const jsonUrl = 'https://v.jwint.net/zzz240507163725';
-        const baseUrl = 'https://v.jwint.net'; 
+
+        let jsonUrl={}, baseUrl={};
 
         function parseMarkdown(text) {
             if (!text) return '未命名';
@@ -238,25 +236,7 @@
                 });
         }
 
-        // ==========================================
-        // 3. 回到最上面的按鈕控制邏輯
-        // ==========================================
-        const backToTopBtn = document.getElementById('back-to-top');
 
-        window.addEventListener('scroll', () => {
-            if (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) {
-                backToTopBtn.style.display = 'block';
-            } else {
-                backToTopBtn.style.display = 'none';
-            }
-        });
-
-        backToTopBtn.addEventListener('click', () => {
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        });
     </script>
 
 </body>
