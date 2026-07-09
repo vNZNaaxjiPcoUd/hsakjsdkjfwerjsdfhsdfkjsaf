@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en-US">
 <head>
@@ -78,6 +77,10 @@
     }
     button:active { background-color: #55555a; transform: scale(0.98); }
 
+    .B1 {
+        background-color: #070222;
+    }
+
     /* 輸入框專屬設計 */
     #countdown {
         display: none;
@@ -112,7 +115,7 @@ iframe {
     aspect-ratio: 16 / 9;   /* 保持比例 */
     
     /* 限制最大高度，避免超出螢幕 */
-    max-height: 100dvh; 
+    max-height: 80dvh; 
     
     /* 確保內容適應 */
     object-fit: contain;
@@ -135,46 +138,19 @@ iframe {
             <button onclick="setSpeed(0.6)">0.6x</button>
             <button onclick="setSpeed(0.65)">0.65x</button>
             <button onclick="setSpeed(0.7)">0.7x</button>
-            <button onclick="player && player.playVideo()">Play</button>
-            <button onclick="setSpeed(0.75)">0.75x</button>
-            <button onclick="setSpeed(0.8)">0.8x</button>
-            <button onclick="setSpeed(1)">1x</button>
-            <button onclick="player && player.pauseVideo()">Pause</button>
+            <button class="B1" onclick="player && player.playVideo()">Play</button>
+            <button class="B1" onclick="setSpeed(0.75)">0.75x</button>
+            <button class="B1" onclick="setSpeed(0.8)">0.8x</button>
+            <button class="B1" onclick="setSpeed(1)">1x</button>
+            <button class="B1" onclick="player && player.pauseVideo()">Pause</button>
+            <button onclick="seekVideo(-120)">-2m</button>
+            <button onclick="seekVideo(-30)">-30s</button>
+            <button onclick="seekVideo(30)">+30s</button>
+            <button onclick="seekVideo(120)">+2m</button>
+            <button onclick="seekVideo(300)">+5m</button>
         </div>
     </div>
 
-    <!--div class="control-group">
-        <h4>⏯ Playback Controls</h4>
-        <div class="btn-grid-2">
-
-            <button onclick="player && player.stopVideo()">Stop</button>
-        </div>
-    </div-->
-
-    <div class="control-group">
-        <!--h4>⏳ Skip / 🔊 Volume</h4-->
-        <div class="btn-grid-4">
-            <button onclick="seekVideo(-120)">⏪ -2m</button>
-            <button onclick="seekVideo(-30)">⏪ -30s</button>
-            <button onclick="seekVideo(30)">⏩ +30s</button>
-            <button onclick="seekVideo(120)">⏩ +2m</button>
-            <!--button onclick="changeVolume(-10)">🔉 -10%</button>
-            <button onclick="changeVolume(10)">🔊 +10%</button-->
-            <button onclick="changeVolume(-10)">-10%</button>
-            <button onclick="changeVolume(10)">+10%</button>
-            <button onclick="player && player.mute()">Mute</button>
-            <button onclick="player && player.unMute()">Unmute</button>
-        </div>
-    </div>
-
-    <div id="countdown" >
-		<!--div><h4>🔊 Countdown</h4></div-->
-		<div class="btn-grid-2">
-        <div><input type="number" id="minutes" placeholder="Mins"></div>
-        <div><button onclick="startTimer()">Send</button></div>
-		</div>
-    </div>
-    
     <div class="control-group">
 		<!--h4>🔊 Video</h4-->
 		<div class="btn-grid-2">

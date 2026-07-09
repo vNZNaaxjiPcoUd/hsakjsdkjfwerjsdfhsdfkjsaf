@@ -77,6 +77,10 @@
     }
     button:active { background-color: #55555a; transform: scale(0.98); }
 
+    .B1 {
+        background-color: #070222;
+    }
+
     /* 輸入框專屬設計 */
     #countdown {
         display: none;
@@ -134,11 +138,11 @@ iframe {
             <button onclick="setSpeed(0.6)">0.6x</button>
             <button onclick="setSpeed(0.65)">0.65x</button>
             <button onclick="setSpeed(0.7)">0.7x</button>
-            <button onclick="player && player.playVideo()">Play</button>
-            <button onclick="setSpeed(0.75)">0.75x</button>
-            <button onclick="setSpeed(0.8)">0.8x</button>
-            <button onclick="setSpeed(1)">1x</button>
-            <button onclick="player && player.pauseVideo()">Pause</button>
+            <button class="B1" onclick="player && player.playVideo()">Play</button>
+            <button class="B1" onclick="setSpeed(0.75)">0.75x</button>
+            <button class="B1" onclick="setSpeed(0.8)">0.8x</button>
+            <button class="B1" onclick="setSpeed(1)">1x</button>
+            <button class="B1" onclick="player && player.pauseVideo()">Pause</button>
             <button onclick="seekVideo(-120)">-2m</button>
             <button onclick="seekVideo(-30)">-30s</button>
             <button onclick="seekVideo(30)">+30s</button>
