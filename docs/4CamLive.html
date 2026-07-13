@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>轉換後的 Markdown 文件</title>
+    <style>
+
+        #preview {
+            padding: 20px;
+            background-color: white;
+            min-height: 100%;
+            line-height: 1.6;
+        }
+        /* 防止 PDF 分頁時切斷元素 */
+        #preview p, #preview h1, #preview h2, #preview h3, #preview img, #preview li {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+        #preview img {
+            max-width: 100%;
+            height: auto;
+        }
+    
+        /* 常見的 markdown 樣式（可選） */
+        .markdown-body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+        .markdown-body img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+<div class="markdown-body">
+<p><a href="http://sm.jwint.net/CamFLH/">前左</a> </p>
+<p><a href="http://sm.jwint.net/CamFrontH/">正前</a> </p>
+<p><a href="http://sm.jwint.net/CamDoorH/">門前</a> </p>
+<p><a href="http://sm.jwint.net/CamGarage/">車庫</a> </p>
+<p><a href="http://sm.jwint.net/CamBackPlant/">菜園</a></p>
+
+</div>
+</body>
+</html>
