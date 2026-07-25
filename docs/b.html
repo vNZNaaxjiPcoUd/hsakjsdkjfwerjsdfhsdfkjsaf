@@ -185,7 +185,7 @@ function handleID(id){
         if (id.length === 11){
             const updateURL = allText.replaceAll('AAURL',id);
             document.getElementById("allT").innerHTML = updateURL ;
-            nUrl = "https://h.jwint.net/b?"+nowID;
+            nUrl = "https://h.jwint.net/c?"+nowID;
             document.getElementById("uID").innerHTML = `<a href="${nUrl}" style="color: #0A84FF;">${id}</a>` ;
         }else {
             document.getElementById("allT").innerHTML = "<h3 style='padding:20px; text-align:center;'>Hello World</h3>" ;
