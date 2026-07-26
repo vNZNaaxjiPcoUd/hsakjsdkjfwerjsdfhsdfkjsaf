@@ -2,10 +2,9 @@
 <html lang="en-US">
 <head>
     <meta charset="UTF-8">
-    <base target="_blank">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <title>Show</title>
+    <title>畫卷</title>
     <style>
     /* 基礎重置與 iPhone 最佳化 */
     * {
@@ -133,11 +132,11 @@ iframe {
     <div class="control-group">
         <!--h4>⏩ Playback</h4-->
         <div class="btn-grid-5">
-            <button class="B1" onclick="player && player.playVideo()">Play</button>
+            <button class="B1" onclick="player && player.playVideo()">播放</button>
             <button class="B1" onclick="setSpeed(0.75)">0.75x</button>
             <button class="B1" onclick="setSpeed(0.8)">0.8x</button>
             <button class="B1" onclick="setSpeed(0.9)">0.9x</button>
-            <button class="B1" onclick="player && player.pauseVideo()">Pause</button>
+            <button class="B1" onclick="player && player.pauseVideo()">暫停</button>
             <button onclick="seekVideo(-120)">-2m</button>
             <button onclick="seekVideo(-30)">-30s</button>
             <button onclick="seekVideo(30)">+30s</button>
@@ -156,7 +155,7 @@ iframe {
 		<div class="btn-grid-2">
 			<div id="uID" style="text-align:center; padding: 10px; background: transparent;"></div> 
 			<!--div id="closeWindow" style="background: transparent; padding: 0;"-->
-	        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">Close</button>
+	        <button id="closeWindowBnt" onclick="window.close()" style="width: 100%; background-color: #FF453A;">關閉</button>
 		</div>
     </div>
 </div>
