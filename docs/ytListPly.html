@@ -98,7 +98,8 @@
         <button onclick="player.previousVideo()">⏮️ 上一部</button>
         <button onclick="player.nextVideo()">⏭️ 下一部</button>
         <button onclick="togglePiP()" id="pipBtn">🔲 子母畫面</button>
-        
+        <button onclick="cpyID()" id="IDShow">000000</button>
+
         <div class="info" id="statusText">系統準備中...</div>
     </div>
 
@@ -116,7 +117,7 @@
         var queryStr = window.location.search.substring(1).trim();
         
         // 如果網址有給參數就使用參數，沒給參數就預設使用原本的 ID
-        var playlistId = queryStr ? queryStr : 'PL9P9juNnx4d6NBRqhq1dxwqHhrLk-EfTY';
+        var playlistId = queryStr ? queryStr : 'PL61m_wFdM7yDEzg1m54pUO-f-Br22XUMT';
         // 【修改部分結束】
 
         function onYouTubeIframeAPIReady() {
@@ -140,7 +141,11 @@
             
             updateSelector();
             document.getElementById('statusText').innerText = "播放器就緒";
+
+            let currentVideoId = player.getPlaylist()[0];
+            document.getElementById('IDShow').innerText = currentVideoId;
         }
+
 
         function updateSelector() {
             var playlist = player.getPlaylist();
@@ -167,6 +172,44 @@
                 var currentIndex = player.getPlaylistIndex();
                 document.getElementById('videoSelector').value = currentIndex;
                 document.getElementById('statusText').innerText = "正在播放第 " + (currentIndex + 1) + " 部";
+
+                let currentVideoId = player.getPlaylist()[currentIndex];
+                document.getElementById('IDShow').innerText = currentVideoId;
+            }
+        }
+
+        async function cpyID() {
+            // 1. 檢查目標元素是否存在 (防呆)
+            const idElement = document.getElementById('IDShow');
+            if (!idElement) {
+                console.error('複製失敗：找不到 IDShow 元素');
+                return; // 中斷執行
+            }
+
+            // 2. 取出文字並去除前後空白，避免複製到多餘的空格
+            const text = idElement.innerText.trim();
+            if (!text) {
+                alert('目前沒有影片 ID 可以複製！');
+                return;
+            }
+
+            // 3. 檢查瀏覽器是否支援 Clipboard API (是否在 HTTPS 環境)
+            if (!navigator.clipboard) {
+                alert('當前瀏覽器環境不支援自動複製，請手動選取複製。');
+                return;
+            }
+
+            // 4. 執行複製並提供明確的使用者回饋
+            try {
+                await navigator.clipboard.writeText(text);
+                
+                // 給一般使用者的視覺回饋 (可用 alert 或修改按鈕文字)
+                //alert('影片 ID 複製成功：' + text); 
+                console.log('複製成功：', text);
+                
+            } catch (err) {
+                console.error('複製失敗：', err);
+                alert('複製失敗，請檢查瀏覽器權限設定。');
             }
         }
 
