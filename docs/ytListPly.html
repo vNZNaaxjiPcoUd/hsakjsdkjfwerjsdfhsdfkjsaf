@@ -170,11 +170,39 @@
         function onPlayerStateChange(event) {
             if (event.data == YT.PlayerState.PLAYING) {
                 var currentIndex = player.getPlaylistIndex();
-                document.getElementById('videoSelector').value = currentIndex;
-                document.getElementById('statusText').innerText = "正在播放第 " + (currentIndex + 1) + " 部";
+                
+                // ❌ 刪除這行：洗牌後，playlist 陣列與 currentIndex 會脫節，導致 ID 錯亂
+                // var playlist = player.getPlaylist();
+                // var currentVideoId = playlist ? playlist[currentIndex] : "未知 ID";
 
-                let currentVideoId = player.getPlaylist()[currentIndex];
-                document.getElementById('IDShow').innerText = currentVideoId;
+                // ✅ 新增這段：直接向播放器索取「當前正在播放」的影片資料
+                var currentVideoId = "未知 ID";
+                
+                // 優先嘗試使用 getVideoData (最直接精準的方法)
+                var videoData = player.getVideoData();
+                if (videoData && videoData.video_id) {
+                    currentVideoId = videoData.video_id;
+                } else {
+                    // 備案：如果 API 變更導致 getVideoData 失效，從當下網址中強行擷取 ID
+                    var currentUrl = player.getVideoUrl();
+                    var match = currentUrl.match(/[?&]v=([^&]+)/);
+                    if (match && match[1]) {
+                        currentVideoId = match[1];
+                    }
+                }
+
+                // 更新下拉選單與狀態文字
+                var selector = document.getElementById('videoSelector');
+                if (selector) selector.value = currentIndex;
+
+                var statusText = document.getElementById('statusText');
+                if (statusText) statusText.innerText = "正在播放第 " + (currentIndex + 1) + " 部";
+
+                // 更新 ID 顯示
+                var idShowElement = document.getElementById('IDShow');
+                if (idShowElement) {
+                    idShowElement.innerText = currentVideoId;
+                }
             }
         }
 
