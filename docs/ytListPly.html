@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>YouTube 自動同步播放器</title>
+    <title>畫卷冊</title>
     <style>
         * { box-sizing: border-box; } 
 
@@ -94,10 +94,10 @@
         <select id="videoSelector" onchange="jumpToVideo(this.value)">
             <option>正在載入清單內容...</option>
         </select>
-        <button onclick="shuffleAndPlay()">🔀 隨機播放</button>
-        <button onclick="player.previousVideo()">⏮️ 上一部</button>
-        <button onclick="player.nextVideo()">⏭️ 下一部</button>
-        <button onclick="togglePiP()" id="pipBtn">🔲 子母畫面</button>
+        <button onclick="shuffleAndPlay()">🔀 隨機</button>
+        <button onclick="player.previousVideo()">⏮️ 上一卷</button>
+        <button onclick="player.nextVideo()">⏭️ 下一卷</button>
+        <button onclick="togglePiP()" id="pipBtn">🔲 小冊</button>
         <button onclick="cpyID()" id="IDShow">000000</button>
 
         <div class="info" id="statusText">系統準備中...</div>
@@ -141,7 +141,7 @@
             player.setLoop(true);
             
             updateSelector();
-            document.getElementById('statusText').innerText = "播放器就緒";
+            document.getElementById('statusText').innerText = "畫卷";
 
             let currentVideoId = player.getPlaylist()[0];
             document.getElementById('IDShow').innerText = currentVideoId;
@@ -158,7 +158,7 @@
                 playlist.forEach(function(videoId, index) {
                     var option = document.createElement('option');
                     option.value = index;
-                    option.text = "影片 " + (index + 1) + " (ID: " + videoId + ")";
+                    option.text = "卷 " + (index + 1) ;
                     selector.appendChild(option);
                 });
             } else {
@@ -177,7 +177,7 @@
                 // var playlist = player.getPlaylist();
                 // var currentVideoId = playlist ? playlist[currentIndex] : "未知 ID";
 
-                // ✅ 新增這段：直接向播放器索取「當前正在播放」的影片資料
+                // ✅ 新增這段：直接向播放器索取「當前正在播放」的資料
                 var currentVideoId = "未知 ID";
                 
                 // 優先嘗試使用 getVideoData (最直接精準的方法)
@@ -220,7 +220,7 @@
             // 2. 取出文字並去除前後空白，避免複製到多餘的空格
             const text = idElement.innerText.trim();
             if (!text) {
-                alert('目前沒有影片 ID 可以複製！');
+                alert('目前沒有 ID 可以複製！');
                 return;
             }
 
@@ -235,7 +235,7 @@
                 await navigator.clipboard.writeText(text);
                 
                 // 給一般使用者的視覺回饋 (可用 alert 或修改按鈕文字)
-                //alert('影片 ID 複製成功：' + text); 
+                //alert(' ID 複製成功：' + text); 
                 console.log('複製成功：', text);
                 
             } catch (err) {
