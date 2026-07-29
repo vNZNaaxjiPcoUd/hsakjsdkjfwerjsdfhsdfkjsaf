@@ -61,7 +61,7 @@
         select { 
             padding: 5px; 
             flex-grow: 1; 
-            max-width: 350px; 
+            max-width: 150px; 
             border: 1px solid #ccc; 
             border-radius: 4px; 
             background: #333;
@@ -92,12 +92,12 @@
 
     <div class="controls">
         <select id="videoSelector" onchange="jumpToVideo(this.value)">
-            <option>正在載入清單內容...</option>
+            <option>正在載入清單</option>
         </select>
         <button onclick="shuffleAndPlay()">🔀 隨機</button>
-        <button onclick="player.previousVideo()">⏮️ 上一卷</button>
-        <button onclick="player.nextVideo()">⏭️ 下一卷</button>
-        <button onclick="togglePiP()" id="pipBtn">🔲 小冊</button>
+        <button onclick="player.previousVideo()">⏮️ 上卷</button>
+        <button onclick="player.nextVideo()">⏭️ 下卷</button>
+        <button onclick="togglePiP()" id="pipBtn">🔲 微觀</button>
         <button onclick="cpyID()" id="IDShow">000000</button>
 
         <div class="info" id="statusText">系統準備中...</div>
@@ -164,7 +164,7 @@
             } else {
                 // 如果找不到清單（可能是無效的 ID）
                 var option = document.createElement('option');
-                option.text = "無法載入清單，請確認網址 ID 是否正確";
+                option.text = "無法載入清單";
                 selector.appendChild(option);
             }
         }
