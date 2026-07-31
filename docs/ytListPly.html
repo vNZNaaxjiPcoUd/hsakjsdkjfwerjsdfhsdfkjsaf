@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>畫卷冊</title>
+    <title>畫冊</title>
     <style>
         * { box-sizing: border-box; } 
 
@@ -92,15 +92,15 @@
 
     <div class="controls">
         <select id="videoSelector" onchange="jumpToVideo(this.value)">
-            <option>正在載入清單</option>
+            <option>正在載入</option>
         </select>
         <button onclick="shuffleAndPlay()">🔀 隨機</button>
         <button onclick="player.previousVideo()">⏮️ 上卷</button>
         <button onclick="player.nextVideo()">⏭️ 下卷</button>
         <button onclick="togglePiP()" id="pipBtn">🔲 微觀</button>
-        <button onclick="cpyID()" id="IDShow">000000</button>
+        <button onclick="cpyID()" id="IDShow">1213812138</button>
 
-        <div class="info" id="statusText">系統準備中...</div>
+        <div class="info" id="statusText">準備中...</div>
     </div>
 
     <script defer>
@@ -164,7 +164,7 @@
             } else {
                 // 如果找不到清單（可能是無效的 ID）
                 var option = document.createElement('option');
-                option.text = "無法載入清單";
+                option.text = "無法載入";
                 selector.appendChild(option);
             }
         }
