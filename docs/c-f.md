@@ -44,6 +44,7 @@
 | 38 | 100.4 | 酷暑 / 發燒界線 |
 | 39 | 102.2 | 極度酷熱 / 高燒 |
 | 40 | 104.0 | 危險高溫 / 需防範中暑 |
+
 相關的參考來源連結
  * National Weather Service (NWS) Temperature Conversion Calculator - 美國國家氣象局官方溫度換算工具。
  * National Institute of Standards and Technology (NIST) Temperature Units - 美國國家標準技術研究所溫度單位標準說明。
