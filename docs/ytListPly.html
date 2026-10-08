@@ -91,184 +91,19 @@
     </div>
 
     <div class="controls">
-        <select id="videoSelector" onchange="jumpToVideo(this.value)">
+        <select id="videoSelector" >
             <option>正在載入</option>
         </select>
-        <button onclick="shuffleAndPlay()">🔀 隨機</button>
-        <button onclick="player.previousVideo()">⏮️ 上卷</button>
-        <button onclick="player.nextVideo()">⏭️ 下卷</button>
-        <button onclick="togglePiP()" id="pipBtn">🔲 微觀</button>
-        <button onclick="cpyID()" id="IDShow">1213812138</button>
+        <button id="playBtn" >🔀 隨機</button>
+        <button id="upBtn" >⏮️ 上卷</button>
+        <button id="dwonBtn">⏭️ 下卷</button>
+        <button id="pipBtn">🔲 微觀</button>
+        <button id="IDShow">1213812138</button>
 
         <div class="info" id="statusText">準備中...</div>
     </div>
 
-    <script defer>
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-        const statusText = document.getElementById("statusText");
-
-        var player;
-
-        // 【修改部分開始】取得網址中的 Playlist ID
-        // window.location.search 會抓到 "?xxxxx" 的字串，.substring(1) 用來去掉前面的問號
-        // .trim() 確保不會因為誤打空白鍵而出錯
-        var queryStr = window.location.search.substring(1).trim();
-        
-        // 如果網址有給參數就使用參數，沒給參數就預設使用原本的 ID
-        var playlistId = queryStr ? queryStr : 'PL61m_wFdM7yDEzg1m54pUO-f-Br22XUMT';
-        // 【修改部分結束】
-
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '100%', 
-                width: '100%',  
-                playerVars: {
-                    'listType': 'playlist',
-                    'list': playlistId,
-                },
-                events: {
-                    'onReady': onPlayerReady,
-                    'onStateChange': onPlayerStateChange
-                }
-            });
-        }
-
-        function onPlayerReady(event) {
-            // 開啟播放清單自動循環功能
-            player.setLoop(true);
-            
-            updateSelector();
-            document.getElementById('statusText').innerText = "畫卷";
-
-            let currentVideoId = player.getPlaylist()[0];
-            document.getElementById('IDShow').innerText = currentVideoId;
-            statusText.innerText = player.getVideoData().title;
-        }
-
-
-        function updateSelector() {
-            var playlist = player.getPlaylist();
-            var selector = document.getElementById('videoSelector');
-            selector.innerHTML = ""; 
-
-            if (playlist) {
-                playlist.forEach(function(videoId, index) {
-                    var option = document.createElement('option');
-                    option.value = index;
-                    option.text = "卷 " + (index + 1) ;
-                    selector.appendChild(option);
-                });
-            } else {
-                // 如果找不到清單（可能是無效的 ID）
-                var option = document.createElement('option');
-                option.text = "無法載入";
-                selector.appendChild(option);
-            }
-        }
-
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.PLAYING) {
-                var currentIndex = player.getPlaylistIndex();
-                
-                // ❌ 刪除這行：洗牌後，playlist 陣列與 currentIndex 會脫節，導致 ID 錯亂
-                // var playlist = player.getPlaylist();
-                // var currentVideoId = playlist ? playlist[currentIndex] : "未知 ID";
-
-                // ✅ 新增這段：直接向播放器索取「當前正在播放」的資料
-                var currentVideoId = "未知 ID";
-                
-                // 優先嘗試使用 getVideoData (最直接精準的方法)
-                var videoData = player.getVideoData();
-                if (videoData && videoData.video_id) {
-                    currentVideoId = videoData.video_id;
-                } else {
-                    // 備案：如果 API 變更導致 getVideoData 失效，從當下網址中強行擷取 ID
-                    var currentUrl = player.getVideoUrl();
-                    var match = currentUrl.match(/[?&]v=([^&]+)/);
-                    if (match && match[1]) {
-                        currentVideoId = match[1];
-                    }
-                }
-
-                // 更新下拉選單與狀態文字
-                var selector = document.getElementById('videoSelector');
-                if (selector) selector.value = currentIndex;
-
-                var statusText = document.getElementById('statusText');
-                if (statusText) statusText.innerText = "正在播放第 " + (currentIndex + 1) + " 部";
-
-                // 更新 ID 顯示
-                var idShowElement = document.getElementById('IDShow');
-                if (idShowElement) {
-                    idShowElement.innerText = currentVideoId;
-                }
-                statusText.innerText = player.getVideoData().title;
-            }
-        }
-
-        async function cpyID() {
-            // 1. 檢查目標元素是否存在 (防呆)
-            const idElement = document.getElementById('IDShow');
-            if (!idElement) {
-                console.error('複製失敗：找不到 IDShow 元素');
-                return; // 中斷執行
-            }
-
-            // 2. 取出文字並去除前後空白，避免複製到多餘的空格
-            const text = idElement.innerText.trim();
-            if (!text) {
-                alert('目前沒有 ID 可以複製！');
-                return;
-            }
-
-            // 3. 檢查瀏覽器是否支援 Clipboard API (是否在 HTTPS 環境)
-            if (!navigator.clipboard) {
-                alert('當前瀏覽器環境不支援自動複製，請手動選取複製。');
-                return;
-            }
-
-            // 4. 執行複製並提供明確的使用者回饋
-            try {
-                await navigator.clipboard.writeText(text);
-                
-                // 給一般使用者的視覺回饋 (可用 alert 或修改按鈕文字)
-                //alert(' ID 複製成功：' + text); 
-                console.log('複製成功：', text);
-                
-            } catch (err) {
-                console.error('複製失敗：', err);
-                alert('複製失敗，請檢查瀏覽器權限設定。');
-            }
-        }
-
-        function jumpToVideo(index) {
-            player.playVideoAt(parseInt(index));
-        }
-
-        function shuffleAndPlay() {
-            player.setShuffle(true);
-            player.playVideoAt(0); 
-            document.getElementById('statusText').innerText = "隨機模式已啟動";
-        }
-
-        // 子母畫面切換邏輯
-        function togglePiP() {
-            var container = document.getElementById('player-container');
-            var btn = document.getElementById('pipBtn');
-            container.classList.toggle('pip-mode');
-
-            // 根據狀態切換按鈕外觀與文字
-            if (container.classList.contains('pip-mode')) {
-                btn.innerText = "🔳 結束子母畫面";
-                btn.style.background = "#ff9b9b"; // 變成紅色提示可關閉
-            } else {
-                btn.innerText = "🔲 子母畫面";
-                btn.style.background = "#9aff9b"; // 恢復原本的綠色
-            }
-        }
-    </script>
+    <script src="ytlp.js"></script>
+    <script defer src="https://www.youtube.com/iframe_api"></script>
 </body>
 </html>
