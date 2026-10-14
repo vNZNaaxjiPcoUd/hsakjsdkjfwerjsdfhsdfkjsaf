@@ -101,14 +101,18 @@
     iframe {
         border: none;
         display: block;
-        margin: 0 auto;
+        margin: 1px auto;
         width: 100%;
         max-width: 177.78vh;
         aspect-ratio: 16 / 9;
         max-height: 80dvh; 
         object-fit: contain;
     }
+    #statusG{
+        display: none;
+    }
     </style>
+
 </head>
 <body>
     <div id="appInfo" style="background-color: black; color: black; display: none;">
@@ -153,11 +157,11 @@
         </div>
     </div>
 
-    <div class="control-group">
+    <div class="control-group" id="statusG">
         <div class="info" id="statusText"></div>
         <div class="info" id="moreText"></div>
     </div>
-    
+
     <div class="control-group">
         <div class="timer-container">
             <input type="number" id="minutes" placeholder="輸入倒數分鐘數" min="0" step="0.1">
