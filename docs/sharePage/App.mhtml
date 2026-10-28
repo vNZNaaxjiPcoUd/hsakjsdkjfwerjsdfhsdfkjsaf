@@ -1,0 +1,779 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://n.jwint.net/
+Subject: App
+Date: Wed, 28 Oct 2026 19:25:55 GMT
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--vGoyZ1AzXCea4BuYlCEwPMsqOjBRXsbrQIRl3sx0lk----"
+
+
+------MultipartBoundary--vGoyZ1AzXCea4BuYlCEwPMsqOjBRXsbrQIRl3sx0lk----
+Content-Type: text/html
+Content-ID: <frame-41921576B1533EC4EE6FE0FA3C8237BD@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://n.jwint.net/
+
+<!DOCTYPE html><html lang=3D"zh-TW"><head><meta http-equiv=3D"Content-Type"=
+ content=3D"text/html; charset=3DUTF-8">
+   =20
+    <base target=3D"_blank">
+    <meta name=3D"referrer" content=3D"no-referrer">
+    <meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=
+=3D1.0, interactive-widget=3Dresizes-content">
+    <meta name=3D"mobile-web-app-capable" content=3D"yes">
+    <meta name=3D"theme-color" content=3D"#000000">
+    <title>App</title>
+    <link rel=3D"manifest" href=3D"data:application/json;charset=3Dutf-8,%7=
+B%22id%22%3A%22%E5%88%86%E4%BA%AB%E7%AD%86%E8%A8%98%22%2C%22name%22%3A%22my=
+app%22%2C%22short_name%22%3A%22myapp%22%2C%22description%22%3A%22%E5%88%86%=
+E4%BA%AB%E7%AD%86%E8%A8%98%20myapp%22%2C%22display%22%3A%22standalone%22%2C=
+%22theme_color%22%3A%22%232196F3%22%2C%22background_color%22%3A%22%23049706=
+%22%2C%22start_url%22%3A%22https%3A%2F%2Fn.jwint.net%2F%23myapp%3DYfbMlmGq0=
+j5WrCekCbqpn7tocCbNEbid0HCVjQB1xLBSkU3GqjKBtq8a7sQh2Zt%22%2C%22scope%22%3A%=
+22https%3A%2F%2Fn.jwint.net%2F%22%2C%22icons%22%3A%5B%7B%22src%22%3A%22http=
+s%3A%2F%2Fn.jwint.net%2Ficon-192.png%22%2C%22sizes%22%3A%22192x192%22%2C%22=
+type%22%3A%22image%2Fpng%22%7D%2C%7B%22src%22%3A%22https%3A%2F%2Fn.jwint.ne=
+t%2Ficon-512.png%22%2C%22sizes%22%3A%22512x512%22%2C%22type%22%3A%22image%2=
+Fpng%22%7D%5D%2C%22orientation%22%3A%22portrait%22%7D">
+     =20
+   =20
+   =20
+   =20
+   =20
+   =20
+   =20
+   =20
+   =20
+   =20
+   =20
+    <link rel=3D"stylesheet" href=3D"https://n.jwint.net/style_black.css">
+
+</head>
+<body style=3D"background-color: rgb(0, 0, 0);">
+    <div id=3D"appInfo" style=3D"background-color: black; color: black; dis=
+play: none;">
+        <h3 id=3D"=E9=87=8D=E9=BB=9E=E5=8F=8A=E6=8F=90=E8=A6=81">=E9=87=8D=
+=E9=BB=9E=E5=8F=8A=E6=8F=90=E8=A6=81</h3>
+        <ul>
+        <li>=E6=8F=90=E4=BE=9B=E8=B7=A8=E5=B9=B3=E5=8F=B0=E3=80=81=E8=B7=A8=
+=E8=A3=9D=E7=BD=AE=E7=9A=84=E9=9B=B2=E7=AB=AF=E7=AD=86=E8=A8=98=E6=9C=8D=E5=
+=8B=99=EF=BC=8C=E7=84=A1=E9=9C=80=E5=AE=89=E8=A3=9D=E5=8D=B3=E5=8F=AF=E9=80=
+=8F=E9=81=8E=E7=80=8F=E8=A6=BD=E5=99=A8=E7=9B=B4=E6=8E=A5=E5=AD=98=E5=8F=96=
+=E3=80=82</li>
+        <li>=E6=8E=A1=E7=94=A8=E7=AB=AF=E5=B0=8D=E7=AB=AF=E9=AB=98=E5=BC=B7=
+=E5=BA=A6=E5=8A=A0=E5=AF=86=E6=9E=B6=E6=A7=8B=EF=BC=8C=E8=90=BD=E5=AF=A6=E6=
+=9C=AC=E5=9C=B0=E8=A7=A3=E5=AF=86=EF=BC=8C=E7=A2=BA=E4=BF=9D=E9=9B=B2=E7=AB=
+=AF=E9=9B=B6=E8=B3=87=E6=96=99=E5=A4=96=E6=B4=A9=E9=A2=A8=E9=9A=AA=E3=80=82=
+</li>
+        <li>=E5=85=A7=E5=BB=BA Markdown =E8=AA=9E=E6=B3=95=E3=80=81=E5=BF=
+=83=E6=99=BA=E5=9C=96=E8=88=87=E5=A4=9A=E6=A8=A3=E5=8C=96=E5=9C=96=E8=A1=A8=
+=E6=94=AF=E6=8F=B4=EF=BC=8C=E6=BB=BF=E8=B6=B3=E5=B0=88=E6=A5=AD=E6=8E=92=E7=
+=89=88=E9=9C=80=E6=B1=82=E3=80=82</li>
+        <li>=E5=85=B7=E5=82=99=E5=AE=8C=E6=95=B4=E5=BF=AB=E6=8D=B7=E9=8D=B5=
+=E8=88=87=E9=80=B2=E9=9A=8E=E6=8C=87=E4=BB=A4=E7=B3=BB=E7=B5=B1=EF=BC=8C=E5=
+=A4=A7=E5=B9=85=E6=8F=90=E5=8D=87=E6=96=87=E4=BB=B6=E7=AE=A1=E7=90=86=E8=88=
+=87=E7=B7=A8=E8=BC=AF=E6=95=88=E7=8E=87=E3=80=82</li>
+        </ul>
+        <h3 id=3D"=E7=B3=BB=E7=B5=B1=E6=A6=82=E8=BF=B0=E8=88=87=E6=A0=B8=E5=
+=BF=83=E5=8A=9F=E8=83=BD">=E7=B3=BB=E7=B5=B1=E6=A6=82=E8=BF=B0=E8=88=87=E6=
+=A0=B8=E5=BF=83=E5=8A=9F=E8=83=BD</h3>
+        <p>=E9=9B=B2=E7=AB=AF=E7=AD=86=E8=A8=98=E6=9C=AC=E6=98=AF=E4=B8=80=
+=E6=AC=BE=E5=B0=88=E7=82=BA=E6=A9=9F=E5=8B=95=E6=80=A7=E8=88=87=E9=AB=98=E5=
+=AE=89=E5=85=A8=E6=80=A7=E8=A8=AD=E8=A8=88=E7=9A=84=E9=9A=A8=E8=BA=AB=E8=A8=
+=98=E4=BA=8B=E7=B3=BB=E7=B5=B1=E3=80=82=E9=A6=96=E6=AC=A1=E9=96=8B=E5=95=9F=
+=E6=99=82=E5=83=85=E9=9C=80=E8=BC=B8=E5=85=A5=E6=9B=B8=E6=9C=AC=E5=90=8D=E7=
+=A8=B1=E8=88=87=E5=AF=86=E7=A2=BC=E5=8D=B3=E5=8F=AF=E5=BB=BA=E7=AB=8B=E6=AA=
+=94=E6=A1=88=E3=80=82=E7=B3=BB=E7=B5=B1=E6=A0=B8=E5=BF=83=E5=84=AA=E5=8B=A2=
+=E5=A6=82=E4=B8=8B=EF=BC=9A</p>
+        <ul>
+        <li>=E7=84=A1=E7=B8=AB=E8=B7=A8=E8=A3=9D=E7=BD=AE=E6=95=B4=E5=90=88=
+=EF=BC=9A=E4=BD=BF=E7=94=A8=E8=80=85=E5=83=85=E9=9C=80=E4=BF=9D=E5=AD=98=E5=
+=B0=88=E5=B1=AC=E7=B6=B2=E5=9D=80=EF=BC=8C=E5=8D=B3=E5=8F=AF=E5=9C=A8=E5=80=
+=8B=E4=BA=BA=E9=9B=BB=E8=85=A6=E3=80=81=E5=B9=B3=E6=9D=BF=E6=88=96=E6=89=8B=
+=E6=A9=9F=E7=AD=89=E8=A8=AD=E5=82=99=E9=96=93=E6=B5=81=E6=9A=A2=E4=BD=9C=E6=
+=A5=AD=E3=80=82=E6=96=BC=E6=89=8B=E6=A9=9F=E7=80=8F=E8=A6=BD=E5=99=A8=E4=B8=
+=AD=E9=BB=9E=E9=81=B8=E3=80=8C=E5=88=86=E4=BA=AB/=E5=8A=A0=E5=85=A5=E4=B8=
+=BB=E7=95=AB=E9=9D=A2=E3=80=8D=EF=BC=8C=E5=8D=B3=E5=8F=AF=E8=BD=89=E7=82=BA=
+=E6=87=89=E7=94=A8=E7=A8=8B=E5=BC=8F (APP) =E5=BD=A2=E5=BC=8F=E6=8D=B7=E5=
+=BE=91=E3=80=82</li>
+        <li>=E5=A4=9A=E5=85=83=E8=A6=96=E8=A6=BA=E5=8C=96=E5=91=88=E7=8F=BE=
+=EF=BC=9A=E7=B3=BB=E7=B5=B1=E6=94=AF=E6=8F=B4=E5=A4=9A=E7=A8=AE=E7=80=8F=E8=
+=A6=BD=E8=A6=96=E8=A7=92=EF=BC=8C=E5=8C=85=E5=90=AB=E6=A8=99=E6=BA=96=E9=96=
+=B1=E8=AE=80=E6=A8=A1=E5=BC=8F=E3=80=81=E5=BF=83=E6=99=BA=E5=9C=96=E5=B1=A4=
+=E7=B4=9A=E6=A8=A1=E5=BC=8F=EF=BC=8C=E4=B8=A6=E5=AE=8C=E7=BE=8E=E6=95=B4=E5=
+=90=88 <a href=3D"https://n.jwint.net/r#markdownSytax">Markdown =E8=AA=9E=
+=E6=B3=95</a> =E8=88=87 <a href=3D"https://n.jwint.net/r#mermaid">Mermaid =
+=E5=9C=96=E8=A1=A8=E8=AA=9E=E6=B3=95</a>=E3=80=82</li>
+        <li>=E5=BD=88=E6=80=A7=E5=88=86=E9=A1=9E=E7=AE=A1=E7=90=86=EF=BC=9A=
+=E5=85=81=E8=A8=B1=E7=84=A1=E9=99=90=E5=88=B6=E5=89=B5=E5=BB=BA=E5=A4=9A=E6=
+=9C=AC=E7=8D=A8=E7=AB=8B=E7=AD=86=E8=A8=98=E6=9C=AC=EF=BC=8C=E4=B8=A6=E6=94=
+=AF=E6=8F=B4=E5=9C=A8=E5=96=AE=E4=B8=80=E7=AD=86=E8=A8=98=E6=9C=AC=E5=85=A7=
+=E6=96=B0=E5=A2=9E=E5=A4=9A=E5=80=8B=E5=88=86=E9=A0=81=EF=BC=8C=E4=BB=A5=E4=
+=BE=BF=E7=B3=BB=E7=B5=B1=E5=8C=96=E6=AD=B8=E6=AA=94=E5=90=84=E9=A1=9E=E8=B3=
+=87=E8=A8=8A=E3=80=82</li>
+        </ul>       =20
+    </div>
+    <div class=3D"main-container">
+        <div class=3D"tabs" id=3D"mainTabs" style=3D"display: flex;">
+            <div id=3D"topBnt" style=3D"display: none;">
+                <button class=3D"tab-button active" id=3D"readLocalBtn" tit=
+le=3D"=E6=9C=AC=E5=9C=B0=E8=AE=80=E5=8F=96" style=3D"color: rgb(255, 0, 230=
+);">=E6=9A=AB=E5=8F=96</button>
+                <button class=3D"tab-button" id=3D"saveLocalBtn" title=3D"=
+=E6=9C=AC=E5=9C=B0=E4=BF=9D=E5=AD=98" style=3D"color: rgb(255, 0, 230);">=
+=E6=9A=AB=E5=AD=98</button>
+                <button class=3D"tab-button" title=3D"=E9=96=B1=E8=AE=80=E6=
+=A8=A1=E5=BC=8F" id=3D"mdViewBtn">=E5=94=AF=E8=AE=80</button>
+                <button class=3D"tab-button" id=3D"getDBBtn2" title=3D"=E9=
+=9B=B2=E4=B8=8B=E8=BC=89=E6=9B=B4=E6=96=B0" style=3D"color: white;">=E5=8F=
+=96</button>
+                <button class=3D"tab-button" id=3D"saveDBBtn2" title=3D"=E4=
+=BF=9D=E5=AD=98=E4=B8=A6=E4=B8=8A=E5=82=B3=E9=9B=B2" style=3D"color: white;=
+">=E5=AD=98</button>
+                <button class=3D"tab-button" id=3D"addSubPageBtn" title=3D"=
+=E6=96=B0=E5=A2=9E=E5=88=86=E9=A0=81">=E2=9E=95</button>
+            </div>
+        </div>
+        <div id=3D"mkdwPage" style=3D"display: block;">
+            <button id=3D"toc-btn" style=3D"display: block;">=E2=98=B0</but=
+ton>
+           =20
+            <nav id=3D"toc" class=3D"toc-sidebar"><div style=3D"line-height=
+: 2; word-break: break-word;">
+            <div class=3D"toc-button-list" style=3D"width: 80%;">
+            <button class=3D"toc-button" id=3D"tTop" title=3D"=E5=9B=9E=E5=
+=88=B0=E9=A0=82=E9=83=A8">=F0=9F=94=9D</button>
+            <button class=3D"toc-button" id=3D"tInc" title=3D"=E5=A2=9E=E5=
+=8A=A0=E9=A1=AF=E7=A4=BA=E5=B1=A4=E7=B4=9A">=E2=9E=95</button>
+            <button class=3D"toc-button" id=3D"tDec" title=3D"=E6=B8=9B=E5=
+=B0=91=E9=A1=AF=E7=A4=BA=E5=B1=A4=E7=B4=9A">=E2=9E=96</button>
+            </div>
+            <br>
+            <a href=3D"https://n.jwint.net/#game" target=3D"_self" style=3D=
+"
+           font-size: 14px;=20
+           margin-right: 3px;=20
+           text-decoration: none;=20
+           color: whitesmoke;
+           display: inline-block;
+         ">&nbsp;&nbsp;&nbsp;&nbsp;Game</a><br><a href=3D"https://n.jwint.n=
+et/#tool" target=3D"_self" style=3D"
+           font-size: 14px;=20
+           margin-right: 3px;=20
+           text-decoration: none;=20
+           color: whitesmoke;
+           display: inline-block;
+         ">&nbsp;&nbsp;&nbsp;&nbsp;Tool</a><br>
+            <br>
+            <div class=3D"toc-button-list" style=3D"width: 95%;">
+            <button class=3D"toc-button" id=3D"tReload" title=3D"=E6=9B=B4=
+=E6=96=B0=E5=85=A7=E5=AE=B9">=F0=9F=94=84</button>
+            <button class=3D"toc-button" id=3D"tUrl" title=3D"=E8=A4=87=E8=
+=A3=BD=E9=8F=88=E7=B5=90">=F0=9F=94=97</button>
+            <button class=3D"toc-button" id=3D"tSee" title=3D"=E4=BD=BF=E7=
+=94=A8=E8=AA=AA=E6=98=8E">=F0=9F=92=A1</button>
+            <button class=3D"toc-button" id=3D"tMD" title=3D"=E7=B7=A8=E8=
+=BC=AF">=E2=9C=8F=EF=B8=8F</button>
+            <button class=3D"toc-button" id=3D"tPwd" title=3D"=E6=9B=B4=E6=
+=8F=9B=E5=AF=86=E7=A2=BC">=F0=9F=97=9D=EF=B8=8F</button>
+            <button class=3D"toc-button" id=3D"tNew" title=3D"=E6=8C=87=E4=
+=BB=A4">=E2=9A=99=EF=B8=8F</button>
+            </div>
+            <br><br>
+            </div></nav>
+
+            <div id=3D"mdShowArea" style=3D"display: block;">
+                <div id=3D"mdBtnTab" style=3D"display:none;">
+                    <button class=3D"mdBtn" id=3D"markdownReloadBtn">reload=
+</button>
+                    <button class=3D"mdBtn" id=3D"markdownViewBtn">close</b=
+utton>
+                </div>
+                <div id=3D"mdText" style=3D"display: block;"><h3 id=3D"game=
+">Game</h3>
+<ul>
+<li><a href=3D"https://chess.jwint.net/">=E8=B1=A1=E6=A3=8B</a></li>
+<li><a href=3D"https://chess.jwint.net/localChess">=E6=9C=AC=E5=9C=B0=E8=B1=
+=A1=E6=A3=8B</a></li>
+<li><a href=3D"https://chess.jwint.net/enChess">=E8=A5=BF=E6=B4=8B=E6=A3=8B=
+</a></li>
+<li><a href=3D"https://app.jwint.net/Go">=E5=9C=8D=E6=A3=8B</a></li>
+<li><a href=3D"https://app.jwint.net/gomoku">=E4=BA=94=E5=AD=90=E6=A3=8B</a=
+></li>
+<li><a href=3D"https://h.jwint.net/ttt">=E4=BA=95=E5=AD=97=E6=A3=8B</a></li=
+>
+<li><a href=3D"https://h.jwint.net/ttt/MiChess">=E7=B1=B3=E5=AD=97=E6=A3=8B=
+</a></li>
+<li><a href=3D"https://app.jwint.net/maze">=E8=BF=B7=E5=AE=AEmaze</a></li>
+<li><a href=3D"https://app.jwint.net/Dama">=E8=B7=B3=E6=A3=8BDama</a></li>
+<li><a href=3D"https://app.jwint.net/mChess">=E9=99=B8=E8=BB=8D=E6=A3=8B</a=
+></li>
+</ul>
+<h3 id=3D"tool">Tool</h3>
+<ul>
+<li><a href=3D"https://app.jwint.net/AES">AES</a></li>
+<li><a href=3D"https://app.jwint.net/AESGCM">AESGCM</a></li>
+<li><a href=3D"https://app.jwint.net/cal">Cal=E8=A9=A6=E7=AE=97</a> <a href=
+=3D"https://n.jwint.net/r#cal%E4%BD%BF%E7%94%A8%E8%AA%AA%E6%98%8E">=E8=AA=
+=AA=E6=98=8E</a></li>
+<li><a href=3D"https://app.jwint.net/chat">Chat =E8=81=8A=E5=A4=A9=E5=AE=A4=
+</a></li>
+<li><a href=3D"https://j.jwint.net/md5.html">Md5</a></li>
+<li><a href=3D"https://app.jwint.net/md2html">Markdown to HTML</a></li>
+<li><a href=3D"https://app.jwint.net/html2md">Markdown from HTML</a></li>
+<li><a href=3D"https://h.jwint.net/md2Markdown">Markdown to mindmap</a></li=
+>
+<li><a href=3D"https://n.jwint.net/">Note=E9=9B=B2=E7=AB=AF=E7=AD=86=E8=A8=
+=98</a> <a href=3D"https://n.jwint.net/r#noteOfN">=E8=AA=AA=E6=98=8E</a></l=
+i>
+<li><a href=3D"https://app.jwint.net/lNote/">Note=E9=9B=A2=E7=B7=9A=E7=AD=
+=86=E8=A8=98</a> <a href=3D"https://n.jwint.net/r#noteOfLocal">=E8=AA=AA=E6=
+=98=8E</a></li>
+<li><a href=3D"https://app.jwint.net/z/sortLine">Sort Text =E6=96=87=E5=AD=
+=97=E6=8E=92=E5=BA=8F</a></li>
+<li><a href=3D"https://h.jwint.net/TalkAI">TalkAI</a> <a href=3D"https://n.=
+jwint.net/r#TalkAiNote">=E8=AA=AA=E6=98=8E</a></li>
+<li><a href=3D"https://app.jwint.net/textEditor/">Text editor</a></li>
+<li><a href=3D"https://app.jwint.net/toDo">Todo</a></li>
+<li><a href=3D"https://app.jwint.net/upLoad">Upload file</a></li>
+<li><a href=3D"https://app.jwint.net/vCard">vCard</a></li>
+<li><a href=3D"https://app.jwint.net/webEnc">WebEnc</a></li>
+<li><a href=3D"https://app.jwint.net/webDec">WebDec</a></li>
+<li><a href=3D"https://app.jwint.net/ime">=E4=B8=AD=E6=96=87=E8=BC=B8=E5=85=
+=A5</a></li>
+<li><a href=3D"https://app.jwint.net/fileEnc">=E6=AA=94=E6=A1=88=E5=8A=A0=
+=E5=AF=86</a></li>
+<li><a href=3D"https://app.jwint.net/sJump/newNote.html">=E5=88=86=E4=BA=AB=
+=E6=9B=B8</a></li>
+<li><a href=3D"https://app.jwint.net/sJump/add">=E7=9F=AD=E7=B6=B2=E5=9D=80=
+</a></li>
+<li><a href=3D"https://app.jwint.net/v/">=E7=9C=8B=E5=BD=B1=E7=89=87</a></l=
+i>
+<li><a href=3D"https://app.jwint.net/listPlay/">=E7=9C=8B=E6=92=AD=E6=94=BE=
+=E6=B8=85=E5=96=AE</a> <a href=3D"https://n.jwint.net/r#viewUrl">=E8=AA=AA=
+=E6=98=8E</a></li>
+<li><a href=3D"https://app.jwint.net/Filter_%E5%AD%97%E5%B9%95%E6%99%82%E9%=
+96%93%E8%BB%B8%E5%8E%BB%E9%99%A4">=E5=AD=97=E5=B9=95=E6=99=82=E9=96=93=E8=
+=BB=B8=E5=8E=BB=E9=99=A4</a></li>
+<li><a href=3D"https://app.jwint.net/liveView/lunch">=E9=96=8B=E7=AA=84=E7=
+=89=88=E7=95=AB=E9=9D=A2</a></li>
+<li><a href=3D"https://app.jwint.net/img2Base64">=E5=9C=96=E7=89=87=E8=BD=
+=89base64</a></li>
+</ul>
+<br></div>
+                <svg id=3D"markmap" style=3D"display: none;"></svg>
+            </div>
+        </div>
+
+        <div id=3D"TabA" class=3D"tab-content">
+            <button id=3D"encBtn">=E8=A7=A3=E5=AF=86</button>
+            <textarea id=3D"encryptedContent" placeholder=3D"=E5=9C=A8=E6=
+=AD=A4=E8=B2=BC=E4=B8=8A=E5=AF=86=E6=96=87..."></textarea>
+        </div>
+
+        <div id=3D"TabB" class=3D"tab-content active" style=3D"display: non=
+e;">
+            <div class=3D"sub-tabs-header">
+                <div id=3D"subTabNav" class=3D"sub-tabs"><button id=3D"sub-=
+btn-block-1" class=3D"sub-tab-button active">
+        <span title=3D"=E6=8C=89=E4=B8=8B=E4=BF=AE=E6=94=B9=E5=88=86=E9=A0=
+=81=E5=90=8D=E7=A8=B1" class=3D"btn-text">App</span>
+        <span class=3D"delete-sub-btn" title=3D"=E5=88=AA=E9=99=A4=E5=88=86=
+=E9=A0=81">=C3=97</span>
+    </button></div>
+            </div>
+            <div id=3D"subTabContentContainer" class=3D"sub-tab-content-con=
+tainer"><div id=3D"sub-content-block-1" class=3D"sub-tab-content active">
+        <input type=3D"text" class=3D"block-name" style=3D"margin-right: 0.=
+5rem; display: none;" value=3D"App" data-target-btn=3D"sub-btn-block-1">
+        <textarea class=3D"editable-text" placeholder=3D"=E5=9C=A8=E6=AD=A4=
+=E8=BC=B8=E5=85=A5=E7=AD=86=E8=A8=98..." disabled=3D"disabled">- [AES](http=
+s://app.jwint.net/AES)
+- [AESGCM](https://app.jwint.net/AESGCM)
+- [Cal=E8=A9=A6=E7=AE=97](https://app.jwint.net/cal) [=E8=A9=B3](r#cal=E4=
+=BD=BF=E7=94=A8=E8=AA=AA=E6=98=8E)
+- [Chat =E8=81=8A=E5=A4=A9=E5=AE=A4](https://app.jwint.net/chat)
+- [Md5](https://j.jwint.net/md5.html)
+- [Markdown to HTML](https://app.jwint.net/md2html)
+- [Markdown from HTML](https://app.jwint.net/html2md)
+- [Markdown to mindmap](https://h.jwint.net/md2Markdown)
+- [Note=E9=9B=B2=E7=AB=AF=E7=AD=86=E8=A8=98](https://n.jwint.net) [=E8=A9=
+=B3](r#noteOfN)
+- [Note=E9=9B=A2=E7=B7=9A=E7=AD=86=E8=A8=98](https://app.jwint.net/lNote/) =
+[=E8=A9=B3](r#noteOfLocal)
+- [TalkAI](https://h.jwint.net/TalkAI) [=E8=A9=B3](r#TalkAiNote)
+- [Text editor](https://app.jwint.net/textEditor/)
+- [Todo](https://app.jwint.net/toDo)
+- [Upload file](https://app.jwint.net/upLoad)
+- [vCard](https://app.jwint.net/vCard)
+- [WebEnc](https://app.jwint.net/webEnc)
+- [WebDec](https://app.jwint.net/webDec)
+- [=E4=B8=AD=E6=96=87=E8=BC=B8=E5=85=A5](https://app.jwint.net/ime)
+- [=E6=AA=94=E6=A1=88=E5=8A=A0=E5=AF=86](https://app.jwint.net/fileEnc)
+- [=E5=88=86=E4=BA=AB=E6=9B=B8](https://app.jwint.net/sJump/newNote.html)
+- [=E7=9F=AD=E7=B6=B2=E5=9D=80](https://app.jwint.net/sJump/add)
+- [=E7=9C=8B=E5=BD=B1=E7=89=87](https://app.jwint.net/v/)
+- [=E7=9C=8B=E6=92=AD=E6=94=BE=E6=B8=85=E5=96=AE](https://app.jwint.net/lis=
+tPlay/) [=E8=A9=B3](r#viewUrl)
+- [=E5=AD=97=E5=B9=95=E6=99=82=E9=96=93=E8=BB=B8=E5=8E=BB=E9=99=A4](https:/=
+/app.jwint.net/Filter_%E5%AD%97%E5%B9%95%E6%99%82%E9%96%93%E8%BB%B8%E5%8E%B=
+B%E9%99%A4)
+- [=E9=96=8B=E7=AA=84=E7=89=88=E7=95=AB=E9=9D=A2](https://app.jwint.net/liv=
+eView/lunch)
+- [=E5=9C=96=E7=89=87=E8=BD=89base64](https://app.jwint.net/img2Base64)
+- [=E8=81=AF=E7=B7=9A=E8=B1=A1=E6=A3=8B](https://chess.jwint.net) [=E8=A9=
+=B3](r#chess)
+- [=E6=9C=AC=E5=9C=B0=E8=B1=A1=E6=A3=8B](https://chess.jwint.net/localChess=
+)
+- [=E5=9C=8D=E6=A3=8B](https://app.jwint.net/Go)
+- [=E4=BA=94=E5=AD=90=E6=A3=8B](https://app.jwint.net/gomoku)
+- [=E4=BA=95=E5=AD=97=E6=A3=8B](https://h.jwint.net/ttt)
+- [=E7=B1=B3=E5=AD=97=E6=A3=8B](https://h.jwint.net/ttt/MiChess)
+- [=E8=BF=B7=E5=AE=AEmaze](https://app.jwint.net/maze) [=E8=A9=B3](r#maze)
+- [=E8=B7=B3=E6=A3=8BDama](https://app.jwint.net/Dama) [=E8=A9=B3](r#Dama)
+- [=E9=99=B8=E8=BB=8D=E6=A3=8B](https://app.jwint.net/mChess)
+</textarea>
+    </div></div>
+        </div>
+    </div>
+   =20
+    <div id=3D"statusMessage" class=3D"status-info" title=3D"=E9=96=B1=E8=
+=AE=80/=E7=B7=A8=E8=BC=AF" style=3D"background-color: rgba(185, 214, 139, 0=
+.98); color: rgb(0, 0, 0);">=E5=84=B2=E5=AD=98=E6=88=90=E5=8A=9F</div>
+    <div id=3D"passwordOverlay" style=3D"display:none">
+        <input type=3D"text" id=3D"passwordInput" placeholder=3D"=E8=A8=8A=
+=E6=81=AF=E5=85=A7=E5=AE=B9" autocomplete=3D"off" value=3D"">
+    </div>
+
+    <dialog id=3D"newPwdDialog" class=3D"custom-dialog">
+        <input type=3D"password" id=3D"newPwd1" placeholder=3D"=E8=BC=B8=E5=
+=85=A5=E6=96=B0=E5=AF=86=E7=A2=BC" class=3D"custom-input"><br><br>
+        <input type=3D"password" id=3D"newPwd2" placeholder=3D"=E5=86=8D=E6=
+=AC=A1=E7=A2=BA=E8=AA=8D=E5=AF=86=E7=A2=BC" class=3D"custom-input"><br><br>
+        <button id=3D"confirmBtn" class=3D"btn-primary">=E7=A2=BA=E5=AE=9A<=
+/button>
+        <button id=3D"cancelBtn" class=3D"btn-primary">=E5=8F=96=E6=B6=88</=
+button>
+    </dialog>
+
+    <dialog id=3D"PwdDialog" class=3D"custom-dialog">
+        <h2 id=3D"inpTitlePwdDialog" class=3D"dialog-title"></h2>
+        <input type=3D"password" id=3D"pwdNow" placeholder=3D"=E8=BC=B8=E5=
+=85=A5" class=3D"custom-input"><br><br>
+        <button id=3D"confirmBtnPwdDialog" class=3D"btn-primary">=E7=A2=BA=
+=E5=AE=9A</button>
+    </dialog>
+
+    <dialog id=3D"inputDialog" class=3D"custom-dialog">
+        <h2 id=3D"inpTitle" class=3D"dialog-title"></h2>
+        <input type=3D"text" id=3D"inputT" placeholder=3D"=E8=BC=B8=E5=85=
+=A5" class=3D"custom-input"><br><br>
+        <button id=3D"okCmd" class=3D"btn-secondary">=E7=A2=BA=E5=AE=9A</bu=
+tton>
+        <button id=3D"cancelCmd" class=3D"btn-secondary">=E5=8F=96=E6=B6=88=
+</button>   =20
+    </dialog>
+
+    <dialog id=3D"msgDialog" class=3D"custom-dialog">
+        <h2 id=3D"msgCheckText" class=3D"dialog-title"></h2>
+        <button id=3D"okbtn" class=3D"btn-secondary">=E7=A2=BA=E5=AE=9A</bu=
+tton>
+        <button id=3D"cancelbtn" class=3D"btn-secondary">=E5=8F=96=E6=B6=88=
+</button>   =20
+    </dialog>
+
+
+  =20
+
+</body></html>
+------MultipartBoundary--vGoyZ1AzXCea4BuYlCEwPMsqOjBRXsbrQIRl3sx0lk----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://n.jwint.net/style_black.css
+
+@charset "utf-8";
+
+html, body { height: 100dvh; margin: 0px; padding: 0px; overflow: hidden; f=
+ont-family: Arial, sans-serif; background-color: rgb(244, 244, 249); font-s=
+ize: 100%; touch-action: manipulation; }
+
+button { font-size: 0.65rem; }
+
+.main-container, .main-container-readonly { display: flex; flex-direction: =
+column; box-sizing: border-box; background-color: rgb(0, 0, 0); height: 100=
+dvh; padding-top: 0.5vw; padding-right: 0.5vw; padding-left: 0.5vw; padding=
+-bottom: calc(30px + env(safe-area-inset-bottom)); position: relative; }
+
+.main-container-readonly { padding-top: 1vw; padding-right: 1vw; padding-le=
+ft: 1vw; padding-bottom: calc(30px + env(safe-area-inset-bottom)); }
+
+.status-info { position: fixed; bottom: 0px; left: 0px; width: 100%; paddin=
+g: 0 0.6rem env(safe-area-inset-bottom) 0.6rem; text-align: center; font-si=
+ze: 0.6rem; font-weight: bold; background-color: rgba(185, 214, 139, 0.98);=
+ z-index: 1000; box-sizing: border-box; }
+
+#mainTabs { display: none; }
+
+.tabs { flex-shrink: 0; margin-bottom: 0px; background-color: rgb(0, 0, 0);=
+ padding: 0px; }
+
+.tabs button { background-color: rgba(32, 144, 79, 0.773); border-width: me=
+dium; border-style: none; border-color: currentcolor; border-image: none; o=
+utline: none; cursor: pointer; padding: 0.2rem 0.7rem; transition: backgrou=
+nd-color 0.3s; margin-right: 0.2rem; border-radius: 0.6rem; color: rgb(255,=
+ 255, 255); }
+
+.tabs button:hover { background-color: rgb(221, 221, 221); color: rgb(0, 0,=
+ 0); }
+
+.tabs button.active { color: rgb(255, 255, 255); }
+
+.tab-content { display: none; padding: 0px; background-color: rgb(0, 0, 0);=
+ flex-grow: 1; overflow: hidden; box-sizing: border-box; height: 100%; posi=
+tion: relative; }
+
+.tab-content.active { display: flex; flex-direction: column; }
+
+#TabA { display: none; }
+
+#TabA.active { display: flex; flex-direction: column; }
+
+.control-row { margin-bottom: 10px; flex-shrink: 0; display: flex; flex-wra=
+p: wrap; gap: 5px; }
+
+#TabA input[type=3D"password"], #delNameDef, #keyNameDef { padding: 8px; bo=
+rder: 1px solid rgb(204, 204, 204); border-radius: 4px; box-sizing: border-=
+box; }
+
+#TabA input[type=3D"password"] { width: 100%; margin-bottom: 5px; }
+
+#keyNameDef, #delNameDef { width: 120px; }
+
+#keyNameDef { display: none; }
+
+#TabA button, #listBtn, #delBtn { padding: 8px 12px; color: rgb(255, 255, 2=
+55); border-width: medium; border-style: none; border-color: currentcolor; =
+border-image: none; border-radius: 4px; cursor: pointer; }
+
+#encryptBtn, #decryptBtn, #copyBtn { background-color: rgb(76, 175, 80); }
+
+#exportBtn, #importBtnTrigger { background-color: rgb(255, 87, 34); }
+
+#saveDBBtn2, #getDBBtn2, #newPageBtn { color: rgb(255, 255, 255); }
+
+#nameBtn, #listBtn, #delBtn { background-color: rgb(63, 81, 181); }
+
+.external-link-btn { background-color: rgb(96, 125, 139); }
+
+#TabA button:hover, #listBtn:hover, #nameBtn:hover { opacity: 0.9; }
+
+#encryptedContent { width: 100%; flex-grow: 1; padding: 10px; border: 1px s=
+olid rgb(204, 204, 204); border-radius: 4px; box-sizing: border-box; resize=
+: none; font-family: monospace; }
+
+.sub-tabs-header { display: flex; flex-wrap: wrap; align-items: flex-end; b=
+order-bottom: 1px solid rgb(204, 204, 204); background-color: rgb(0, 0, 0);=
+ padding-top: 1px; flex-shrink: 0; min-height: 20px; }
+
+.sub-tabs { display: flex; flex-wrap: nowrap; overflow: auto hidden; margin=
+-bottom: -2px; margin-top: 3px; width: 100%; }
+
+.sub-tabs > button, .sub-tabs > div { flex-shrink: 0; }
+
+.btn-text { margin-right: 0.42rem; margin-left: 0.2rem; }
+
+.sub-tab-button { background-color: rgb(238, 238, 238); border-width: 0px 0=
+px 1px; border-style: solid; border-color: rgb(204, 204, 204); border-image=
+: none; outline: none; cursor: pointer; padding: 1px 5px; transition: trans=
+form 0.3s, background-color 0.3s; border-radius: 5px 5px 0px 0px; margin-ri=
+ght: 1px; margin-bottom: 0px; display: flex; align-items: center; white-spa=
+ce: nowrap; }
+
+.sub-tab-button:hover { background-color: rgb(221, 221, 221); transform: sc=
+ale(1.01); }
+
+.sub-tab-button.active { background-color: rgb(176, 253, 188); border-botto=
+m: 1px solid rgb(255, 255, 255); z-index: 10; position: relative; transform=
+: scale(0.99); }
+
+.delete-sub-btn { margin-left: 2px; color: rgb(153, 153, 153); font-weight:=
+ bold; line-height: 1; padding: 0px 2px; }
+
+.delete-sub-btn:hover { color: rgb(255, 0, 0); }
+
+.sub-tab-content-container { flex-grow: 1; position: relative; width: 100%;=
+ height: 100%; overflow: hidden; }
+
+.sub-tab-content { display: none; width: 100%; height: 100%; position: abso=
+lute; inset: 0px; overflow: hidden; }
+
+.sub-tab-content.active { display: flex; flex-direction: column; }
+
+.block-name { display: none; width: 100%; padding: 5px; margin-bottom: 5px;=
+ border: 2px solid rgb(33, 150, 243); border-radius: 4px; font-size: 1rem; =
+box-sizing: border-box; }
+
+.editable-text { width: 100%; flex-grow: 1; padding: 5px; border: 1px solid=
+ rgb(170, 170, 170); border-radius: 5px; font-size: 1rem; line-height: 1.6;=
+ resize: none; box-sizing: border-box; font-family: ui-monospace, "Cascadia=
+ Code", "Cascadia Mono", "Segoe UI Mono", Consolas, Menlo, Monaco, "Liberat=
+ion Mono", "DejaVu Sans Mono", monospace; scroll-margin-bottom: 100px; colo=
+r: rgba(255, 255, 255, 0.88); background-color: rgba(255, 255, 255, 0.082);=
+ }
+
+#mdShowArea { position: absolute; inset: 0px; width: 100%; max-width: 4000p=
+x; margin: 0px auto; padding: 0px 16px; box-sizing: border-box; overflow-x:=
+ hidden; font-family: Inter, systrem-ui, -apple-systrem, BlinkMacSystremFon=
+t, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif; font-si=
+ze: 1rem; font-weight: 200; line-height: 1.5rem; letter-spacing: 0.066rem; =
+color: rgb(204, 204, 204); background-color: rgb(0, 0, 0); overflow-y: auto=
+ !important; }
+
+#mdShowArea code, #mdShowArea pre { letter-spacing: normal; }
+
+#mdShowArea a, #mdShowArea a:visited { display: inline-block; text-decorati=
+on: none; color: rgb(225, 225, 216); font-weight: 200; transition: color 0.=
+3s, transform 0.3s; }
+
+#mdShowArea a::first-letter { font-weight: 300; letter-spacing: 0.02rem; co=
+lor: rgb(225, 225, 206); transition: color 0.3s; }
+
+#mdShowArea a:hover { color: rgb(96, 255, 102); transform: scale(0.98); }
+
+#mdShowArea a:hover::first-letter { color: rgb(96, 255, 102); }
+
+#mdShowArea h1, #mdShowArea h2, #mdShowArea h3, #mdShowArea h4, #mdShowArea=
+ h5, #mdShowArea h6 { transition: color 0.3s, transform 0.3s; }
+
+#mdShowArea h1:hover, #mdShowArea h2:hover, #mdShowArea h3:hover, #mdShowAr=
+ea h4:hover, #mdShowArea h5:hover, #mdShowArea h6:hover { transform: scale(=
+0.99); }
+
+#mdShowArea h1 { font-size: 2rem; font-weight: 700; color: rgb(46, 204, 113=
+); letter-spacing: 0.05rem; margin: 1.8rem 0px 0.2rem; border-bottom: 1px s=
+olid rgb(74, 144, 226); padding-bottom: 0.26rem; text-shadow: rgba(0, 0, 0,=
+ 0.3) 0px 1px 1px; line-height: 2.2rem; }
+
+#mdShowArea h2 { font-size: 1.6rem; font-weight: 500; color: rgb(89, 214, 1=
+41); letter-spacing: 0.03rem; margin: 1.5rem 0px 0.2rem; padding-bottom: 0.=
+1rem; line-height: 2.2rem; }
+
+#mdShowArea h3 { font-size: 1.4rem; font-weight: 500; color: rgb(116, 218, =
+159); letter-spacing: 0.02rem; margin: 1.2rem 0px 0.2rem; padding-bottom: 0=
+.1rem; line-height: 2.2rem; }
+
+#mdShowArea h4 { font-size: 1.3rem; font-weight: 400; color: rgb(124, 218, =
+116); letter-spacing: 0.01rem; margin: 1rem 0px 0.2rem; line-height: 2.2rem=
+; }
+
+#mdShowArea h5 { font-size: 1.2rem; font-weight: 400; color: rgb(164, 218, =
+116); letter-spacing: 0.01rem; margin: 1rem 0px 0.2rem; line-height: 2.2rem=
+; }
+
+#mdShowArea h6 { font-size: 1.1rem; font-weight: 400; color: rgb(193, 231, =
+144); letter-spacing: 0.01rem; margin: 1rem 0px 0.2rem; line-height: 2.2rem=
+; }
+
+#mdShowArea b, #mdShowArea strong, #mdShowArea i, #mdShowArea rem { display=
+: inline-block; color: rgb(135, 237, 135); transition: color 0.3s, transfor=
+m 0.3s; }
+
+#mdShowArea b, #mdShowArea strong { font-weight: 300; }
+
+#mdShowArea i, #mdShowArea rem { font-style: italic; }
+
+#mdShowArea b i, #mdShowArea strong rem, #mdShowArea i b, #mdShowArea rem s=
+trong { font-style: italic; font-weight: 300; }
+
+#mdShowArea b:hover, #mdShowArea strong:hover, #mdShowArea i:hover, #mdShow=
+Area rem:hover, #mdShowArea b i:hover, #mdShowArea strong rem:hover, #mdSho=
+wArea i b:hover, #mdShowArea rem strong:hover { transform: scale(0.99); col=
+or: rgb(139, 254, 123); }
+
+#mdShowArea p { margin: 0.3rem 0px; }
+
+#mdShowArea hr { border-width: 1px medium medium; border-style: solid none =
+none; border-color: rgb(20, 34, 23) currentcolor currentcolor; border-image=
+: none; margin: 1.5rem 0px; }
+
+#mdShowArea img { max-width: 100%; height: auto; display: block; margin: 1.=
+8rem auto; border: 1px solid rgb(51, 51, 51); border-radius: 4px; box-shado=
+w: rgba(255, 255, 255, 0.1) 0px 2px 8px; transition: transform 0.3s, box-sh=
+adow 0.3s; }
+
+#mdShowArea img:hover { transform: scale(0.99); box-shadow: rgba(255, 255, =
+255, 0.2) 0px 4px 12px; }
+
+#mdShowArea table { width: 100%; border-collapse: separate; border-spacing:=
+ 0px; margin: 1rem 0px; border-radius: 9px; overflow: hidden; }
+
+#mdShowArea th, #mdShowArea td { border: 1px solid rgb(51, 51, 51); padding=
+: 14px; text-align: left; transition: background-color 0.3s; }
+
+#mdShowArea th { background-color: rgb(74, 144, 226); color: rgb(255, 255, =
+255); font-weight: 500; }
+
+#mdShowArea tr:nth-child(2n) { background-color: rgb(26, 26, 26); }
+
+#mdShowArea tr:hover { background-color: rgb(42, 42, 42); }
+
+#mdShowArea ul, #mdShowArea ol { margin: 0.6rem 0px; padding-left: 2.5rem; =
+}
+
+#mdShowArea ul li { list-style-type: square; color: rgb(204, 204, 204); }
+
+#mdShowArea ol li { list-style-type: decimal; color: rgb(204, 204, 204); }
+
+#mdShowArea li { margin-bottom: 0.1rem; transition: color 0.3s; }
+
+#mdShowArea pre, #mdShowArea code { font-family: "Courier New", monospace; =
+background-color: rgb(26, 26, 26); color: rgb(204, 204, 204); }
+
+#mdShowArea pre { white-space: pre; overflow-x: auto; display: block; paddi=
+ng: 10px; font-size: 0.7rem; border-radius: 4px; }
+
+#mdShowArea code { padding: 2px 4px; border-radius: 3px; }
+
+#mdShowArea pre code { padding: 0px; background-color: transparent; }
+
+#mdShowArea footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px s=
+olid rgb(51, 51, 51); font-size: 0.9rem; color: rgb(204, 204, 204); text-al=
+ign: center; }
+
+#markmap { width: 100%; height: 100%; flex-grow: 1; display: flex; backgrou=
+nd-color: rgba(128, 128, 128, 0.39); color: rgb(255, 255, 255); font-size: =
+1rem; }
+
+.btn-container { display: flex; width: 80%; margin: 0px auto; gap: 10px; }
+
+.mdBtn { flex: 1 1 0%; margin-top: 2px; padding: 5px 25px; background-color=
+: rgb(0, 129, 13); color: rgb(255, 255, 255); border-width: medium; border-=
+style: none; border-color: currentcolor; border-image: none; border-radius:=
+ 4px; cursor: pointer; }
+
+#mdvBtn { background-color: rgb(244, 244, 249); color: rgb(244, 244, 249); =
+padding: 0px; margin: 0px; }
+
+#tabAbtn, #noshow { background-color: rgb(244, 244, 249); color: rgb(244, 2=
+44, 249); border-width: medium; border-style: none; border-color: currentco=
+lor; border-image: none; }
+
+#backToTopBtn { position: fixed; top: 2dvw; right: 3dvw; width: 30px; heigh=
+t: 20px; border-radius: 50%; background-color: rgba(38, 255, 0, 0.247); col=
+or: rgb(255, 255, 255); border-width: medium; border-style: none; border-co=
+lor: currentcolor; border-image: none; cursor: pointer; z-index: 995; box-s=
+hadow: rgba(0, 0, 0, 0.2) 0px 4px 8px; transition: background-color 0.3s, t=
+ransform 0.3s; }
+
+#backToTopBtn:hover { background-color: rgb(0, 86, 179); transform: scale(1=
+.01); }
+
+#toc-btn { position: fixed; right: 1rem; top: 20px; z-index: 995; padding: =
+10px 15px; background-color: rgba(0, 255, 38, 0.14); color: rgb(255, 255, 2=
+55); border-width: medium; border-style: none; border-color: currentcolor; =
+border-image: none; cursor: pointer; border-radius: 5px 0px 0px 5px; box-sh=
+adow: rgba(0, 0, 0, 0.2) -2px 2px 5px; }
+
+.toc-sidebar { box-sizing: border-box; position: fixed; top: 0px; right: -1=
+7rem; width: 17rem; height: 100dvh; background-color: rgba(21, 62, 21, 0.82=
+7); box-shadow: rgba(20, 20, 20, 0.1) -2px 0px 5px; transition: right 0.3s;=
+ z-index: 990; overflow-y: auto; padding: calc(30px + env(safe-area-inset-t=
+op)) 20px
+    calc(50px + env(safe-area-inset-bottom)) 20px; }
+
+.toc-sidebar.open { right: 0px; }
+
+.toc-button-list { justify-content: space-between; align-items: center; use=
+r-select: none; box-sizing: border-box; width: 90%; display: flex !importan=
+t; }
+
+.toc-button { background: linear-gradient(145deg, rgb(247, 214, 181), rgb(2=
+24, 191, 160)); color: rgb(43, 58, 44); border: 1px solid rgb(230, 197, 165=
+); border-radius: 3px; font-weight: 600; padding: 1px 4px; box-shadow: rgba=
+(0, 0, 0, 0.3) 0px 2px 4px; cursor: pointer; margin: 0px; transition: 0.25s=
+ cubic-bezier(0.175, 0.885, 0.32, 1.275); outline: none; user-select: none;=
+ }
+
+.toc-button:hover { background: linear-gradient(145deg, rgb(250, 226, 204),=
+ rgb(247, 214, 181)); border-color: rgb(255, 220, 184); transform: translat=
+eY(-2px) scale(1.01); box-shadow: rgba(247, 214, 181, 0.35) 0px 4px 10px; }
+
+.toc-button:active { background: linear-gradient(145deg, rgb(224, 191, 160)=
+, rgb(204, 171, 141)); transform: translateY(1px) scale(0.98); box-shadow: =
+rgba(0, 0, 0, 0.3) 0px 1px 2px; transition: 0.1s; }
+
+#passwordOverlay { position: fixed; inset: 0px; background: rgba(0, 0, 0, 0=
+.95); display: none; justify-content: center; align-items: center; flex-dir=
+ection: column; z-index: 2000; }
+
+#passwordInput { font-size: 2rem; padding: 15px 20px; width: 300px; text-al=
+ign: center; border-width: medium medium 3px; border-style: none none solid=
+; border-color: currentcolor currentcolor rgb(0, 255, 136); border-image: n=
+one; background: transparent; color: rgb(255, 255, 255); outline: none; }
+
+#passwordInput:focus { border-bottom-color: rgb(0, 255, 136); }
+
+.tip { margin-top: 20px; color: rgb(136, 136, 136); font-size: 1rem; }
+
+.custom-dialog { background-color: rgb(51, 51, 51); color: rgb(245, 245, 24=
+5); border-width: medium; border-style: none; border-color: currentcolor; b=
+order-image: none; border-radius: 16px; padding: 30px; text-align: center; =
+box-shadow: rgba(0, 0, 0, 0.6) 0px 10px 30px; }
+
+.dialog-title { margin-top: 0px; color: rgb(165, 214, 167); font-size: 16px=
+; font-weight: bold; margin-bottom: 5px; }
+
+.custom-input { background: transparent; border-width: medium medium 2px; b=
+order-style: none none solid; border-color: currentcolor currentcolor rgb(1=
+29, 199, 132); border-image: none; color: rgb(255, 255, 255); padding: 8px =
+12px; outline: none; font-size: 16px; text-align: center; width: 80%; }
+
+.btn-primary { background-color: rgb(165, 214, 167); color: rgb(27, 94, 32)=
+; border-width: medium; border-style: none; border-color: currentcolor; bor=
+der-image: none; border-radius: 25px; padding: 0.1rem 24px; font-weight: bo=
+ld; cursor: pointer; margin: 0px 10px; box-shadow: rgb(81, 150, 87) 0px 4px=
+ 0px; }
+
+.btn-secondary { background-color: rgb(165, 214, 167); color: rgb(27, 94, 3=
+2); border-width: medium; border-style: none; border-color: currentcolor; b=
+order-image: none; border-radius: 10px; padding: 0.1rem 10px; font-weight: =
+bold; cursor: pointer; margin: 0px 6px; box-shadow: rgb(81, 150, 87) 0px 2p=
+x 0px; }
+
+@media (width > 4096px) {
+  html { font-size: 165%; }
+}
+
+@media (max-width: 4096px) {
+  html { font-size: 155%; }
+}
+
+@media (max-width: 3120px) {
+  html { font-size: 145%; }
+}
+
+@media (max-width: 2200px) {
+  html { font-size: 135%; }
+}
+
+@media (max-width: 1920px) {
+  html { font-size: 125%; }
+}
+
+@media (max-width: 1440px) {
+  html { font-size: 115%; }
+}
+
+@media (max-width: 1024px) {
+  html { font-size: 110%; }
+}
+
+@media (max-width: 768px) {
+  html { font-size: 105%; }
+}
+
+@media (max-width: 480px) {
+  html { font-size: 100%; }
+}
+------MultipartBoundary--vGoyZ1AzXCea4BuYlCEwPMsqOjBRXsbrQIRl3sx0lk------
